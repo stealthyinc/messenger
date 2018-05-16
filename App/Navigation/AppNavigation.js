@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
 import { NativeModules, ScrollView, Text, Image, View } from 'react-native'
-import { StackNavigator, SwitchNavigator } from 'react-navigation';
+import { DrawerNavigator, StackNavigator, SwitchNavigator } from 'react-navigation';
 import { Images } from '../Themes'
+
+import firebase from 'react-native-firebase';
 
 // Styles
 import styles from './Styles/NavigationStyles'
@@ -13,12 +15,32 @@ import ChatScreen from '../Containers/ChatScreen'
 import StartChatScreen from '../Containers/StartChatScreen'
 import ContactScreen from '../Containers/ContactScreen'
 import ChatMenuScreen from '../Containers/ChatMenuScreen'
+import ContactProfile from '../Containers/ContactProfile'
+import BlockContactSearch from '../Containers/BlockContactSearch'
 
 console.disableYellowBox = true;
 
-const AppStack = StackNavigator({
+if (!firebase.auth().currentUser) {
+  firebase.auth().signInAnonymously()
+  .then(() => {
+    console.log("Firebase logged in")
+  });
+}
+
+const ChatRoom = DrawerNavigator(
+  {
+    ChatRoom: { screen: ChatScreen },
+  },
+  {
+    contentComponent: props => <ContactProfile {...props} />,
+    drawerPosition: 'right'
+  }
+);
+
+const PrimaryNav = StackNavigator({
   Tab: { screen: TabScreen },
-  ChatRoom: { screen: ChatScreen },
+  ChatRoom,
+  BlockContactSearch: { screen: BlockContactSearch },
   ChatMenu: { screen: ChatMenuScreen },
 });
 const AuthStack = StackNavigator({ 
@@ -28,7 +50,7 @@ const AuthStack = StackNavigator({
 export default SwitchNavigator(
   {
     AuthLoading: AuthLoadingScreen,
-    App: AppStack,
+    App: PrimaryNav,
     Auth: AuthStack,
   },
   {

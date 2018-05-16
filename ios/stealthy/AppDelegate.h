@@ -6,8 +6,11 @@
  */
 
 #import <UIKit/UIKit.h>
-
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
+
+//@import UserNotifications;
+// change this with extra parameter
+//@interface AppDelegate : UIResponder <UIApplicationDelegate,UNUserNotificationCenterDelegate>
 
 @property (nonatomic, strong) UIWindow *window;
 

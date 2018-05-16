@@ -4,11 +4,15 @@ import {
   StyleSheet,
   Text,
   View,
+  ScrollView,
   Image,
   WebView,
   Linking,
+  NativeModules
 } from 'react-native';
-import { Icon, Button, SocialIcon } from 'react-native-elements'
+import { Icon, Button, Overlay, SocialIcon } from 'react-native-elements'
+
+// import FAQ from '../Components/FAQ'
 
 import laptop from '../Images/laptopChat.png';
 import chatIcon from '../Images/blue512.png';
@@ -21,9 +25,13 @@ export default class SignInScreen extends React.Component {
     header: null,
   };
 
+  state = {
+    isVisible: false
+  }
+
   render() {
     return (
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         <View style={{flexDirection: 'row', marginTop: 40}}>
           <SocialIcon
             style={{width: 45, height: 45}}
@@ -38,9 +46,10 @@ export default class SignInScreen extends React.Component {
           <Button
             onPress={this._signInAsync}
             title="Blockstack Login"
-            textStyle={{ fontSize: 16, fontWeight: "bold", color: "#34bbed"}}
+            titleStyle={{ fontSize: 16, fontWeight: "bold", color: "#34bbed"}}
             icon={{name: 'input', color: "#34bbed"}}
             buttonStyle={{
+              marginLeft: 20,
               width: 200,
               height: 50,
               backgroundColor: "white",
@@ -49,7 +58,6 @@ export default class SignInScreen extends React.Component {
               borderRadius: 5,
               marginTop: 5
             }}
-            containerStyle={{ marginTop: 20 }}
           />
         </View>
         <View style={{flexDirection: 'row', marginTop: 120}}>
@@ -57,14 +65,14 @@ export default class SignInScreen extends React.Component {
             source={chatIcon}
             style={{width: 50, height: 50}}
           />
-          <Text style={{ fontWeight: 'bold', fontSize: 30, marginLeft: 15, marginBottom: 80, marginTop: 5 }}>Say Hi to Stealthy</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: 80, marginTop: 5 }}>Say Hi to Stealthy</Text>
         </View>
         <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'grey', marginBottom: 80 }}>Secure Decentralized Communication</Text>
         <Button
           onPress={this._signInAsync}
           title="Create Account"
-          textStyle={{ fontSize: 16, fontWeight: "bold"}}
-          icon={{name: 'create'}}
+          titleStyle={{ fontSize: 16, fontWeight: "bold", color: "white"}}
+          icon={{name: 'create', color: "white"}}
           buttonStyle={{
             backgroundColor: "#34bbed",
             width: 180,
@@ -73,12 +81,12 @@ export default class SignInScreen extends React.Component {
             borderWidth: 0,
             borderRadius: 5,
           }}
-          containerStyle={{ marginTop: 60 }}
+          containerStyle={{ marginTop: 25 }}
         />
         <Button
           onPress={() => Linking.openURL('https://www.youtube.com/watch?v=wOfkTP8mgE4').catch(err => console.error('An error occurred', err))}
           title="Watch Demo"
-          textStyle={{ fontSize: 16, fontWeight: "bold", color: "black"}}
+          titleStyle={{ fontSize: 16, fontWeight: "bold", color: "black"}}
           icon={{name: 'featured-video', color: "black"}}
           buttonStyle={{
             backgroundColor: "white",
@@ -90,13 +98,78 @@ export default class SignInScreen extends React.Component {
           }}
           style={{ marginTop: 25 }}
         />
-      </View>
+        {/*<Button
+          onPress={() => this.setState({isVisible: !this.state.isVisible})}
+          title="Frequent Q's"
+          titleStyle={{ fontSize: 16, fontWeight: "bold", color: "#34bbed"}}
+          icon={{name: 'info-outline', color: "#34bbed"}}
+          buttonStyle={{
+            backgroundColor: "black",
+            width: 180,
+            height: 50,
+            borderColor: "#34bbed",
+            borderWidth: 2,
+            borderRadius: 5,
+          }}
+          style={{ marginTop: 25, marginBottom: 50 }}
+        />
+        <Overlay
+          isVisible={this.state.isVisible}
+          onBackdropPress={() => this.setState({isVisible: !this.state.isVisible})}
+          width="auto"
+          height="auto"
+        >
+          <FAQ />
+        </Overlay>*/}
+      </ScrollView>
     );
   }
 
   _signInAsync = async () => {
-    await AsyncStorage.setItem('userToken', 'abc');
-    this.props.navigation.navigate('App');
+    // await AsyncStorage.setItem('userToken', 'abc');
+    // this.props.navigation.navigate('App');
+    const {BlockstackNativeModule} = NativeModules;
+    await BlockstackNativeModule.signIn("https://www.stealthy.im/redirect.html", "https://www.stealthy.im", null, (error, events) => {
+      if (!error) {
+        this.props.navigation.navigate('App');
+        let userData = this._getUserData();
+
+        // TODO: call engine here with:
+        //  userData[privateKey]
+        //
+        //  (other fields available right now are userData[username] and userData[profileURL],
+        //   avatarUrl does not seem to be available--publicKey is but it's an array--one element,
+        //   so probably safe to use).
+        //
+        // this.engine =
+        //   new MessagingEngine(this.logger,
+        //                       this.privateKey,
+        //                       this.publicKey,
+        //                       this.props.plugin,
+        //                       this.props.avatarUrl,
+        //                       this.props.path);
+        //
+        // Other stuff we'll need are encryptCies and decryptCies (from blockstack). Also,
+        // the getPublicKeyFromPrivate method (unless we poach the array one above).
+        //
+      }
+    });
+  };
+
+  _getUserData = async () => {
+    const {BlockstackNativeModule} = NativeModules;
+    try {
+      let userData = await BlockstackNativeModule.getUserData();
+      console.log(`SUCCESS (loadUserDataObject):\n`);
+      for (const key in userData) {
+        console.log(`\t${key}: ${userData[key]}`)
+      }
+      return userData;
+    } catch(err) {
+      console.log(`ERROR (loadUserDataObject):\n${err}`);
+    }
+
+    return undefined;
   };
 }
 

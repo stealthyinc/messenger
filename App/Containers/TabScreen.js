@@ -6,27 +6,12 @@ import { TabNavigator, TabBarBottom } from 'react-navigation';
 import ConversationScreen from './ConversationScreen'
 import ContactScreen from './ContactScreen'
 import ProfileScreen from './ProfileScreen'
-class HomeScreen extends React.Component {
-  static navigationOptions = {
-    header: null,
-  };
-  render() {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text h3>In Progress...</Text>
-        <View />
-        <Image
-          style={{width: 300, height: 200}}
-          source={{uri: 'https://m.popkey.co/00fb19/VeNqm.gif'}} />
-      </View>
-    );
-  }
-}
+import WalletScreen from './WalletScreen'
 
 export default TabNavigator(
   {
-    Chat: { screen: ConversationScreen },
-    Wallet: { screen: HomeScreen },
+    Messages: { screen: ConversationScreen },
+    // Wallet: { screen: WalletScreen },
     Profile: { screen: ProfileScreen },
   },
   {
@@ -34,7 +19,7 @@ export default TabNavigator(
       tabBarIcon: ({ focused, tintColor }) => {
         const { routeName } = navigation.state;
         let iconName;
-        if (routeName === 'Chat') {
+        if (routeName === 'Messages') {
           iconName = `ios-chatbubbles${focused ? '' : '-outline'}`;
         } 
         else if (routeName === 'Wallet') {
