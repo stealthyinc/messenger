@@ -7,7 +7,10 @@ target 'stealthy' do
 
   # Pods for Stealthy
   #pod 'Blockstack', :git => 'https://github.com/Blockstack/Blockstack-ios.git', :branch => 'rn-test'
-  pod 'Blockstack', :git => 'https://github.com/michalciurus/blockstack-ios.git', :branch => 'objc_support'
+  #pod 'Blockstack', :git => 'https://github.com/michalciurus/blockstack-ios.git', :branch => 'objc_support'
+  #pod 'Blockstack', :git => 'https://github.com/AC-FTW/blockstack-ios.git', :branch => 'encryption'
+  pod 'Blockstack', :git => 'https://github.com/AC-FTW/blockstack-ios.git', :branch => 'stealthy_blockstack'
+
   #pod 'Firebase'
   #pod 'Firebase' # To enable Firebase module, with `@import Firebase` support
   pod 'Firebase/Core', '~> 4.13.0'

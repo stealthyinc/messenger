@@ -156,18 +156,68 @@ export default class SignInScreen extends React.Component {
     });
   };
 
-  _getUserData = async () => {
+  _getUserData = () => {
     const {BlockstackNativeModule} = NativeModules;
-    try {
-      let userData = await BlockstackNativeModule.getUserData();
-      console.log(`SUCCESS (loadUserDataObject):\n`);
-      for (const key in userData) {
-        console.log(`\t${key}: ${userData[key]}`)
+    BlockstackNativeModule.getUserData((error, userData) => {
+      if (error) {
+        throw(`Failed to get user data.  ${error}`);
+      } else {
+        console.log(`SUCCESS (getUserData):\n`);
+        for (const key in userData) {
+          console.log(`\t${key}: ${userData[key]}`)
+        }
+
+        // Get public key:
+        BlockstackNativeModule.getPublicKeyFromPrivate(
+          userData['privateKey'], (error, publicKey) => {
+            if (error) {
+              throw(`Failed to get public key from private. ${error}`);
+            } else {
+              console.log(`SUCCESS (loadUserDataObject): publicKey = ${publicKey}\n`);
+
+              // Test encryption
+              // let testString = "Concensus";
+              // let cipherString = await BlockstackNativeModule.encryptZiez(publicKey, testString);
+              // console.log(`SUCCESS (encryptZiez): cipherString = ${cipherString}`);
+
+              // let decryptedString = await BlockstackNativeModule.decryptZiez(userData['privateKey'], cipherString);
+              // console.log(`SUCCESS (decryptZiez): decryptedString = ${decryptedString}`)
+
+              // Test get file on pk.txt path.
+              BlockstackNativeModule.getRawFile('pk.txt', (error, array) => {
+                console.log('After getFile:');
+                console.log('--------------------------------------------------------');
+                console.log(`error: ${error}`);
+                console.log(`content: ${array}`);
+                console.log('');
+              });
+
+              // Test write/read cycle:
+              // BlockstackNativeModule.putFile('testWrite.txt',
+              //                                'Will this work?',
+              //                                (error, content) => {
+              //   console.log('wrote testWrite.txt');
+              //   console.log('After putFile:');
+              //   console.log('--------------------------------------------------------');
+              //   console.log(`error: ${error}`);
+              //   console.log(`content: ${content}`);
+              //   console.log('');
+              //
+              //   BlockstackNativeModule.getFile('testWrite.txt', (error, content) => {
+              //     console.log('read testWrite.txt');
+              //     console.log('After getFile:');
+              //     console.log('--------------------------------------------------------');
+              //     console.log(`error: ${error}`);
+              //     console.log(`content: ${content}`);
+              //     console.log('');
+              //   });
+              // });
+            }
+        });
+
+        return userData;
       }
-      return userData;
-    } catch(err) {
-      console.log(`ERROR (loadUserDataObject):\n${err}`);
-    }
+    });
 
     return undefined;
   };
