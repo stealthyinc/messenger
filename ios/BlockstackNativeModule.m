@@ -71,46 +71,33 @@ RCT_EXPORT_METHOD(getFile:(NSString *)path completion:(RCTResponseSenderBlock)co
 // Bridging Proposed Blockstack Methods
 ////////////////////////////////////////////////////////////////////////////
 
-// TODO:
-//RCT_EXPORT_METHOD(getFile:(NSString *)path completion:(RCTResponseSenderBlock)completion) {
-//  [[Blockstack sharedInstance] getFileWithPath:path completion:^(id content, NSError * error) {
-//    completion(@[error ? error.localizedDescription : [NSNull null], content]);
-//  }];
-//}
-//
-//RCT_REMAP_METHOD(decryptPrivateKey,
-//                 decryptBs:(NSString *)aKey
-//                 hexedEncrypted:(NSString *)hexedEncrypted
-//                 resolver:(RCTPromiseResolveBlock)resolve
-//                 rejecter:(RCTPromiseRejectBlock)reject )
-//{
-//  NSString* decryptedStr =
-//  [[Blockstack sharedInstance] decryptBsWithAKey:aKey hexedEncrypted:hexedEncrypted];
-//
-//  if (decryptedStr == nil) {
-//    NSError *error = [NSError errorWithDomain:@"im.stealthy.www" code:0 userInfo:@{@"encryption failed": @"encrytpion result was nil"}];
-//    reject(@"encryption failed", @"encrytpion result was nil", error);
-//  } else {
-//    resolve(decryptedStr);
-//  }
-//}
-//
-//RCT_REMAP_METHOD(encryptZiez,
-//                 encryptBs:(NSString *)aKey
-//                 hexedNotEncrypted:(NSString *)hexedNotEncrypted
-//                 resolver:(RCTPromiseResolveBlock)resolve
-//                 rejecter:(RCTPromiseRejectBlock)reject )
-//{
-//  NSString* encryptedStr =
-//  [[Blockstack sharedInstance] encryptBsWithAKey:aKey hexedNotEncrypted:hexedNotEncrypted];
-//
-//  if (encryptedStr == nil) {
-//    NSError *error = [NSError errorWithDomain:@"im.stealthy.www" code:0 userInfo:@{@"encryption failed": @"encrytpion result was nil"}];
-//    reject(@"encryption failed", @"encrytpion result was nil", error);
-//  } else {
-//    resolve(encryptedStr);
-//  }
-//}
+RCT_EXPORT_METHOD(decryptPrivateKey:(NSString*)privateKey hexedEncrypted:(NSString*) hexedEncrypted completion:(RCTResponseSenderBlock)completion) {
+  NSString* decrypted = [Encryption decryptPrivateKeyWithPrivateKey:privateKey hexedEncrypted:hexedEncrypted];
+  NSError *error = nil;
+  
+  if (!privateKey) {
+    error = [NSError errorWithDomain:@"im.stealthy.www"
+                                code:0
+                            userInfo:@{@"failed to decrypt private key": @"Unable to decrypt private key"}];
+  }
+  
+  completion(@[error ? error.localizedDescription : [NSNull null],
+               decrypted ? decrypted : [NSNull null]]);
+}
+
+RCT_EXPORT_METHOD(encryptPrivateKey:(NSString*)publicKey privatekey:(NSString*) privateKey completion:(RCTResponseSenderBlock)completion) {
+  NSString* cipherObjectJSONString = [Encryption encryptPrivateKeyWithPublicKey:publicKey privateKey:privateKey];
+  NSError *error = nil;
+  
+  if (!cipherObjectJSONString) {
+    error = [NSError errorWithDomain:@"im.stealthy.www"
+                                code:0
+                            userInfo:@{@"failed to encrypt private key": @"Unable to encrypt private key"}];
+  }
+  
+  completion(@[error ? error.localizedDescription : [NSNull null],
+               cipherObjectJSONString ? cipherObjectJSONString : [NSNull null]]);
+}
 
 //
 //
@@ -138,5 +125,39 @@ RCT_EXPORT_METHOD(getRawFile:(NSString *)path completion:(RCTResponseSenderBlock
     completion(@[error ? error.localizedDescription : [NSNull null], contentStr]);
   }];
 }
+
+
+//
+//
+// Bridging Experimental Blockstack Methods
+////////////////////////////////////////////////////////////////////////////
+
+//RCT_EXPORT_METHOD(decryptContent:(NSString*)content completion:(RCTResponseSenderBlock)completion) {
+//  NSString* decrypted = [Encryption decryptContentWithContent:content];
+//  NSError *error = nil;
+//  
+//  if (!decrypted) {
+//    error = [NSError errorWithDomain:@"im.stealthy.www"
+//                                code:0
+//                            userInfo:@{@"failed to decrypt private key": @"Unable to decrypt private key"}];
+//  }
+//  
+//  completion(@[error ? error.localizedDescription : [NSNull null],
+//               decrypted ? decrypted : [NSNull null]]);
+//}
+//
+//RCT_EXPORT_METHOD(encryptContent:(NSString*)content completion:(RCTResponseSenderBlock)completion) {
+//  NSString* cipherObjectJSONString = [Encryption encryptContentWithContent:content];
+//  NSError *error = nil;
+//  
+//  if (!cipherObjectJSONString) {
+//    error = [NSError errorWithDomain:@"im.stealthy.www"
+//                                code:0
+//                            userInfo:@{@"failed to encrypt private key": @"Unable to encrypt private key"}];
+//  }
+//  
+//  completion(@[error ? error.localizedDescription : [NSNull null],
+//               cipherObjectJSONString ? cipherObjectJSONString : [NSNull null]]);
+//}
 
 @end

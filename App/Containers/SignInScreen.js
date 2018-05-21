@@ -177,20 +177,46 @@ export default class SignInScreen extends React.Component {
 
               // Test encryption
               // let testString = "Concensus";
-              // let cipherString = await BlockstackNativeModule.encryptZiez(publicKey, testString);
-              // console.log(`SUCCESS (encryptZiez): cipherString = ${cipherString}`);
+              // BlockstackNativeModule.encryptPrivateKey(publicKey, testString, (error, cipherObjectJSONString) => {
+              //   if (error) {
+              //     throw(`Failed to encrpyt ${error}.`);
+              //   } else {
+              //     console.log(`SUCCESS (encryptPrivateKey): cipherObjectJSONString = ${cipherObjectJSONString}`);
+              //     BlockstackNativeModule.decryptPrivateKey(userData['privateKey'], cipherObjectJSONString, (error, decrypted) => {
+              //       if (error) {
+              //         throw(`Failed to decrypt: ${error}.`)
+              //       } else {
+              //         console.log(`SUCCESS (decryptPrivateKey): decryptedString = ${decrypted}`)
+              //       }
+              //     });
+              //   }
+              // });
 
-              // let decryptedString = await BlockstackNativeModule.decryptZiez(userData['privateKey'], cipherString);
-              // console.log(`SUCCESS (decryptZiez): decryptedString = ${decryptedString}`)
+              // Test encryptContent / decryptContent
+              // let testString = "Content works?";
+              // BlockstackNativeModule.encryptContent(testString, (error, cipherObjectJSONString) => {
+              //   if (error) {
+              //     throw(`Failed to encrpyt with encryptContent: ${error}.`);
+              //   } else {
+              //     console.log(`SUCCESS (encryptContent): cipherObjectJSONString = ${cipherObjectJSONString}`);
+              //     BlockstackNativeModule.decryptContent(cipherObjectJSONString, (error, decrypted) => {
+              //       if (error) {
+              //         throw(`Failed to decrypt with decryptContent: ${error}.`)
+              //       } else {
+              //         console.log(`SUCCESS (decryptContent): decryptedString = ${decrypted}`)
+              //       }
+              //     });
+              //   }
+              // });
 
               // Test get file on pk.txt path.
-              BlockstackNativeModule.getRawFile('pk.txt', (error, array) => {
-                console.log('After getFile:');
-                console.log('--------------------------------------------------------');
-                console.log(`error: ${error}`);
-                console.log(`content: ${array}`);
-                console.log('');
-              });
+              // BlockstackNativeModule.getRawFile('pk.txt', (error, array) => {
+              //   console.log('After getFile:');
+              //   console.log('--------------------------------------------------------');
+              //   console.log(`error: ${error}`);
+              //   console.log(`content: ${array}`);
+              //   console.log('');
+              // });
 
               // Test write/read cycle:
               // BlockstackNativeModule.putFile('testWrite.txt',
