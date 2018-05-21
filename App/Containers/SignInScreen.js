@@ -20,6 +20,10 @@ import chatV1 from '../Images/StealthyV1.png';
 import flow from '../Images/rStealthyFlow.jpg';
 import graphitePlugin from '../Images/plugin.jpg';
 
+
+const { MessagingEngine } = require('./../Engine/engine.js');
+
+
 export default class SignInScreen extends React.Component {
   static navigationOptions = {
     header: null,
@@ -174,6 +178,20 @@ export default class SignInScreen extends React.Component {
               throw(`Failed to get public key from private. ${error}`);
             } else {
               console.log(`SUCCESS (loadUserDataObject): publicKey = ${publicKey}\n`);
+
+              // Start the engine:
+              const logger = undefined;
+              const privateKey = userData['privateKey'];
+              const isPlugIn = false;
+              const avatarUrl = '';  // TODO
+              const discoveryPath = ''; // TODO
+              this.engine =
+                new MessagingEngine(logger,
+                                    privateKey,
+                                    publicKey,
+                                    isPlugIn,
+                                    this.props.avatarUrl,
+                                    this.props.path);
 
               // Test encryption
               // let testString = "Concensus";
