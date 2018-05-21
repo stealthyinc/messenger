@@ -1,7 +1,9 @@
-const Config = require('Config');
-const { Analytics } = require('aws-amplify')
+// const Config = require('Config');
+import Secrets from 'react-native-config'
 
-const cryptoUtils = require('./cryptoUtils.js');
+// const { Analytics } = require('aws-amplify')
+
+// const cryptoUtils = require('./cryptoUtils.js');
 
 const MAX_QUEUE = 100;
 
@@ -20,10 +22,10 @@ class Anonalytics {
       '/global/analytics/ids' : '/global/development/analytics/ids';
 
     // if (!this.trackAnalytics) {
-      Analytics.disable();
+      // Analytics.disable();
     // }
 
-    this.password = Config.FIREBASE_ENC_KEY;
+    this.password = Secrets.FIREBASE_ENC_KEY;
     if (!this.password) {
       throw 'Anonalytics requires a db crypto key.';
     }
@@ -35,8 +37,9 @@ class Anonalytics {
     if (aFirebase) {
       this.firebase = aFirebase;
       if (this.userId) {
-        this.analyticId = (this.encrypt) ?
-          cryptoUtils.encryptStr(this.userId, this.password) : this.userId;
+        // this.analyticId = (this.encrypt) ?
+        //   cryptoUtils.encryptStr(this.userId, this.password) : this.userId;
+        this.analyticId = this.userId;
       } else {
         this.analyticId = this.firebase.database().ref(this.basePath).push().key;
       }
@@ -171,8 +174,9 @@ class Anonalytics {
   _storeEvent(anEventName, aString = undefined) {
     if (anEventName) {
       const ueEventName = anEventName;  // unencrypted event name.
-      const eventName = (this.encrypt) ?
-        cryptoUtils.encryptStr(anEventName, this.password) : anEventName;
+      // const eventName = (this.encrypt) ?
+      //   cryptoUtils.encryptStr(anEventName, this.password) : anEventName;
+      const eventName = anEventName;
       const eventTimeMs = Date.now();
       const cleanString = (aString !== undefined) ?
         Anonalytics._cleanPathForFirebase(aString) : undefined;
@@ -207,10 +211,10 @@ class Anonalytics {
           eventObj.cleanString;
 
         ref.set({ time: eventObj.eventTimeMs, data: eventObj.cleanString });
-        Analytics.record(eventObj.ueEventName, {data: awsCleanString});
+        // Analytics.record(eventObj.ueEventName, {data: awsCleanString});
       } else {
         ref.set({ time: eventObj.eventTimeMs });
-        Analytics.record(eventObj.ueEventName, {time: eventObj.eventTimeMs});
+        // Analytics.record(eventObj.ueEventName, {time: eventObj.eventTimeMs});
       }
     }
   }

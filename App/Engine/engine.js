@@ -1,6 +1,7 @@
-const blockstack = require('blockstack');
+// const blockstack = require('blockstack');
 const platform = require('platform');
-const firebase = require('firebase');
+// const firebase = require('firebase');
+import firebase from 'react-native-firebase';
 const adapter = require('webrtc-adapter');
 
 const EventEmitter = require('events');
@@ -12,7 +13,11 @@ const { getScreenConstraints,
 const SimplePeer = require('simple-peer');
 
 
-const Config = require('Config');
+// const Config = require('Config');
+
+import {
+  NativeModules
+} from 'react-native';
 
 
 const { MESSAGE_TYPE,
@@ -203,9 +208,9 @@ export class MessagingEngine extends EventEmitter {
 
     this.myTimer.logEvent('Enter componentDidMountWork')
 
-    this.logger('Build Date: ', Config.BUILD_DATE_STAMP);
-    this.logger('Build Time: ', Config.BUILD_TIME_STAMP);
-    this.logger('Build Version: ', Config.BUILD_VERSION);
+    // this.logger('Build Date: ', Config.BUILD_DATE_STAMP);
+    // this.logger('Build Time: ', Config.BUILD_TIME_STAMP);
+    // this.logger('Build Version: ', Config.BUILD_VERSION);
 
     if (!firebase.auth().currentUser) {
       firebase.auth().signInAnonymously()

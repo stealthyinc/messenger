@@ -1,6 +1,8 @@
 // TODO: crypto is now a built in. Remove this require and the assoc
 //       npm package.
 const crypto = require('crypto');
+// import '../../../shim.js'
+// import crypto from 'crypto'
 const algorithm = 'aes-256-ctr';
 
 // Nodejs encryption with CTR

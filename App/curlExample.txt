@@ -1,0 +1,12 @@
+curl --http2 --cert ./myapp-push-cert.pem \
+-H "apns-topic: stealthy-im" \
+-d '{"aps":{"alert":"Hello from APNs!","sound":"default"}}' \
+https://api.development.push.apple.com/3/device/chrZGSIpC74:APA91bEv7c6qHHWCzKyaG7h5ykd9J6CIh-LhshwdzFvNjXhyHmHBwlnPVgJLr_dgDbd3akOb0Ls6RTVfc4Sah5rMFSfUEQFTiK5xr_VnRMA356q1cwedymi_meeVpHMaUpQ7PyHF8CGT
+
+
+curl --header "Content-Type: application/json" \
+--header "Authorization: key=AAAAhdS8lMY:APA91bEdMbEj2Qw4Xj7HXYzsuZTzrDrnyAWBlPVbSK76kkxlmWls24MUAoQ6oBUTO36LnSfTT3kByFLrP_tAavQQyDaWYn5bFefG7bA1_u3EIqtyOkHk5naQBRGnTNBT7WSVbU9uO6gD" \
+https://fcm.googleapis.com/fcm/send \
+-d '{"notification": {"title": "New Message", "sound": "default"},
+"priority": "high",
+"to": "chrZGSIpC74:APA91bEv7c6qHHWCzKyaG7h5ykd9J6CIh-LhshwdzFvNjXhyHmHBwlnPVgJLr_dgDbd3akOb0Ls6RTVfc4Sah5rMFSfUEQFTiK5xr_VnRMA356q1cwedymi_meeVpHMaUpQ7PyHF8CGT"}'

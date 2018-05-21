@@ -59,7 +59,7 @@ PODS:
   - secp256k1.swift (0.1.4)
 
 DEPENDENCIES:
-  - Blockstack (from `https://github.com/michalciurus/blockstack-ios.git`, branch `objc_support`)
+  - Blockstack (from `https://github.com/AC-FTW/blockstack-ios.git`, branch `stealthy_encryption_blockstack`)
   - Firebase/Auth
   - Firebase/Core (~> 4.13.0)
   - Firebase/Database
@@ -83,13 +83,13 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   Blockstack:
-    :branch: objc_support
-    :git: https://github.com/michalciurus/blockstack-ios.git
+    :branch: stealthy_encryption_blockstack
+    :git: https://github.com/AC-FTW/blockstack-ios.git
 
 CHECKOUT OPTIONS:
   Blockstack:
-    :commit: 62bdbcd62b4a86e3a3c92e509461596cbb351a5d
-    :git: https://github.com/michalciurus/blockstack-ios.git
+    :commit: 5219a018342ce7544ee5e1ed4c76004a6953aeb4
+    :git: https://github.com/AC-FTW/blockstack-ios.git
 
 SPEC CHECKSUMS:
   Blockstack: 280c0343e547af93d9b6d6aa09b42dd8a5c76d9b
@@ -107,6 +107,6 @@ SPEC CHECKSUMS:
   Protobuf: 8a9838fba8dae3389230e1b7f8c104aa32389c03
   secp256k1.swift: a7e7a214f6db6ce5db32cc6b2b45e5c4dd633634
 
-PODFILE CHECKSUM: 8e9e1d3f6e9d68eaaab9503cfed5ead627264454
+PODFILE CHECKSUM: 078d28e7ea63548723bcdc15775d551b16b0d155
 
 COCOAPODS: 1.5.2

@@ -1,4 +1,5 @@
-const Config = require('Config');
+// const Config = require('Config');
+import Secrets from 'react-native-config'
 const { encryptECIES, decryptECIES } = require('blockstack/lib/encryption');
 
 // Determines if a js object is empty.
@@ -48,7 +49,10 @@ module.exports.getAppContext = function(appToken) {
   let context = 'Stealthy';
 
   if (appToken) {
-    const validAppsMap = Config.VALID_APPS;
+    // const validAppsMap = Secrets.VALID_APPS;
+    const validAppsMap = {
+      'gd04012018': 'Graphite',
+    }
 
     if (validAppsMap.hasOwnProperty(appToken)) {
       context = validAppsMap[appToken];
