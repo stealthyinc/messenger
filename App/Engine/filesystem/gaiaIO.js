@@ -1,9 +1,15 @@
+import {
+  NativeModules
+} from 'react-native';
 
-const {
-  getFile,
-  putFile,
-  Person,
-} = require('blockstack');
+const {BlockstackNativeModule} = NativeModules;
+const {getFile, putFile} = BlockstackNativeModule;
+
+// const {
+  // getFile,
+  // putFile,
+  // Person,
+// } = require('blockstack');
 
 const utils = require('./../misc//utils.js');
 const BaseIO = require('./baseIO.js');

@@ -1,4 +1,3 @@
-// const blockstack = require('blockstack');
 const platform = require('platform');
 // const firebase = require('firebase');
 import firebase from 'react-native-firebase';
