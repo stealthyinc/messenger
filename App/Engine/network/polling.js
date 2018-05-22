@@ -1,4 +1,4 @@
-const EventEmitter = require('events');
+const EventEmitter = require('EventEmitter');
 
 
 const utils = require('./../misc/utils.js');
@@ -21,6 +21,11 @@ class InvitationPolling extends EventEmitter {
     this.privateKey = privateKey;
     this.logger = logger;
     this.logOutput = logOutput;
+  }
+
+  // Convert node 'on' method to react 'addListener' method for RN EventEmitter
+  on(eventTypeStr, listenerFn, context) {
+    this.addListener(eventTypeStr, listenerFn, context);
   }
 
   log(...args) {
