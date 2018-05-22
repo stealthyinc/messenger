@@ -26,7 +26,7 @@ class Anonalytics {
     // }
 
     this.password = Secrets.FIREBASE_ENC_KEY;
-    if (!this.password) {
+    if (!this.password && this.isProduction) {
       throw 'Anonalytics requires a db crypto key.';
     }
   }

@@ -165,7 +165,7 @@ export class MessagingEngine extends EventEmitter {
   }
 
   // Convert node 'on' method to react 'addListener' method for RN EventEmitter
-  on(eventTypeStr, listenerFn, context) {
+  on = (eventTypeStr, listenerFn, context) => {
     this.addListener(eventTypeStr, listenerFn, context);
   }
 
@@ -613,7 +613,8 @@ export class MessagingEngine extends EventEmitter {
         if (!this.plugin) {
           this.addProfile('relay.stealthy');
           this.addProfile('stealthy');
-          this.handleIntroOpen();
+          // this.handleIntroOpen();
+          this.emit('me-handle-intro-open');
         }
       }
 

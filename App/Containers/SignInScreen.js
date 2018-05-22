@@ -25,6 +25,39 @@ const { MessagingEngine } = require('./../Engine/engine.js');
 
 
 export default class SignInScreen extends React.Component {
+  constructor() {
+    super();
+
+    this.engine = this._initEngineNoData();
+    this.engine.on('me-initialized', () => {
+      // this.setState({initWithFetchedData: true});
+      this.engineInit = true;
+    });
+
+    this.engine.on('me-update-contactmgr', (aContactMgr) => {
+      console.log(`Messaging Engine updated contact manager: ${aContactMgr}.`)
+      // this.props.storeContactMgr(aContactMgr);
+    });
+
+    this.engine.on('me-update-messages', (theMessages) => {
+      console.log(`Messaging Engine updated messages: ${theMessages}.`)
+      // this.props.storeMessages(theMessages);
+    });
+
+    this.engineInit = false;
+    this.fakeUserId = 'alexc.stealthy.id';
+  }
+
+  logger = (...args) => {
+    // if (process.env.NODE_ENV === 'development' || this.state.console) {
+      console.log(...args);
+    // }
+  }
+
+  componentDidMount() {
+    this.engine.componentDidMountWork(this.engineInit, this.fakeUserId);
+  }
+
   static navigationOptions = {
     header: null,
   };
@@ -136,29 +169,29 @@ export default class SignInScreen extends React.Component {
     await BlockstackNativeModule.signIn("https://www.stealthy.im/redirect.html", "https://www.stealthy.im", null, (error, events) => {
       if (!error) {
         this.props.navigation.navigate('App');
-        let userData = this._getUserData();
-
-        // TODO: call engine here with:
-        //  userData[privateKey]
-        //
-        //  (other fields available right now are userData[username] and userData[profileURL],
-        //   avatarUrl does not seem to be available--publicKey is but it's an array--one element,
-        //   so probably safe to use).
-        //
-        // this.engine =
-        //   new MessagingEngine(this.logger,
-        //                       this.privateKey,
-        //                       this.publicKey,
-        //                       this.props.plugin,
-        //                       this.props.avatarUrl,
-        //                       this.props.path);
-        //
-        // Other stuff we'll need are encryptCies and decryptCies (from blockstack). Also,
-        // the getPublicKeyFromPrivate method (unless we poach the array one above).
-        //
+        // let userData = this._getUserData();
       }
     });
   };
+
+  _initEngineNoData = () => {
+    // Start the engine:
+    const logger = this.logger;
+    const privateKey = '1';
+    const publicKey = '2';
+    const isPlugIn = false;
+    const avatarUrl = '';  // TODO
+    const discoveryPath = ''; // TODO
+    const engine =
+      new MessagingEngine(logger,
+                          privateKey,
+                          publicKey,
+                          isPlugIn,
+                          avatarUrl,
+                          discoveryPath);
+
+    return engine;
+  }
 
   _getUserData = () => {
     const {BlockstackNativeModule} = NativeModules;

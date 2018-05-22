@@ -34,6 +34,22 @@ class HeartBeat extends EventEmitter {
               logOutput = false) {
     super();
 
+    this._writeHeartBeatFiles = this._writeHeartBeatFiles.bind(this);
+    this.on = this.on.bind(this);
+    this.log = this.log.bind(this);
+    this.addContact = this.addContact.bind(this);
+    this.removeContact = this.removeContact.bind(this);
+    this.deleteContact = this.deleteContact.bind(this);
+    this.getHeartBeats = this.getHeartBeats.bind(this);
+    this.getHeartBeat = this.getHeartBeat.bind(this);
+    this.startBeat = this.startBeat.bind(this);
+    this.stopBeat = this.stopBeat.bind(this);
+    this.startMonitor = this.startMonitor.bind(this);
+    this.stopMonitor = this.stopMonitor.bind(this);
+    this._writeHeartBeatFiles = this._writeHeartBeatFiles.bind(this);
+    this._readHeartBeatFiles = this._readHeartBeatFiles.bind(this);
+
+
     utils.throwIfUndef('logger', logger);
     utils.throwIfUndef('anIoDriver', anIoDriver);
     utils.throwIfUndef('aUserId', aUserId);
@@ -68,10 +84,9 @@ class HeartBeat extends EventEmitter {
   }
 
   // Convert node 'on' method to react 'addListener' method for RN EventEmitter
-  on(eventTypeStr, listenerFn, context) {
+  on = (eventTypeStr, listenerFn, context) => {
     this.addListener(eventTypeStr, listenerFn, context);
   }
-
 
   log(aString) {
     if (this.logOutput) {

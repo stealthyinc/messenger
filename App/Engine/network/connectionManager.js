@@ -37,10 +37,9 @@ class ConnectionManager extends EventEmitter {
   }
 
   // Convert node 'on' method to react 'addListener' method for RN EventEmitter
-  on(eventTypeStr, listenerFn, context) {
+  on = (eventTypeStr, listenerFn, context) => {
     this.addListener(eventTypeStr, listenerFn, context);
   }
-
 
   invite(targetUser, targetUserPublicKey = undefined) {
     const p = new Peer(getSimplePeerOpts());

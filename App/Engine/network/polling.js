@@ -24,7 +24,7 @@ class InvitationPolling extends EventEmitter {
   }
 
   // Convert node 'on' method to react 'addListener' method for RN EventEmitter
-  on(eventTypeStr, listenerFn, context) {
+  on = (eventTypeStr, listenerFn, context) => {
     this.addListener(eventTypeStr, listenerFn, context);
   }
 
