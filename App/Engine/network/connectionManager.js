@@ -1,4 +1,12 @@
-const Peer = require('simple-peer');
+// TODO: something like rn-nodeify simple peer (existing problems though--naming
+// goals, yarn etc.). See:
+//    - https://www.npmjs.com/package/rn-nodeify
+//    - https://github.com/feross/simple-peer/issues/109
+//    - https://github.com/tradle/rn-nodeify
+//    - https://github.com/philikon/ReactNativify
+// const Peer = require('simple-peer');
+const Peer = undefined;
+
 const EventEmitter = require('EventEmitter');
 const sdpParser = require('sdp-transform');
 
