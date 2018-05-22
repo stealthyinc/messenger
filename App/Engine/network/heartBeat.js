@@ -1,4 +1,4 @@
-const EventEmitter = require('events');
+const EventEmitter = require('EventEmitter');
 
 
 const utils = require('./../misc/utils.js');
@@ -66,6 +66,12 @@ class HeartBeat extends EventEmitter {
     this.on('HeartBeatMonitor', this._readHeartBeatFiles);
     this.on('firstBeatComplete', this.startMonitor);
   }
+
+  // Convert node 'on' method to react 'addListener' method for RN EventEmitter
+  on(eventTypeStr, listenerFn, context) {
+    this.addListener(eventTypeStr, listenerFn, context);
+  }
+
 
   log(aString) {
     if (this.logOutput) {

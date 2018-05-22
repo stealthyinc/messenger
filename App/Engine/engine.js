@@ -4,7 +4,7 @@ const platform = require('platform');
 import firebase from 'react-native-firebase';
 const adapter = require('webrtc-adapter');
 
-const EventEmitter = require('events');
+const EventEmitter = require('EventEmitter');
 
 const { getScreenConstraints,
         getChromeExtensionStatus } = require('./ext/Screen-Capturing');
@@ -157,6 +157,10 @@ export class MessagingEngine extends EventEmitter {
     this.anonalytics = undefined;
   }
 
+  // Convert node 'on' method to react 'addListener' method for RN EventEmitter
+  on(eventTypeStr, listenerFn, context) {
+    this.addListener(eventTypeStr, listenerFn, context);
+  }
 
   log = (display, ...args) => {
     if (display) {

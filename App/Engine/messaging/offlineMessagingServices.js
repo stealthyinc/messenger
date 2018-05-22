@@ -1,4 +1,4 @@
-const EventEmitter = require('events');
+const EventEmitter = require('EventEmitter');
 
 const utils = require('./../misc/utils.js');
 const { MESSAGE_STATE } = require('./chatMessage.js');
@@ -147,6 +147,11 @@ class OfflineMessagingServices extends EventEmitter {
     // index file clobbering. It causes sendMessagesToStorage calls to be ignored
     // because a call to this method is already working on the queue.
     this.sending = false;
+  }
+
+  // Convert node 'on' method to react 'addListener' method for RN EventEmitter
+  on(eventTypeStr, listenerFn, context) {
+    this.addListener(eventTypeStr, listenerFn, context);
   }
 
   log(...args) {

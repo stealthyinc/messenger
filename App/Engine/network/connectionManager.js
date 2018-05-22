@@ -1,5 +1,5 @@
 const Peer = require('simple-peer');
-const EventEmitter = require('events');
+const EventEmitter = require('EventEmitter');
 const sdpParser = require('sdp-transform');
 const { encryptECIES } = require('blockstack/lib/encryption');
 
@@ -22,6 +22,12 @@ class ConnectionManager extends EventEmitter {
 
     this.failedSdpInvites = {};
   }
+
+  // Convert node 'on' method to react 'addListener' method for RN EventEmitter
+  on(eventTypeStr, listenerFn, context) {
+    this.addListener(eventTypeStr, listenerFn, context);
+  }
+
 
   invite(targetUser, targetUserPublicKey = undefined) {
     const p = new Peer(getSimplePeerOpts());
