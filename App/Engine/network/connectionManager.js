@@ -1,7 +1,12 @@
 const Peer = require('simple-peer');
 const EventEmitter = require('EventEmitter');
 const sdpParser = require('sdp-transform');
-const { encryptECIES } = require('blockstack/lib/encryption');
+
+// TODO: get these through Blockstack iOS API
+// const { encryptECIES } = require('blockstack/lib/encryption');
+function encryptECIES(arg1, arg2) {
+  throw 'TODO: in connectionManager.js, need to get encryption methods from iOS Blockstack'
+}
 
 
 const { RESPONSE_TYPE, OFFER_TYPE } = require('./PeerManager');

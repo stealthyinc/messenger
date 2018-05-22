@@ -1,6 +1,16 @@
 // const Config = require('Config');
 import Secrets from 'react-native-config'
-const { encryptECIES, decryptECIES } = require('blockstack/lib/encryption');
+
+// TODO: get these through Blockstack iOS API
+// const { encryptECIES, decryptECIES } = require('blockstack/lib/encryption');
+function encryptECIES(arg1, arg2) {
+  throw 'TODO: in utils.js, need to get encryption methods from iOS Blockstack'
+}
+
+function decryptECIES(arg1, arg2) {
+  throw 'TODO: in utils.js, need to get encryption methods from iOS Blockstack'
+}
+
 
 // Determines if a js object is empty.
 //

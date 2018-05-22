@@ -1,9 +1,16 @@
+// TODO: get these through Blockstack iOS API
+// const {
+//   getFile,
+//   putFile,
+// } = require('blockstack');
+function getFile(arg1, arg2) {
+  throw 'TODO: in gaiaIO.js, need to get IO methods from iOS Blockstack'
+}
 
-const {
-  getFile,
-  putFile,
-  Person,
-} = require('blockstack');
+function putFile(arg1, arg2, arg3) {
+  throw 'TODO: in gaiaIO.js, need to get IO methods from iOS Blockstack'
+}
+
 
 const utils = require('./../misc//utils.js');
 const BaseIO = require('./baseIO.js');
