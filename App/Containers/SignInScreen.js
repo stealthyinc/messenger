@@ -35,7 +35,14 @@ export default class SignInScreen extends React.Component {
     });
 
     this.engine.on('me-update-contactmgr', (aContactMgr) => {
-      console.log(`Messaging Engine updated contact manager: ${aContactMgr}.`)
+      console.log(`Messaging Engine updated contact manager:`)
+      const userIds = aContactMgr ? aContactMgr.getContactIds() : [];
+      console.log(`  ${userIds.length} contacts ...`);
+      for (const userId of userIds) {
+        console.log(`  userId: ${userId}`);
+      }
+      console.log;
+
       // this.props.storeContactMgr(aContactMgr);
     });
 
@@ -45,7 +52,8 @@ export default class SignInScreen extends React.Component {
     });
 
     this.engineInit = false;
-    this.fakeUserId = 'alexc.stealthy.id';
+    // this.fakeUserId = 'alexc.stealthy.id';
+    this.fakeUserId = 'alexc.id';
   }
 
   logger = (...args) => {

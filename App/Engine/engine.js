@@ -68,9 +68,9 @@ const RELAY_IDS = [
 ];
 
 // Dev. constants not set in ctor:
-const ENCRYPT_HB = true;
-const ENABLE_AUTOCONNECT = true;
-const ENCRYPT_INDEXED_IO = true;
+const ENCRYPT_HB = false;
+const ENABLE_AUTOCONNECT = false;
+const ENCRYPT_INDEXED_IO = false;
 
 const ENABLE_RECEIPTS = true;
 const ENABLE_RELAY = true;
