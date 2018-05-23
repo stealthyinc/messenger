@@ -50,7 +50,17 @@ module.exports = class FirebaseIO extends BaseIO {
   _write(filePath, data) {
     const cleanPath = this._cleanPathForFirebase(filePath);
     this.logger(`Writing data to: ${cleanPath}`);
-    return this.firebaseInst.database().ref(cleanPath).set(data);
+    try {
+      const res = this.firebaseInst.database().ref(cleanPath).set(data);
+      return res;
+    } catch (err) {
+      let errMsg = `ERROR: firebaseIO::_write ${err}`;
+      if (process.env.NODE_ENV === 'production') {
+        this.logger(errMsg);
+      } else {
+        throw errMsg;
+      }
+    }
   }
 
   _read(filePath) {

@@ -34,6 +34,7 @@ class ContactManager {
       for (const contact of aContactArr) {
         contact.unread = 0;
         contact.time = '';
+        contact.timeMs = '';
       }
       this.initFromArray(aContactArr);
     }
@@ -45,6 +46,9 @@ class ContactManager {
       // contacts.
       const tempContactArr = utils.deepCopyObj(aContactArr);
       for (const aContact of tempContactArr) {
+        if (aContact.timeMs === undefined) {
+          aContact.timeMs = '';
+        }
         if (ContactManager._getContactForId(aContact.id, this.contactArr)) {
           // TODO: throw / warn if duplicate detected.
           continue;
@@ -301,7 +305,11 @@ class ContactManager {
   }
 
   setTimeMs(aContactId, theTimeSinceOnlineMs) {
-    this._setterWithChecks(aContactId, 'timeMs', theTimeSinceOnlineMs);
+    if (theTimeSinceOnlineMs) {
+      this._setterWithChecks(aContactId, 'timeMs', theTimeSinceOnlineMs);
+    } else {
+      this._setterWithChecks(aContactId, 'timeMs', '');
+    } 
   }
 
   incrementUnread(aContactId) {
@@ -376,13 +384,18 @@ class ContactManager {
   }
 
   static getContactTimeStr(aTimeInMs) {
+    if (aTimeInMs && aTimeInMs === '') {
+      return '...';
+    }
     if (aTimeInMs && (aTimeInMs > 0)) {
       const timeInSeconds = Math.floor(aTimeInMs / 1000);
       const timeInMinutes = Math.floor(timeInSeconds / 60);
       const timeInHours = Math.floor(timeInMinutes / 60);
       const timeInDays = Math.floor(timeInHours / 24);
-      if (timeInDays > 0) {
+      if ((timeInDays > 0) && (timeInDays < 7)) {
         return `present ${timeInDays} day(s) ago.`;
+      } else if ((timeInDays > 7)) {
+        return 'present a week or more ago.';
       } else if (timeInHours > 0) {
         return `present ${timeInHours} hour(s) ago.`;
       } else if (timeInMinutes > 1) {
