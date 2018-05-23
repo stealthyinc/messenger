@@ -1,5 +1,5 @@
 import React from 'react';
-import { AsyncStorage, View, ListView, StyleSheet, TouchableOpacity } from 'react-native';
+import { AsyncStorage, View, ListView, StyleSheet, TouchableOpacity, NativeModules } from 'react-native';
 import TouchableRow from './contacts/Row';
 // import Header from './contacts/Header';
 import Footer from './contacts/Footer';
@@ -8,6 +8,8 @@ import { SearchBar, Text } from 'react-native-elements'
 import { Button, Container, Header, Content, List, ListItem, Left, Body, Right, Item, Icon, Input, Thumbnail, Title } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import firebase from 'react-native-firebase';
+
+const { MessagingEngine } = require('./../Engine/engine.js');
 
 const styles = StyleSheet.create({
   container: {
@@ -21,58 +23,18 @@ const styles = StyleSheet.create({
   },
 });
 const stock = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
-const list = [
-  // {
-  //   name: 'New Contact',
-  //   picture: stock,
-  //   text: 'Start a new conversation',
-  //   time: 'Now'
-  // },
-  {
-    name: 'Daniel Alvarez',
-    picture: 'https://react.semantic-ui.com/assets/images/avatar/large/daniel.jpg',
-    text: "hello",
-    time: "12:59 pm",
-  },
-  {
-    name: 'Albert Bjorn',
-    picture: 'https://react.semantic-ui.com/assets/images/avatar/large/matt.jpg',
-    text: "hello",
-    time: "12:59 pm",
-  },
-  {
-    name: 'Mathew Leinart',
-    picture: 'https://react.semantic-ui.com/assets/images/avatar/large/matthew.png',
-    text: "hello",
-    time: "12:59 pm",
-  },
-  {
-    name: 'Elliot Baker',
-    picture: 'https://react.semantic-ui.com/assets/images/avatar/large/elliot.jpg',
-    text: "hello",
-    time: "12:59 pm",
-  },
-  {
-    name: 'Steve Sanders',
-    picture: 'https://react.semantic-ui.com/assets/images/avatar/large/steve.jpg',
-    text: "hello",
-    time: "12:59 pm",
-  },
-  {
-    name: 'Molly Thomas',
-    picture: 'https://react.semantic-ui.com/assets/images/avatar/large/molly.png',
-    text: "hello",
-    time: "12:59 pm",
-  },
-  {
-    name: 'Jenny Davis',
-    picture: 'https://react.semantic-ui.com/assets/images/avatar/large/jenny.jpg',
-    text: "hello",
-    time: "12:59 pm",
-  },
+
+const pictures = [
+  'https://react.semantic-ui.com/assets/images/avatar/large/daniel.jpg',
+  'https://react.semantic-ui.com/assets/images/avatar/large/matt.jpg',
+  'https://react.semantic-ui.com/assets/images/avatar/large/matthew.png',
+  'https://react.semantic-ui.com/assets/images/avatar/large/elliot.jpg',
+  'https://react.semantic-ui.com/assets/images/avatar/large/steve.jpg',
+  'https://react.semantic-ui.com/assets/images/avatar/large/molly.png',
+  'https://react.semantic-ui.com/assets/images/avatar/large/jenny.jpg',
 ]
 
-class ConversationScreen extends React.Component {
+export default class ConversationScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {};
     return {
@@ -91,11 +53,53 @@ class ConversationScreen extends React.Component {
     this.ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
     this.state = {
       basic: true,
-      listViewData: list,
+      listViewData: [],
+      loaded: false
     };
+    this.engine = this._initEngineNoData();
+    this.engine.on('me-initialized', () => {
+      // this.setState({initWithFetchedData: true});
+      this.engineInit = true;
+    });
+    this.engine.on('me-update-contactmgr', (aContactMgr) => {
+      // console.log(`Messaging Engine updated contact manager:`)
+      const userIds = aContactMgr ? aContactMgr.getContactIds() : [];
+      this.updateContacts(userIds)
+      // this.props.storeContactMgr(aContactMgr);
+    });
+    this.engine.on('me-update-messages', (theMessages) => {
+      console.log(`Messaging Engine updated messages: ${theMessages}`)
+      // this.props.storeMessages(theMessages);
+    });
+    this.engineInit = false;
+    // this.fakeUserId = 'alexc.stealthy.id';
+    // this.fakeUserId = 'alexc.id';
+    this.fakeUserId = 'pbj.id';
+  }
+  logger = (...args) => {
+    // if (process.env.NODE_ENV === 'development' || this.state.console) {
+      // console.log(...args);
+    // }
+  }
+  componentDidMount() {
+    this.engine.componentDidMountWork(this.engineInit, this.fakeUserId);
   }
   componentWillMount() {
     this.props.navigation.setParams({ goToChatRoom: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
+  }
+  updateContacts(userIds) {
+    if (!this.state.loaded) {
+      // console.log(`  ${userIds.length} contacts ...`);
+      let i = 0
+      let list = []
+      for (const userId of userIds) {
+        let index = i%(pictures.length-1)
+        let picture = pictures[index]
+        list.push({name: userId, picture})
+        i++
+      }
+      this.setState({listViewData: list, loaded: true})
+    }
   }
   sendTestMessageToFirebase() {
     //pbj pk.txt: 0231debdb29c8761a215619b2679991a1db8006c953d1fa554de32e700fe89feb9
@@ -119,6 +123,125 @@ class ConversationScreen extends React.Component {
     newData.splice(rowId, 1);
     this.setState({ listViewData: newData });
   }
+  _initEngineNoData = () => {
+    // Start the engine:
+    const logger = this.logger;
+    const privateKey = '1';
+    const publicKey = '2';
+    const isPlugIn = false;
+    const avatarUrl = '';  // TODO
+    const discoveryPath = ''; // TODO
+    const engine =
+      new MessagingEngine(logger,
+                          privateKey,
+                          publicKey,
+                          isPlugIn,
+                          avatarUrl,
+                          discoveryPath);
+
+    return engine;
+  }
+  _getUserData = () => {
+    const {BlockstackNativeModule} = NativeModules;
+    BlockstackNativeModule.getUserData((error, userData) => {
+      if (error) {
+        throw(`Failed to get user data.  ${error}`);
+      } else {
+        console.log(`SUCCESS (getUserData):\n`);
+        for (const key in userData) {
+          console.log(`\t${key}: ${userData[key]}`)
+        }
+        // Get public key:
+        BlockstackNativeModule.getPublicKeyFromPrivate(
+          userData['privateKey'], (error, publicKey) => {
+            if (error) {
+              throw(`Failed to get public key from private. ${error}`);
+            } else {
+              console.log(`SUCCESS (loadUserDataObject): publicKey = ${publicKey}\n`);
+              // Start the engine:
+              const logger = undefined;
+              const privateKey = userData['privateKey'];
+              const isPlugIn = false;
+              const avatarUrl = '';  // TODO
+              const discoveryPath = ''; // TODO
+              this.engine =
+                new MessagingEngine(logger,
+                                    privateKey,
+                                    publicKey,
+                                    isPlugIn,
+                                    this.props.avatarUrl,
+                                    this.props.path);
+
+              // Test encryption
+              // let testString = "Concensus";
+              // BlockstackNativeModule.encryptPrivateKey(publicKey, testString, (error, cipherObjectJSONString) => {
+              //   if (error) {
+              //     throw(`Failed to encrpyt ${error}.`);
+              //   } else {
+              //     console.log(`SUCCESS (encryptPrivateKey): cipherObjectJSONString = ${cipherObjectJSONString}`);
+              //     BlockstackNativeModule.decryptPrivateKey(userData['privateKey'], cipherObjectJSONString, (error, decrypted) => {
+              //       if (error) {
+              //         throw(`Failed to decrypt: ${error}.`)
+              //       } else {
+              //         console.log(`SUCCESS (decryptPrivateKey): decryptedString = ${decrypted}`)
+              //       }
+              //     });
+              //   }
+              // });
+
+              // Test encryptContent / decryptContent
+              // let testString = "Content works?";
+              // BlockstackNativeModule.encryptContent(testString, (error, cipherObjectJSONString) => {
+              //   if (error) {
+              //     throw(`Failed to encrpyt with encryptContent: ${error}.`);
+              //   } else {
+              //     console.log(`SUCCESS (encryptContent): cipherObjectJSONString = ${cipherObjectJSONString}`);
+              //     BlockstackNativeModule.decryptContent(cipherObjectJSONString, (error, decrypted) => {
+              //       if (error) {
+              //         throw(`Failed to decrypt with decryptContent: ${error}.`)
+              //       } else {
+              //         console.log(`SUCCESS (decryptContent): decryptedString = ${decrypted}`)
+              //       }
+              //     });
+              //   }
+              // });
+
+              // Test get file on pk.txt path.
+              // BlockstackNativeModule.getRawFile('pk.txt', (error, array) => {
+              //   console.log('After getFile:');
+              //   console.log('--------------------------------------------------------');
+              //   console.log(`error: ${error}`);
+              //   console.log(`content: ${array}`);
+              //   console.log('');
+              // });
+
+              // Test write/read cycle:
+              // BlockstackNativeModule.putFile('testWrite.txt',
+              //                                'Will this work?',
+              //                                (error, content) => {
+              //   console.log('wrote testWrite.txt');
+              //   console.log('After putFile:');
+              //   console.log('--------------------------------------------------------');
+              //   console.log(`error: ${error}`);
+              //   console.log(`content: ${content}`);
+              //   console.log('');
+              //
+              //   BlockstackNativeModule.getFile('testWrite.txt', (error, content) => {
+              //     console.log('read testWrite.txt');
+              //     console.log('After getFile:');
+              //     console.log('--------------------------------------------------------');
+              //     console.log(`error: ${error}`);
+              //     console.log(`content: ${content}`);
+              //     console.log('');
+              //   });
+              // });
+            }
+        });
+        return userData;
+      }
+    });
+    return undefined;
+  };
   render() {
     const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
     return (
@@ -133,10 +256,10 @@ class ConversationScreen extends React.Component {
                 </Left>
                 <Body>
                   <Text>{item.name}</Text>
-                  <Text note>{item.text}</Text>
+                  <Text note>Hello World</Text>
                 </Body>
                 <Right>
-                  <Text note>{item.time}</Text>
+                  <Text note>12:00</Text>
                 </Right>
               </ListItem>}
             renderLeftHiddenRow={data =>
@@ -155,5 +278,3 @@ class ConversationScreen extends React.Component {
     );
   }
 }
-
-export default ConversationScreen;

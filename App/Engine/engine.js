@@ -5,8 +5,8 @@ const adapter = require('webrtc-adapter');
 
 const EventEmitter = require('EventEmitter');
 
-const { getScreenConstraints,
-        getChromeExtensionStatus } = require('./ext/Screen-Capturing');
+// const { getScreenConstraints,
+//         getChromeExtensionStatus } = require('./ext/Screen-Capturing');
 // import { requestScreenShare } from 'iframe-screenshare';
 
 // TODO: something like rn-nodeify simple peer (existing problems though--naming
@@ -381,14 +381,16 @@ export class MessagingEngine extends EventEmitter {
   //
   setupDevelopmentConstants() {
 
-    const url = window.location.href;
-    if (url.indexOf('localhost') > -1) {
-      STEALTHY_PAGE = 'LOCALHOST';
-    } else if (url.indexOf('test') > -1) {
-      STEALTHY_PAGE = 'TEST_STEALTHY';
-    } else {
-      STEALTHY_PAGE = 'STEALTHY';
-    }
+    // const url = window.location.href;
+    // if (url.indexOf('localhost') > -1) {
+    //   STEALTHY_PAGE = 'LOCALHOST';
+    // } else if (url.indexOf('test') > -1) {
+    //   STEALTHY_PAGE = 'TEST_STEALTHY';
+    // } else {
+    //   STEALTHY_PAGE = 'STEALTHY';
+    // }
+
+    STEALTHY_PAGE = 'LOCALHOST'
 
     if (this.userId === 'pbj.id') {
       // PBJ Dev Settings:
@@ -1936,51 +1938,51 @@ export class MessagingEngine extends EventEmitter {
       case SHARED_STREAM_TYPES.DESKTOP:
         // let res = requestScreenShare()
 
-        getChromeExtensionStatus((status) => {
-          this.logger(`INFO: Chrome extension status = ${status}`)
-          switch (status) {
-            case 'not-chrome':
-            case 'installed-enabled':
-              // Do nothing, run getScreenConstraints.
-              break;
-            case 'installed-disabled':
-              let showMeThePlugin = confirm(
-                "The Stealthy Screen Chrome Plugin must be enabled to share your desktop. " +
-                "Would you like to do that now?");
+        // getChromeExtensionStatus((status) => {
+        //   this.logger(`INFO: Chrome extension status = ${status}`)
+        //   switch (status) {
+        //     case 'not-chrome':
+        //     case 'installed-enabled':
+        //       // Do nothing, run getScreenConstraints.
+        //       break;
+        //     case 'installed-disabled':
+        //       let showMeThePlugin = confirm(
+        //         "The Stealthy Screen Chrome Plugin must be enabled to share your desktop. " +
+        //         "Would you like to do that now?");
 
-              if (showMeThePlugin) {
-                window.open('//chrome://extensions/?id=ololhidlkciconhglnndlojapdiklgha', '_blank');
-              }
-              this.handleVideoClose();
-              return;
-            case 'not-installed':
-              let installThePlugin = confirm(
-                "The Stealthy Screen Chrome Plugin must be installed to share your desktop. " +
-                "Would you like to do that now?");
+        //       if (showMeThePlugin) {
+        //         window.open('//chrome://extensions/?id=ololhidlkciconhglnndlojapdiklgha', '_blank');
+        //       }
+        //       this.handleVideoClose();
+        //       return;
+        //     case 'not-installed':
+        //       let installThePlugin = confirm(
+        //         "The Stealthy Screen Chrome Plugin must be installed to share your desktop. " +
+        //         "Would you like to do that now?");
 
-              if (installThePlugin) {
-                window.open('https://chrome.google.com/webstore/detail/stealthy-screen/ololhidlkciconhglnndlojapdiklgha', '_blank');
-              }
-              this.handleVideoClose();
-              return;
-            default:
+        //       if (installThePlugin) {
+        //         window.open('https://chrome.google.com/webstore/detail/stealthy-screen/ololhidlkciconhglnndlojapdiklgha', '_blank');
+        //       }
+        //       this.handleVideoClose();
+        //       return;
+        //     default:
 
-          }
+        //   }
 
-          getScreenConstraints((error, screen_constraints) => {
-            if (error) {
-              this.handleVideoClose();
-              return alert(error);
-            }
-            const constraints = {
-              video: screen_constraints,
-              // audio: true
-            }
-            // TODO: make this use screen share
-            // this._startStreaming(constraints, MESSAGE_TYPE.SCREEN_SHARE_SDP);
-            this._startStreaming(constraints, MESSAGE_TYPE.VIDEO_SDP);
-          });
-        });
+        //   getScreenConstraints((error, screen_constraints) => {
+        //     if (error) {
+        //       this.handleVideoClose();
+        //       return alert(error);
+        //     }
+        //     const constraints = {
+        //       video: screen_constraints,
+        //       // audio: true
+        //     }
+        //     // TODO: make this use screen share
+        //     // this._startStreaming(constraints, MESSAGE_TYPE.SCREEN_SHARE_SDP);
+        //     this._startStreaming(constraints, MESSAGE_TYPE.VIDEO_SDP);
+        //   });
+        // });
         break;
       default:
         throw 'ERROR: unrecognized stream type for sharing.'

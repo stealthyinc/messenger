@@ -31,13 +31,13 @@ const adapter = require('webrtc-adapter');
 // Second Step: Listen for postMessage handler
 // postMessage is used to exchange "sourceId" between chrome extension and you webpage.
 // though, there are tons other options as well, e.g. XHR-signaling, websockets, etc.
-window.addEventListener('message', function(event) {
-    if (event.origin != window.location.origin) {
-        return;
-    }
+// window.addEventListener('message', function(event) {
+//     if (event.origin != window.location.origin) {
+//         return;
+//     }
 
-    onMessageCallback(event.data);
-});
+//     onMessageCallback(event.data);
+// });
 
 // and the function that handles received messages
 

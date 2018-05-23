@@ -14,11 +14,11 @@ export default class ProfileScreen extends React.Component {
   };
 
   _signOutAsync = async () => {
-    // await AsyncStorage.clear();
-    // this.props.navigation.navigate('Auth');
-    const {BlockstackNativeModule} = NativeModules;
-    await BlockstackNativeModule.signOut();
+    await AsyncStorage.clear();
     this.props.navigation.navigate('Auth');
+    // const {BlockstackNativeModule} = NativeModules;
+    // await BlockstackNativeModule.signOut();
+    // this.props.navigation.navigate('Auth');
   };
 
   render() {
