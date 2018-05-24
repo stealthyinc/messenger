@@ -57,7 +57,6 @@ export default class ConversationScreen extends React.Component {
       loaded: false
     };
     this.tempContactMgr = undefined;  // TODO: PBJ delete me and refs when contact click is working.
-
     this.engine = this._initEngineNoData();
     this.engine.on('me-initialized', () => {
       // this.setState({initWithFetchedData: true});
@@ -71,6 +70,12 @@ export default class ConversationScreen extends React.Component {
         const theNextActiveContact = this.tempContactMgr.getContact(theNextActiveContactId);
 
         this.engine.handleContactClick(theNextActiveContact);
+
+        // An example showing how to send a message
+        // TODO: PBJ delete me and integrate with the messages editor / editbox
+        const currDate = new Date();
+        const aMessage = `I was sent automatically after me-initialized [${currDate.getHours()}:${currDate.getMinutes()}:${currDate.getSeconds()}].`;
+        this.engine.handleOutgoingMessage(aMessage);
       }
     });
     this.engine.on('me-update-contactmgr', (aContactMgr) => {
@@ -157,13 +162,17 @@ export default class ConversationScreen extends React.Component {
     const isPlugIn = false;
     const avatarUrl = '';  // TODO
     const discoveryPath = ''; // TODO
+    const configuration = {
+      neverWebRTC: true
+    }
     const engine =
       new MessagingEngine(logger,
                           privateKey,
                           publicKey,
                           isPlugIn,
                           avatarUrl,
-                          discoveryPath);
+                          discoveryPath,
+                          configuration);
 
     return engine;
   }
