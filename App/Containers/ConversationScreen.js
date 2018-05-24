@@ -42,7 +42,7 @@ export default class ConversationScreen extends React.Component {
       headerBackTitle: 'Back',
       headerRight: (
         //params.goToChatRoom.navigate('BlockContactSearch')
-        <TouchableOpacity onPress={() => params.sendMessage()} style={{marginRight: 10}}> 
+        <TouchableOpacity onPress={() => params.sendMessage()} style={{marginRight: 10}}>
           <Ionicons name="ios-paper-plane-outline" size={30} color='#037aff'/>
         </TouchableOpacity>
       ),
@@ -56,25 +56,51 @@ export default class ConversationScreen extends React.Component {
       listViewData: [],
       loaded: false
     };
+    this.tempContactMgr = undefined;  // TODO: PBJ delete me and refs when contact click is working.
+
     this.engine = this._initEngineNoData();
     this.engine.on('me-initialized', () => {
       // this.setState({initWithFetchedData: true});
       this.engineInit = true;
+
+      if (this.tempContactMgr) {
+        // An example showing how to set the active contact (results in an me-update-messages event).
+        // Setting to a contact that both pbj/ac have convo data with.
+        // TODO: PBJ delete me and integrate to your awesome iOS person picker.
+        const theNextActiveContactId = (this.fakeUserId = 'alexc.id') ?  'pbj.id' : 'alexc.id';
+        const theNextActiveContact = this.tempContactMgr.getContact(theNextActiveContactId);
+
+        this.engine.handleContactClick(theNextActiveContact);
+      }
     });
     this.engine.on('me-update-contactmgr', (aContactMgr) => {
       // console.log(`Messaging Engine updated contact manager:`)
       const userIds = aContactMgr ? aContactMgr.getContactIds() : [];
       this.updateContacts(userIds)
       // this.props.storeContactMgr(aContactMgr);
+
+      this.tempContactMgr = aContactMgr;
     });
     this.engine.on('me-update-messages', (theMessages) => {
       console.log(`Messaging Engine updated messages: ${theMessages}`)
       // this.props.storeMessages(theMessages);
+
+      if (theMessages) {
+        // An example printing out the message data.
+        // TODO: PBJ use this to integrate to your chat component
+        console.log('Messages Object:');
+        console.log('---------------------------------------------------------');
+        for (const message of theMessages) {
+          // TODO: include message.image when we get the avatarUrl & recipientImageUrl
+          console.log(`${message.author}: "${message.body}"  (seen:${message.seen} time:${message.time} state:${message.state})`);
+        }
+        console.log('')
+      }
     });
     this.engineInit = false;
     // this.fakeUserId = 'alexc.stealthy.id';
-    // this.fakeUserId = 'alexc.id';
-    this.fakeUserId = 'pbj.id';
+    this.fakeUserId = 'alexc.id';
+    // this.fakeUserId = 'pbj.id';
   }
   logger = (...args) => {
     // if (process.env.NODE_ENV === 'development' || this.state.console) {

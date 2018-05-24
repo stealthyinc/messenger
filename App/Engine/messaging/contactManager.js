@@ -309,7 +309,7 @@ class ContactManager {
       this._setterWithChecks(aContactId, 'timeMs', theTimeSinceOnlineMs);
     } else {
       this._setterWithChecks(aContactId, 'timeMs', '');
-    } 
+    }
   }
 
   incrementUnread(aContactId) {
@@ -333,7 +333,7 @@ class ContactManager {
 
   clearUnread(aContactId) {
     this._setterWithChecks(aContactId, 'unread', 0);
-    document.title = "Stealthy | Decentralized Communication"
+    // document.title = "Stealthy | Decentralized Communication"
   }
 
   getAllUnread() {
