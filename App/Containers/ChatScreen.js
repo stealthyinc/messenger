@@ -17,7 +17,7 @@ class ChatScreen extends Component {
     return {
       headerTitle: params.name,
       headerRight: (
-        <TouchableOpacity onPress={() => params.navigation.navigate("DrawerOpen")} style={{marginRight: 10}}> 
+        <TouchableOpacity onPress={() => params.navigation.navigate("DrawerOpen")} style={{marginRight: 10}}>
           <Ionicons name="ios-information-circle-outline" size={30} color='#037aff'/>
         </TouchableOpacity>
       ),
@@ -26,6 +26,9 @@ class ChatScreen extends Component {
 
   constructor(props) {
     super(props);
+    console.log('');
+    console.log('CREATING ChatScreen instance!');
+    console.log('-------------------------------------------------------------');
     this.state = {
       messages: [],
       loadEarlier: true,
@@ -44,47 +47,15 @@ class ChatScreen extends Component {
     this.onLoadEarlier = this.onLoadEarlier.bind(this);
 
     this._isAlright = null;
-    let { engine } = this.props.screenProps
-    engine.on('me-update-messages', (theMessages) => {
-      console.log(`Messaging Engine updated messages: ${theMessages}`)
-      // this.props.storeMessages(theMessages);
-      if (theMessages) {
-        // An example printing out the message data.
-        // TODO: PBJ use this to integrate to your chat component
-        // {
-        //   _id: Math.round(Math.random() * 1000000),
-        //   text: 'Yes, and wallet integration is next!',
-        //   createdAt: new Date(Date.UTC(2018, 4, 26, 17, 20, 0)),
-        //   user: {
-        //     _id: 1,
-        //     name: 'Developer',
-        //   },
-        //   sent: true,
-        //   received: true,
-        //   // location: {
-        //   //   latitude: 48.864601,
-        //   //   longitude: 2.398704
-        //   // },
-        // },
-        // {
-        //   _id: Math.round(Math.random() * 1000000),
-        //   text: 'Is this the new Stealthy Mobile UI?',
-        //   createdAt: new Date(Date.UTC(2018, 4, 26, 17, 20, 0)),
-        //   user: {
-        //     _id: 2,
-        //     name: 'AC',
-        //   },
-        // },
-        console.log('Messages Object:');
-        console.log('---------------------------------------------------------');
-        for (const message of theMessages) {
-          // TODO: include message.image when we get the avatarUrl & recipientImageUrl
-          console.log(`${message.author}: "${message.body}"  (seen:${message.seen} time:${message.time} state:${message.state})`);
-          this.setupMessages(theMessages)
-        }
-        console.log('')
+    // let { engine } = this.props.screenProps
+    let { messages } = this.props.screenProps;
+    if (messages) {
+      let configuredMessages = this.setupMessages(messages);
+      if (configuredMessages && !this.state.setup) {
+        this.state.messages = configuredMessages;
+        this.state.setup = true;
       }
-    });
+    }
   }
 
   componentWillMount() {
@@ -131,8 +102,10 @@ class ChatScreen extends Component {
           })
         }
       }
-      this.setState({messages, setup: true})
+      // this.setState({messages, setup: true})
+      return messages;
     }
+    return undefined;
   }
 
   onLoadEarlier() {

@@ -13,6 +13,8 @@ class ReduxNavigation extends React.Component {
 
     this.engine = this._initEngineNoData();
     this.engineInit = false;
+    this.messages = undefined;
+
     this.fakeUserId = 'alexc.id';
     // this.fakeUserId = 'pbj.id';
     this.engine.on('me-initialized', () => {
@@ -22,6 +24,51 @@ class ReduxNavigation extends React.Component {
   }
   componentDidMount() {
     this.engine.componentDidMountWork(this.engineInit, this.fakeUserId);
+
+    console.log('adding listener for MessagingEngine me-update-messages')
+    this.engine.on('me-update-messages', (theMessages) => {
+      console.log(`Messaging Engine updated messages: ${theMessages}`)
+      // this.props.storeMessages(theMessages);
+      if (theMessages) {
+        // An example printing out the message data.
+        // TODO: PBJ use this to integrate to your chat component
+        // {
+        //   _id: Math.round(Math.random() * 1000000),
+        //   text: 'Yes, and wallet integration is next!',
+        //   createdAt: new Date(Date.UTC(2018, 4, 26, 17, 20, 0)),
+        //   user: {
+        //     _id: 1,
+        //     name: 'Developer',
+        //   },
+        //   sent: true,
+        //   received: true,
+        //   // location: {
+        //   //   latitude: 48.864601,
+        //   //   longitude: 2.398704
+        //   // },
+        // },
+        // {
+        //   _id: Math.round(Math.random() * 1000000),
+        //   text: 'Is this the new Stealthy Mobile UI?',
+        //   createdAt: new Date(Date.UTC(2018, 4, 26, 17, 20, 0)),
+        //   user: {
+        //     _id: 2,
+        //     name: 'AC',
+        //   },
+        // },
+        console.log('Messages Object:');
+        console.log('---------------------------------------------------------');
+        for (const message of theMessages) {
+          // TODO: include message.image when we get the avatarUrl & recipientImageUrl
+          console.log(`${message.author}: "${message.body}"  (seen:${message.seen} time:${message.time} state:${message.state})`);
+        }
+        console.log('')
+        if (this.engineInit) {
+          this.messages = theMessages;
+        }
+      }
+    });
+
   }
   componentWillMount () {
     if (Platform.OS === 'ios') return
@@ -41,9 +88,9 @@ class ReduxNavigation extends React.Component {
     BackHandler.removeEventListener('hardwareBackPress')
   }
   logger = (...args) => {
-    // if (process.env.NODE_ENV === 'development' || this.state.console) {
-      // console.log(...args);
-    // }
+    if (process.env.NODE_ENV === 'development' || this.state.console) {
+      console.log(...args);
+    }
   }
   _initEngineNoData = () => {
     // Start the engine:
@@ -169,7 +216,12 @@ class ReduxNavigation extends React.Component {
     return undefined;
   };
   render () {
-    return <AppNavigation screenProps={{engine: this.engine}} navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root') })} />
+    return <AppNavigation
+              screenProps={{
+                engine: this.engine,
+                messages: this.messages,
+              }}
+              navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root') })} />
   }
 }
 

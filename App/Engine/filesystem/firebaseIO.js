@@ -4,11 +4,18 @@ const ROOT = '/global/gaia';
 const APP_NAME = 'stealthy.im';
 
 module.exports = class FirebaseIO extends BaseIO {
-  constructor(logger, firebaseInst, pathURL) {
+  constructor(logger, firebaseInst, pathURL, logOutput = false) {
     super();
     this.logger = logger;
+    this.logOutput = logOutput;
     this.firebaseInst = firebaseInst;
     this.pathURL = pathURL;
+  }
+
+  log(...args) {
+    if (this.logOutput) {
+      this.logger(...args);
+    }
   }
 
   // Public:
@@ -49,7 +56,7 @@ module.exports = class FirebaseIO extends BaseIO {
 
   _write(filePath, data) {
     const cleanPath = this._cleanPathForFirebase(filePath);
-    this.logger(`Writing data to: ${cleanPath}`);
+    this.log(`Writing data to: ${cleanPath}`);
     try {
       const res = this.firebaseInst.database().ref(cleanPath).set(data);
       return res;
@@ -69,7 +76,7 @@ module.exports = class FirebaseIO extends BaseIO {
 
     return targetRef.once('value')
     .then((snapshot) => {
-      this.logger(`Read data from: ${cleanPath}`);
+      this.log(`Read data from: ${cleanPath}`);
       return snapshot.val();
     })
     .catch((error) => {
@@ -80,7 +87,7 @@ module.exports = class FirebaseIO extends BaseIO {
 
   _delete(filePath) {
     const cleanPath = this._cleanPathForFirebase(filePath);
-    this.logger(`Deleting ${cleanPath}`);
+    this.log(`Deleting ${cleanPath}`);
     return this.firebaseInst.database().ref(cleanPath).remove();
   }
 };

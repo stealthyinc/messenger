@@ -190,6 +190,8 @@ export class MessagingEngine extends EventEmitter {
   }
 
   updateMessages(theMessages) {
+    console.log('updateMessages:')
+    console.log(`   active id:  ${this.contactMgr.getActiveContact().id}`)
     this.emit('me-update-messages', theMessages);
   }
 
@@ -227,14 +229,14 @@ export class MessagingEngine extends EventEmitter {
       .then(() => {
         this.io = (ENABLE_GAIA) ?
           new GaiaIO(this.logger, LOG_GAIAIO) :
-          new FirebaseIO(this.logger, firebase, STEALTHY_PAGE);
+          new FirebaseIO(this.logger, firebase, STEALTHY_PAGE, LOG_GAIAIO);
 
         this._fetchUserSettings();
       });
     } else {
       this.io = (ENABLE_GAIA) ?
         new GaiaIO(this.logger, LOG_GAIAIO) :
-        new FirebaseIO(this.logger, firebase, STEALTHY_PAGE);
+        new FirebaseIO(this.logger, firebase, STEALTHY_PAGE, LOG_GAIAIO);
 
       this._fetchUserSettings();
     }
@@ -517,7 +519,7 @@ export class MessagingEngine extends EventEmitter {
 
     const heartbeatIoDriver = (ENABLE_GAIA) ?
       new GaiaIO(this.logger, LOG_GAIAIO) :
-      new FirebaseIO(this.logger, firebase, STEALTHY_PAGE);
+      new FirebaseIO(this.logger, firebase, STEALTHY_PAGE, LOG_GAIAIO);
     this.heartBeat = new HeartBeat(
       this.logger,
       heartbeatIoDriver,
