@@ -13,10 +13,9 @@ class ReduxNavigation extends React.Component {
 
     this.engine = this._initEngineNoData();
     this.engineInit = false;
-    // this.fakeUserId = 'alexc.id';
-    this.fakeUserId = 'pbj.id';
+    this.fakeUserId = 'alexc.id';
+    // this.fakeUserId = 'pbj.id';
     this.engine.on('me-initialized', () => {
-      console.log("engine initialized")
       // this.setState({initWithFetchedData: true});
       this.engineInit = true;
     });
@@ -43,7 +42,7 @@ class ReduxNavigation extends React.Component {
   }
   logger = (...args) => {
     // if (process.env.NODE_ENV === 'development' || this.state.console) {
-      console.log(...args);
+      // console.log(...args);
     // }
   }
   _initEngineNoData = () => {

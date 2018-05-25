@@ -126,7 +126,8 @@ class ChatScreen extends Component {
     // TODO: PBJ delete me and integrate with the messages editor / editbox
     const currDate = new Date();
     const aMessage = `I was sent automatically after me-initialized [${currDate.getHours()}:${currDate.getMinutes()}:${currDate.getSeconds()}].`;
-    this.engine.handleOutgoingMessage(aMessage);
+    let { engine } = this.props.screenProps
+    engine.handleOutgoingMessage(aMessage);
     this.setState((previousState) => {
       return {
         messages: GiftedChat.append(previousState.messages, messages),

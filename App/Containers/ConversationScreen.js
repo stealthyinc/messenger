@@ -90,13 +90,8 @@ export default class ConversationScreen extends React.Component {
       const theNextActiveContactId = (this.fakeUserId = 'alexc.id') ?  'pbj.id' : 'alexc.id';
       const theNextActiveContact = this.contactMgr.getContact(theNextActiveContactId);
 
-      this.engine.handleContactClick(theNextActiveContact);
-
-      // An example showing how to send a message
-      // TODO: PBJ delete me and integrate with the messages editor / editbox
-      // const currDate = new Date();
-      // const aMessage = `I was sent automatically after me-initialized [${currDate.getHours()}:${currDate.getMinutes()}:${currDate.getSeconds()}].`;
-      // this.engine.handleOutgoingMessage(aMessage);
+      let { engine } = this.props.screenProps
+      engine.handleContactClick(theNextActiveContact);
     }
     this.props.navigation.navigate('ChatRoom')
   }
