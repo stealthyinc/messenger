@@ -22,9 +22,6 @@ console.disableYellowBox = true;
 
 if (!firebase.auth().currentUser) {
   firebase.auth().signInAnonymously()
-  .then(() => {
-    console.log("Firebase logged in")
-  });
 }
 
 const ChatRoom = DrawerNavigator(

@@ -65,11 +65,6 @@ export default class ConversationScreen extends React.Component {
       this.contactMgr = aContactMgr;
     });
   }
-  logger = (...args) => {
-    // if (process.env.NODE_ENV === 'development' || this.state.console) {
-      console.log(...args);
-    // }
-  }
   componentWillMount() {
     this.props.navigation.setParams({ goToChatRoom: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
   }

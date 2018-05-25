@@ -82,9 +82,9 @@ class App extends Component {
     if (enabled) {
       // user has permissions
       firebase.messaging().getToken().then(token => {
-        console.log("token", token)
+        // console.log("token", token)
       });
-      console.log("user has permissions")
+      // console.log("user has permissions")
     } else {
       // user doesn't have permission
       console.log("user doesn't have permissions")
