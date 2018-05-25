@@ -43,6 +43,23 @@ class ChatScreen extends Component {
     this.onLoadEarlier = this.onLoadEarlier.bind(this);
 
     this._isAlright = null;
+    let { engine } = this.props.screenProps
+    engine.on('me-update-messages', (theMessages) => {
+      console.log(`Messaging Engine updated messages: ${theMessages}`)
+      // this.props.storeMessages(theMessages);
+
+      if (theMessages) {
+        // An example printing out the message data.
+        // TODO: PBJ use this to integrate to your chat component
+        console.log('Messages Object:');
+        console.log('---------------------------------------------------------');
+        for (const message of theMessages) {
+          // TODO: include message.image when we get the avatarUrl & recipientImageUrl
+          console.log(`${message.author}: "${message.body}"  (seen:${message.seen} time:${message.time} state:${message.state})`);
+        }
+        console.log('')
+      }
+    });
   }
 
   componentWillMount() {
@@ -82,18 +99,18 @@ class ChatScreen extends Component {
   onSend(messages = []) {
     //pbj pk.txt: 0231debdb29c8761a215619b2679991a1db8006c953d1fa554de32e700fe89feb9
     //ayc pk.txt: 0363cd66f87eec2e0fc2a4bc9b8314f5fd0c2a18ce1c6a7d31f1efec83253d46a2
-    const senderId  = "alexc.id"
-    const time      = Date.now()
-    const read      = false
-    const sender    = "0363cd66f87eec2e0fc2a4bc9b8314f5fd0c2a18ce1c6a7d31f1efec83253d46a2"
-    const recepient = "0231debdb29c8761a215619b2679991a1db8006c953d1fa554de32e700fe89feb9"
-    const npath = `/global/notifications/${recepient}/`
-    firebase.database().ref(npath).push({
-      read,
-      time,
-      sender,
-      senderId,
-    })
+    // const senderId  = "alexc.id"
+    // const time      = Date.now()
+    // const read      = false
+    // const sender    = "0363cd66f87eec2e0fc2a4bc9b8314f5fd0c2a18ce1c6a7d31f1efec83253d46a2"
+    // const recepient = "0231debdb29c8761a215619b2679991a1db8006c953d1fa554de32e700fe89feb9"
+    // const npath = `/global/notifications/${recepient}/`
+    // firebase.database().ref(npath).push({
+    //   read,
+    //   time,
+    //   sender,
+    //   senderId,
+    // })
     // process for sending a notification
     // - check fb under /global/notifications/senderPK
     // - decrypt data and look up receiver's user device token
@@ -104,6 +121,12 @@ class ChatScreen extends Component {
     //   -d '{"notification": {"title": "New Message", "sound": "default"},
     //   "priority": "high",
     //   "to": "user_device_token"}'
+
+    // An example showing how to send a message
+    // TODO: PBJ delete me and integrate with the messages editor / editbox
+    const currDate = new Date();
+    const aMessage = `I was sent automatically after me-initialized [${currDate.getHours()}:${currDate.getMinutes()}:${currDate.getSeconds()}].`;
+    this.engine.handleOutgoingMessage(aMessage);
     this.setState((previousState) => {
       return {
         messages: GiftedChat.append(previousState.messages, messages),

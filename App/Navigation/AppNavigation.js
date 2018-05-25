@@ -43,6 +43,7 @@ const PrimaryNav = StackNavigator({
   BlockContactSearch: { screen: BlockContactSearch },
   ChatMenu: { screen: ChatMenuScreen },
 });
+
 const AuthStack = StackNavigator({ 
   SignIn: { screen: SignInScreen }
 });
