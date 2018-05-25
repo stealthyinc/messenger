@@ -31,6 +31,7 @@ class ChatScreen extends Component {
       loadEarlier: true,
       typingText: null,
       isLoadingEarlier: false,
+      setup: false
     };
 
     this._isMounted = false;
@@ -47,15 +48,39 @@ class ChatScreen extends Component {
     engine.on('me-update-messages', (theMessages) => {
       console.log(`Messaging Engine updated messages: ${theMessages}`)
       // this.props.storeMessages(theMessages);
-
       if (theMessages) {
         // An example printing out the message data.
         // TODO: PBJ use this to integrate to your chat component
+        // {
+        //   _id: Math.round(Math.random() * 1000000),
+        //   text: 'Yes, and wallet integration is next!',
+        //   createdAt: new Date(Date.UTC(2018, 4, 26, 17, 20, 0)),
+        //   user: {
+        //     _id: 1,
+        //     name: 'Developer',
+        //   },
+        //   sent: true,
+        //   received: true,
+        //   // location: {
+        //   //   latitude: 48.864601,
+        //   //   longitude: 2.398704
+        //   // },
+        // },
+        // {
+        //   _id: Math.round(Math.random() * 1000000),
+        //   text: 'Is this the new Stealthy Mobile UI?',
+        //   createdAt: new Date(Date.UTC(2018, 4, 26, 17, 20, 0)),
+        //   user: {
+        //     _id: 2,
+        //     name: 'AC',
+        //   },
+        // },
         console.log('Messages Object:');
         console.log('---------------------------------------------------------');
         for (const message of theMessages) {
           // TODO: include message.image when we get the avatarUrl & recipientImageUrl
           console.log(`${message.author}: "${message.body}"  (seen:${message.seen} time:${message.time} state:${message.state})`);
+          this.setupMessages(theMessages)
         }
         console.log('')
       }
@@ -65,15 +90,49 @@ class ChatScreen extends Component {
   componentWillMount() {
     this._isMounted = true;
     this.props.navigation.setParams({ navigation: this.props.navigation, name: 'Daniel' });
-    this.setState(() => {
-      return {
-        messages: require('./data/messages.js'),
-      };
-    });
+    // this.setState(() => {
+    //   return {
+    //     messages: require('./data/messages.js'),
+    //   };
+    // });
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+  }
+
+  setupMessages = (inputMessages) => {
+    if (!this.state.setup) {
+      let messages = []
+      for (const message of inputMessages) {
+        if (message.author === 'alexc.id') {
+          messages.push({
+            _id: Math.round(Math.random() * 1000000),
+            text: message.body,
+            createdAt: new Date(message.time),
+            sent: true,
+            received: message.seen,
+            user: {
+              _id: 1,
+              name: 'AC',
+            },
+          })
+        }
+        else {
+          messages.push({
+            _id: Math.round(Math.random() * 1000000),
+            text: message.body,
+            createdAt: new Date(message.time),
+            received: message.seen,
+            user: {
+              _id: 2,
+              name: 'PB',
+            },
+          })
+        }
+      }
+      this.setState({messages, setup: true})
+    }
   }
 
   onLoadEarlier() {
@@ -124,10 +183,10 @@ class ChatScreen extends Component {
 
     // An example showing how to send a message
     // TODO: PBJ delete me and integrate with the messages editor / editbox
-    const currDate = new Date();
-    const aMessage = `I was sent automatically after me-initialized [${currDate.getHours()}:${currDate.getMinutes()}:${currDate.getSeconds()}].`;
-    let { engine } = this.props.screenProps
-    engine.handleOutgoingMessage(aMessage);
+    // const currDate = new Date();
+    // const aMessage = `I was sent automatically after me-initialized [${currDate.getHours()}:${currDate.getMinutes()}:${currDate.getSeconds()}].`;
+    // let { engine } = this.props.screenProps
+    // engine.handleOutgoingMessage(aMessage);
     this.setState((previousState) => {
       return {
         messages: GiftedChat.append(previousState.messages, messages),
@@ -264,6 +323,7 @@ class ChatScreen extends Component {
   }
 
   render() {
+    console.log("Messages", this.state.messages)
     return (
       <GiftedChat
         style={{backgroundColor: 'white'}}
