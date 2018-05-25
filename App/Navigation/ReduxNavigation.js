@@ -1,5 +1,5 @@
 import React from 'react'
-import { BackHandler, Platform } from 'react-native'
+import { BackHandler, Platform, NativeModules } from 'react-native'
 import { addNavigationHelpers } from 'react-navigation'
 import { createReduxBoundAddListener } from 'react-navigation-redux-helpers'
 import { connect } from 'react-redux'
@@ -14,6 +14,8 @@ class ReduxNavigation extends React.Component {
     this.engine = this._initEngineNoData();
     this.engineInit = false;
     this.messages = undefined;
+
+    this.userData = undefined;
 
     this.fakeUserId = 'alexc.id';
     // this.fakeUserId = 'pbj.id';
@@ -114,7 +116,7 @@ class ReduxNavigation extends React.Component {
 
     return engine;
   }
-  _getUserData = () => {
+  _getUserData = (completion) => {
     const {BlockstackNativeModule} = NativeModules;
     BlockstackNativeModule.getUserData((error, userData) => {
       if (error) {
@@ -131,19 +133,23 @@ class ReduxNavigation extends React.Component {
               throw(`Failed to get public key from private. ${error}`);
             } else {
               console.log(`SUCCESS (loadUserDataObject): publicKey = ${publicKey}\n`);
+              userData['appPublicKey'] = publicKey;
+              this.userData = userData;
+              completion();
+
               // Start the engine:
-              const logger = undefined;
-              const privateKey = userData['privateKey'];
-              const isPlugIn = false;
-              const avatarUrl = '';  // TODO
-              const discoveryPath = ''; // TODO
-              this.engine =
-                new MessagingEngine(logger,
-                                    privateKey,
-                                    publicKey,
-                                    isPlugIn,
-                                    this.props.avatarUrl,
-                                    this.props.path);
+              // const logger = undefined;
+              // const privateKey = userData['privateKey'];
+              // const isPlugIn = false;
+              // const avatarUrl = '';  // TODO
+              // const discoveryPath = ''; // TODO
+              // this.engine =
+              //   new MessagingEngine(logger,
+              //                       privateKey,
+              //                       publicKey,
+              //                       isPlugIn,
+              //                       this.props.avatarUrl,
+              //                       this.props.path);
 
               // Test encryption
               // let testString = "Concensus";
@@ -210,16 +216,16 @@ class ReduxNavigation extends React.Component {
               // });
             }
         });
-        return userData;
+        // return userData;
       }
     });
-    return undefined;
   };
   render () {
     return <AppNavigation
               screenProps={{
                 engine: this.engine,
                 messages: this.messages,
+                getUserData: this._getUserData,
               }}
               navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root') })} />
   }

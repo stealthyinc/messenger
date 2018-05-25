@@ -23,13 +23,15 @@ const styles = StyleSheet.create({
 const stock = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
 
 const pictures = [
-  'https://react.semantic-ui.com/assets/images/avatar/large/daniel.jpg',
-  'https://react.semantic-ui.com/assets/images/avatar/large/matt.jpg',
-  'https://react.semantic-ui.com/assets/images/avatar/large/matthew.png',
-  'https://react.semantic-ui.com/assets/images/avatar/large/elliot.jpg',
-  'https://react.semantic-ui.com/assets/images/avatar/large/steve.jpg',
-  'https://react.semantic-ui.com/assets/images/avatar/large/molly.png',
-  'https://react.semantic-ui.com/assets/images/avatar/large/jenny.jpg',
+  'https://gaia.blockstack.org/hub/12ELFuCsjCx5zxVDyNxttnYe9VLrRbLuMm/0/avatar-0',  // pbj.id
+  'https://gaia.blockstack.org/hub/1GHZbCnbufz53Skb79FwnwuedW4Hhe2VhR/0/avatar-0',  // alexc.id
+  'https://gaia.blockstack.org/hub/1P4So8DUfo9nC8RQvgfRhLzSyqGiAu8FPA//avatar-0',   // stealthy.id
+  'https://gaia.blockstack.org/hub/1Lac25uJk3c6BXLACtN56ARFf1NdqzoaaS//avatar-0',   // relay.stealthy.id
+  'https://gaia.blockstack.org/hub/1J3PUxY5uDShUnHRrMyU6yKtoHEUPhKULs/0/avatar-0',  // muneeb.id
+  'https://gaia.blockstack.org/hub/1BiG7hjHukZFd2sZiJFhs8W93pgaUbVeYp/0/avatar-0',  // xan.id
+  // 'https://react.semantic-ui.com/assets/images/avatar/large/steve.jpg',
+  // 'https://react.semantic-ui.com/assets/images/avatar/large/molly.png',
+  // 'https://react.semantic-ui.com/assets/images/avatar/large/jenny.jpg',
 ]
 
 export default class ConversationScreen extends React.Component {
