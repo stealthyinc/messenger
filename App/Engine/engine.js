@@ -4,6 +4,7 @@ import firebase from 'react-native-firebase';
 const adapter = require('webrtc-adapter');
 
 const EventEmitter = require('EventEmitter');
+import EngineActions from '../Redux/EngineRedux'
 
 // const { getScreenConstraints,
 //         getChromeExtensionStatus } = require('./ext/Screen-Capturing');
@@ -133,7 +134,6 @@ export class MessagingEngine extends EventEmitter {
               avatarUrl,
               discoveryPath) {
     super();
-
     this.logger = logger;
     this.privateKey = privateKey;
     this.publicKey = publicKey;
@@ -210,6 +210,7 @@ export class MessagingEngine extends EventEmitter {
   //
 
   componentDidMountWork(initWithFetchedData, userId) {
+    debugger
     if (initWithFetchedData || !userId) {
       return;
     }
@@ -593,11 +594,15 @@ export class MessagingEngine extends EventEmitter {
       this.updateContactMgr();
 
       this.emit('me-initialized');
+      debugger
+      EngineActions.engineInitial({engineInit: true})
     })
     .catch((err) => {
       this.offlineMsgSvc.startRecvService();
       this.logger('INFO: No contact bundles to load.');
+      debugger
       this.emit('me-initialized');
+      EngineActions.engineInitial({engineInit: true})
     });
   }
 

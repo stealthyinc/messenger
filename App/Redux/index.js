@@ -10,6 +10,7 @@ export const reducers = combineReducers({
   github: require('./GithubRedux').reducer,
   search: require('./SearchRedux').reducer,
   contact: require('./BlockstackContactsRedux').reducer,
+  engine: require('./EngineRedux').reducer,
 })
 
 export default () => {

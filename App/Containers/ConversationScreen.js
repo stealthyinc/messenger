@@ -56,16 +56,16 @@ export default class ConversationScreen extends React.Component {
       listViewData: [],
       loaded: false
     };
-    this.contactMgr = undefined;  // TODO: PBJ delete me and refs when contact click is working.
-    let { engine } = this.props.screenProps
-    engine.on('me-update-contactmgr', (aContactMgr) => {
-      console.log(`Messaging Engine updated contact manager:`)
-      const userIds = aContactMgr ? aContactMgr.getContactIds() : [];
-      this.updateContacts(userIds)
-      // this.props.storeContactMgr(aContactMgr);
+    // this.contactMgr = undefined;  // TODO: PBJ delete me and refs when contact click is working.
+    // let { engine } = this.props.screenProps
+    // engine.on('me-update-contactmgr', (aContactMgr) => {
+    //   console.log(`Messaging Engine updated contact manager:`)
+    //   const userIds = aContactMgr ? aContactMgr.getContactIds() : [];
+    //   this.updateContacts(userIds)
+    //   // this.props.storeContactMgr(aContactMgr);
 
-      this.contactMgr = aContactMgr;
-    });
+    //   this.contactMgr = aContactMgr;
+    // });
   }
   componentWillMount() {
     this.props.navigation.setParams({ goToChatRoom: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
@@ -92,8 +92,8 @@ export default class ConversationScreen extends React.Component {
       const theNextActiveContactId = (this.fakeUserId = 'alexc.id') ?  'pbj.id' : 'alexc.id';
       const theNextActiveContact = this.contactMgr.getContact(theNextActiveContactId);
 
-      let { engine } = this.props.screenProps
-      engine.handleContactClick(theNextActiveContact);
+      // let { engine } = this.props.screenProps
+      // engine.handleContactClick(theNextActiveContact);
     }
     this.props.navigation.navigate('ChatRoom')
   }

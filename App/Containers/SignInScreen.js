@@ -130,9 +130,9 @@ export default class SignInScreen extends React.Component {
     const {BlockstackNativeModule} = NativeModules;
     await BlockstackNativeModule.signIn("https://www.stealthy.im/redirect.html", "https://www.stealthy.im", null, (error, events) => {
       if (!error) {
-        this.props.screenProps.getUserData(() => {
+        // this.props.screenProps.getUserData(() => {
           this.props.navigation.navigate('App');
-        });
+        // });
       }
     });
 
