@@ -190,8 +190,8 @@ export class MessagingEngine extends EventEmitter {
   }
 
   updateMessages(theMessages) {
-    console.log('updateMessages:')
-    console.log(`   active id:  ${this.contactMgr.getActiveContact().id}`)
+    // console.log('updateMessages:')
+    // console.log(`   active id:  ${this.contactMgr.getActiveContact().id}`)
     this.emit('me-update-messages', theMessages);
   }
 
@@ -209,8 +209,7 @@ export class MessagingEngine extends EventEmitter {
   // ////////////////////////////////////////////////////////////////////////////
   //
 
-  componentDidMountWork(initWithFetchedData, userId) {
-    debugger
+  componentDidMountWork = (initWithFetchedData, userId) => {
     if (initWithFetchedData || !userId) {
       return;
     }
@@ -594,15 +593,11 @@ export class MessagingEngine extends EventEmitter {
       this.updateContactMgr();
 
       this.emit('me-initialized');
-      debugger
-      EngineActions.engineInitial({engineInit: true})
     })
     .catch((err) => {
       this.offlineMsgSvc.startRecvService();
       this.logger('INFO: No contact bundles to load.');
-      debugger
       this.emit('me-initialized');
-      EngineActions.engineInitial({engineInit: true})
     });
   }
 
@@ -1725,7 +1720,7 @@ export class MessagingEngine extends EventEmitter {
     return seenMessages;
   }
 
-  handleContactClick(contact) {
+  handleContactClick = (contact) => {
     const selectedUserId = contact.id;
 
     // TODO: need to send a packet back indicating messages seen.

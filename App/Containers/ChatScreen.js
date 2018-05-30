@@ -129,6 +129,50 @@ class ChatScreen extends Component {
   }
 
   onSend(messages = []) {
+    
+      // console.log('adding listener for MessagingEngine me-update-messages')
+    // this.engine.on('me-update-messages', (theMessages) => {
+    //   console.log(`Messaging Engine updated messages: ${theMessages}`)
+    //   // this.props.storeMessages(theMessages);
+    //   if (theMessages) {
+    //     // An example printing out the message data.
+    //     // TODO: PBJ use this to integrate to your chat component
+    //     // {
+    //     //   _id: Math.round(Math.random() * 1000000),
+    //     //   text: 'Yes, and wallet integration is next!',
+    //     //   createdAt: new Date(Date.UTC(2018, 4, 26, 17, 20, 0)),
+    //     //   user: {
+    //     //     _id: 1,
+    //     //     name: 'Developer',
+    //     //   },
+    //     //   sent: true,
+    //     //   received: true,
+    //     //   // location: {
+    //     //   //   latitude: 48.864601,
+    //     //   //   longitude: 2.398704
+    //     //   // },
+    //     // },
+    //     // {
+    //     //   _id: Math.round(Math.random() * 1000000),
+    //     //   text: 'Is this the new Stealthy Mobile UI?',
+    //     //   createdAt: new Date(Date.UTC(2018, 4, 26, 17, 20, 0)),
+    //     //   user: {
+    //     //     _id: 2,
+    //     //     name: 'AC',
+    //     //   },
+    //     // },
+    //     console.log('Messages Object:');
+    //     console.log('---------------------------------------------------------');
+    //     for (const message of theMessages) {
+    //       // TODO: include message.image when we get the avatarUrl & recipientImageUrl
+    //       console.log(`${message.author}: "${message.body}"  (seen:${message.seen} time:${message.time} state:${message.state})`);
+    //     }
+    //     console.log('')
+    //     if (this.engineInit) {
+    //       this.messages = theMessages;
+    //     }
+    //   }
+    // });
     //pbj pk.txt: 0231debdb29c8761a215619b2679991a1db8006c953d1fa554de32e700fe89feb9
     //ayc pk.txt: 0363cd66f87eec2e0fc2a4bc9b8314f5fd0c2a18ce1c6a7d31f1efec83253d46a2
     // const senderId  = "alexc.id"

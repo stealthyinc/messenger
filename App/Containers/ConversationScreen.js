@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux'
 import { AsyncStorage, View, ListView, StyleSheet, TouchableOpacity, NativeModules } from 'react-native';
 import TouchableRow from './contacts/Row';
 // import Header from './contacts/Header';
@@ -8,6 +9,7 @@ import { SearchBar, Text } from 'react-native-elements'
 import { Button, Container, Header, Content, List, ListItem, Left, Body, Right, Item, Icon, Input, Thumbnail, Title } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import firebase from 'react-native-firebase';
+import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 const styles = StyleSheet.create({
   container: {
@@ -34,7 +36,7 @@ const pictures = [
   // 'https://react.semantic-ui.com/assets/images/avatar/large/jenny.jpg',
 ]
 
-export default class ConversationScreen extends React.Component {
+class ConversationScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {};
     return {
@@ -56,23 +58,18 @@ export default class ConversationScreen extends React.Component {
       listViewData: [],
       loaded: false
     };
-    // this.contactMgr = undefined;  // TODO: PBJ delete me and refs when contact click is working.
-    // let { engine } = this.props.screenProps
-    // engine.on('me-update-contactmgr', (aContactMgr) => {
-    //   console.log(`Messaging Engine updated contact manager:`)
-    //   const userIds = aContactMgr ? aContactMgr.getContactIds() : [];
-    //   this.updateContacts(userIds)
-    //   // this.props.storeContactMgr(aContactMgr);
-
-    //   this.contactMgr = aContactMgr;
-    // });
   }
   componentWillMount() {
     this.props.navigation.setParams({ goToChatRoom: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
   }
-  updateContacts(userIds) {
-    if (!this.state.loaded) {
+  componentDidMount() {
+    this.updateContacts()
+  }
+  updateContacts() {
+    const { contactMgr } = this.props.engine
+    if (contactMgr) {
       // console.log(`  ${userIds.length} contacts ...`);
+      const userIds = contactMgr.getContactIds()
       let i = 0
       let list = []
       for (const userId of userIds) {
@@ -85,15 +82,15 @@ export default class ConversationScreen extends React.Component {
     }
   }
   contactSelected = () => {
-    if (this.contactMgr) {
+    debugger
+    const { contactMgr, engineInstance } = this.props.engine
+    if (contactMgr) {
       // An example showing how to set the active contact (results in an me-update-messages event).
       // Setting to a contact that both pbj/ac have convo data with.
       // TODO: PBJ delete me and integrate to your awesome iOS person picker.
       const theNextActiveContactId = (this.fakeUserId = 'alexc.id') ?  'pbj.id' : 'alexc.id';
-      const theNextActiveContact = this.contactMgr.getContact(theNextActiveContactId);
-
-      // let { engine } = this.props.screenProps
-      // engine.handleContactClick(theNextActiveContact);
+      const theNextActiveContact = contactMgr.getContact(theNextActiveContactId);
+      engineInstance.handleContactClick(theNextActiveContact);
     }
     this.props.navigation.navigate('ChatRoom')
   }
@@ -155,3 +152,16 @@ export default class ConversationScreen extends React.Component {
     );
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    engine: state.engine
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ConversationScreen)

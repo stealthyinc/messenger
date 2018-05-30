@@ -145,7 +145,7 @@ class ContactManager {
     this.contactArr = (aContactArr) || [];
   }
 
-  getContactIds() {
+  getContactIds = () => {
     if (this.pluginMode && LEAN_PLUGIN) {
       return [this.activeContact.id];
     }
@@ -222,7 +222,7 @@ class ContactManager {
     }
   }
 
-  getContact(aContactId) {
+  getContact = (aContactId) => {
     if (aContactId) {
       return ContactManager._getContactForId(aContactId, this.contactArr);
     }
