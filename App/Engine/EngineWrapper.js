@@ -1,28 +1,73 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import EngineActions from '../Redux/EngineRedux'
+import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 const { MessagingEngine } = require('./engine.js');
 
 class EngineWrapper extends Component {
+  constructor(props) {
+    super(props);
+  }
+  static Instance = new MessagingEngine(
+                          logger= (...args) => {
+                            if (process.env.NODE_ENV === 'development') {
+                              console.log(...args);
+                            }
+                          },
+                          '1',
+                          '2',
+                          false,
+                          '',
+                          '',
+                          {
+                            neverWebRTC: true
+                          })
+
   componentDidMount() {
     const fakeUserId = 'alexc.id';
-    const { engineInit, engineInstance } = this.props.engine
-    if (engineInstance) {
-      engineInstance.componentDidMountWork(engineInit, fakeUserId);
-      engineInstance.on('me-initialized', () => {
+    const { engineInit } = this.props
+    if (EngineWrapper.Instance) {
+      EngineWrapper.Instance.componentDidMountWork(engineInit, fakeUserId);
+      EngineWrapper.Instance.on('me-initialized', () => {
         console.log(`Messaging Engine initialized`)
         this.props.setEngineInitial(true)
       });
-      engineInstance.on('me-update-contactmgr', (contactMgr) => {
+      EngineWrapper.Instance.on('me-update-contactmgr', (contactMgr) => {
         console.log(`Messaging Engine updated contact manager:`)
         this.props.setEngineContactMgr(contactMgr)
       });
-      engineInstance.on('me-update-messages', (messages) => {
+      EngineWrapper.Instance.on('me-update-messages', (messages) => {
         console.log(`Messaging Engine updated messages`)
         this.props.setEngineMessages(messages)
       });
     }
   }
+  logger = (...args) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(...args);
+    }
+  }
+  // _initEngineNoData = () => {
+  //   // Start the engine:
+  //   const logger = this.logger;
+  //   const privateKey = '1';
+  //   const publicKey = '2';
+  //   const isPlugIn = false;
+  //   const avatarUrl = '';  // TODO
+  //   const discoveryPath = ''; // TODO
+  //   const configuration = {
+  //     neverWebRTC: true
+  //   }
+  //   const engine =
+  //     new MessagingEngine(logger,
+  //                         privateKey,
+  //                         publicKey,
+  //                         isPlugIn,
+  //                         avatarUrl,
+  //                         discoveryPath,
+  //                         configuration);
+
+  //   return engine;
+  // }
   _getUserData = () => {
     const {BlockstackNativeModule} = NativeModules;
     BlockstackNativeModule.getUserData((error, userData) => {
@@ -131,7 +176,7 @@ class EngineWrapper extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    engine: state.engine,
+    engineInit: EngineSelectors.getEngineInit(state),
   }
 }
 

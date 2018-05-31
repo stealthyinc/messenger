@@ -9,7 +9,8 @@ import { SearchBar, Text } from 'react-native-elements'
 import { Button, Container, Header, Content, List, ListItem, Left, Body, Right, Item, Icon, Input, Thumbnail, Title } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import firebase from 'react-native-firebase';
-import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import { EngineSelectors } from '../Redux/EngineRedux'
+import EngineWrapper from '../Engine/EngineWrapper'
 
 const styles = StyleSheet.create({
   container: {
@@ -66,7 +67,7 @@ class ConversationScreen extends React.Component {
     this.updateContacts()
   }
   updateContacts() {
-    const { contactMgr } = this.props.engine
+    const { contactMgr } = this.props
     if (contactMgr) {
       // console.log(`  ${userIds.length} contacts ...`);
       const userIds = contactMgr.getContactIds()
@@ -82,15 +83,14 @@ class ConversationScreen extends React.Component {
     }
   }
   contactSelected = () => {
-    debugger
-    const { contactMgr, engineInstance } = this.props.engine
+    const { contactMgr } = this.props
     if (contactMgr) {
       // An example showing how to set the active contact (results in an me-update-messages event).
       // Setting to a contact that both pbj/ac have convo data with.
       // TODO: PBJ delete me and integrate to your awesome iOS person picker.
       const theNextActiveContactId = (this.fakeUserId = 'alexc.id') ?  'pbj.id' : 'alexc.id';
       const theNextActiveContact = contactMgr.getContact(theNextActiveContactId);
-      engineInstance.handleContactClick(theNextActiveContact);
+      EngineWrapper.Instance.handleContactClick(theNextActiveContact);
     }
     this.props.navigation.navigate('ChatRoom')
   }
@@ -155,7 +155,7 @@ class ConversationScreen extends React.Component {
 
 const mapStateToProps = (state) => {
   return {
-    engine: state.engine
+    contactMgr: EngineSelectors.getContactMgr(state),
   }
 }
 

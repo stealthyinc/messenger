@@ -1299,7 +1299,7 @@ export class MessagingEngine extends EventEmitter {
     this.updateMessages(newMessages);
   }
 
-  handleOutgoingMessage(text) {
+  handleOutgoingMessage = (text) => {
     const outgoingUserId = (this.contactMgr.getActiveContact()) ?
       this.contactMgr.getActiveContact().id : undefined;
     if (this.settings.discovery) {

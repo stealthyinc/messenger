@@ -5,7 +5,6 @@ import Immutable from 'seamless-immutable'
 
 const { Types, Creators } = createActions({
   setEngineFailure: null,
-  setEngineInstance: ['engineInstance'],
   setEngineInitial: ['engineInit'],
   setEngineContactMgr: ['contactMgr'],
   setEngineMessages: ['messages'],
@@ -19,7 +18,6 @@ export default Creators
 export const INITIAL_STATE = Immutable({
   fetching: null,
   error: null,
-  engineInstance: null,
   engineInit: false,
   contactMgr: null,
   messages: null,
@@ -28,7 +26,7 @@ export const INITIAL_STATE = Immutable({
 /* ------------- Selectors ------------- */
 
 export const EngineSelectors = {
-  getEngineInstance: state => state.engine.engineInstance,
+  getEngineInit: state => state.engine.engineInit,
   getContactMgr: state => state.engine.contactMgr,
   getMessages: state => state.engine.messages,
 }
@@ -38,11 +36,6 @@ export const EngineSelectors = {
 // engine failed to start
 export const setEngineFailure = state =>
   state.merge({ fetching: false, error: true, engine: null })
-
-// successful engine start
-export const setEngineInstance = (state, { engineInstance }) => {
-  return state.merge({ engineInstance })
-}
 
 // engine intialized
 export const setEngineInitial = (state, { engineInit }) => {
@@ -63,7 +56,6 @@ export const setEngineMessages = (state, { messages }) => {
 
 export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_ENGINE_FAILURE]: setEngineFailure,
-  [Types.SET_ENGINE_INSTANCE]: setEngineInstance,
   [Types.SET_ENGINE_INITIAL]: setEngineInitial,
   [Types.SET_ENGINE_CONTACT_MGR]: setEngineContactMgr,
   [Types.SET_ENGINE_MESSAGES]: setEngineMessages,
