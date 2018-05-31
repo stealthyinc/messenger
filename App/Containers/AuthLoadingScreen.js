@@ -7,9 +7,10 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-// const { Blockstack } = NativeModules;
+import { connect } from 'react-redux'
+import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
-export default class AuthLoadingScreen extends React.Component {
+class AuthLoadingScreen extends React.Component {
   constructor(props) {
     super(props);
     this._bootstrapAsync();
@@ -17,11 +18,13 @@ export default class AuthLoadingScreen extends React.Component {
 
   // Fetch the token from storage then navigate to our appropriate place
   _bootstrapAsync = async () => {
-    const userToken = await AsyncStorage.getItem('userToken');
+    const userData = await AsyncStorage.getItem('userData');
+    if (userData)
+      this.props.setUserData(JSON.parse(userData))
 
     // This will switch to the App screen or Auth screen and this loading
     // screen will be unmounted and thrown away.
-    this.props.navigation.navigate(userToken ? 'App' : 'Auth');
+    this.props.navigation.navigate(userData ? 'App' : 'Auth');
   };
 
   // Render any loading content that you like here
@@ -42,3 +45,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+
+const mapStateToProps = (state) => {
+  return {
+    userData: EngineSelectors.getUserData(state),
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setUserData: (userData) => dispatch(EngineActions.setUserData(userData)),
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(AuthLoadingScreen)

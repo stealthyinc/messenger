@@ -6,11 +6,11 @@ import DebugConfig from '../Config/DebugConfig'
 /* ------------- Types ------------- */
 
 import { BlockstackContactsTypes } from '../Redux/BlockstackContactsRedux'
-import { EngineTypes } from '../Redux/EngineRedux'
 
 /* ------------- Sagas ------------- */
 
 import { getBlockstackContacts } from './BlockstackContactsSagas'
+import engineSagas from './EngineSagas'
 
 /* ------------- API ------------- */
 
@@ -21,6 +21,7 @@ const api = DebugConfig.useFixtures ? FixtureAPI : API.create()
 /* ------------- Connect Types To Sagas ------------- */
 
 export default function * root () {
+  yield fork(engineSagas)
   yield all([
     takeLatest(BlockstackContactsTypes.BLOCKSTACK_CONTACTS_REQUEST, getBlockstackContacts, api)
   ])

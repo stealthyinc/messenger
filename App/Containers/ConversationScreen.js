@@ -9,8 +9,7 @@ import { SearchBar, Text } from 'react-native-elements'
 import { Button, Container, Header, Content, List, ListItem, Left, Body, Right, Item, Icon, Input, Thumbnail, Title } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import firebase from 'react-native-firebase';
-import { EngineSelectors } from '../Redux/EngineRedux'
-import EngineWrapper from '../Engine/EngineWrapper'
+import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 const styles = StyleSheet.create({
   container: {
@@ -24,18 +23,6 @@ const styles = StyleSheet.create({
   },
 });
 const stock = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
-
-const pictures = [
-  'https://gaia.blockstack.org/hub/12ELFuCsjCx5zxVDyNxttnYe9VLrRbLuMm/0/avatar-0',  // pbj.id
-  'https://gaia.blockstack.org/hub/1GHZbCnbufz53Skb79FwnwuedW4Hhe2VhR/0/avatar-0',  // alexc.id
-  'https://gaia.blockstack.org/hub/1P4So8DUfo9nC8RQvgfRhLzSyqGiAu8FPA//avatar-0',   // stealthy.id
-  'https://gaia.blockstack.org/hub/1Lac25uJk3c6BXLACtN56ARFf1NdqzoaaS//avatar-0',   // relay.stealthy.id
-  'https://gaia.blockstack.org/hub/1J3PUxY5uDShUnHRrMyU6yKtoHEUPhKULs/0/avatar-0',  // muneeb.id
-  'https://gaia.blockstack.org/hub/1BiG7hjHukZFd2sZiJFhs8W93pgaUbVeYp/0/avatar-0',  // xan.id
-  // 'https://react.semantic-ui.com/assets/images/avatar/large/steve.jpg',
-  // 'https://react.semantic-ui.com/assets/images/avatar/large/molly.png',
-  // 'https://react.semantic-ui.com/assets/images/avatar/large/jenny.jpg',
-]
 
 class ConversationScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -63,34 +50,17 @@ class ConversationScreen extends React.Component {
   componentWillMount() {
     this.props.navigation.setParams({ goToChatRoom: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
   }
-  componentDidMount() {
-    this.updateContacts()
+  componentWillReceiveProps(nextProps) {
+    const { contactMgr } = nextProps
+    if (contactMgr && contactMgr.getContactIds)
+      this.setState({listViewData: contactMgr.getAllContacts()})
   }
-  updateContacts() {
+  contactSelected = (id) => {
     const { contactMgr } = this.props
     if (contactMgr) {
-      // console.log(`  ${userIds.length} contacts ...`);
-      const userIds = contactMgr.getContactIds()
-      let i = 0
-      let list = []
-      for (const userId of userIds) {
-        let index = i%(pictures.length-1)
-        let picture = pictures[index]
-        list.push({name: userId, picture})
-        i++
-      }
-      this.setState({listViewData: list, loaded: true})
-    }
-  }
-  contactSelected = () => {
-    const { contactMgr } = this.props
-    if (contactMgr) {
-      // An example showing how to set the active contact (results in an me-update-messages event).
-      // Setting to a contact that both pbj/ac have convo data with.
-      // TODO: PBJ delete me and integrate to your awesome iOS person picker.
-      const theNextActiveContactId = (this.fakeUserId = 'alexc.id') ?  'pbj.id' : 'alexc.id';
+      const theNextActiveContactId = id;
       const theNextActiveContact = contactMgr.getContact(theNextActiveContactId);
-      EngineWrapper.Instance.handleContactClick(theNextActiveContact);
+      this.props.handleContactClick(theNextActiveContact);
     }
     this.props.navigation.navigate('ChatRoom')
   }
@@ -124,13 +94,13 @@ class ConversationScreen extends React.Component {
           <List
             dataSource={this.ds.cloneWithRows(this.state.listViewData)}
             renderRow={item =>
-              <ListItem style={{marginLeft: 5}} avatar onPress={this.contactSelected}>
+              <ListItem style={{marginLeft: 5}} avatar onPress={this.contactSelected.bind(this, item.id)}>
                 <Left>
-                  <Thumbnail source={{ uri: item.picture}} />
+                  <Thumbnail source={{ uri: item.image}} />
                 </Left>
                 <Body>
-                  <Text>{item.name}</Text>
-                  <Text note>Hello World</Text>
+                  <Text>{item.title}</Text>
+                  <Text note>{item.summary}</Text>
                 </Body>
                 <Right>
                   <Text note>12:00</Text>
@@ -161,6 +131,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
   }
 }
 

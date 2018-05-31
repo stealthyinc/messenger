@@ -400,20 +400,20 @@ export class MessagingEngine extends EventEmitter {
       ENCRYPT_MESSAGES = false;
       ENCRYPT_CONTACTS = false;
       ENCRYPT_SETTINGS = false;
-      ENCRYPT_SDP = false;
+      ENCRYPT_SDP = true;
     } else if (this.userId === 'alexc.id') {
       // AC Dev Settings:
       ENABLE_GAIA = false;
       ENCRYPT_MESSAGES = false;
       ENCRYPT_CONTACTS = false;
       ENCRYPT_SETTINGS = false;
-      ENCRYPT_SDP = false;
+      ENCRYPT_SDP = true;
     } else {
       ENABLE_GAIA = false;
       ENCRYPT_MESSAGES = false;
       ENCRYPT_CONTACTS = false;
       ENCRYPT_SETTINGS = false;
-      ENCRYPT_SDP = false;
+      ENCRYPT_SDP = true;
     }
   }
 
@@ -592,12 +592,12 @@ export class MessagingEngine extends EventEmitter {
       this.updateMessages(newMessages);
       this.updateContactMgr();
 
-      this.emit('me-initialized');
+      this.emit('me-initialized', true);
     })
     .catch((err) => {
       this.offlineMsgSvc.startRecvService();
       this.logger('INFO: No contact bundles to load.');
-      this.emit('me-initialized');
+      this.emit('me-initialized', true);
     });
   }
 
@@ -1735,7 +1735,8 @@ export class MessagingEngine extends EventEmitter {
 
     // TODO: predicate this by checking if unread is already zero ...
     this.contactMgr.setActiveContact(contact);
-    this.contactMgr.clearUnread(selectedUserId);
+    // ACTODO: this method makes shit break...............
+    // this.contactMgr.clearUnread(selectedUserId);
 
     const seenMessages = this.markReceivedMessagesSeen(selectedUserId);
     this.sendMessageReceipts(seenMessages);

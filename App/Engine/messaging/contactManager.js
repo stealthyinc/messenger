@@ -137,7 +137,7 @@ class ContactManager {
     return this.contactArr;
   }
 
-  getAllContacts() {
+  getAllContacts = () => {
     return this.contactArr;
   }
 
@@ -178,7 +178,7 @@ class ContactManager {
     return this.activeContact;
   }
 
-  setActiveContact(aContact) {
+  setActiveContact = (aContact) => {
     this.activeContact = aContact;
   }
 
@@ -331,7 +331,7 @@ class ContactManager {
     this._setterWithChecks(aContactId, 'unread', anUnreadCount);
   }
 
-  clearUnread(aContactId) {
+  clearUnread = (aContactId) => {
     this._setterWithChecks(aContactId, 'unread', 0);
     // document.title = "Stealthy | Decentralized Communication"
   }

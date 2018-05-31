@@ -9,7 +9,85 @@
 *  - This template uses the api declared in sagas/index.js, so
 *    you'll need to define a constant in that file.
 *************************************************************/
+import { eventChannel } from 'redux-saga'
+import { apply, call, fork, put, select, take, takeLatest } from 'redux-saga/effects'
+import EngineActions, { EngineSelectors, EngineTypes } from '../Redux/EngineRedux'
+const { MessagingEngine } = require('../Engine/engine.js')
 
-import { apply, call, put, select } from 'redux-saga/effects'
-import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
-const { MessagingEngine } = require('../Engine/engine.js');
+const logger = (...args) => { 
+  if (process.env.NODE_ENV === 'development') {
+    console.log(...args)
+  }
+}
+
+const createEngine = (userData) => {
+  return new MessagingEngine(
+                              logger,
+                              userData['privateKey'],
+                              userData['publicKey'],
+                              false,
+                              userData['profileURL'],
+                              '',
+                              {
+                                neverWebRTC: true
+                              })
+}
+
+function* watchInitialzedEventChannel(Instance) {
+  const channel = eventChannel(emitter => {
+    Instance.on('me-initialized', (engineInit) => emitter(engineInit))
+    return () => {
+      console.log(`Messaging Engine initialized`)
+    }
+  })
+  const engineInit = yield take(channel)
+  yield put(EngineActions.setEngineInitial(engineInit))
+}
+
+function* watchContactMgrEventChannel(Instance) {
+  const channel = eventChannel(emitter => {
+    Instance.on('me-update-contactmgr', (contactMgr) => emitter(contactMgr))
+    return () => {
+      console.log(`Messaging Engine updated contact manager:`)
+    }
+  })
+  const contactMgr = yield take(channel)
+  yield put(EngineActions.setEngineContactMgr(contactMgr))
+}
+
+function* watchMessagesEventChannel(Instance) {
+  const channel = eventChannel(emitter => {
+    Instance.on('me-update-messages', (messages) => emitter(messages))
+    return () => {
+      console.log(`Messaging Engine updated messages`)
+    }
+  })
+  const messages = yield take(channel)
+  yield put(EngineActions.setEngineMessages(messages))
+}
+
+function* handleContactClick(Instance) {
+  const contact = yield select(EngineSelectors.getActiveContact)
+  Instance.handleContactClick(contact)
+}
+
+function* handleOutgoingMessage(Instance) {
+  const message = yield select(EngineSelectors.getOutgoingMessage)
+  Instance.handleOutgoingMessage(message)
+}
+
+export function* startEngine () {
+  const userData = yield select(EngineSelectors.getUserData)
+  const Instance = yield call (createEngine, userData)
+  const engineInit = yield select(EngineSelectors.getEngineInit)
+  Instance.componentDidMountWork(engineInit, userData["username"])
+  yield fork(watchInitialzedEventChannel, Instance)
+  yield fork(watchContactMgrEventChannel, Instance)
+  yield fork(watchMessagesEventChannel, Instance) 
+  yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick, Instance)
+  yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage, Instance)
+}
+
+export default function* engineSagas() {
+  yield takeLatest(EngineTypes.SET_USER_DATA, startEngine)
+}

@@ -3,7 +3,6 @@ import { View, StatusBar } from 'react-native'
 import ReduxNavigation from '../Navigation/ReduxNavigation'
 import { connect } from 'react-redux'
 import ReduxPersist from '../Config/ReduxPersist'
-import EngineWrapper from '../Engine/EngineWrapper'
 
 // Styles
 import styles from './Styles/RootContainerStyles'
@@ -19,7 +18,6 @@ class RootContainer extends Component {
     return (
       <View style={styles.applicationView}>
         <StatusBar barStyle='light-content' />
-        <EngineWrapper />
         <ReduxNavigation />
       </View>
     )

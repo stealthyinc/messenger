@@ -9,8 +9,7 @@ import {GiftedChat, Actions, Bubble, SystemMessage} from 'react-native-gifted-ch
 import CustomActions from './chat/CustomActions';
 import CustomView from './chat/CustomView';
 import firebase from 'react-native-firebase';
-import { EngineSelectors } from '../Redux/EngineRedux'
-import EngineWrapper from '../Engine/EngineWrapper'
+import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 class ChatScreen extends Component {
 
@@ -28,9 +27,6 @@ class ChatScreen extends Component {
 
   constructor(props) {
     super(props);
-    console.log('');
-    console.log('CREATING ChatScreen instance!');
-    console.log('-------------------------------------------------------------');
     this.state = {
       messages: [],
       loadEarlier: true,
@@ -161,7 +157,7 @@ class ChatScreen extends Component {
     // TODO: PBJ delete me and integrate with the messages editor / editbox
     // const currDate = new Date();
     // const aMessage = `I was sent automatically after me-initialized [${currDate.getHours()}:${currDate.getMinutes()}:${currDate.getSeconds()}].`;
-    EngineWrapper.Instance.handleOutgoingMessage(messages[0].text);
+    this.props.handleOutgoingMessage(messages[0].text);
     this.setState((previousState) => {
       return {
         messages: GiftedChat.append(previousState.messages, messages),
@@ -169,7 +165,7 @@ class ChatScreen extends Component {
     });
 
     // for demo purpose
-    this.answerDemo(messages);
+    // this.answerDemo(messages);
   }
 
   answerDemo(messages) {
@@ -298,7 +294,6 @@ class ChatScreen extends Component {
   }
 
   render() {
-    console.log("Messages", this.state.messages)
     return (
       <GiftedChat
         style={{backgroundColor: 'white'}}
@@ -330,6 +325,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    handleOutgoingMessage: (message) => dispatch(EngineActions.setOutgoingMessage(message)),
   }
 }
 

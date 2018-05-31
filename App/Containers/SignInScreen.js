@@ -11,6 +11,9 @@ import {
   NativeModules
 } from 'react-native';
 import { Icon, Button, Overlay, SocialIcon } from 'react-native-elements'
+import { connect } from 'react-redux'
+import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+const { MessagingEngine } = require('../Engine/engine.js');
 
 // import FAQ from '../Components/FAQ'
 
@@ -20,7 +23,7 @@ import chatV1 from '../Images/StealthyV1.png';
 import flow from '../Images/rStealthyFlow.jpg';
 import graphitePlugin from '../Images/plugin.jpg';
 
-export default class SignInScreen extends React.Component {
+class SignInScreen extends React.Component {
 
   static navigationOptions = {
     header: null,
@@ -125,44 +128,32 @@ export default class SignInScreen extends React.Component {
       </ScrollView>
     );
   }
-  _getUserData = (completion) => {
+  _getUserData = async (completion) => {
     const {BlockstackNativeModule} = NativeModules;
     BlockstackNativeModule.getUserData((error, userData) => {
       if (error) {
         throw(`Failed to get user data.  ${error}`);
       } else {
-        console.log(`SUCCESS (getUserData):\n`);
-        for (const key in userData) {
-          console.log(`\t${key}: ${userData[key]}`)
-        }
+        // console.log(`SUCCESS (getUserData):\n`);
+        // for (const key in userData) {
+        //   console.log(`\t${key}: ${userData[key]}`)
+        // }
         // Get public key:
         BlockstackNativeModule.getPublicKeyFromPrivate(
-          userData['privateKey'], (error, publicKey) => {
+          userData['privateKey'], async (error, publicKey) => {
             if (error) {
               throw(`Failed to get public key from private. ${error}`);
-            } else {
-              console.log(`SUCCESS (loadUserDataObject): publicKey = ${publicKey}\n`);
+            } 
+            else {
+              // console.log(`SUCCESS (loadUserDataObject): publicKey = ${publicKey}\n`);
               userData['appPublicKey'] = publicKey;
               this.userData = userData;
-              completion();
-
-              // Start the engine:
-              // const logger = undefined;
-              // const privateKey = userData['privateKey'];
-              // const isPlugIn = false;
-              // const avatarUrl = '';  // TODO
-              // const discoveryPath = ''; // TODO
-              // this.engine =
-              //   new MessagingEngine(logger,
-              //                       privateKey,
-              //                       publicKey,
-              //                       isPlugIn,
-              //                       this.props.avatarUrl,
-              //                       this.props.path);
-
+              await AsyncStorage.setItem('userData', JSON.stringify(this.userData));
+              this.props.setUserData(this.userData)
+              this.props.navigation.navigate('App');
               // Test encryption
-              // let testString = "Concensus";
-              // BlockstackNativeModule.encryptPrivateKey(publicKey, testString, (error, cipherObjectJSONString) => {
+              // let testString1 = "Concensus";
+              // BlockstackNativeModule.encryptPrivateKey(publicKey, testString1, (error, cipherObjectJSONString) => {
               //   if (error) {
               //     throw(`Failed to encrpyt ${error}.`);
               //   } else {
@@ -178,8 +169,8 @@ export default class SignInScreen extends React.Component {
               // });
 
               // Test encryptContent / decryptContent
-              // let testString = "Content works?";
-              // BlockstackNativeModule.encryptContent(testString, (error, cipherObjectJSONString) => {
+              // let testString2 = "Content works?";
+              // BlockstackNativeModule.encryptContent(testString2, (error, cipherObjectJSONString) => {
               //   if (error) {
               //     throw(`Failed to encrpyt with encryptContent: ${error}.`);
               //   } else {
@@ -203,7 +194,7 @@ export default class SignInScreen extends React.Component {
               //   console.log('');
               // });
 
-              // Test write/read cycle:
+              // // Test write/read cycle:
               // BlockstackNativeModule.putFile('testWrite.txt',
               //                                'Will this work?',
               //                                (error, content) => {
@@ -213,7 +204,7 @@ export default class SignInScreen extends React.Component {
               //   console.log(`error: ${error}`);
               //   console.log(`content: ${content}`);
               //   console.log('');
-              //
+              
               //   BlockstackNativeModule.getFile('testWrite.txt', (error, content) => {
               //     console.log('read testWrite.txt');
               //     console.log('After getFile:');
@@ -223,32 +214,20 @@ export default class SignInScreen extends React.Component {
               //     console.log('');
               //   });
               // });
+              completion();
             }
         });
-        // return userData;
       }
     });
+    return;
   };
   _signInAsync = async () => {
     const {BlockstackNativeModule} = NativeModules;
     await BlockstackNativeModule.signIn("https://www.stealthy.im/redirect.html", "https://www.stealthy.im", null, (error, events) => {
       if (!error) {
-        // this.getUserData(() => {
-          this.props.navigation.navigate('App');
-        // });
+        this._getUserData()
       }
     });
-
-    // await AsyncStorage.setItem('userToken', 'abc');
-    // this.props.navigation.navigate('App');
-
-    // const {BlockstackNativeModule} = NativeModules;
-    // await BlockstackNativeModule.signIn("https://www.stealthy.im/redirect.html", "https://www.stealthy.im", null, (error, events) => {
-    //   if (!error) {
-    //     this.props.navigation.navigate('App');
-        // let userData = this._getUserData();
-    //   }
-    // });
   };
 }
 
@@ -260,3 +239,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setUserData: (userData) => dispatch(EngineActions.setUserData(userData)),
+  }
+}
+
+export default connect(null, mapDispatchToProps)(SignInScreen)

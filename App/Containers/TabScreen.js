@@ -4,7 +4,6 @@ import { AsyncStorage, Image, View } from 'react-native';
 import { Text, Card, Button } from 'react-native-elements'
 import { TabNavigator, TabBarBottom } from 'react-navigation';
 import ConversationScreen from './ConversationScreen'
-import ContactScreen from './ContactScreen'
 import ProfileScreen from './ProfileScreen'
 import WalletScreen from './WalletScreen'
 
