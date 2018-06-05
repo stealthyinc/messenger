@@ -233,8 +233,8 @@ class ConversationManager {
         } else {
           this.conversations[contactId].sort(Bundle.compareBundles);
         }
-        return;
       }
+      return;
     });
   }
 
