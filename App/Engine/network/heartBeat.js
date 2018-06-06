@@ -237,10 +237,12 @@ class HeartBeat extends EventEmitter {
           // or a user has deleted another user.
         }
       }
+
       this.emit('monitor', this.heartBeats);
     })
     .catch((err) => {
       this.logger(`ERROR (Heartbeat Monitor): ${err}`);
+      this.logger(`   WARNING: this error may be in code listening to emitted event 'monitor'`)
     });
   }
 

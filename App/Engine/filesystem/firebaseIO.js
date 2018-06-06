@@ -1,4 +1,5 @@
 const BaseIO = require('./baseIO.js');
+const utils = require('./../misc/utils.js')
 
 const ROOT = '/global/gaia';
 const APP_NAME = 'stealthy.im';
@@ -21,8 +22,13 @@ module.exports = class FirebaseIO extends BaseIO {
   // Public:
   //
   writeLocalFile(localUser, fileName, data) {
+    // Clone the data we're writing b/c Firebase seems to make it sealed/immutable
+    // which breaks the engine on iOS/ReactNative. The coniditional assignment is
+    // for those special moments where for some reason we write an undefined value.
+    const dcData = (data) ? utils.deepCopyObj(data) : data;
+
     const filePath = `${this._getLocalApplicationPath(localUser)}/${fileName}`;
-    return this._write(filePath, data);
+    return this._write(filePath, dcData);
   }
 
   readLocalFile(localUser, fileName) {
