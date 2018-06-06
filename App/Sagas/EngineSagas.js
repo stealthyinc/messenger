@@ -17,6 +17,8 @@ import {
 } from 'react-native';
 const { MessagingEngine } = require('../Engine/engine.js')
 
+let EngineInstance = undefined;
+
 const logger = (...args) => { 
   if (process.env.NODE_ENV === 'development') {
     console.log(...args)
@@ -36,9 +38,9 @@ const createEngine = (userData) => {
                               })
 }
 
-function* watchInitialzedEventChannel(Instance) {
+function* watchInitialzedEventChannel() {
   const channel = eventChannel(emitter => {
-    Instance.on('me-initialized', (engineInit) => emitter(engineInit))
+    EngineInstance.on('me-initialized', (engineInit) => emitter(engineInit))
     return () => {
       console.log(`Messaging Engine initialized`)
     }
@@ -47,9 +49,9 @@ function* watchInitialzedEventChannel(Instance) {
   yield put(EngineActions.setEngineInitial(engineInit))
 }
 
-function* watchContactMgrEventChannel(Instance) {
+function* watchContactMgrEventChannel() {
   const channel = eventChannel(emitter => {
-    Instance.on('me-update-contactmgr', (contactMgr) => emitter(contactMgr))
+    EngineInstance.on('me-update-contactmgr', (contactMgr) => emitter(contactMgr))
     return () => {
       console.log(`Messaging Engine updated contact manager:`)
     }
@@ -60,9 +62,9 @@ function* watchContactMgrEventChannel(Instance) {
   }
 }
 
-function* watchMessagesEventChannel(Instance) {
+function* watchMessagesEventChannel() {
   const channel = eventChannel(emitter => {
-    Instance.on('me-update-messages', (messages) => emitter(messages))
+    EngineInstance.on('me-update-messages', (messages) => emitter(messages))
     return () => {
       console.log(`Messaging Engine updated messages`)
     }
@@ -73,29 +75,27 @@ function* watchMessagesEventChannel(Instance) {
   }
 }
 
-function* handleContactClick(Instance) {
+function* handleContactClick() {
   const contact = yield select(EngineSelectors.getActiveContact)
-  Instance.handleContactClick(contact)
+  EngineInstance.handleContactClick(contact)
 }
 
-function* handleOutgoingMessage(Instance) {
+function* handleOutgoingMessage() {
   const message = yield select(EngineSelectors.getOutgoingMessage)
-  Instance.handleOutgoingMessage(message)
+  EngineInstance.handleOutgoingMessage(message)
 }
 
 export function* startEngine () {
   const userData = yield select(EngineSelectors.getUserData)
-  const Instance = yield call (createEngine, userData)
+  EngineInstance = yield call (createEngine, userData)
   const engineInit = yield select(EngineSelectors.getEngineInit)
-  Instance.componentDidMountWork(engineInit, userData["username"])
-  yield fork(watchInitialzedEventChannel, Instance)
-  yield fork(watchContactMgrEventChannel, Instance)
-  yield fork(watchMessagesEventChannel, Instance) 
-  yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick, Instance)
-  yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage, Instance)
+  EngineInstance.componentDidMountWork(engineInit, userData["username"])
+  yield fork(watchInitialzedEventChannel)
+  yield fork(watchContactMgrEventChannel)
+  yield fork(watchMessagesEventChannel) 
+  yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
+  yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)
 }
-
-
 
 export function * getUserProfile (api) {
   const userData = yield select(EngineSelectors.getUserData)

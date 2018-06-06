@@ -14,7 +14,7 @@ target 'stealthy' do
 
   #pod 'Firebase'
   #pod 'Firebase' # To enable Firebase module, with `@import Firebase` support
-  pod 'Firebase/Core', '~> 4.13.0'
+  pod 'Firebase/Core'
   pod 'Firebase/Auth'
   pod 'Firebase/Database'
   #pod 'FirebaseAnalytics'
