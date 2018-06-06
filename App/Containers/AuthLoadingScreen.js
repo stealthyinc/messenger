@@ -19,11 +19,13 @@ class AuthLoadingScreen extends React.Component {
   // Fetch the token from storage then navigate to our appropriate place
   _bootstrapAsync = async () => {
     const userData = await AsyncStorage.getItem('userData');
-    if (userData)
+    if (userData) {
       this.props.setUserData(JSON.parse(userData))
+    }
     const userProfile = await AsyncStorage.getItem('userProfile');
-    if (userProfile)
+    if (userProfile) {
       this.props.setUserProfile(JSON.parse(userProfile))
+    }
 
     // This will switch to the App screen or Auth screen and this loading
     // screen will be unmounted and thrown away.
@@ -51,7 +53,6 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
   return {
-    userData: EngineSelectors.getUserData(state),
   }
 }
 
