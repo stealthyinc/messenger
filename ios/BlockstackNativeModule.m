@@ -47,7 +47,7 @@ RCT_EXPORT_METHOD(getUserData:(RCTResponseSenderBlock)completion) {
   } else {
     udoDict =  @{ @"username" : udo.username,
                   @"privateKey" : udo.privateKey,
-                  @"profileURL" : udo.profileURL };
+                  @"profileURL" : udo.profileURL};
   }
   
   completion(@[error ? error.localizedDescription : [NSNull null],

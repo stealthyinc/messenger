@@ -36,6 +36,8 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   //
   const getBlockstackContacts = (username) => api.get(`/v1/search?query=${username}`)
 
+  const getUserProfile = (username) => api.get(`/v1/users/${username}`)
+
   // ------
   // STEP 3
   // ------
@@ -50,7 +52,8 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   //
   return {
     // a list of the API functions from step 2
-    getBlockstackContacts
+    getBlockstackContacts,
+    getUserProfile
   }
 }
 

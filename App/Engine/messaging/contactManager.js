@@ -174,7 +174,7 @@ class ContactManager {
 // Single contact operations:
 // //////////////////////////////////////////////////////////////////////////////
 //
-  getActiveContact() {
+  getActiveContact = () => {
     return this.activeContact;
   }
 

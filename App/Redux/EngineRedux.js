@@ -11,6 +11,7 @@ const { Types, Creators } = createActions({
   setEngineMessages: ['messages'],
   setActiveContact: ['activeContact'],
   setOutgoingMessage: ['outgoingMessage'],
+  setUserProfile: ['userProfile'],
 })
 
 export const EngineTypes = Types
@@ -22,6 +23,7 @@ export const INITIAL_STATE = Immutable({
   fetching: null,
   error: null,
   userData: null,
+  userProfile: null,
   engineInit: false,
   contactMgr: null,
   messages: null,
@@ -32,6 +34,7 @@ export const INITIAL_STATE = Immutable({
 /* ------------- Selectors ------------- */
 
 export const EngineSelectors = {
+  getUserProfile: state => state.engine.userProfile,
   getUserData: state => state.engine.userData,
   getActiveContact: state => state.engine.activeContact,
   getEngineInit: state => state.engine.engineInit,
@@ -49,6 +52,10 @@ export const setEngineFailure = state =>
 // engine intialized
 export const setUserData = (state, { userData }) => {
   return state.merge({ userData })
+}
+
+export const setUserProfile = (state, { userProfile }) => {
+  return state.merge({ userProfile })
 }
 
 // engine intialized
@@ -80,6 +87,7 @@ export const setOutgoingMessage = (state, { outgoingMessage }) => {
 
 export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_USER_DATA]: setUserData,
+  [Types.SET_USER_PROFILE]: setUserProfile,
   [Types.SET_OUTGOING_MESSAGE]: setOutgoingMessage,
   [Types.SET_ACTIVE_CONTACT]: setActiveContact,
   [Types.SET_ENGINE_FAILURE]: setEngineFailure,

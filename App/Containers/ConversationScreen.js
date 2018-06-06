@@ -22,7 +22,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#8E8E8E',
   },
 });
-const stock = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
 
 class ConversationScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
