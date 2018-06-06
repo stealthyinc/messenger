@@ -174,6 +174,21 @@ export class MessagingEngine extends EventEmitter {
     }
   }
 
+  _sealFreezeTest(anObj, anObjName, aCallingMethodName) {
+    if (Object.isSealed(anObj)) {
+      throw(`ERROR: engine.js::${aCallingMethodName} - The ${anObjName} is sealed.`);
+    }
+    if (Object.isFrozen(anObj)) {
+      throw(`ERROR: engine.js::${aCallingMethodName} - The ${anObjName} is frozen.`);
+    }
+  }
+
+  sealFreezeTest(aCallingMethodName) {
+    this._sealFreezeTest(this.contactMgr, 'this.contactMgr', aCallingMethodName);
+    this._sealFreezeTest(this.contactMgr.contactArr, 'this.contactMgr.contactArr', aCallingMethodName);
+    this._sealFreezeTest(this.contactMgr.getAllContacts(), 'this.contactMgr.getAllContacts()', aCallingMethodName);
+  }
+
   //
   //  API Events
   // ////////////////////////////////////////////////////////////////////////////
