@@ -32,7 +32,7 @@ class ChatScreen extends Component {
       loadEarlier: true,
       typingText: null,
       isLoadingEarlier: false,
-      setup: false
+      activeContact: null,
     };
 
     this._isMounted = false;
@@ -49,21 +49,16 @@ class ChatScreen extends Component {
 
   componentWillMount() {
     this._isMounted = true;
-    this.props.navigation.setParams({ navigation: this.props.navigation, name: 'Daniel' });
-    // this.setState(() => {
-    //   return {
-    //     messages: require('./data/messages.js'),
-    //   };
-    // });
-
-    // let { engine } = this.props.screenProps
+    const { contactMgr } = this.props
+    let activeContact
+    if (contactMgr) {
+      activeContact = contactMgr.getActiveContact();
+    }
+    this.state.activeContact = activeContact
+    this.props.navigation.setParams({ navigation: this.props.navigation, name: activeContact.description ? activeContact.description : activeContact.id });
     const { messages } = this.props;
     if (messages) {
-      let configuredMessages = this.setupMessages(messages);
-      if (configuredMessages && !this.state.setup) {
-        this.state.messages = configuredMessages;
-        this.state.setup = true;
-      }
+      this.state.messages = this.setupMessages(messages).reverse();
     }
   }
 
@@ -72,39 +67,36 @@ class ChatScreen extends Component {
   }
 
   setupMessages = (inputMessages) => {
-    if (!this.state.setup) {
-      let messages = []
-      for (const message of inputMessages) {
-        if (message.author === 'alexc.id') {
-          messages.push({
-            _id: Math.round(Math.random() * 1000000),
-            text: message.body,
-            createdAt: new Date(message.time),
-            sent: true,
-            received: message.seen,
-            user: {
-              _id: 1,
-              name: 'AC',
-            },
-          })
-        }
-        else {
-          messages.push({
-            _id: Math.round(Math.random() * 1000000),
-            text: message.body,
-            createdAt: new Date(message.time),
-            received: message.seen,
-            user: {
-              _id: 2,
-              name: 'PB',
-            },
-          })
-        }
+    let messages = []
+    for (const message of inputMessages) {
+      const { description, id } = this.state.activeContact
+      if (message.author === id) {
+        messages.push({
+          _id: Math.round(Math.random() * 1000000),
+          text: message.body,
+          createdAt: new Date(message.time),
+          sent: true,
+          received: message.seen,
+          user: {
+            _id: 2,
+            name: 'AC',
+          },
+        })
       }
-      // this.setState({messages, setup: true})
-      return messages;
+      else {
+        messages.push({
+          _id: Math.round(Math.random() * 1000000),
+          text: message.body,
+          createdAt: new Date(message.time),
+          received: message.seen,
+          user: {
+            _id: 1,
+            name: 'PB',
+          },
+        })
+      }
     }
-    return undefined;
+    return messages;
   }
 
   onLoadEarlier() {
@@ -320,6 +312,7 @@ class ChatScreen extends Component {
 const mapStateToProps = (state) => {
   return {
     messages: EngineSelectors.getMessages(state),
+    contactMgr: EngineSelectors.getContactMgr(state),
   }
 }
 

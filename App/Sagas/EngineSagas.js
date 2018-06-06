@@ -51,8 +51,10 @@ function* watchContactMgrEventChannel(Instance) {
       console.log(`Messaging Engine updated contact manager:`)
     }
   })
-  const contactMgr = yield take(channel)
-  yield put(EngineActions.setEngineContactMgr(contactMgr))
+  while (true) {
+    const contactMgr = yield take(channel)
+    yield put(EngineActions.setEngineContactMgr(contactMgr)) 
+  }
 }
 
 function* watchMessagesEventChannel(Instance) {
@@ -62,8 +64,10 @@ function* watchMessagesEventChannel(Instance) {
       console.log(`Messaging Engine updated messages`)
     }
   })
-  const messages = yield take(channel)
-  yield put(EngineActions.setEngineMessages(messages))
+  while (true) {
+    const messages = yield take(channel)
+    yield put(EngineActions.setEngineMessages(messages))
+  }
 }
 
 function* handleContactClick(Instance) {
@@ -88,6 +92,20 @@ export function* startEngine () {
   yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage, Instance)
 }
 
-export default function* engineSagas() {
+
+
+export function * getUserProfile (api) {
+  const userData = yield select(EngineSelectors.getUserData)
+  const { username } = userData
+  const response = yield call(api.getUserProfile, username)
+  if (response.ok) {
+    yield put(EngineActions.setUserProfile(response.data[username]))
+  } else {
+    yield put(EngineActions.setUserProfile(null))
+  }
+}
+
+export default function* engineSagas(api) {
   yield takeLatest(EngineTypes.SET_USER_DATA, startEngine)
+  yield takeLatest(EngineTypes.SET_USER_DATA, getUserProfile, api)
 }
