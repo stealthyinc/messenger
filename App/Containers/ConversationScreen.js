@@ -50,9 +50,12 @@ class ConversationScreen extends React.Component {
     this.props.navigation.setParams({ goToChatRoom: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
   }
   componentWillReceiveProps(nextProps) {
-    const { contactMgr } = nextProps
-    if (contactMgr && contactMgr.getContactIds)
-      this.setState({listViewData: contactMgr.getAllContacts()})
+    const { contactMgr, engineInit } = nextProps
+    if (engineInit && contactMgr && contactMgr.getContactIds) {
+      const listViewData = contactMgr.getAllContacts()
+      console.log('contacts found', listViewData)
+      this.setState({listViewData})
+    }
   }
   contactSelected = (id) => {
     const { contactMgr } = this.props
@@ -125,6 +128,7 @@ class ConversationScreen extends React.Component {
 const mapStateToProps = (state) => {
   return {
     contactMgr: EngineSelectors.getContactMgr(state),
+    engineInit: EngineSelectors.getEngineInit(state),
   }
 }
 

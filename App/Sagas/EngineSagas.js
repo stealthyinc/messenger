@@ -12,6 +12,9 @@
 import { eventChannel } from 'redux-saga'
 import { apply, call, fork, put, select, take, takeLatest } from 'redux-saga/effects'
 import EngineActions, { EngineSelectors, EngineTypes } from '../Redux/EngineRedux'
+import {
+  AsyncStorage,
+} from 'react-native';
 const { MessagingEngine } = require('../Engine/engine.js')
 
 const logger = (...args) => { 
@@ -99,7 +102,9 @@ export function * getUserProfile (api) {
   const { username } = userData
   const response = yield call(api.getUserProfile, username)
   if (response.ok) {
-    yield put(EngineActions.setUserProfile(response.data[username]))
+    const userProfile = response.data[username]
+    yield put(EngineActions.setUserProfile(userProfile))
+    AsyncStorage.setItem('userProfile', JSON.stringify(userProfile))
   } else {
     yield put(EngineActions.setUserProfile(null))
   }

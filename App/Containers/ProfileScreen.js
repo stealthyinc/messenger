@@ -28,7 +28,7 @@ class ProfileScreen extends React.Component {
     const { userProfile, userData } = this.props
     if (!userProfile) {
       return (
-        <View style={styles.container}>
+        <View style={styles.containerEmpty}>
           <ActivityIndicator />
           <StatusBar barStyle="default" />
         </View>
@@ -76,6 +76,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     alignItems: 'center',
   },
+  containerEmpty: {
+    flex: 1,
+    paddingTop: 100,
+    backgroundColor: 'white',
+    alignItems: 'center',
+  }
 });
 
 const mapStateToProps = (state) => {
