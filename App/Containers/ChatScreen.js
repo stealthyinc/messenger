@@ -268,24 +268,27 @@ class ChatScreen extends Component {
 
   render() {
     return (
-      <GiftedChat
-        style={{backgroundColor: 'white'}}
-        messages={this.state.messages}
-        onSend={this.onSend}
-        loadEarlier={this.state.loadEarlier}
-        onLoadEarlier={this.onLoadEarlier}
-        isLoadingEarlier={this.state.isLoadingEarlier}
+      <View id='GiftedChatContainer'
+           style={{flex: 1,
+                   backgroundColor: 'white'}}>
+        <GiftedChat
+          messages={this.state.messages}
+          onSend={this.onSend}
+          loadEarlier={this.state.loadEarlier}
+          onLoadEarlier={this.onLoadEarlier}
+          isLoadingEarlier={this.state.isLoadingEarlier}
 
-        user={{
-          _id: this.state.author.username, // sent messages should have same user._id
-        }}
+          user={{
+            _id: this.state.author.username, // sent messages should have same user._id
+          }}
 
-        renderActions={this.renderCustomActions}
-        renderBubble={this.renderBubble}
-        renderSystemMessage={this.renderSystemMessage}
-        renderCustomView={this.renderCustomView}
-        renderFooter={this.renderFooter}
-      />
+          renderActions={this.renderCustomActions}
+          renderBubble={this.renderBubble}
+          renderSystemMessage={this.renderSystemMessage}
+          renderCustomView={this.renderCustomView}
+          renderFooter={this.renderFooter}
+        />
+      </View>
     );
   }
 }
