@@ -33,6 +33,7 @@ class ChatScreen extends Component {
       typingText: null,
       isLoadingEarlier: false,
       activeContact: null,
+      token: '',
     };
 
     this._isMounted = false;
@@ -66,6 +67,17 @@ class ChatScreen extends Component {
     if (contactMgr) {
       activeContact = contactMgr.getActiveContact();
     }
+    const { publicKey } = activeContact
+    let path = `/global/notifications/development/${publicKey}/`
+    if (process.env.NODE_ENV === 'production') {
+      path = `/global/notifications/${publicKey}/`
+    }
+    firebase.database().ref(`${path}/token`).once('value')
+    .then((snapshot) => {
+      if (snapshot.val()) {
+        this.state.token = snapshot.val()
+      }
+    });
     this.state.activeContact = activeContact
     let displayname = activeContact.id
     if (activeContact.title)
@@ -161,9 +173,10 @@ class ChatScreen extends Component {
   }
 
   onSend(messages = []) {
-    const { activeContact } = this.state
-    const { id, publicKey } = activeContact
-    this.props.sendNotification(publicKey)
+    const { token } = this.state
+    if (token) {
+      this.props.sendNotification(token)
+    }
     this.props.handleOutgoingMessage(messages[0].text);
     this.setState((previousState) => {
       return {

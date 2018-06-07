@@ -58,7 +58,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
 }
 
 // our "constructor"
-const notification = (baseURL = 'https://fcm.googleapis.com/fcm/send', token) => {
+const notification = (baseURL, token) => {
 
 
   // curl --header "Content-Type: application/json" \

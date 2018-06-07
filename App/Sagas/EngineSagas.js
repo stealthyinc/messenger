@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 const { MessagingEngine } = require('../Engine/engine.js')
 import API from '../Services/Api'
+import DebugConfig from '../Config/DebugConfig'
 import firebase from 'react-native-firebase';
 
 let EngineInstance = undefined;
@@ -111,21 +112,9 @@ function* sendNotificationWorker() {
   // - check fb under /global/notifications/senderPK
   // - decrypt data and look up receiver's user device token
   // - send a request to fb server to notify the person of a new message
-  const recepientPublicKey = yield select(EngineSelectors.getRecepientPublicKey)
-  let path = `/global/notifications/development/${recepientPublicKey}/`
-  if (process.env.NODE_ENV === 'production') {
-    path = `/global/notifications/${recepientPublicKey}/`
-  }
-  console.log('path', path)
-  firebase.database().ref(`${path}/token`).once('value')
-  .then((snapshot) => {
-    if (snapshot.val()) {
-      const token = snapshot.val()
-      console.log("sender pk", token)
-      const api = DebugConfig.useFixtures ? FixtureAPI : API.notification('', token)
-      api.send
-    }
-  });
+  const token = yield select(EngineSelectors.getRecepientToken)
+  const api = DebugConfig.useFixtures ? FixtureAPI : API.notification('https://fcm.googleapis.com/fcm/send', token)
+  yield call (api.send)
 }
 
 export function* startEngine () {

@@ -15,7 +15,7 @@ const { Types, Creators } = createActions({
   addNewContact: ['newContact'],
   setContactAdded: ['contactAdded'],
   setToken: ['token'],
-  sendNotification: ['recepientPublicKey'],
+  sendNotification: ['recepientToken'],
 })
 
 export const EngineTypes = Types
@@ -36,7 +36,7 @@ export const INITIAL_STATE = Immutable({
   newContact: null,
   contactAdded: false,
   token: '',
-  recepientPublicKey: '',
+  recepientToken: '',
 })
 
 /* ------------- Selectors ------------- */
@@ -52,7 +52,7 @@ export const EngineSelectors = {
   getNewContact: state => state.engine.newContact,
   getContactAdded: state => state.engine.contactAdded,
   getToken: state => state.engine.token,
-  getRecepientPublicKey: state => state.engine.recepientPublicKey,
+  getRecepientToken: state => state.engine.recepientToken,
 }
 
 /* ------------- Reducers ------------- */
@@ -111,8 +111,8 @@ export const setToken = (state, { token }) => {
 }
 
 // send notification
-export const sendNotification = (state, { recepientPublicKey }) => {
-  return state.merge({ recepientPublicKey })
+export const sendNotification = (state, { recepientToken }) => {
+  return state.merge({ recepientToken })
 }
 
 /* ------------- Hookup Reducers To Types ------------- */
