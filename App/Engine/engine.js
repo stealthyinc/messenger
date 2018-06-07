@@ -784,7 +784,7 @@ export class MessagingEngine extends EventEmitter {
     } else {
       this.handleContactAdd(contact, selectedUserId);
     }
-    this.emit('me-search-select-done');
+    this.emit('me-search-select-done', true);
   }
 
   handleContactAdd(contact, id, status = undefined) {

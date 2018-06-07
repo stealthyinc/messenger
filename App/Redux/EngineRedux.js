@@ -13,6 +13,7 @@ const { Types, Creators } = createActions({
   setOutgoingMessage: ['outgoingMessage'],
   setUserProfile: ['userProfile'],
   addNewContact: ['newContact'],
+  setContactAdded: ['contactAdded'],
 })
 
 export const EngineTypes = Types
@@ -31,6 +32,7 @@ export const INITIAL_STATE = Immutable({
   activeContact: '',
   outgoingMessage: '',
   newContact: null,
+  contactAdded: false,
 })
 
 /* ------------- Selectors ------------- */
@@ -44,6 +46,7 @@ export const EngineSelectors = {
   getMessages: state => state.engine.messages,
   getOutgoingMessage: state => state.engine.outgoingMessage,
   getNewContact: state => state.engine.newContact,
+  getContactAdded: state => state.engine.contactAdded,
 }
 
 /* ------------- Reducers ------------- */
@@ -91,6 +94,11 @@ export const addNewContact = (state, { newContact }) => {
   return state.merge({ newContact })
 }
 
+// set new contact
+export const setContactAdded = (state, { contactAdded }) => {
+  return state.merge({ contactAdded })
+}
+
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -103,4 +111,5 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_ENGINE_CONTACT_MGR]: setEngineContactMgr,
   [Types.SET_ENGINE_MESSAGES]: setEngineMessages,
   [Types.ADD_NEW_CONTACT]: addNewContact,
+  [Types.SET_CONTACT_ADDED]: setContactAdded,
 })

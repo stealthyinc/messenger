@@ -29,7 +29,7 @@ const createEngine = (userData) => {
   return new MessagingEngine(
                               logger,
                               userData['privateKey'],
-                              userData['publicKey'],
+                              userData['appPublicKey'],
                               false,
                               userData['profileURL'],
                               '',
@@ -75,6 +75,20 @@ function* watchMessagesEventChannel() {
   }
 }
 
+function* watchContactAddedChannel() {
+  const channel = eventChannel(emitter => {
+    EngineInstance.on('me-search-select-done', (flag) => emitter(flag))
+    return () => {
+      console.log(`Messaging Engine updated messages`)
+    }
+  })
+  while (true) {
+    const flag = yield take(channel)
+    yield put(EngineActions.setContactAdded(flag))
+  }
+  
+}
+
 function* handleContactClick() {
   const contact = yield select(EngineSelectors.getActiveContact)
   EngineInstance.handleContactClick(contact)
@@ -97,7 +111,8 @@ export function* startEngine () {
   EngineInstance.componentDidMountWork(engineInit, userData["username"])
   yield fork(watchInitialzedEventChannel)
   yield fork(watchContactMgrEventChannel)
-  yield fork(watchMessagesEventChannel) 
+  yield fork(watchMessagesEventChannel)
+  yield fork(watchContactAddedChannel)
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
   yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)
   yield takeLatest(EngineTypes.ADD_NEW_CONTACT, handleSearchSelect)

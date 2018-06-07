@@ -36,11 +36,11 @@ class BlockContactSearch extends Component {
     this.props.request('')
   }
   componentWillReceiveProps(nextProps) {
-    const { contactMgr } = nextProps
-    const oldContactMgr = this.props.contactMgr
-    if (contactMgr !== oldContactMgr) {
+    const { contactAdded } = nextProps
+    if (contactAdded) {
       this.props.navigation.goBack()
       this.props.navigation.navigate('ChatRoom')
+      this.props.setContactAdded(false)
     }
   }
   parseContact(item) {
@@ -125,6 +125,7 @@ const mapStateToProps = (state) => {
   return {
     contact: state.contact,
     contactMgr: EngineSelectors.getContactMgr(state),
+    contactAdded: EngineSelectors.getContactAdded(state),
   }
 }
 
@@ -133,6 +134,7 @@ const mapDispatchToProps = (dispatch) => {
     request: (data) => dispatch(BlockstackContactsActions.blockstackContactsRequest({data})),
     clear: () => dispatch(BlockstackContactsActions.blockstackContactsClear()),
     addNewContact: (contact) => dispatch(EngineActions.addNewContact(contact)),
+    setContactAdded: (flag) => dispatch(EngineActions.setContactAdded(flag)),
   }
 }
 
