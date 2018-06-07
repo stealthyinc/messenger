@@ -361,11 +361,6 @@ class ContactManager {
       if ((index !== undefined) || (index !== 0)) {
         const contactToMoveToTop = this.contactArr.splice(index, 1);
         this.contactArr.splice(0, 0, contactToMoveToTop[0]);
-
-        // let tempContactArr = utils.deepCopyObj(this.contactArr);
-        // const contactToMoveToTop = tempContactArr.splice(index, 1);
-        // tempContactArr.splice(0, 0, contactToMoveToTop[0]);
-        // this.setContacts(tempContactArr)
       }
     }
   }

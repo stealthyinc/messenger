@@ -1524,7 +1524,7 @@ export class MessagingEngine extends EventEmitter {
 
     const receiptObj = aChatMsg.content;
     if (receiptObj) {
-      this.logger(`Processing receipt from ${aChatMsg.from}`);
+      // this.logger(`Processing receipt from ${aChatMsg.from}`);
       const recipientId = receiptObj.recipient;
       const receivedMsgIds = receiptObj.receivedMsgIds;
       const readMsgIds = receiptObj.readMsgIds;

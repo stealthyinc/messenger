@@ -53,7 +53,6 @@ class ConversationScreen extends React.Component {
     const { contactMgr, engineInit } = nextProps
     if (engineInit && contactMgr && contactMgr.getContactIds) {
       const listViewData = contactMgr.getAllContacts()
-      console.log('contacts found', listViewData)
       this.setState({listViewData})
     }
   }
