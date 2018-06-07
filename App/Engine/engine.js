@@ -200,7 +200,7 @@ export class MessagingEngine extends EventEmitter {
   }
 
   closeContactSearch() {
-    this.emit('me-close-contact-search');
+    this.emit('me-close-contact-search', true);
   }
 
   //

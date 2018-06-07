@@ -77,7 +77,7 @@ function* watchMessagesEventChannel() {
 
 function* watchContactAddedChannel() {
   const channel = eventChannel(emitter => {
-    EngineInstance.on('me-search-select-done', (flag) => emitter(flag))
+    EngineInstance.on('me-close-contact-search', (flag) => emitter(flag))
     return () => {
       console.log(`Messaging Engine updated messages`)
     }
