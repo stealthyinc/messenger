@@ -79,7 +79,7 @@ class ChatScreen extends Component {
 
   componentWillReceiveProps(nextProps) {
     const { messages } = nextProps
-    if (this.props.messages.length !== messages.length) {
+    if (this.props.messages && this.props.messages.length !== messages.length) {
       const msg = messages[messages.length-1]
       const { author } = msg
       if (author !== this.state.author.username) {
