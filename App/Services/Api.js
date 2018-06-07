@@ -59,20 +59,19 @@ const create = (baseURL = 'https://core.blockstack.org') => {
 
 // our "constructor"
 const notification = (baseURL, token) => {
-
-
-  // curl --header "Content-Type: application/json" \
-  //   --header "Authorization: key=fb_server_key" \
-  //   "https://fcm.googleapis.com/fcm/send" \
-  //   -d '{"notification": {"title": "New Message", "sound": "default"},
-  //   "priority": "high",
-  //   "to": "user_device_token"}'
+// curl --header "Content-Type: application/json" \
+// --header "Authorization: key=AAAAhdS8lMY:APA91bEdMbEj2Qw4Xj7HXYzsuZTzrDrnyAWBlPVbSK76kkxlmWls24MUAoQ6oBUTO36LnSfTT3kByFLrP_tAavQQyDaWYn5bFefG7bA1_u3EIqtyOkHk5naQBRGnTNBT7WSVbU9uO6gD" \
+// https://fcm.googleapis.com/fcm/send \
+// -d '{"notification": {"title": "New Message", "sound": "default"},
+// "priority": "high",
+// "to": "fnIkBB46C2E:APA91bH2Q9J_rfYztmZZXCI8aXcUSBEaePS6Mzjft4MB_eeiGDJ6LBGF9VdYSY68Xe54S3yY5UAQRBDQ0JuK5X5RE3RnFKJLPcLamP9JOeyoFPN_F0AtCrcj92C6LmdU651z5ySgciOe"}'
   // ------
   // STEP 1
   // ------
   //
   // Create and configure an apisauce-based api object.
   //
+
   const fb_server_key = 'AAAAhdS8lMY:APA91bEdMbEj2Qw4Xj7HXYzsuZTzrDrnyAWBlPVbSK76kkxlmWls24MUAoQ6oBUTO36LnSfTT3kByFLrP_tAavQQyDaWYn5bFefG7bA1_u3EIqtyOkHk5naQBRGnTNBT7WSVbU9uO6gD'
   const api = apisauce.create({
     // base URL is read from the "constructor"
