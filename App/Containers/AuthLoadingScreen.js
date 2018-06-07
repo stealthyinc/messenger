@@ -26,6 +26,8 @@ class AuthLoadingScreen extends React.Component {
     if (userProfile) {
       this.props.setUserProfile(JSON.parse(userProfile))
     }
+    const token = await AsyncStorage.getItem('token')
+    this.props.setToken(token)
 
     // This will switch to the App screen or Auth screen and this loading
     // screen will be unmounted and thrown away.
@@ -60,6 +62,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     setUserData: (userData) => dispatch(EngineActions.setUserData(userData)),
     setUserProfile: (userProfile) => dispatch(EngineActions.setUserProfile(userProfile)),
+    setToken: (token) => dispatch(EngineActions.setToken(token)),
   }
 }
 

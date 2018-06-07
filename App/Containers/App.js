@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { Provider } from 'react-redux'
 import RootContainer from './RootContainer'
 import createStore from '../Redux'
-import { PushNotificationIOS } from 'react-native'
+import { AsyncStorage, PushNotificationIOS } from 'react-native'
 
 import firebase from 'react-native-firebase';
 import type { Notification, NotificationOpen } from 'react-native-firebase';
@@ -81,7 +81,8 @@ class App extends Component {
     const enabled = await firebase.messaging().hasPermission();
     if (enabled) {
       // user has permissions
-      firebase.messaging().getToken().then(token => {
+      await firebase.messaging().getToken().then(token => {
+        AsyncStorage.setItem('token', token);
         // console.log("token", token)
       });
       // console.log("user has permissions")

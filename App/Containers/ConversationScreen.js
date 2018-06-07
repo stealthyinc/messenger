@@ -46,7 +46,16 @@ class ConversationScreen extends React.Component {
       loaded: false
     };
   }
-  componentWillMount() {
+  async componentWillMount() {
+    const { userData, token } = this.props
+    const publicKey = userData['appPublicKey']
+    let npath = `/global/notifications/development/${publicKey}/`
+    if (process.env.NODE_ENV === 'production') {
+      npath = `/global/notifications/${publicKey}/`
+    }
+    firebase.database().ref(npath).set({
+      token,
+    })
     this.props.navigation.setParams({ goToChatRoom: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
   }
   componentWillReceiveProps(nextProps) {
@@ -64,22 +73,6 @@ class ConversationScreen extends React.Component {
       this.props.handleContactClick(theNextActiveContact);
     }
     this.props.navigation.navigate('ChatRoom')
-  }
-  sendTestMessageToFirebase() {
-    //pbj pk.txt: 0231debdb29c8761a215619b2679991a1db8006c953d1fa554de32e700fe89feb9
-    //ayc pk.txt: 0363cd66f87eec2e0fc2a4bc9b8314f5fd0c2a18ce1c6a7d31f1efec83253d46a2
-    const senderId  = "alexc.id"
-    const time      = Date.now()
-    const read      = false
-    const sender    = "0363cd66f87eec2e0fc2a4bc9b8314f5fd0c2a18ce1c6a7d31f1efec83253d46a2"
-    const recepient = "0231debdb29c8761a215619b2679991a1db8006c953d1fa554de32e700fe89feb9"
-    const npath = `/global/notifications/${recepient}/`
-    firebase.database().ref(npath).push({
-      read,
-      time,
-      sender,
-      senderId,
-    })
   }
   deleteRow(secId, rowId, rowMap) {
     rowMap[`${secId}${rowId}`].props.closeRow();
@@ -126,6 +119,8 @@ class ConversationScreen extends React.Component {
 
 const mapStateToProps = (state) => {
   return {
+    token: EngineSelectors.getToken(state),
+    userData: EngineSelectors.getUserData(state),
     contactMgr: EngineSelectors.getContactMgr(state),
     engineInit: EngineSelectors.getEngineInit(state),
   }

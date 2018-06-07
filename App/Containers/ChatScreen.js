@@ -161,35 +161,9 @@ class ChatScreen extends Component {
   }
 
   onSend(messages = []) {
-    //pbj pk.txt: 0231debdb29c8761a215619b2679991a1db8006c953d1fa554de32e700fe89feb9
-    //ayc pk.txt: 0363cd66f87eec2e0fc2a4bc9b8314f5fd0c2a18ce1c6a7d31f1efec83253d46a2
-    // const senderId  = "alexc.id"
-    // const time      = Date.now()
-    // const read      = false
-    // const sender    = "0363cd66f87eec2e0fc2a4bc9b8314f5fd0c2a18ce1c6a7d31f1efec83253d46a2"
-    // const recepient = "0231debdb29c8761a215619b2679991a1db8006c953d1fa554de32e700fe89feb9"
-    // const npath = `/global/notifications/${recepient}/`
-    // firebase.database().ref(npath).push({
-    //   read,
-    //   time,
-    //   sender,
-    //   senderId,
-    // })
-    // process for sending a notification
-    // - check fb under /global/notifications/senderPK
-    // - decrypt data and look up receiver's user device token
-    // - send a request to fb server to notify the person of a new message
-    // - curl --header "Content-Type: application/json" \
-    //   --header "Authorization: key=fb_server_key" \
-    //   https://fcm.googleapis.com/fcm/send \
-    //   -d '{"notification": {"title": "New Message", "sound": "default"},
-    //   "priority": "high",
-    //   "to": "user_device_token"}'
-
-    // An example showing how to send a message
-    // TODO: PBJ delete me and integrate with the messages editor / editbox
-    // const currDate = new Date();
-    // const aMessage = `I was sent automatically after me-initialized [${currDate.getHours()}:${currDate.getMinutes()}:${currDate.getSeconds()}].`;
+    const { activeContact } = this.state
+    const { id, publicKey } = activeContact
+    this.props.sendNotification(publicKey)
     this.props.handleOutgoingMessage(messages[0].text);
     this.setState((previousState) => {
       return {
@@ -306,15 +280,16 @@ class ChatScreen extends Component {
 const mapStateToProps = (state) => {
   return {
     userData: EngineSelectors.getUserData(state),
-    userProfile: EngineSelectors.getUserProfile(state),
     messages: EngineSelectors.getMessages(state),
     contactMgr: EngineSelectors.getContactMgr(state),
+    userProfile: EngineSelectors.getUserProfile(state),
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
     handleOutgoingMessage: (message) => dispatch(EngineActions.setOutgoingMessage(message)),
+    sendNotification: (publicKey) => dispatch(EngineActions.sendNotification(publicKey)),
   }
 }
 

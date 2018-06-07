@@ -14,6 +14,8 @@ const { Types, Creators } = createActions({
   setUserProfile: ['userProfile'],
   addNewContact: ['newContact'],
   setContactAdded: ['contactAdded'],
+  setToken: ['token'],
+  sendNotification: ['recepientPublicKey'],
 })
 
 export const EngineTypes = Types
@@ -33,6 +35,8 @@ export const INITIAL_STATE = Immutable({
   outgoingMessage: '',
   newContact: null,
   contactAdded: false,
+  token: '',
+  recepientPublicKey: '',
 })
 
 /* ------------- Selectors ------------- */
@@ -47,6 +51,8 @@ export const EngineSelectors = {
   getOutgoingMessage: state => state.engine.outgoingMessage,
   getNewContact: state => state.engine.newContact,
   getContactAdded: state => state.engine.contactAdded,
+  getToken: state => state.engine.token,
+  getRecepientPublicKey: state => state.engine.recepientPublicKey,
 }
 
 /* ------------- Reducers ------------- */
@@ -94,9 +100,19 @@ export const addNewContact = (state, { newContact }) => {
   return state.merge({ newContact })
 }
 
-// set new contact
+// set contact added
 export const setContactAdded = (state, { contactAdded }) => {
   return state.merge({ contactAdded })
+}
+
+// set token
+export const setToken = (state, { token }) => {
+  return state.merge({ token })
+}
+
+// send notification
+export const sendNotification = (state, { recepientPublicKey }) => {
+  return state.merge({ recepientPublicKey })
 }
 
 /* ------------- Hookup Reducers To Types ------------- */
@@ -112,4 +128,6 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_ENGINE_MESSAGES]: setEngineMessages,
   [Types.ADD_NEW_CONTACT]: addNewContact,
   [Types.SET_CONTACT_ADDED]: setContactAdded,
+  [Types.SET_TOKEN]: setToken,
+  [Types.SEND_NOTIFICATION]: sendNotification,
 })

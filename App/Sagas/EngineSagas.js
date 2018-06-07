@@ -16,6 +16,8 @@ import {
   AsyncStorage,
 } from 'react-native';
 const { MessagingEngine } = require('../Engine/engine.js')
+import API from '../Services/Api'
+import firebase from 'react-native-firebase';
 
 let EngineInstance = undefined;
 
@@ -104,6 +106,28 @@ function* handleSearchSelect() {
   EngineInstance.handleSearchSelect(contact)
 }
 
+function* sendNotificationWorker() {
+  // process for sending a notification
+  // - check fb under /global/notifications/senderPK
+  // - decrypt data and look up receiver's user device token
+  // - send a request to fb server to notify the person of a new message
+  const recepientPublicKey = yield select(EngineSelectors.getRecepientPublicKey)
+  let path = `/global/notifications/development/${recepientPublicKey}/`
+  if (process.env.NODE_ENV === 'production') {
+    path = `/global/notifications/${recepientPublicKey}/`
+  }
+  console.log('path', path)
+  firebase.database().ref(`${path}/token`).once('value')
+  .then((snapshot) => {
+    if (snapshot.val()) {
+      const token = snapshot.val()
+      console.log("sender pk", token)
+      const api = DebugConfig.useFixtures ? FixtureAPI : API.notification('', token)
+      api.send
+    }
+  });
+}
+
 export function* startEngine () {
   const userData = yield select(EngineSelectors.getUserData)
   EngineInstance = yield call (createEngine, userData)
@@ -116,6 +140,7 @@ export function* startEngine () {
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
   yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)
   yield takeLatest(EngineTypes.ADD_NEW_CONTACT, handleSearchSelect)
+  yield takeLatest(EngineTypes.SEND_NOTIFICATION, sendNotificationWorker)
 }
 
 export function * getUserProfile (api) {
