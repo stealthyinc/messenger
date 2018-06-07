@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { Container, Header, Content, List, ListItem, Thumbnail, Text, Body } from 'native-base';
 import { SearchBar } from 'react-native-elements'
 import BlockstackContactsActions, { BlockstackContactsSelectors } from '../Redux/BlockstackContactsRedux'
+import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 import {
   ActivityIndicator,
@@ -34,9 +35,42 @@ class BlockContactSearch extends Component {
     this.search.focus()
     this.props.request('')
   }
+  componentWillReceiveProps(nextProps) {
+    const { contactMgr } = nextProps
+    const oldContactMgr = this.props.contactMgr
+    if (contactMgr !== oldContactMgr) {
+      this.props.navigation.goBack()
+      this.props.navigation.navigate('ChatRoom')
+    }
+  }
+  parseContact(item) {
+    let userImage = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
+    const { profile, username, fullyQualifiedName } = item
+    const { contactMgr } = this.props
+    const found = contactMgr.getContact(fullyQualifiedName)
+    if (found) {
+      this.props.navigation.goBack()
+      this.props.navigation.navigate('ChatRoom')      
+    }
+    const { image, name, description } = profile
+    if (image[0]) {
+      userImage = image[0].contentUrl
+    }
+    let fullName = username
+    if (name)
+      fullName = name
+    const cleanItem = {
+      description,
+      id: username,
+      image: userImage,
+      key: Date.now(),
+      title: name
+    }
+    this.props.addNewContact(cleanItem)
+  }
   createListItem(payload) {
     return (payload && payload.results) ? payload.results.map((item, i) => (
-      <ListItem key={i}>
+      <ListItem key={i} onPress={this.parseContact.bind(this, item)}>
         <Thumbnail square size={80} source={{ uri: (item.profile.image && item.profile.image[0]) ? item.profile.image[0].contentUrl : '' }} />
         <Body>
           <Text>{(item.profile.name) ? item.profile.name : item.username}</Text>
@@ -76,6 +110,8 @@ class BlockContactSearch extends Component {
           clearIcon={null}
           onClear={this.onClear}
           onCancel={this.onClear}
+          autoCorrect={false}
+          autoCapitalize='none'
           placeholder='Search for contacts...' />
         <Content>
           {this.createListItem(this.props.contact.payload)}
@@ -87,14 +123,16 @@ class BlockContactSearch extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    contact: state.contact
+    contact: state.contact,
+    contactMgr: EngineSelectors.getContactMgr(state),
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
     request: (data) => dispatch(BlockstackContactsActions.blockstackContactsRequest({data})),
-    clear: () => dispatch(BlockstackContactsActions.blockstackContactsClear())
+    clear: () => dispatch(BlockstackContactsActions.blockstackContactsClear()),
+    addNewContact: (contact) => dispatch(EngineActions.addNewContact(contact)),
   }
 }
 

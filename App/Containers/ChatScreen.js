@@ -67,7 +67,10 @@ class ChatScreen extends Component {
       activeContact = contactMgr.getActiveContact();
     }
     this.state.activeContact = activeContact
-    this.props.navigation.setParams({ navigation: this.props.navigation, name: activeContact.description ? activeContact.description : activeContact.id });
+    let displayname = activeContact.id
+    if (activeContact.title)
+      displayname = activeContact.title
+    this.props.navigation.setParams({ navigation: this.props.navigation, name: displayname });
     const { messages } = this.props;
     if (messages) {
       this.state.messages = this.setupMessages(messages).reverse();

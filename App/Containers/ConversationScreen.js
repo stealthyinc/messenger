@@ -30,8 +30,8 @@ class ConversationScreen extends React.Component {
       headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold'}}>Messages</Text>,
       headerBackTitle: 'Back',
       headerRight: (
-        //params.goToChatRoom.navigate('BlockContactSearch')
-        <TouchableOpacity onPress={() => params.sendMessage()} style={{marginRight: 10}}>
+        //params.sendMessage()
+        <TouchableOpacity onPress={() => params.goToChatRoom.navigate('BlockContactSearch')} style={{marginRight: 10}}>
           <Ionicons name="ios-paper-plane-outline" size={30} color='#037aff'/>
         </TouchableOpacity>
       ),

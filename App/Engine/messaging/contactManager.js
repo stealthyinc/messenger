@@ -142,7 +142,6 @@ class ContactManager {
   }
 
   setContacts = (aContactArr) => {
-    debugger
     this.contactArr = (aContactArr) || [];
   }
 

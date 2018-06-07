@@ -85,6 +85,11 @@ function* handleOutgoingMessage() {
   EngineInstance.handleOutgoingMessage(message)
 }
 
+function* handleSearchSelect() {
+  const contact = yield select(EngineSelectors.getNewContact)
+  EngineInstance.handleSearchSelect(contact)
+}
+
 export function* startEngine () {
   const userData = yield select(EngineSelectors.getUserData)
   EngineInstance = yield call (createEngine, userData)
@@ -95,6 +100,7 @@ export function* startEngine () {
   yield fork(watchMessagesEventChannel) 
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
   yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)
+  yield takeLatest(EngineTypes.ADD_NEW_CONTACT, handleSearchSelect)
 }
 
 export function * getUserProfile (api) {
