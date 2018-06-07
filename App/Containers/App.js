@@ -108,13 +108,13 @@ class App extends Component {
       // Get information about the notification that was opened
       const notification: Notification = notificationOpen.notification;
       console.log("notification initial open")
-      alert("notification initial open")
+      // alert("notification initial open")
     }
     this.notificationDisplayedListener = firebase.notifications().onNotificationDisplayed((notification: Notification) => {
       // Process your notification as required
       // ANDROID: Remote notifications do not contain the channel ID. You will have to specify this manually if you'd like to re-display the notification.
       console.log("notification displayed")
-      alert("notification displayed")
+      // alert("notification displayed")
     });
     this.notificationListener = firebase.notifications().onNotification((notification: Notification) => {
       // Process your notification as required
@@ -126,7 +126,7 @@ class App extends Component {
       // Get information about the notification that was opened
       const notification: Notification = notificationOpen.notification;
       console.log("notification opened")
-      alert("notification opened")
+      // alert("notification opened")
     });
   }
   componentWillUnmount() {
