@@ -174,7 +174,6 @@ class ChatScreen extends Component {
 
   onSend(messages = []) {
     const { token } = this.state
-    debugger
     if (token) {
       this.props.sendNotification(token)
     }
