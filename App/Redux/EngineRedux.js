@@ -16,6 +16,8 @@ const { Types, Creators } = createActions({
   setContactAdded: ['contactAdded'],
   setToken: ['token'],
   sendNotification: ['recepientToken'],
+  setUserSettings: ['userSettings'],
+  updateUserSettings: ['radioSetting'],
 })
 
 export const EngineTypes = Types
@@ -37,6 +39,8 @@ export const INITIAL_STATE = Immutable({
   contactAdded: false,
   token: '',
   recepientToken: '',
+  userSettings: {},
+  radioSetting: '',
 })
 
 /* ------------- Selectors ------------- */
@@ -53,6 +57,8 @@ export const EngineSelectors = {
   getContactAdded: state => state.engine.contactAdded,
   getToken: state => state.engine.token,
   getRecepientToken: state => state.engine.recepientToken,
+  getUserSettings: state => state.engine.userSettings,
+  getSettingsRadio: state => state.engine.radioSetting,
 }
 
 /* ------------- Reducers ------------- */
@@ -115,6 +121,16 @@ export const sendNotification = (state, { recepientToken }) => {
   return state.merge({ recepientToken })
 }
 
+// read user settings from engine
+export const setUserSettings = (state, { userSettings }) => {
+  return state.merge({ userSettings })
+}
+
+// read user settings from engine
+export const updateUserSettings = (state, { radioSetting }) => {
+  return state.merge({ radioSetting })
+}
+
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -130,4 +146,6 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_CONTACT_ADDED]: setContactAdded,
   [Types.SET_TOKEN]: setToken,
   [Types.SEND_NOTIFICATION]: sendNotification,
+  [Types.SET_USER_SETTINGS]: setUserSettings,
+  [Types.UPDATE_USER_SETTINGS]: updateUserSettings,
 })

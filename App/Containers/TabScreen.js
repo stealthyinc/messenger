@@ -10,7 +10,7 @@ import WalletScreen from './WalletScreen'
 export default TabNavigator(
   {
     Messages: { screen: ConversationScreen },
-    Wallet: { screen: WalletScreen },
+    // Wallet: { screen: WalletScreen },
     Profile: { screen: ProfileScreen },
   },
   {

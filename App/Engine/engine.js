@@ -132,7 +132,8 @@ export class MessagingEngine extends EventEmitter {
               publicKey,
               plugIn,
               avatarUrl,
-              discoveryPath) {
+              discoveryPath,
+              isMobile=false) {
     super();
     this.logger = logger;
     this.privateKey = privateKey;
@@ -140,6 +141,7 @@ export class MessagingEngine extends EventEmitter {
     this.plugIn = plugIn;
     this.avatarUrl = avatarUrl;
     this.discoveryPath = discoveryPath;
+    this.isMobile = isMobile;
 
     this.settings = {}
     this.contactMgr = undefined;
@@ -613,7 +615,12 @@ export class MessagingEngine extends EventEmitter {
         // THIS HAPPENS FIRST TIME ONLY
         // centralized discovery on by default
         this.logger('No data read from settings file. Initializing with default settings.');
-        if (!this.plugin) {
+        this.settings = {
+          heartbeat: true,
+          notifications: true,
+          discovery: true,
+        }
+        if (!this.plugin && !this.isMobile) {
           this.addProfile('relay.stealthy');
           this.addProfile('stealthy');
           // this.handleIntroOpen();
@@ -873,6 +880,12 @@ export class MessagingEngine extends EventEmitter {
     if (name === 'console') {
       this.settings.console = !this.settings.console;
       this.anonalytics.aeSettings(`console:${this.settings.console}`);
+    } else if (name === 'heartbeat') {
+      this.settings.heartbeat = !this.settings.heartbeat;
+      // this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`);
+    } else if (name === 'notifications') {
+      this.settings.notifications = !this.settings.notifications;
+      // this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`);
     } else if (name === 'search') {
       this.settings.search = !this.settings.search;
       this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`);

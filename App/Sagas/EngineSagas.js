@@ -36,6 +36,7 @@ const createEngine = (userData) => {
                               false,
                               userData['profileURL'],
                               '',
+                              true,
                               {
                                 neverWebRTC: true
                               })
@@ -89,7 +90,19 @@ function* watchContactAddedChannel() {
     const flag = yield take(channel)
     yield put(EngineActions.setContactAdded(flag))
   }
-  
+}
+
+function* watchUserSettingsChannel() {
+  const channel = eventChannel(emitter => {
+    EngineInstance.on('me-update-settings', (settings) => emitter(settings))
+    return () => {
+      console.log(`Messaging Engine Settings`)
+    }
+  })
+  while (true) {
+    const settings = yield take(channel)
+    yield put(EngineActions.setUserSettings(settings))
+  }
 }
 
 function* handleContactClick() {
@@ -105,6 +118,11 @@ function* handleOutgoingMessage() {
 function* handleSearchSelect() {
   const contact = yield select(EngineSelectors.getNewContact)
   EngineInstance.handleSearchSelect(contact)
+}
+
+function* updateUserSettings() {
+  const name = yield select(EngineSelectors.getSettingsRadio)
+  EngineInstance.handleRadio(null, { name })
 }
 
 function* sendNotificationWorker() {
@@ -126,10 +144,12 @@ export function* startEngine () {
   yield fork(watchContactMgrEventChannel)
   yield fork(watchMessagesEventChannel)
   yield fork(watchContactAddedChannel)
+  yield fork(watchUserSettingsChannel)
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
   yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)
   yield takeLatest(EngineTypes.ADD_NEW_CONTACT, handleSearchSelect)
   yield takeLatest(EngineTypes.SEND_NOTIFICATION, sendNotificationWorker)
+  yield takeLatest(EngineTypes.UPDATE_USER_SETTINGS, updateUserSettings)
 }
 
 export function * getUserProfile (api) {
