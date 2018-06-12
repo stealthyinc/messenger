@@ -69,7 +69,6 @@ const RELAY_IDS = [
 ];
 
 // Dev. constants not set in ctor:
-const ENCRYPT_HB = false;
 const ENABLE_AUTOCONNECT = false;
 const ENCRYPT_INDEXED_IO = false;
 
@@ -526,9 +525,7 @@ export class MessagingEngine extends EventEmitter {
       this.logger,
       heartbeatIoDriver,
       this.userId,
-      this.contactMgr.getContacts(),
-      this.privateKey,
-      ENCRYPT_HB);
+      this.contactMgr.getContacts());
 
     // Explicit scoping required to get correct this context in
     // _handleHeartBeatMonitor.

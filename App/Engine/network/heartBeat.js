@@ -7,7 +7,7 @@ const utils = require('./../misc/utils.js');
 //  Every minute, wake up and write an encrypted heartbeat file to each contact
 //  we are associated with that we do not have a peer connection to.
 //
-//  Version 1.0 of a heartbeat file includes:
+//  Version 1.1 of a heartbeat file includes:
 //  {
 //    time: currentTimeUTC,
 //  }
@@ -29,8 +29,6 @@ class HeartBeat extends EventEmitter {
               anIoDriver,
               aUserId,
               aContactArr,
-              aPrivateKey,
-              encryption = true,
               logOutput = true) {
     super();
 
@@ -38,22 +36,18 @@ class HeartBeat extends EventEmitter {
     utils.throwIfUndef('anIoDriver', anIoDriver);
     utils.throwIfUndef('aUserId', aUserId);
     utils.throwIfUndef('aContactArr', aContactArr);
-    utils.throwIfUndef('aPrivateKey', aPrivateKey);
-    utils.throwIfUndef('encryption', encryption);
 
     this.logger = logger;
     this.logOutput = logOutput;
     this.contactIdKeys = {};
     this.io = anIoDriver;
     this.userId = aUserId;
-    this.encryption = encryption;
 
     this.enableBeat = false;
     this.firstBeat = true;
 
     this.enableMonitor = false;
     this.heartBeats = {};
-    this.privateKey = aPrivateKey;
 
     for (const contact of aContactArr) {
       if (utils.isDef(contact) && utils.isDef(contact.publicKey) && utils.isDef(contact.id)) {
@@ -62,8 +56,8 @@ class HeartBeat extends EventEmitter {
       }
     }
 
-    this.on('HeartBeat', this._writeHeartBeatFiles);
-    this.on('HeartBeatMonitor', this._readHeartBeatFiles);
+    this.on('HeartBeat', this.writeHeartBeatFiles);
+    this.on('HeartBeatMonitor', this.readHeartBeatFiles);
     this.on('firstBeatComplete', this.startMonitor);
   }
 
@@ -157,31 +151,10 @@ class HeartBeat extends EventEmitter {
     this.enableMonitor = false;
   }
 
-  _writeHeartBeatFiles = () => {
+  writeHeartBeatFiles = () => {
     this.log('Write HeartBeat files!');
-    // const heartBeatObj = { userId: this.userId, time: Date.now() };
 
-    // const writePromises = [];
-    // for (const contactId in this.contactIdKeys) {
-    //   const filePath = `${contactId}/${HB_FILE_NAME}`;
-
-    //   let writeObj;
-    //   if (this.encryption) {
-    //     const contactPubKey = this.contactIdKeys[contactId];
-    //     writeObj = utils.encryptObj(contactPubKey, heartBeatObj);
-    //   } else {
-    //     writeObj = heartBeatObj;
-    //   }
-
-    //   try {
-    //     writePromises.push(this.io.writeLocalFile(this.userId, filePath, writeObj));
-    //   } catch (err) {
-    //     this.logger('ERROR: writing heartbeat file ${filePath}. ${err}');
-    //   }
-    // }
-
-    // return Promise.all(writePromises)
-    return this.io.writeLocalFile(this.userId, HB_FILE_NAME, { userId: this.userId, time: Date.now() })
+    return this.io.writeLocalFile(this.userId, HB_FILE_NAME, { time: Date.now() })
     .then(() => {
       this.log('HeartBeat successful.');
     })
@@ -190,35 +163,49 @@ class HeartBeat extends EventEmitter {
     });
   }
 
-
-  _readHeartBeatFiles = () => {
+  readHeartBeatFiles = () => {
     this.log('Read HeartBeat files!');
     const readPromises = [];
     for (const contactId in this.contactIdKeys) {
-      // const filePath = `${this.userId}/${HB_FILE_NAME}`;
+      const filePath = `${contactId}/${HB_FILE_NAME}`;
       try {
-        readPromises.push(this.io.readRemoteFile(contactId, HB_FILE_NAME));
+        const wrReadPromise = new Promise((resolve, reject) => {
+          this.io.readRemoteFile(contactId, HB_FILE_NAME)
+          .then((hbData) => {
+            resolve({
+              contactId: contactId,
+              hbData: hbData,
+            });
+          })
+          .catch((err) => {
+            reject(err);
+          });
+        });
+
+        readPromises.push(wrReadPromise);
       } catch (err) {
         this.logger('ERROR: reading heartbeat file ${filePath}. ${err}');
       }
     }
 
     return Promise.all(readPromises)
-    .then((values) => {
+    .then((idDataPairs) => {
       this.log('HeartBeat Monitor cycle successful.');
-      for (const value of values) {
-        if (utils.isDef(value) && !utils.isEmptyObj(value)) {
-          // if (this.encryption && utils.isObjEncrypted(value)) {
-          //   const decryptedValue = utils.decryptToObj(this.privateKey, value);
-          //   this.heartBeats[decryptedValue.userId] = decryptedValue;
-          // } else {
-            this.heartBeats[value.userId] = value;
-          // }
-        } else {
-          // value resolved to null or {} in _readHeartBeatFiles
+      for (const idDataPair of idDataPairs) {
+        if (!utils.isDef(idDataPair)) {
+          continue;
+        }
+
+        const userId = idDataPair.contactId;
+        const hbData = idDataPair.hbData;
+        if (!utils.isDef(hbData) || utils.isEmptyObj(hbData)) {
+          // value resolved to null or {} in readHeartBeatFiles
           // This happens when a heartbeat file does not exist for a user
           // or a user has deleted another user.
+          continue;
         }
+
+        this.heartBeats[userId] = hbData.time;
       }
 
       this.emit('monitor', this.heartBeats);
