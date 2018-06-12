@@ -51,7 +51,6 @@ class ProfileScreen extends React.Component {
       );
     }
     const { discovery, notifications, heartbeat, webrtc } = userSettings
-    console.log("User Settings", userSettings)
     const { profile } = userProfile
     const { username } = userData
     const { name, image } = profile
