@@ -50,7 +50,8 @@ class ProfileScreen extends React.Component {
         </View>
       );
     }
-    const { discovery, notifications, heartbeat } = userSettings
+    const { discovery, notifications, heartbeat, webrtc } = userSettings
+    console.log("User Settings", userSettings)
     const { profile } = userProfile
     const { username } = userData
     const { name, image } = profile
@@ -80,7 +81,7 @@ class ProfileScreen extends React.Component {
               color={(discovery) ? '#037aff' : 'grey'}
               onPress={() => {
                 Toast.show({
-                  text: (discovery) ? 'Discovery Setting Enabled!' : 'Discovery Setting Disabled!',
+                  text: (discovery) ? 'Discovery Setting Disabled!' : 'Discovery Setting Enabled!',
                   duration: 1500
                 })
                 this.props.updateUserSettings('discovery')}
@@ -92,7 +93,7 @@ class ProfileScreen extends React.Component {
               color={(notifications) ? '#037aff' : 'grey'}
               onPress={() => {
                 Toast.show({
-                  text: (notifications) ? 'Notifications Setting Enabled!' : 'Notifications Setting Disabled!',
+                  text: (notifications) ? 'Notifications Setting Disabled!' : 'Notifications Setting Enabled!',
                   duration: 1500
                 })
                 this.props.updateUserSettings('notifications')}
@@ -104,10 +105,22 @@ class ProfileScreen extends React.Component {
               color={(heartbeat) ? '#037aff' : 'grey'}
               onPress={() => {
                 Toast.show({
-                  text: (heartbeat) ? 'Heartbeat Setting Enabled!' : 'Heartbeat Setting Disabled!',
+                  text: (heartbeat) ? 'Heartbeat Setting Disabled!' : 'Heartbeat Setting Enabled!',
                   duration: 1500
                 })
                 this.props.updateUserSettings('heartbeat')}
+              } />
+            <Icon
+              reverse
+              name='wifi'
+              type='font-awesome'
+              color={(webrtc) ? '#037aff' : 'grey'}
+              onPress={() => {
+                Toast.show({
+                  text: (webrtc) ? 'WebRTC Setting Disabled!' : 'WebRTC Setting Enabled!',
+                  duration: 1500
+                })
+                this.props.updateUserSettings('webrtc')}
               } />
           </View>
           <Button
