@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, AsyncStorage, Image, View, StyleSheet, TouchableOpacity, NativeModules, StatusBar } from 'react-native';
-import { Avatar, Card, Button, Text, Icon } from 'react-native-elements'
+import { Avatar, Card, Button, Text, Icon, Overlay } from 'react-native-elements'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
@@ -15,8 +15,8 @@ class ProfileScreen extends React.Component {
       headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold'}}>Profile</Text>,
       headerBackTitle: 'Back',
       headerRight: (
-        <TouchableOpacity onPress={() => params.goToSettings.navigate('Settings')} style={{marginRight: 10}}> 
-          <Ionicons name="ios-settings-outline" size={30} color='#037aff'/>
+        <TouchableOpacity onPress={() => params.showOverlay()} style={{marginRight: 10}}> 
+          <Ionicons name="ios-information-circle-outline" size={30} color='#037aff'/>
         </TouchableOpacity>
       ),
     };
@@ -25,12 +25,17 @@ class ProfileScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      showToast: false
+      showToast: false,
+      isVisible: false
     }
   }
 
   componentWillMount() {
-    this.props.navigation.setParams({ goToSettings: this.props.navigation });
+    this.props.navigation.setParams({ showOverlay: this.showOverlay });
+  }
+
+  showOverlay = () => {
+    this.setState({isVisible: !this.state.isVisible})
   }
 
   _signOutAsync = async () => {
@@ -60,6 +65,14 @@ class ProfileScreen extends React.Component {
     }
     return (
       <View style={styles.container}>
+        <Overlay
+          isVisible={this.state.isVisible}
+          windowBackgroundColor="rgba(255, 255, 255, .5)"
+          overlayBackgroundColor="white"
+          width="auto"
+          height="auto"
+        >
+        </Overlay>
         <View style={{flex: 10}} />
         <View style={{flex: 60, alignItems: 'center'}}>
           <Avatar
@@ -70,8 +83,8 @@ class ProfileScreen extends React.Component {
             activeOpacity={0.7}
             containerStyle={{marginBottom: 15}}
           />
-          <Text h4 style={{marginTop: 35, marginBottom: 15}}>{name}</Text>
-          <Text style={{marginBottom: 15}}>{username}</Text>
+          <Text h4 style={{marginTop: 25, marginBottom: 15}}>{name}</Text>
+          <Text h4 style={{marginBottom: 15, fontWeight: 'bold'}}>({username})</Text>
           <View style={{flexDirection: 'row', margin: 30}}>
             <Icon
               reverse
