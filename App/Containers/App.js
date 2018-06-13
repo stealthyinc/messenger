@@ -12,46 +12,6 @@ import type { Notification, NotificationOpen } from 'react-native-firebase';
 
 // create our store
 const store = createStore()
-
-// PushNotification.configure({
-
-//     // (optional) Called when Token is generated (iOS and Android)
-//     onRegister: function(token) {
-//         console.log( '################TOKEN:', token );
-//     },
-
-//     // (required) Called when a remote or local notification is opened or received
-//     onNotification: function(notification) {
-//         console.log( '################NOTIFICATION:', notification );
-
-//         // process the notification
-
-//         // required on iOS only (see fetchCompletionHandler docs: https://facebook.github.io/react-native/docs/pushnotificationios.html)
-//         notification.finish(PushNotificationIOS.FetchResult.NoData);
-//     },
-
-//     // ANDROID ONLY: GCM Sender ID (optional - not required for local notifications, but is need to receive remote push notifications)
-//     // senderID: "YOUR GCM SENDER ID",
-
-//     // IOS ONLY (optional): default: all - Permissions to register.
-//     permissions: {
-//         alert: true,
-//         badge: true,
-//         sound: true
-//     },
-
-//     // Should the initial notification be popped automatically
-//     // default: true
-//     popInitialNotification: true,
-
-//     /**
-//       * (optional) default: true
-//       * - Specified if permissions (ios) and token (android and ios) will requested or not,
-//       * - if not, you must call PushNotificationsHandler.requestPermissions() later
-//       */
-//     requestPermissions: true,
-// });
-
 /**
  * Provides an entry point into our application.  Both index.ios.js and index.android.js
  * call this component first.
@@ -63,21 +23,6 @@ const store = createStore()
  */
 class App extends Component {
   async componentWillMount () {
-    // const recepient = "0231debdb29c8761a215619b2679991a1db8006c953d1fa554de32e700fe89feb9"
-    // const npath = `/global/notifications/${recepient}/`
-    // firebase.database().ref(npath).on('child_added', function(childSnapshot, prevChildKey) {
-    //   console.log('Snapshot', childSnapshot.key, childSnapshot.val())
-    //   const notification = new firebase.notifications.Notification()
-    //   .setNotificationId('notificationId')
-    //   .setTitle('Stealthy IM')
-    //   .setBody('New Stealthy Message')
-    //   .setData({
-    //     key1: 'value1',
-    //     key2: 'value2',
-    //   });
-    //   notification.ios.setBadge(1);
-    //   firebase.notifications().displayNotification(notification)
-    // });
     const enabled = await firebase.messaging().hasPermission();
     if (enabled) {
       // user has permissions

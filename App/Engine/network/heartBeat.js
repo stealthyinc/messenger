@@ -29,7 +29,7 @@ class HeartBeat extends EventEmitter {
               anIoDriver,
               aUserId,
               aContactArr,
-              logOutput = true) {
+              logOutput = false) {
     super();
 
     utils.throwIfUndef('logger', logger);
@@ -204,7 +204,6 @@ class HeartBeat extends EventEmitter {
           // or a user has deleted another user.
           continue;
         }
-
         this.heartBeats[userId] = hbData.time;
       }
 
