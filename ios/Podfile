@@ -13,10 +13,24 @@ target 'stealthy' do
   #pod 'Blockstack', :git => 'https://github.com/AC-FTW/blockstack-ios.git', :branch => 'experiment/enc_dec_content'
 
   pod 'Firebase/Core'
+  #pod 'Firebase/Core', '~> 4.13.0'
   pod 'Firebase/Auth'
   pod 'Firebase/Database'
   #pod 'FirebaseAnalytics'
   pod 'Firebase/Messaging'
+
+  #pod "yoga", :path => "../node_modules/react-native/ReactCommon/yoga"
+  #pod "React", :path => "../node_modules/react-native", :subspecs => [
+    #'Core',
+    #'CxxBridge',
+    #'DevSupport',
+    #'RCTText',
+    #'RCTImage',
+    #'RCTNetwork',
+    #'RCTSettings',
+    #'RCTWebSocket', # needed for debugging
+  #]
+  #pod 'RNBackgroundFetch', :path => '../node_modules/react-native-background-fetch'
 
   #pod 'react-native-config', :path => '../node_modules/react-native-config'
 
