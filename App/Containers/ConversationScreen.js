@@ -6,7 +6,7 @@ import TouchableRow from './contacts/Row';
 import Footer from './contacts/Footer';
 import SectionHeader from './contacts/SectionHeader';
 import { SearchBar, Text } from 'react-native-elements'
-import { Button, Container, Header, Content, List, ListItem, Left, Body, Right, Item, Icon, Input, Thumbnail, Title } from 'native-base';
+import { Button, Badge, Container, Header, Content, List, ListItem, Left, Body, Right, Item, Icon, Input, Thumbnail, Title } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import firebase from 'react-native-firebase';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
@@ -101,7 +101,9 @@ class ConversationScreen extends React.Component {
                   <Text note>{item.summary}</Text>
                 </Body>
                 <Right>
-                  <Icon name="arrow-forward" />
+                  <Badge style={{ backgroundColor: '#037aff' }}>
+                    <Text style={{ color: 'white' }}>3</Text>
+                  </Badge>
                 </Right>
               </ListItem>}
             renderRightHiddenRow={(data, secId, rowId, rowMap) =>

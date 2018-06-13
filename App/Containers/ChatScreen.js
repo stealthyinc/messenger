@@ -29,7 +29,7 @@ class ChatScreen extends Component {
     super(props);
     this.state = {
       messages: [],
-      loadEarlier: true,
+      loadEarlier: false,
       typingText: null,
       isLoadingEarlier: false,
       activeContact: null,
