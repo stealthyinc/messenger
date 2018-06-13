@@ -105,38 +105,38 @@ function* watchUserSettingsChannel() {
   }
 }
 
-function* handleContactClick() {
-  const contact = yield select(EngineSelectors.getActiveContact)
-  EngineInstance.handleContactClick(contact)
+function* handleContactClick(action) {
+  const { activeContact } = action
+  EngineInstance.handleContactClick(activeContact)
 }
 
-function* handleOutgoingMessage() {
-  const message = yield select(EngineSelectors.getOutgoingMessage)
-  EngineInstance.handleOutgoingMessage(message)
+function* handleOutgoingMessage(action) {
+  const { outgoingMessage } = action
+  EngineInstance.handleOutgoingMessage(outgoingMessage)
 }
 
-function* handleSearchSelect() {
-  const contact = yield select(EngineSelectors.getNewContact)
-  EngineInstance.handleSearchSelect(contact)
+function* handleSearchSelect(action) {
+  const { newContact } = action
+  EngineInstance.handleSearchSelect(newContact)
 }
 
-function* updateUserSettings() {
-  const name = yield select(EngineSelectors.getSettingsRadio)
-  EngineInstance.handleRadio(null, { name })
+function* updateUserSettings(action) {
+  const { radioSetting } = action
+  EngineInstance.handleRadio(null, { name: radioSetting })
 }
 
-function* deleteContact() {
-  const contact = yield select(EngineSelectors.getDeleteContact)
-  EngineInstance.handleDeleteContact(null, { contact })
+function* deleteContact(action) {
+  const { deleteContact } = action
+  EngineInstance.handleDeleteContact(null, { contact: deleteContact })
 }
 
-function* sendNotificationWorker() {
+function* sendNotificationWorker(action) {
   // process for sending a notification
   // - check fb under /global/notifications/senderPK
   // - decrypt data and look up receiver's user device token
   // - send a request to fb server to notify the person of a new message
-  const token = yield select(EngineSelectors.getRecepientToken)
-  const api = DebugConfig.useFixtures ? FixtureAPI : API.notification('https://fcm.googleapis.com/fcm/send', token)
+  const { recepientToken } = action
+  const api = DebugConfig.useFixtures ? FixtureAPI : API.notification('https://fcm.googleapis.com/fcm/send', recepientToken)
   yield call (api.send)
 }
 
@@ -144,8 +144,8 @@ function* backgroundTasks() {
   EngineInstance.handleMobileBackgroundUpdate()
 }
 
-export function* startEngine () {
-  const userData = yield select(EngineSelectors.getUserData)
+export function* startEngine (action) {
+  const { userData } = action
   EngineInstance = yield call (createEngine, userData)
   const engineInit = yield select(EngineSelectors.getEngineInit)
   EngineInstance.componentDidMountWork(engineInit, userData["username"])
@@ -154,17 +154,10 @@ export function* startEngine () {
   yield fork(watchMessagesEventChannel)
   yield fork(watchContactAddedChannel)
   yield fork(watchUserSettingsChannel)
-  yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
-  yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)
-  yield takeLatest(EngineTypes.ADD_NEW_CONTACT, handleSearchSelect)
-  yield takeLatest(EngineTypes.SEND_NOTIFICATION, sendNotificationWorker)
-  yield takeLatest(EngineTypes.UPDATE_USER_SETTINGS, updateUserSettings)
-  yield takeLatest(EngineTypes.BACKGROUND_REFRESH, backgroundTasks)
-  yield takeLatest(EngineTypes.HANDLE_DELETE_CONTACT, deleteContact)
 }
 
-export function * getUserProfile (api) {
-  const userData = yield select(EngineSelectors.getUserData)
+export function * getUserProfile (api, action) {
+  const { userData } = action
   const { username } = userData
   const response = yield call(api.getUserProfile, username)
   if (response.ok) {
@@ -176,8 +169,8 @@ export function * getUserProfile (api) {
   }
 }
 
-export function * getActiveUserProfile (api) {
-  const activeContact = yield select(EngineSelectors.getActiveContact)
+export function * getActiveUserProfile (api, action) {
+  const { activeContact } = action
   const { id } = activeContact
   const username = id.substring(0, id.lastIndexOf('.'))
   const response = yield call(api.getUserProfile, username)
@@ -193,4 +186,11 @@ export default function* engineSagas(api) {
   yield takeLatest(EngineTypes.SET_USER_DATA, startEngine)
   yield takeLatest(EngineTypes.SET_USER_DATA, getUserProfile, api)
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, getActiveUserProfile, api)
+  yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
+  yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)
+  yield takeLatest(EngineTypes.ADD_NEW_CONTACT, handleSearchSelect)
+  yield takeLatest(EngineTypes.SEND_NOTIFICATION, sendNotificationWorker)
+  yield takeLatest(EngineTypes.UPDATE_USER_SETTINGS, updateUserSettings)
+  yield takeLatest(EngineTypes.BACKGROUND_REFRESH, backgroundTasks)
+  yield takeLatest(EngineTypes.HANDLE_DELETE_CONTACT, deleteContact)
 }

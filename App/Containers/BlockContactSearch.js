@@ -53,7 +53,7 @@ class BlockContactSearch extends Component {
       this.props.navigation.navigate('ChatRoom')      
     }
     const { image, name, description } = profile
-    if (image[0]) {
+    if (image && image.length) {
       userImage = image[0].contentUrl
     }
     let fullName = username

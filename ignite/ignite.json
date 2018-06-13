@@ -13,6 +13,7 @@
     "screen": "ignite-ir-boilerplate-andross",
     "map": "ignite-maps",
     "map-utilities": "ignite-maps",
-    "map-callout": "ignite-maps"
+    "map-callout": "ignite-maps",
+    "test": "jest"
   }
 }
