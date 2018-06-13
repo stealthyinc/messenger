@@ -23,6 +23,7 @@ DerivedData
 project.xcworkspace
 ios/Pods/
 ios/Podfile.lock
+package-lock.json
 
 # Android/IntelliJ
 #
