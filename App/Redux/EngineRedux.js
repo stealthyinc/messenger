@@ -12,6 +12,7 @@ const { Types, Creators } = createActions({
   setActiveContact: ['activeContact'],
   setOutgoingMessage: ['outgoingMessage'],
   setUserProfile: ['userProfile'],
+  setActiveUserProfile: ['activeUserProfile'],
   addNewContact: ['newContact'],
   setContactAdded: ['contactAdded'],
   setToken: ['token'],
@@ -19,6 +20,8 @@ const { Types, Creators } = createActions({
   setUserSettings: ['userSettings'],
   updateUserSettings: ['radioSetting'],
   backgroundRefresh: [''],
+  handleDeleteContact: ['deleteContact'],
+  clearUserData: [''],
 })
 
 export const EngineTypes = Types
@@ -31,6 +34,7 @@ export const INITIAL_STATE = Immutable({
   error: null,
   userData: null,
   userProfile: null,
+  activeUserProfile: null,
   engineInit: false,
   contactMgr: null,
   messages: null,
@@ -42,12 +46,14 @@ export const INITIAL_STATE = Immutable({
   recepientToken: '',
   userSettings: {},
   radioSetting: '',
+  deleteContact: null,
 })
 
 /* ------------- Selectors ------------- */
 
 export const EngineSelectors = {
   getUserProfile: state => state.engine.userProfile,
+  getActiveUserProfile: state => state.engine.activeUserProfile,
   getUserData: state => state.engine.userData,
   getActiveContact: state => state.engine.activeContact,
   getEngineInit: state => state.engine.engineInit,
@@ -60,6 +66,7 @@ export const EngineSelectors = {
   getRecepientToken: state => state.engine.recepientToken,
   getUserSettings: state => state.engine.userSettings,
   getSettingsRadio: state => state.engine.radioSetting,
+  getDeleteContact: state => state.engine.deleteContact,
 }
 
 /* ------------- Reducers ------------- */
@@ -73,8 +80,17 @@ export const setUserData = (state, { userData }) => {
   return state.merge({ userData })
 }
 
+// engine clear data
+export const clearUserData = (state) => {
+  return INITIAL_STATE
+}
+
 export const setUserProfile = (state, { userProfile }) => {
   return state.merge({ userProfile })
+}
+
+export const setActiveUserProfile = (state, { activeUserProfile }) => {
+  return state.merge({ activeUserProfile })
 }
 
 // engine intialized
@@ -132,11 +148,18 @@ export const updateUserSettings = (state, { radioSetting }) => {
   return state.merge({ radioSetting })
 }
 
+// delete contact from engine
+export const handleDeleteContact = (state, { deleteContact }) => {
+  return state.merge({ deleteContact })
+}
+
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_USER_DATA]: setUserData,
+  [Types.CLEAR_USER_DATA]: clearUserData,
   [Types.SET_USER_PROFILE]: setUserProfile,
+  [Types.SET_ACTIVE_USER_PROFILE]: setActiveUserProfile,
   [Types.SET_OUTGOING_MESSAGE]: setOutgoingMessage,
   [Types.SET_ACTIVE_CONTACT]: setActiveContact,
   [Types.SET_ENGINE_FAILURE]: setEngineFailure,
@@ -149,4 +172,5 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SEND_NOTIFICATION]: sendNotification,
   [Types.SET_USER_SETTINGS]: setUserSettings,
   [Types.UPDATE_USER_SETTINGS]: updateUserSettings,
+  [Types.HANDLE_DELETE_CONTACT]: handleDeleteContact,
 })

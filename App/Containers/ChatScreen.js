@@ -37,14 +37,6 @@ class ChatScreen extends Component {
     };
 
     this._isMounted = false;
-    this.onSend = this.onSend.bind(this);
-    this.onReceive = this.onReceive.bind(this);
-    this.renderCustomActions = this.renderCustomActions.bind(this);
-    this.renderBubble = this.renderBubble.bind(this);
-    this.renderSystemMessage = this.renderSystemMessage.bind(this);
-    this.renderFooter = this.renderFooter.bind(this);
-    this.onLoadEarlier = this.onLoadEarlier.bind(this);
-
     this._isAlright = null;
   }
 
@@ -157,7 +149,7 @@ class ChatScreen extends Component {
     return messages;
   }
 
-  onLoadEarlier() {
+  onLoadEarlier = () => {
     this.setState((previousState) => {
       return {
         isLoadingEarlier: true,
@@ -177,7 +169,7 @@ class ChatScreen extends Component {
     }, 1000); // simulating network
   }
 
-  onSend(messages = []) {
+  onSend = (messages = []) => {
     const { token } = this.state
     if (token) {
       this.props.sendNotification(token)
@@ -190,7 +182,7 @@ class ChatScreen extends Component {
     });
   }
 
-  onReceive(newMessages) {
+  onReceive = (newMessages) => {
     if (newMessages.length > 0) {
       this.setState((previousState) => {
         return {
@@ -200,7 +192,7 @@ class ChatScreen extends Component {
     }
   }
 
-  renderCustomActions(props) {
+  renderCustomActions = (props) => {
     if (Platform.OS === 'ios') {
       return (
         <CustomActions
@@ -225,7 +217,7 @@ class ChatScreen extends Component {
     );
   }
 
-  renderBubble(props) {
+  renderBubble = (props) => {
     return (
       <Bubble
         {...props}
@@ -238,7 +230,7 @@ class ChatScreen extends Component {
     );
   }
 
-  renderSystemMessage(props) {
+  renderSystemMessage = (props) => {
     return (
       <SystemMessage
         {...props}
@@ -252,7 +244,7 @@ class ChatScreen extends Component {
     );
   }
 
-  renderCustomView(props) {
+  renderCustomView = (props) => {
     return (
       <CustomView
         {...props}
@@ -260,7 +252,7 @@ class ChatScreen extends Component {
     );
   }
 
-  renderFooter(props) {
+  renderFooter = (props) => {
     if (this.state.typingText) {
       return (
         <View style={styles.footerContainer}>

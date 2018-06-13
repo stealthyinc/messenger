@@ -74,7 +74,11 @@ class ConversationScreen extends React.Component {
     }
     this.props.navigation.navigate('ChatRoom')
   }
-  deleteRow(secId, rowId, rowMap) {
+  deleteRow(data, secId, rowId, rowMap) {
+    const { contactMgr } = this.props
+    const deleteContactId = data.id;
+    const deleteContact = contactMgr.getContact(deleteContactId);
+    this.props.handleDeleteContact(deleteContact);
     rowMap[`${secId}${rowId}`].props.closeRow();
     const newData = [...this.state.listViewData];
     newData.splice(rowId, 1);
@@ -97,18 +101,13 @@ class ConversationScreen extends React.Component {
                   <Text note>{item.summary}</Text>
                 </Body>
                 <Right>
-                  <Text note>12:00</Text>
+                  <Icon name="arrow-forward" />
                 </Right>
               </ListItem>}
-            renderLeftHiddenRow={data =>
-              <Button full onPress={() => alert(data)}>
-                <Icon active name="information-circle" />
-              </Button>}
             renderRightHiddenRow={(data, secId, rowId, rowMap) =>
-              <Button full danger onPress={_ => this.deleteRow(secId, rowId, rowMap)}>
+              <Button full danger onPress={_ => this.deleteRow(data, secId, rowId, rowMap)}>
                 <Icon active name="trash" />
               </Button>}
-            leftOpenValue={75}
             rightOpenValue={-75}
           />
         </Content>
@@ -128,6 +127,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    handleDeleteContact: (contact) => dispatch(EngineActions.handleDeleteContact(contact)),
     handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
   }
 }

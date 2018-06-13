@@ -858,7 +858,7 @@ export class MessagingEngine extends EventEmitter {
     });
   }
 
-  handleDeleteContact(e, { contact }) {
+  handleDeleteContact = (e, { contact }) => {
     this.contactMgr.deleteContact(contact);
 
     if (this.settings.webrtc) {

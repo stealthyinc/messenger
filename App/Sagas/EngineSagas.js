@@ -125,6 +125,11 @@ function* updateUserSettings() {
   EngineInstance.handleRadio(null, { name })
 }
 
+function* deleteContact() {
+  const contact = yield select(EngineSelectors.getDeleteContact)
+  EngineInstance.handleDeleteContact(null, { contact })
+}
+
 function* sendNotificationWorker() {
   // process for sending a notification
   // - check fb under /global/notifications/senderPK
@@ -155,6 +160,7 @@ export function* startEngine () {
   yield takeLatest(EngineTypes.SEND_NOTIFICATION, sendNotificationWorker)
   yield takeLatest(EngineTypes.UPDATE_USER_SETTINGS, updateUserSettings)
   yield takeLatest(EngineTypes.BACKGROUND_REFRESH, backgroundTasks)
+  yield takeLatest(EngineTypes.HANDLE_DELETE_CONTACT, deleteContact)
 }
 
 export function * getUserProfile (api) {
@@ -170,7 +176,21 @@ export function * getUserProfile (api) {
   }
 }
 
+export function * getActiveUserProfile (api) {
+  const activeContact = yield select(EngineSelectors.getActiveContact)
+  const { id } = activeContact
+  const username = id.substring(0, id.lastIndexOf('.'))
+  const response = yield call(api.getUserProfile, username)
+  if (response.ok) {
+    const userProfile = response.data[username]
+    yield put(EngineActions.setActiveUserProfile(userProfile))
+  } else {
+    yield put(EngineActions.setActiveUserProfile(null))
+  }
+}
+
 export default function* engineSagas(api) {
   yield takeLatest(EngineTypes.SET_USER_DATA, startEngine)
   yield takeLatest(EngineTypes.SET_USER_DATA, getUserProfile, api)
+  yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, getActiveUserProfile, api)
 }

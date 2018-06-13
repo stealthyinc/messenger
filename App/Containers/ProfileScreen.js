@@ -40,6 +40,7 @@ class ProfileScreen extends React.Component {
 
   _signOutAsync = async () => {
     const {BlockstackNativeModule} = NativeModules;
+    this.props.clearUserData();
     await AsyncStorage.clear();
     await BlockstackNativeModule.signOut();
     this.props.navigation.navigate('Auth');
@@ -175,6 +176,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     handleOutgoingMessage: (message) => dispatch(EngineActions.setOutgoingMessage(message)),
     updateUserSettings: (radio) => dispatch(EngineActions.updateUserSettings(radio)),
+    clearUserData: () => dispatch(EngineActions.clearUserData()),
   }
 }
 
