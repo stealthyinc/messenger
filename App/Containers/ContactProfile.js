@@ -10,14 +10,12 @@ class ContactProfile extends React.Component {
     const list = [];
     if (profile && profile.account) {
       for (const i of profile.account) {
-        if (i.service === 'hackerNews') {
-          list.push(<SocialIcon type="hacker news"  onPress={() => Linking.openURL(i.proofUrl).catch(err => console.error('An error occurred', err))} />);
-        } else if (i.service === 'twitter' || i.service === 'facebook' || i.service === 'github') {
-          list.push(<SocialIcon type={i.service} onPress={() => Linking.openURL(i.proofUrl).catch(err => console.error('An error occurred', err))} />);
+        if (i.service === 'twitter' || i.service === 'facebook' || i.service === 'github' || i.service === 'instagram') {
+          list.push(<SocialIcon style={{ flex: 0.7 }}key={i.service} type={i.service} onPress={() => Linking.openURL(i.proofUrl).catch(err => console.error('An error occurred', err))} />);
         }
       }
       return (
-        <View style={{flexDirection: 'row', alignItems: 'center', margin: 10}}>
+        <View style={{flexDirection: 'row', alignItems: 'center', margin: 5}}>
           {list}
         </View>
       )
@@ -37,15 +35,14 @@ class ContactProfile extends React.Component {
         style={styles.container}
         title={`${title} (${id})`}
         image={{ uri: image}}>
-        <Text style={{marginBottom: 10}}>
+        <Text>
           {checkDescription}
         </Text>
         {this.getSocial(profile)}
         <Button
           icon={<Icon name='heartbeat' type='font-awesome' color='#ffffff' />}
-          backgroundColor='green'
           fontFamily='Lato'
-          buttonStyle={{borderRadius: 0, marginLeft: 0, marginRight: 0, marginBottom: 0, backgroundColor: status}}
+          buttonStyle={{marginTop: 10, backgroundColor: status}}
           title={(status === 'green') ? 'ONLINE' : (status === 'yellow') ? 'AWAY' : 'OFFLINE'} />
       </Card>
     );

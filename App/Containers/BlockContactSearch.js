@@ -73,7 +73,7 @@ class BlockContactSearch extends Component {
       <ListItem key={i} onPress={this.parseContact.bind(this, item)}>
         <Thumbnail square size={80} source={{ uri: (item.profile.image && item.profile.image[0]) ? item.profile.image[0].contentUrl : '' }} />
         <Body>
-          <Text>{(item.profile.name) ? item.profile.name : item.username}</Text>
+          <Text>{(item.profile.name) ? `${item.profile.name} (${item.username})` : item.username}</Text>
           <Text note>{item.profile.description ? item.profile.description : null}</Text>
         </Body>
       </ListItem>
