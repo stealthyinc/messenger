@@ -92,22 +92,27 @@ class ChatScreen extends Component {
   componentWillReceiveProps(nextProps) {
     const { messages } = nextProps
     if (this.props.messages && this.props.messages.length !== messages.length) {
-      const msg = messages[messages.length-1]
-      const { author } = msg
-      if (author !== this.state.author.username) {
-        const { body, time, image } = msg
-        const newMessage = {
-          _id: Math.round(Math.random() * 1000000),
-          text: body,
-          createdAt: time,
-          user: {
-            _id: author,
-            name: author,
-            avatar: image,
-          },
+      const numNewMsgs = messages.length - this.props.messages.length;
+      let newMessages = [];
+      for (const idx = messages.length-numNewMsgs; idx < messages.length; idx++) {
+        const msg = messages[idx]
+        const { author } = msg
+        if (author !== this.state.author.username) {
+          const { body, time, image } = msg
+          const newMessage = {
+            _id: Math.round(Math.random() * 1000000),
+            text: body,
+            createdAt: time,
+            user: {
+              _id: author,
+              name: author,
+              avatar: image,
+            },
+          }
+          newMessages.splice(0, 0, newMessage);
         }
-        this.onReceive(newMessage)
       }
+      this.onReceive(newMessages)
     }
   }
 
@@ -185,12 +190,14 @@ class ChatScreen extends Component {
     });
   }
 
-  onReceive(newMessage) {
-    this.setState((previousState) => {
-      return {
-        messages: GiftedChat.append(previousState.messages, newMessage),
-      };
-    });
+  onReceive(newMessages) {
+    if (newMessages.length > 0) {
+      this.setState((previousState) => {
+        return {
+          messages: GiftedChat.append(previousState.messages, newMessages),
+        };
+      });
+    }
   }
 
   renderCustomActions(props) {
