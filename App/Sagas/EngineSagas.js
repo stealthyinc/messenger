@@ -135,6 +135,11 @@ function* sendNotificationWorker() {
   yield call (api.send)
 }
 
+function* backgroundTasks() {
+  //ACTODO: Put Background Stuff Here
+  console.log("PBJ: Background Tasks Started")
+}
+
 export function* startEngine () {
   const userData = yield select(EngineSelectors.getUserData)
   EngineInstance = yield call (createEngine, userData)
@@ -150,6 +155,7 @@ export function* startEngine () {
   yield takeLatest(EngineTypes.ADD_NEW_CONTACT, handleSearchSelect)
   yield takeLatest(EngineTypes.SEND_NOTIFICATION, sendNotificationWorker)
   yield takeLatest(EngineTypes.UPDATE_USER_SETTINGS, updateUserSettings)
+  yield takeLatest(EngineTypes.BACKGROUND_REFRESH, backgroundTasks)
 }
 
 export function * getUserProfile (api) {

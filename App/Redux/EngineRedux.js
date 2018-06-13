@@ -18,6 +18,7 @@ const { Types, Creators } = createActions({
   sendNotification: ['recepientToken'],
   setUserSettings: ['userSettings'],
   updateUserSettings: ['radioSetting'],
+  backgroundRefresh: [''],
 })
 
 export const EngineTypes = Types
