@@ -474,13 +474,9 @@ class IndexedIO {
       retValue = aFilePath.substr(idx + 1);
     }
     if (this.ioInst instanceof FirebaseIO) {
-      retValue = IndexedIO._cleanPathForFirebase(retValue);
+      retValue = utils.cleanPathForFirebase(retValue);
     }
     return retValue;
-  }
-
-  static _cleanPathForFirebase(path) {
-    return path.replace(/\./g, '_');
   }
 
   // https://stackoverflow.com/questions/31712808/how-to-force-javascript-to-deep-copy-a-string

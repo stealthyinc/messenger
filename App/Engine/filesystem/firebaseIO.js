@@ -48,10 +48,6 @@ module.exports = class FirebaseIO extends BaseIO {
 
   // Private:
   //
-  _cleanPathForFirebase(path) {
-    return path.replace(/\./g, '_');
-  }
-
   _getLocalApplicationPath(localUser, appName = APP_NAME) {
     return `${ROOT}/${localUser}/${this.pathURL}/${APP_NAME}`;
   }
@@ -61,7 +57,7 @@ module.exports = class FirebaseIO extends BaseIO {
   }
 
   _write(filePath, data) {
-    const cleanPath = this._cleanPathForFirebase(filePath);
+    const cleanPath = utils.cleanPathForFirebase(filePath);
     this.log(`Writing data to: ${cleanPath}`);
     try {
       const res = this.firebaseInst.database().ref(cleanPath).set(data);
@@ -77,7 +73,7 @@ module.exports = class FirebaseIO extends BaseIO {
   }
 
   _read(filePath) {
-    const cleanPath = this._cleanPathForFirebase(filePath);
+    const cleanPath = utils.cleanPathForFirebase(filePath);
     const targetRef = this.firebaseInst.database().ref(cleanPath);
 
     return targetRef.once('value')
@@ -92,7 +88,7 @@ module.exports = class FirebaseIO extends BaseIO {
   }
 
   _delete(filePath) {
-    const cleanPath = this._cleanPathForFirebase(filePath);
+    const cleanPath = utils.cleanPathForFirebase(filePath);
     this.log(`Deleting ${cleanPath}`);
     return this.firebaseInst.database().ref(cleanPath).remove();
   }

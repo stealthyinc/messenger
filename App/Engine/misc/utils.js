@@ -114,3 +114,7 @@ function _throwIfKeyUndefined(aKey, aMethodName) {
     throw (`ERROR: In call to ${aMethodName}, aKey is not defined.`);
   }
 }
+
+module.exports.cleanPathForFirebase = function (path) {
+  return path.replace(/[\.-]/g, '_');
+}

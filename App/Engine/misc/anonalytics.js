@@ -1,4 +1,5 @@
 // const Config = require('Config');
+const utils = require('./utils.js');
 import Secrets from 'react-native-config'
 
 // const { Analytics } = require('aws-amplify')
@@ -179,7 +180,7 @@ class Anonalytics {
       const eventName = anEventName;
       const eventTimeMs = Date.now();
       const cleanString = (aString !== undefined) ?
-        Anonalytics._cleanPathForFirebase(aString) : undefined;
+        utils.cleanPathForFirebase(aString) : undefined;
 
       if (this.analyticsQueue.length < MAX_QUEUE) {
         this.analyticsQueue.push({
@@ -201,7 +202,7 @@ class Anonalytics {
       const eventObj = this.analyticsQueue.shift();
 
       const path = `${this.basePath}/${this.analyticId}/${eventObj.eventName}`;
-      const cleanPath = Anonalytics._cleanPathForFirebase(path);
+      const cleanPath = utils.cleanPathForFirebase(path);
       const ref = this.firebase.database().ref(cleanPath).push();
 
       if (eventObj.cleanString !== undefined) {
@@ -217,10 +218,6 @@ class Anonalytics {
         // Analytics.record(eventObj.ueEventName, {time: eventObj.eventTimeMs});
       }
     }
-  }
-
-  static _cleanPathForFirebase(path) {
-    return path.replace(/[\.-]/g, '_');
   }
 }
 

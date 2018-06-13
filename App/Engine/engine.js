@@ -427,7 +427,7 @@ export class MessagingEngine extends EventEmitter {
 
     // Modify tool for plug-in to only focus on the contact we're workign with.
     //
-    if (this.plugin) {
+    if (!this.isMobile && this.plugin) {
       // TODO: fix this when we handle TLDs properly.
       const length = getQueryString('length');
       for (let i = 0; i < length; i++) {
@@ -648,7 +648,7 @@ export class MessagingEngine extends EventEmitter {
     this.anonalytics.aeLogin();
     this.anonalytics.aePlatformDescription(platform.description);
 
-    const appToken = getQueryString('app');
+    const appToken = (this.isMobile) ? undefined : getQueryString('app');
     let context = utils.getAppContext(appToken);
     this.anonalytics.aeLoginContext(context);
 
@@ -689,12 +689,15 @@ export class MessagingEngine extends EventEmitter {
         contactArr = [];
       }
       this._initWithContacts(contactArr);
-      // add query contact if there is one
-      const queryContact = getQueryString('add');
-      const existingUserIds = this.contactMgr.getAllContactIds();
-      const checkId = `${queryContact}.id`;
-      if (queryContact && !existingUserIds.includes(checkId)) {
-        this.emit('me-add-query-contact', queryContact);
+
+      if (!this.isMobile) {
+        // add query contact if there is one
+        const queryContact = getQueryString('add');
+        const existingUserIds = this.contactMgr.getAllContactIds();
+        const checkId = `${queryContact}.id`;
+        if (queryContact && !existingUserIds.includes(checkId)) {
+          this.emit('me-add-query-contact', queryContact);
+        }
       }
     })
     .catch((error) => {
@@ -830,7 +833,8 @@ export class MessagingEngine extends EventEmitter {
 
       if (status) {
         const key = id.substring(0, id.indexOf('.id')).replace(/\./g, '_');
-        firebase.database().ref(`${this.discoveryPath.replace(/\./g, '_')}/${key}`).remove();
+        const fbPath = utils.cleanPathForFirebase(`${this.discoveryPath}/${key}`);
+        firebase.database().ref(fbPath).remove();
       }
     });
   }
@@ -866,7 +870,8 @@ export class MessagingEngine extends EventEmitter {
 
     if (this.settings.discovery) {
       const key = contact.id.substring(0, contact.id.indexOf('.id')).replace(/\./g, '_');
-      firebase.database().ref(`${this.discoveryPath.replace(/\./g, '_')}/${key}`).remove();
+      const fbPath = utils.cleanPathForFirebase(`${this.discoveryPath}/${key}`);
+      firebase.database().ref(fbPath).remove();
     }
 
     this.updateContactMgr();
