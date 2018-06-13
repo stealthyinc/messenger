@@ -116,5 +116,9 @@ function _throwIfKeyUndefined(aKey, aMethodName) {
 }
 
 module.exports.cleanPathForFirebase = function (path) {
+  if ((path === null) || (path === undefined)) {
+    throw (`ERROR(utils::cleanPathForFirebase): path is null or undefined.`);
+  }
+  
   return path.replace(/[\.-]/g, '_');
 }

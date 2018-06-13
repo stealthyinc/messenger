@@ -179,7 +179,7 @@ class Anonalytics {
       //   cryptoUtils.encryptStr(anEventName, this.password) : anEventName;
       const eventName = anEventName;
       const eventTimeMs = Date.now();
-      const cleanString = (aString !== undefined) ?
+      const cleanString = ((aString !== undefined) && (aString !== null)) ?
         utils.cleanPathForFirebase(aString) : undefined;
 
       if (this.analyticsQueue.length < MAX_QUEUE) {
