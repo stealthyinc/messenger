@@ -56,7 +56,7 @@ class HeartBeat extends EventEmitter {
       }
     }
 
-    this.on('HeartBeat', this.writeHeartBeatFiles);
+    this.on('HeartBeat', this.writeHeartBeatFile);
     this.on('HeartBeatMonitor', this.readHeartBeatFiles);
     this.on('firstBeatComplete', this.startMonitor);
   }
@@ -151,7 +151,7 @@ class HeartBeat extends EventEmitter {
     this.enableMonitor = false;
   }
 
-  writeHeartBeatFiles = () => {
+  writeHeartBeatFile = () => {
     this.log('Write HeartBeat files!');
 
     return this.io.writeLocalFile(this.userId, HB_FILE_NAME, { time: Date.now() })

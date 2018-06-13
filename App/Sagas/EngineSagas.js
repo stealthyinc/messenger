@@ -22,7 +22,7 @@ import firebase from 'react-native-firebase';
 
 let EngineInstance = undefined;
 
-const logger = (...args) => { 
+const logger = (...args) => {
   if (process.env.NODE_ENV === 'development') {
     console.log(...args)
   }
@@ -62,7 +62,7 @@ function* watchContactMgrEventChannel() {
   })
   while (true) {
     const contactMgr = yield take(channel)
-    yield put(EngineActions.setEngineContactMgr(contactMgr)) 
+    yield put(EngineActions.setEngineContactMgr(contactMgr))
   }
 }
 
@@ -136,8 +136,7 @@ function* sendNotificationWorker() {
 }
 
 function* backgroundTasks() {
-  //ACTODO: Put Background Stuff Here
-  console.log("PBJ: Background Tasks Started")
+  EngineInstance.handleMobileBackgroundUpdate()
 }
 
 export function* startEngine () {

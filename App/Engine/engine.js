@@ -764,6 +764,25 @@ export class MessagingEngine extends EventEmitter {
   }
 
   //
+  //  Mobile
+  // ////////////////////////////////////////////////////////////////////////////
+  // ////////////////////////////////////////////////////////////////////////////
+  //
+  handleMobileBackgroundUpdate() {
+    console.log('MessagingEngine::handleMobileBackgroundUpdate:');
+
+    if (this.heartBeat) {
+      this.heartBeat.writeHeartBeatFile();
+
+      // TODO: Think about including this. If this method is getting called,
+      //       we're in the background anyway so what's the point of getting
+      //       the heartBeat files?
+      //
+      // this.heartBeat.readHeartBeatFiles();
+    }
+  }
+
+  //
   //  Contact Management
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
