@@ -20,5 +20,13 @@ export default {
       ok: true,
       data: username.toLowerCase() === 'gantman' ? gantmanData : skellockData
     }
+  },
+  getUserProfile: (username) => {
+    // This fixture only supports gantman or else returns skellock
+    const userData = require('../Fixtures/blockstackUserProfile.json')
+    return {
+      ok: true,
+      data: userData
+    }
   }
 }

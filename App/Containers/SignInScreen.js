@@ -134,11 +134,6 @@ class SignInScreen extends React.Component {
       if (error) {
         throw(`Failed to get user data.  ${error}`);
       } else {
-        // console.log(`SUCCESS (getUserData):\n`);
-        // for (const key in userData) {
-        //   console.log(`\t${key}: ${userData[key]}`)
-        // }
-        // Get public key:
         BlockstackNativeModule.getPublicKeyFromPrivate(
           userData['privateKey'], async (error, publicKey) => {
             if (error) {
@@ -151,69 +146,6 @@ class SignInScreen extends React.Component {
               await AsyncStorage.setItem('userData', JSON.stringify(this.userData));
               this.props.setUserData(this.userData)
               this.props.navigation.navigate('App');
-              // Test encryption
-              // let testString1 = "Concensus";
-              // BlockstackNativeModule.encryptPrivateKey(publicKey, testString1, (error, cipherObjectJSONString) => {
-              //   if (error) {
-              //     throw(`Failed to encrpyt ${error}.`);
-              //   } else {
-              //     console.log(`SUCCESS (encryptPrivateKey): cipherObjectJSONString = ${cipherObjectJSONString}`);
-              //     BlockstackNativeModule.decryptPrivateKey(userData['privateKey'], cipherObjectJSONString, (error, decrypted) => {
-              //       if (error) {
-              //         throw(`Failed to decrypt: ${error}.`)
-              //       } else {
-              //         console.log(`SUCCESS (decryptPrivateKey): decryptedString = ${decrypted}`)
-              //       }
-              //     });
-              //   }
-              // });
-
-              // Test encryptContent / decryptContent
-              // let testString2 = "Content works?";
-              // BlockstackNativeModule.encryptContent(testString2, (error, cipherObjectJSONString) => {
-              //   if (error) {
-              //     throw(`Failed to encrpyt with encryptContent: ${error}.`);
-              //   } else {
-              //     console.log(`SUCCESS (encryptContent): cipherObjectJSONString = ${cipherObjectJSONString}`);
-              //     BlockstackNativeModule.decryptContent(cipherObjectJSONString, (error, decrypted) => {
-              //       if (error) {
-              //         throw(`Failed to decrypt with decryptContent: ${error}.`)
-              //       } else {
-              //         console.log(`SUCCESS (decryptContent): decryptedString = ${decrypted}`)
-              //       }
-              //     });
-              //   }
-              // });
-
-              // Test get file on pk.txt path.
-              // BlockstackNativeModule.getRawFile('pk.txt', (error, array) => {
-              //   console.log('After getFile:');
-              //   console.log('--------------------------------------------------------');
-              //   console.log(`error: ${error}`);
-              //   console.log(`content: ${array}`);
-              //   console.log('');
-              // });
-
-              // // Test write/read cycle:
-              // BlockstackNativeModule.putFile('testWrite.txt',
-              //                                'Will this work?',
-              //                                (error, content) => {
-              //   console.log('wrote testWrite.txt');
-              //   console.log('After putFile:');
-              //   console.log('--------------------------------------------------------');
-              //   console.log(`error: ${error}`);
-              //   console.log(`content: ${content}`);
-              //   console.log('');
-              
-              //   BlockstackNativeModule.getFile('testWrite.txt', (error, content) => {
-              //     console.log('read testWrite.txt');
-              //     console.log('After getFile:');
-              //     console.log('--------------------------------------------------------');
-              //     console.log(`error: ${error}`);
-              //     console.log(`content: ${content}`);
-              //     console.log('');
-              //   });
-              // });
               completion();
             }
         });

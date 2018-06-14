@@ -15,10 +15,8 @@ import EngineActions, { EngineSelectors, EngineTypes } from '../Redux/EngineRedu
 import {
   AsyncStorage,
 } from 'react-native';
-const { MessagingEngine } = require('../Engine/engine.js')
 import API from '../Services/Api'
 import DebugConfig from '../Config/DebugConfig'
-import firebase from 'react-native-firebase';
 
 let EngineInstance = undefined;
 
@@ -29,6 +27,7 @@ const logger = (...args) => {
 }
 
 const createEngine = (userData) => {
+  const { MessagingEngine } = require('../Engine/engine.js')
   return new MessagingEngine(
                               logger,
                               userData['privateKey'],
@@ -175,6 +174,7 @@ export function * getActiveUserProfile (api, action) {
   const username = id.substring(0, id.lastIndexOf('.'))
   const response = yield call(api.getUserProfile, username)
   if (response.ok) {
+    console.log(JSON.stringify(response.data))
     const userProfile = response.data[username]
     yield put(EngineActions.setActiveUserProfile(userProfile))
   } else {

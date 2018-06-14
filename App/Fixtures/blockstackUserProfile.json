@@ -1,0 +1,155 @@
+{
+  "ryan": {
+    "owner_address": "15BcxePn59Y6mYD2fRLCLCaaHScefqW2No",
+    "profile": {
+      "@context": "http:\/\/schema.org",
+      "@type": "Person",
+      "account": [
+        {
+          "@type": "Account",
+          "identifier": "ryaneshea",
+          "placeholder": false,
+          "proofType": "http",
+          "proofUrl": "https:\/\/twitter.com\/ryaneshea\/status\/923642786171314178",
+          "service": "twitter"
+        },
+        {
+          "@type": "Account",
+          "identifier": "ryaneshea",
+          "placeholder": false,
+          "proofType": "http",
+          "proofUrl": "https:\/\/www.linkedin.com\/feed\/update\/urn:li:activity:6329408726621052928",
+          "service": "linkedIn"
+        },
+        {
+          "@type": "Account",
+          "identifier": "shea256",
+          "placeholder": false,
+          "proofType": "http",
+          "proofUrl": "https:\/\/gist.github.com\/shea256\/d2ea6da033f784e99fda2525a34b5c37",
+          "service": "github"
+        },
+        {
+          "@type": "Account",
+          "identifier": "shea256",
+          "placeholder": false,
+          "proofType": "http",
+          "proofUrl": "https:\/\/news.ycombinator.com\/user?id=shea256",
+          "service": "hackerNews"
+        },
+        {
+          "@type": "Account",
+          "identifier": "9e:93:6f:ff:04:cd:2d:42:33:62:7f:09:84:48:7b:62",
+          "placeholder": false,
+          "proofType": "http",
+          "proofUrl": "",
+          "service": "ssh"
+        },
+        {
+          "@type": "Account",
+          "identifier": "ryaneshea",
+          "placeholder": false,
+          "proofType": "http",
+          "proofUrl": "https:\/\/www.instagram.com\/p\/Ba5AGfoFi7U\/",
+          "service": "instagram"
+        },
+        {
+          "@type": "Account",
+          "identifier": "1KpsPeFpyRoC8n8ETS25rQr8NTiT85A9Vi",
+          "placeholder": false,
+          "proofType": "http",
+          "proofUrl": "",
+          "service": "bitcoin"
+        },
+        {
+          "@type": "Account",
+          "identifier": "0x40750B7a892f65048eaC32755b577CB808cD5add",
+          "placeholder": false,
+          "proofType": "http",
+          "proofUrl": "",
+          "service": "ethereum"
+        },
+        {
+          "@type": "Account",
+          "identifier": "ryaneshea",
+          "placeholder": false,
+          "proofType": "http",
+          "proofUrl": "https:\/\/www.facebook.com\/ryaneshea\/posts\/10155457350247713",
+          "service": "facebook"
+        }
+      ],
+      "apps": {
+        "http:\/\/app.travelstack.club": "https:\/\/gaia.blockstack.org\/hub\/1NT3GpayTLGGqtVVjvjCD3AYC4dtQx2Gdr\/",
+        "http:\/\/blockstack-hires.wbobeirne.com": "https:\/\/gaia.blockstack.org\/hub\/1BT5kVXheR4aPL5fwfdgTmva1iYFJNyrFP\/",
+        "http:\/\/publik.ykliao.com": "https:\/\/gaia.blockstack.org\/hub\/1FrZTGQ8DM9TMPfGXtXMUvt2NNebLiSzad\/",
+        "https:\/\/app.graphitedocs.com": "https:\/\/gaia.blockstack.org\/hub\/1Pi37X7KHdkJzd5BfBPXGhUyJkUUxjZqr8\/",
+        "https:\/\/blockx-socialapp.herokuapp.com": "https:\/\/gaia.blockstack.org\/hub\/1NfWp4omBcumwohizD5B1snyEffTK5xiBG\/",
+        "https:\/\/chat.postly.co": "https:\/\/gaia.blockstack.org\/hub\/1CBTNS9oaXFZvkyn8AnWDUcp1p7DFvk1ov\/",
+        "https:\/\/sketch.riot.ai": "https:\/\/gaia.blockstack.org\/hub\/1LZQ7cXZRx8eGQkgq5PkSo8fw3uHtu45S3\/",
+        "https:\/\/testnet.misthos.io": "https:\/\/gaia.blockstack.org\/hub\/13Tu9T7krKRjD7Wiz6PwhRdgdqJW7rJp6A\/",
+        "https:\/\/www.chat.hihermes.co": "https:\/\/gaia.blockstack.org\/hub\/15Vry9GwtVRreoiSNzSdhiVkr1ePDPkeho\/",
+        "https:\/\/www.stealthy.im": "https:\/\/gaia.blockstack.org\/hub\/1MFvNbDe4xDZgqsUp29rCDWyYneZN9T58w\/"
+      },
+      "description": "Co-founder of @Blockstack (w @muneeb), a new internet for decentralized apps. Background building software products & developer communities. Princeton & YC.",
+      "image": [
+        {
+          "@type": "ImageObject",
+          "contentUrl": "https:\/\/gaia.blockstack.org\/hub\/15BcxePn59Y6mYD2fRLCLCaaHScefqW2No\/0\/avatar-0",
+          "name": "avatar"
+        }
+      ],
+      "name": "Ryan Shea"
+    },
+    "public_key": "02bf12e014078b27e79279ad337969b0623356451a181b3db9faeeb00b9abe7d1a",
+    "verifications": [
+      {
+        "identifier": "ryaneshea",
+        "proof_url": "https:\/\/twitter.com\/ryaneshea\/status\/923642786171314178",
+        "service": "twitter",
+        "valid": true
+      },
+      {
+        "identifier": "ryaneshea",
+        "proof_url": "https:\/\/www.linkedin.com\/feed\/update\/urn:li:activity:6329408726621052928",
+        "service": "linkedIn",
+        "valid": true
+      },
+      {
+        "identifier": "shea256",
+        "proof_url": "https:\/\/gist.github.com\/shea256\/d2ea6da033f784e99fda2525a34b5c37",
+        "service": "github",
+        "valid": true
+      },
+      {
+        "identifier": "shea256",
+        "proof_url": "https:\/\/news.ycombinator.com\/user?id=shea256",
+        "service": "hackerNews",
+        "valid": true
+      },
+      {
+        "identifier": "ryaneshea",
+        "proof_url": "https:\/\/www.instagram.com\/p\/Ba5AGfoFi7U\/",
+        "service": "instagram",
+        "valid": true
+      },
+      {
+        "identifier": "ryaneshea",
+        "proof_url": "https:\/\/www.facebook.com\/ryaneshea\/posts\/10155457350247713",
+        "service": "facebook",
+        "valid": false
+      }
+    ],
+    "zone_file": {
+      "$origin": "ryan.id",
+      "$ttl": 3600,
+      "uri": [
+        {
+          "name": "_http._tcp",
+          "priority": 10,
+          "target": "https:\/\/gaia.blockstack.org\/hub\/15BcxePn59Y6mYD2fRLCLCaaHScefqW2No\/0\/profile.json",
+          "weight": 1
+        }
+      ]
+    }
+  }
+}
