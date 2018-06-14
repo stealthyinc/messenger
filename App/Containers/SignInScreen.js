@@ -138,7 +138,7 @@ class SignInScreen extends React.Component {
           userData['privateKey'], async (error, publicKey) => {
             if (error) {
               throw(`Failed to get public key from private. ${error}`);
-            } 
+            }
             else {
               // console.log(`SUCCESS (loadUserDataObject): publicKey = ${publicKey}\n`);
               userData['appPublicKey'] = publicKey;
@@ -146,6 +146,28 @@ class SignInScreen extends React.Component {
               await AsyncStorage.setItem('userData', JSON.stringify(this.userData));
               this.props.setUserData(this.userData)
               this.props.navigation.navigate('App');
+
+              // #BhardwajParty:
+              // Code to reproduce the encryptECIES issues
+              BlockstackNativeModule.getPublicKeyFromPrivate(this.userData.privateKey, (error, publicKey) => {
+                if (error) {
+                  console.log(`ERROR: failed getting public key from private key - ${error}`);
+                } else {
+                  console.log(`Got public key from private. publicKey=${publicKey}`);
+
+                  const valueToEncrypt = 'Testing';
+                  BlockstackNativeModule.encryptPrivateKey(publicKey, valueToEncrypt, (error, cipherObjectJSONString) => {
+                    if (error) {
+                      debugger
+                      console.log(`ERROR: encrypting failed with ${error}`);
+                    } else {
+                      debugger
+                      console.log(`Encryption succeeded. cipherObjectJSONString=${cipherObjectJSONString}`);
+                    }
+                  })
+                }
+              });
+
               completion();
             }
         });
