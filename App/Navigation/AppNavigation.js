@@ -11,6 +11,7 @@ import HomeScreen from '../Containers/HomeScreen'
 import AuthLoadingScreen from '../Containers/AuthLoadingScreen'
 import SignInScreen from '../Containers/SignInScreen'
 import TabScreen from '../Containers/TabScreen'
+import BlockScreen from '../Containers/BlockScreen'
 import ChatScreen from '../Containers/ChatScreen'
 import StartChatScreen from '../Containers/StartChatScreen'
 import ContactScreen from '../Containers/ContactScreen'
@@ -50,6 +51,7 @@ export default SwitchNavigator(
     AuthLoading: AuthLoadingScreen,
     App: PrimaryNav,
     Auth: AuthStack,
+    Block: BlockScreen,
   },
   {
     headerMode: 'none',

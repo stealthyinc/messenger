@@ -3,6 +3,8 @@ package com.stealthy;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.rn.ecc.ECCPackage;
+import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
@@ -30,6 +32,8 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new ECCPackage(),
+            new RNBackgroundFetchPackage(),
             new RandomBytesPackage(),
             new ReactNativePushNotificationPackage(),
             new ReactNativeConfigPackage(),

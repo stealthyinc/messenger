@@ -141,11 +141,11 @@ class SignInScreen extends React.Component {
             }
             else {
               // console.log(`SUCCESS (loadUserDataObject): publicKey = ${publicKey}\n`);
-              userData['appPublicKey'] = publicKey;
               this.userData = userData;
-              await AsyncStorage.setItem('userData', JSON.stringify(this.userData));
               this.props.setUserData(this.userData)
-              this.props.navigation.navigate('App');
+              userData['appPublicKey'] = publicKey;
+              await AsyncStorage.setItem('userData', JSON.stringify(this.userData));
+              this.props.navigation.navigate('AuthLoading');
               completion();
             }
         });

@@ -21,7 +21,10 @@ const { Types, Creators } = createActions({
   updateUserSettings: ['radioSetting'],
   backgroundRefresh: [''],
   handleDeleteContact: ['deleteContact'],
-  clearUserData: [''],
+  clearUserData: ['publicKey'],
+  unlockEngine: [''],
+  setCurrentPlatform: ['currentPlatform'],
+  lockEngine: [''],
 })
 
 export const EngineTypes = Types
@@ -41,6 +44,8 @@ export const INITIAL_STATE = Immutable({
   contactAdded: false,
   token: '',
   userSettings: {},
+  currentPlatform: '',
+  lockEngine: false,
 })
 
 /* ------------- Selectors ------------- */
@@ -55,9 +60,27 @@ export const EngineSelectors = {
   getContactAdded: state => state.engine.contactAdded,
   getToken: state => state.engine.token,
   getUserSettings: state => state.engine.userSettings,
+  getCurrentPlatform: state => state.engine.currentPlatform,
+  getEngineLock: state => state.engine.lockEngine,
 }
 
 /* ------------- Reducers ------------- */
+
+// set current platform 
+export const setCurrentPlatform = (state, { currentPlatform }) => {
+  return state.merge({ currentPlatform })
+}
+
+// set block engine
+export const lockEngine = (state) => {
+  debugger
+  return state.merge({ lockEngine: true })
+}
+
+// set block engine
+export const unlockEngine = (state) => {
+  return state.merge({ lockEngine: false })
+}
 
 // engine failed to start
 export const setEngineFailure = state =>
@@ -115,6 +138,9 @@ export const setUserSettings = (state, { userSettings }) => {
 
 export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_USER_DATA]: setUserData,
+  [Types.SET_CURRENT_PLATFORM]: setCurrentPlatform,
+  [Types.LOCK_ENGINE]: lockEngine,
+  [Types.UNLOCK_ENGINE]: unlockEngine,
   [Types.CLEAR_USER_DATA]: clearUserData,
   [Types.SET_USER_PROFILE]: setUserProfile,
   [Types.SET_ACTIVE_USER_PROFILE]: setActiveUserProfile,

@@ -14,9 +14,11 @@ import { apply, call, fork, put, select, take, takeLatest } from 'redux-saga/eff
 import EngineActions, { EngineSelectors, EngineTypes } from '../Redux/EngineRedux'
 import {
   AsyncStorage,
+  Platform,
 } from 'react-native';
 import API from '../Services/Api'
 import DebugConfig from '../Config/DebugConfig'
+import firebase from 'react-native-firebase';
 
 let EngineInstance = undefined;
 
@@ -39,6 +41,34 @@ const createEngine = (userData) => {
                               {
                                 neverWebRTC: true
                               })
+}
+
+const checkFirebaseBlocking = (publicKey) => {
+  const ref = firebase.database().ref(`/global/session/${publicKey}`);
+  return ref.once('value')
+  .then((snapshot) => {
+    if (snapshot.exists() && snapshot.child('platform').val()) {
+      return snapshot.child('platform').val();
+    }
+    else {
+      if (Platform.OS) {
+        ref.set({'platform': Platform.OS})
+        return Platform.OS
+      }
+      else {
+        ref.set({'platform': 'browser'})
+        return 'browser'
+      }
+    }
+  })
+}
+
+function* setFirebaseBlocking (action, iPublicKey, platform) {
+  if (action) {
+    const { publicKey } = action
+    return firebase.database().ref(`/global/session/${publicKey}`).set({platform: 'none'})
+  }
+  return firebase.database().ref(`/global/session/${iPublicKey}`).set({platform})
 }
 
 function* watchInitialzedEventChannel() {
@@ -143,8 +173,8 @@ function* backgroundTasks() {
   EngineInstance.handleMobileBackgroundUpdate()
 }
 
-export function* startEngine (action) {
-  const { userData } = action
+function* engineWorkers() {
+  const userData = yield select(EngineSelectors.getUserData)
   EngineInstance = yield call (createEngine, userData)
   const engineInit = yield select(EngineSelectors.getEngineInit)
   EngineInstance.componentDidMountWork(engineInit, userData["username"])
@@ -153,6 +183,27 @@ export function* startEngine (action) {
   yield fork(watchMessagesEventChannel)
   yield fork(watchContactAddedChannel)
   yield fork(watchUserSettingsChannel)
+  yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
+  yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)
+  yield takeLatest(EngineTypes.ADD_NEW_CONTACT, handleSearchSelect)
+  yield takeLatest(EngineTypes.SEND_NOTIFICATION, sendNotificationWorker)
+  yield takeLatest(EngineTypes.UPDATE_USER_SETTINGS, updateUserSettings)
+  yield takeLatest(EngineTypes.BACKGROUND_REFRESH, backgroundTasks)
+  yield takeLatest(EngineTypes.HANDLE_DELETE_CONTACT, deleteContact)
+}
+
+export function* startEngine (action) {
+  const { userData } = action
+  const currentPlatform = yield call (checkFirebaseBlocking, userData['appPublicKey'])
+  yield put(EngineActions.setCurrentPlatform(currentPlatform))
+  if (currentPlatform === 'none') {
+    const publicKey = userData['appPublicKey']
+    yield call (setFirebaseBlocking, undefined, publicKey, Platform.OS)
+    yield put(EngineActions.unlockEngine())
+  }
+  else {
+    yield put(EngineActions.lockEngine())
+  }
 }
 
 export function * getUserProfile (api, action) {
@@ -184,13 +235,8 @@ export function * getActiveUserProfile (api, action) {
 
 export default function* engineSagas(api) {
   yield takeLatest(EngineTypes.SET_USER_DATA, startEngine)
+  yield takeLatest(EngineTypes.UNLOCK_ENGINE, engineWorkers)
+  yield takeLatest(EngineTypes.CLEAR_USER_DATA, setFirebaseBlocking)
   yield takeLatest(EngineTypes.SET_USER_DATA, getUserProfile, api)
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, getActiveUserProfile, api)
-  yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
-  yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)
-  yield takeLatest(EngineTypes.ADD_NEW_CONTACT, handleSearchSelect)
-  yield takeLatest(EngineTypes.SEND_NOTIFICATION, sendNotificationWorker)
-  yield takeLatest(EngineTypes.UPDATE_USER_SETTINGS, updateUserSettings)
-  yield takeLatest(EngineTypes.BACKGROUND_REFRESH, backgroundTasks)
-  yield takeLatest(EngineTypes.HANDLE_DELETE_CONTACT, deleteContact)
 }
