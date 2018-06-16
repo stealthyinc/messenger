@@ -5,6 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import { Toast } from 'native-base';
+import firebase from 'react-native-firebase';
 
 const stock = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
 
@@ -41,6 +42,7 @@ class ProfileScreen extends React.Component {
   _signOutAsync = async () => {
     const {BlockstackNativeModule} = NativeModules;
     const publicKey = this.props.userData['appPublicKey']
+    await firebase.database().ref(`/global/session/${publicKey}`).set({platform: 'none'})
     this.props.clearUserData(publicKey);
     await AsyncStorage.clear();
     await BlockstackNativeModule.signOut();

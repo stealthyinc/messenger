@@ -6,48 +6,46 @@ import {
   StatusBar,
   StyleSheet,
   View,
+  Platform
 } from 'react-native';
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import firebase from 'react-native-firebase';
 
 class AuthLoadingScreen extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      finishSetup: false
-    }
     this._bootstrapAsync();
   }
 
   // Fetch the token from storage then navigate to our appropriate place
   _bootstrapAsync = async () => {
-    const userData = await AsyncStorage.getItem('userData');
+    const userData = JSON.parse(await AsyncStorage.getItem('userData'));
     if (!userData) {
       this.props.navigation.navigate('Auth');
     }
     else {
-      this.props.setUserData(JSON.parse(userData))
-      const userProfile = await AsyncStorage.getItem('userProfile');
-      this.props.setUserProfile(JSON.parse(userProfile))
-      const token = await AsyncStorage.getItem('token')
-      this.props.setToken(token)
-      this.state.finishSetup = true
-      this.props.navigation.navigate(this.props.lockEngine ? 'Block' : 'App');
+      const publicKey = userData['appPublicKey']
+      const ref = firebase.database().ref(`/global/session/${publicKey}`)
+      await ref.once('value')
+      .then((snapshot) => {
+        if (snapshot.exists() && snapshot.child('platform').val() === Platform.OS) {
+          this.setupVars(userData)
+        }
+        else {
+          this.props.navigation.navigate('Block');
+        }
+      })
     }
-
-    // This will switch to the App screen or Auth screen and this loading
-    // screen will be unmounted and thrown away.
-    // this.props.navigation.navigate(userData ? 'App' : 'Auth');
   };
 
-  componentWillReceiveProps(nextProps) {
-    const { lockEngine } = nextProps
-    if (lockEngine && this.state.finishSetup) {
-      this.props.navigation.navigate('Block');
-    }
-    else {
-      this.props.navigation.navigate('App');
-    }
+  setupVars = async (userData) => {
+    this.props.setUserData(userData)
+    const userProfile = JSON.parse(await AsyncStorage.getItem('userProfile'));
+    this.props.setUserProfile(userProfile)
+    const token = await AsyncStorage.getItem('token')
+    this.props.setToken(token)
+    this.props.navigation.navigate('App');
   }
 
   // Render any loading content that you like here

@@ -8,12 +8,14 @@ import {
   Image,
   WebView,
   Linking,
-  NativeModules
+  NativeModules,
+  Platform,
 } from 'react-native';
 import { Icon, Button, Overlay, SocialIcon } from 'react-native-elements'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 const { MessagingEngine } = require('../Engine/engine.js');
+import firebase from 'react-native-firebase';
 
 // import FAQ from '../Components/FAQ'
 
@@ -140,12 +142,22 @@ class SignInScreen extends React.Component {
               throw(`Failed to get public key from private. ${error}`);
             }
             else {
-              // console.log(`SUCCESS (loadUserDataObject): publicKey = ${publicKey}\n`);
-              this.userData = userData;
-              this.props.setUserData(this.userData)
               userData['appPublicKey'] = publicKey;
-              await AsyncStorage.setItem('userData', JSON.stringify(this.userData));
-              this.props.navigation.navigate('AuthLoading');
+              this.userData = userData;
+              const ref = firebase.database().ref(`/global/session/${publicKey}`);
+              console.log('publicKey', publicKey)
+              await ref.once('value')
+              .then((snapshot) => {
+                if (snapshot.exists() && snapshot.child('platform').val() === 'none') {
+                  this.props.setUserData(this.userData)
+                  AsyncStorage.setItem('userData', JSON.stringify(this.userData));
+                  firebase.database().ref(`/global/session/${publicKey}`).set({platform: Platform.OS})
+                  this.props.navigation.navigate('App');
+                }
+                else {
+                  this.props.navigation.navigate('Block');
+                }
+              })
               completion();
             }
         });

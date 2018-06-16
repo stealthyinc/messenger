@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 // import PropTypes from 'prop-types'
-import { AsyncStorage, NativeModules, View, Text } from 'react-native'
+import { AsyncStorage, NativeModules, View, Text, Platform } from 'react-native'
 import styles from './Styles/BlockScreenStyle'
 import { Button } from 'react-native-elements'
 import { connect } from 'react-redux'
@@ -9,15 +9,19 @@ import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 class BlockScreen extends Component {
   _signOutAsync = async () => {
     const {BlockstackNativeModule} = NativeModules
-    const publicKey = userData['appPublicKey']
-    this.props.clearUserData(publicKey)
+    const { userData } = this.props
+    if (userData) {
+      const publicKey = userData['appPublicKey']
+      await firebase.database().ref(`/global/session/${publicKey}`).set({platform: 'none'})
+    }
     await AsyncStorage.clear()
     await BlockstackNativeModule.signOut()
     this.props.navigation.navigate('Auth')
   }
-  _unlockEngine = () => {
-    this.props.unlockEngine()
-    this.props.navigation.navigate('AuthLoading')
+  _unlockEngine = async () => {
+    const publicKey = this.props.userData['appPublicKey']
+    await firebase.database().ref(`/global/session/${publicKey}`).set({platform: Platform.OS})
+    this.props.navigation.navigate('App')
   }
   render () {
     return (
@@ -58,8 +62,6 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    clearUserData: (publicKey) => dispatch(EngineActions.clearUserData(publicKey)),
-    unlockEngine: () => dispatch(EngineActions.unlockEngine()),
   }
 }
 
