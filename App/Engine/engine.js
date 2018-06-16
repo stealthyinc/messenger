@@ -610,10 +610,10 @@ export class MessagingEngine extends EventEmitter {
 
       this.logger(`INFO(engine.js::_configureSessionManagement): session is locked to ${snapshot.val()}.`);
 
-      ref.on('child_changed')
-      .then((snapshot) => {
-        const session = snapshot.val();
-      })
+      // ref.on('child_changed')
+      // .then((snapshot) => {
+      //   const session = snapshot.val();
+      // })
 
       this._configureIO();
     })
