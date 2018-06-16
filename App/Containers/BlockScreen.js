@@ -21,9 +21,13 @@ class BlockScreen extends Component {
   }
   _unlockEngine = async () => {
     const { publicKey } = this.props
-    await firebase.database().ref(common.getSessionRef(publicKey)).set(common.getSessionId())
-    const userData = JSON.parse(await AsyncStorage.getItem('userData'));
-    this.setupVars(userData)
+    if (publicKey) {
+      await firebase.database().ref(common.getSessionRef(publicKey)).set(common.getSessionId())
+      const userData = JSON.parse(await AsyncStorage.getItem('userData'));
+      this.setupVars(userData)
+    } else {
+      this.props.navigation.navigate('Auth');
+    }
   }
   setupVars = async (userData) => {
     this.props.setUserData(userData)
@@ -72,7 +76,10 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    setUserData: (userData) => dispatch(EngineActions.setUserData(userData)),
+    setUserProfile: (userProfile) => dispatch(EngineActions.setUserProfile(userProfile)),
     clearUserData: (publicKey) => dispatch(EngineActions.clearUserData(publicKey)),
+    setToken: (token) => dispatch(EngineActions.setToken(token)),
   }
 }
 

@@ -608,7 +608,7 @@ export class MessagingEngine extends EventEmitter {
         throw `ERROR(engine.js::_configureSessionManagement): session is unlocked.`;
       }
 
-      this.logger(`INFO(engine.js::_configureSessionManagement): session is locked to ${session}.`);
+      this.logger(`INFO(engine.js::_configureSessionManagement): session is locked to ${snapshot.val()}.`);
 
       ref.on('child_changed')
       .then((snapshot) => {

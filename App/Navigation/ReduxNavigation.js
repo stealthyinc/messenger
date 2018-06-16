@@ -15,7 +15,7 @@ class ReduxNavigation extends React.Component {
     this.state = {
       fbListner: false
     }
-    this.ref = firebase.database().ref(`/global/session/`)
+    this.ref = undefined;
   }
   componentWillMount () {
     if (Platform.OS !== 'ios') {
@@ -65,12 +65,15 @@ class ReduxNavigation extends React.Component {
     const { publicKey } = nextProps
     if (!this.state.fbListner) {
       this.setState({fbListner: true})
-      this.ref.child(`${publicKey}`)
-      .on('child_changed', (childSnapshot, prevChildKey) => {
-        const platform = childSnapshot.child('platform').val()
-        if (platform !== Platform.OS && platform !== 'none')
-          this._signOutAsync(childSnapshot.key)
-      });
+
+      if (publicKey && !this.ref) {
+        this.ref = firebase.database().ref(common.getSessionRef(publicKey))
+        this.ref.on('child_changed', (childSnapshot, prevChildKey) => {
+          const platform = childSnapshot.child('platform').val()
+          if (platform !== Platform.OS && platform !== 'none')
+            this._signOutAsync(childSnapshot.key)
+        });
+      }
     }
   }
   componentWillUnmount () {
@@ -78,11 +81,15 @@ class ReduxNavigation extends React.Component {
       BackHandler.removeEventListener('hardwareBackPress')
     }
     const { publicKey } = this.props
-    this.ref.child(`${publicKey}`).off()
+    if (this.ref) {
+      this.ref.off();
+    }
   }
   _signOutAsync = async (publicKey) => {
     const {BlockstackNativeModule} = NativeModules;
-    this.ref.child(`${publicKey}`).off()
+    if (this.ref) {
+      this.ref.off();
+    }
     this.props.dispatch(EngineActions.clearUserData(publicKey));
     await AsyncStorage.clear();
     await BlockstackNativeModule.signOut();
@@ -97,7 +104,7 @@ class ReduxNavigation extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => { 
+const mapStateToProps = (state) => {
   return {
     nav: state.nav,
     publicKey: EngineSelectors.getPublicKey(state),
