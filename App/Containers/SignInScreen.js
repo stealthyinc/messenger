@@ -17,6 +17,8 @@ import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 const { MessagingEngine } = require('../Engine/engine.js');
 import firebase from 'react-native-firebase';
 
+const common = require('./../common.js');
+
 // import FAQ from '../Components/FAQ'
 
 import laptop from '../Images/laptopChat.png';
@@ -144,14 +146,16 @@ class SignInScreen extends React.Component {
             else {
               userData['appPublicKey'] = publicKey;
               this.userData = userData;
-              const ref = firebase.database().ref(`/global/session/${publicKey}`);
-              console.log('publicKey', publicKey)
+              const ref = firebase.database().ref(common.getSessionRef(publicKey));
+              // const ref = firebase.database().ref(`/global/session/${publicKey}`);
+              console.log(`publicKey: ${publicKey}`)
               await ref.once('value')
               .then((snapshot) => {
-                if (snapshot.exists() && snapshot.child('platform').val() === 'none') {
+                if (snapshot.exists() && snapshot.val() === 'none') {
                   this.props.setUserData(this.userData)
                   AsyncStorage.setItem('userData', JSON.stringify(this.userData));
-                  firebase.database().ref(`/global/session/${publicKey}`).set({platform: Platform.OS})
+                  ref.set(common.getSessionId());
+                  // firebase.database().ref(`/global/session/${publicKey}`).set({platform: Platform.OS})
                   this.props.navigation.navigate('App');
                 }
                 else {
