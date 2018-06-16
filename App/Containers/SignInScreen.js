@@ -143,14 +143,14 @@ class SignInScreen extends React.Component {
             }
             else {
               userData['appPublicKey'] = publicKey;
+              this.props.setPublicKey(publicKey)
               this.userData = userData;
+              AsyncStorage.setItem('userData', JSON.stringify(this.userData));
               const ref = firebase.database().ref(`/global/session/${publicKey}`);
-              console.log('publicKey', publicKey)
               await ref.once('value')
               .then((snapshot) => {
-                if (snapshot.exists() && snapshot.child('platform').val() === 'none') {
+                if (!snapshot.exists() || snapshot.child('platform').val() === 'none') {
                   this.props.setUserData(this.userData)
-                  AsyncStorage.setItem('userData', JSON.stringify(this.userData));
                   firebase.database().ref(`/global/session/${publicKey}`).set({platform: Platform.OS})
                   this.props.navigation.navigate('App');
                 }
@@ -158,7 +158,7 @@ class SignInScreen extends React.Component {
                   this.props.navigation.navigate('Block');
                 }
               })
-              completion();
+              // completion();
             }
         });
       }
@@ -187,6 +187,7 @@ const styles = StyleSheet.create({
 const mapDispatchToProps = (dispatch) => {
   return {
     setUserData: (userData) => dispatch(EngineActions.setUserData(userData)),
+    setPublicKey: (publicKey) => dispatch(EngineActions.setPublicKey(publicKey)),
   }
 }
 

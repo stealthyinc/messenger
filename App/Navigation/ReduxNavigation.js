@@ -1,14 +1,22 @@
 import React from 'react'
-import { BackHandler, Platform, NativeModules } from 'react-native'
+import { AsyncStorage, BackHandler, Platform, NativeModules } from 'react-native'
 import { addNavigationHelpers } from 'react-navigation'
 import { createReduxBoundAddListener } from 'react-navigation-redux-helpers'
 import { connect } from 'react-redux'
 import AppNavigation from './AppNavigation'
 import { Root } from "native-base";
 import BackgroundFetch from "react-native-background-fetch";
-import EngineActions from '../Redux/EngineRedux'
+import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import firebase from 'react-native-firebase';
 
 class ReduxNavigation extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      fbListner: false
+    }
+    this.ref = firebase.database().ref(`/global/session/`)
+  }
   componentWillMount () {
     if (Platform.OS !== 'ios') {
       BackHandler.addEventListener('hardwareBackPress', () => {
@@ -53,10 +61,33 @@ class ReduxNavigation extends React.Component {
       }
     });
   }
-  componentWillUnmount () {
-    if (Platform.OS === 'ios') return
-    BackHandler.removeEventListener('hardwareBackPress')
+  componentWillReceiveProps (nextProps) {
+    const { publicKey } = nextProps
+    if (!this.state.fbListner) {
+      this.setState({fbListner: true})
+      this.ref.child(`${publicKey}`)
+      .on('child_changed', (childSnapshot, prevChildKey) => {
+        const platform = childSnapshot.child('platform').val()
+        if (platform !== Platform.OS && platform !== 'none')
+          this._signOutAsync(childSnapshot.key)
+      });
+    }
   }
+  componentWillUnmount () {
+    if (Platform.OS !== 'ios') {
+      BackHandler.removeEventListener('hardwareBackPress')
+    }
+    const { publicKey } = this.props
+    this.ref.child(`${publicKey}`).off()
+  }
+  _signOutAsync = async (publicKey) => {
+    const {BlockstackNativeModule} = NativeModules;
+    this.ref.child(`${publicKey}`).off()
+    this.props.dispatch(EngineActions.clearUserData(publicKey));
+    await AsyncStorage.clear();
+    await BlockstackNativeModule.signOut();
+    // this.props.nav.navigate('Auth');
+  };
   render () {
     return (
       <Root>
@@ -66,5 +97,11 @@ class ReduxNavigation extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({ nav: state.nav })
+const mapStateToProps = (state) => { 
+  return {
+    nav: state.nav,
+    publicKey: EngineSelectors.getPublicKey(state),
+  }
+}
+
 export default connect(mapStateToProps)(ReduxNavigation)

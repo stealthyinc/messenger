@@ -6,6 +6,7 @@ import Immutable from 'seamless-immutable'
 const { Types, Creators } = createActions({
   setEngineFailure: null,
   setUserData:['userData'],
+  setPublicKey: ['publicKey'],
   setEngineInitial: ['engineInit'],
   setEngineContactMgr: ['contactMgr'],
   setEngineMessages: ['messages'],
@@ -44,6 +45,7 @@ export const INITIAL_STATE = Immutable({
   userSettings: {},
   currentPlatform: '',
   lockEngine: false,
+  publicKey: '',
 })
 
 /* ------------- Selectors ------------- */
@@ -60,6 +62,7 @@ export const EngineSelectors = {
   getUserSettings: state => state.engine.userSettings,
   getCurrentPlatform: state => state.engine.currentPlatform,
   getEngineLock: state => state.engine.lockEngine,
+  getPublicKey: state => state.engine.publicKey,
 }
 
 /* ------------- Reducers ------------- */
@@ -79,8 +82,15 @@ export const setUserData = (state, { userData }) => {
 }
 
 // engine clear data
-export const clearUserData = (state) => {
-  return INITIAL_STATE
+export const clearUserData = (state, { publicKey }) => {
+  let newState = INITIAL_STATE
+  newState.merge({ publicKey })
+  return newState
+}
+
+// engine clear data
+export const setPublicKey = (state, { publicKey }) => {
+  return state.merge({ publicKey })
 }
 
 export const setUserProfile = (state, { userProfile }) => {
@@ -125,6 +135,7 @@ export const setUserSettings = (state, { userSettings }) => {
 
 export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_USER_DATA]: setUserData,
+  [Types.SET_PUBLIC_KEY]: setPublicKey,
   [Types.SET_CURRENT_PLATFORM]: setCurrentPlatform,
   [Types.CLEAR_USER_DATA]: clearUserData,
   [Types.SET_USER_PROFILE]: setUserProfile,

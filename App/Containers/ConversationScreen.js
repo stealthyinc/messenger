@@ -47,8 +47,7 @@ class ConversationScreen extends React.Component {
     };
   }
   async componentWillMount() {
-    const { userData, token } = this.props
-    const publicKey = userData['appPublicKey']
+    const { userData, token, publicKey } = this.props
     let npath = `/global/notifications/development/${publicKey}/`
     if (process.env.NODE_ENV === 'production') {
       npath = `/global/notifications/${publicKey}/`
@@ -122,6 +121,7 @@ const mapStateToProps = (state) => {
   return {
     token: EngineSelectors.getToken(state),
     userData: EngineSelectors.getUserData(state),
+    publicKey: EngineSelectors.getPublicKey(state),
     contactMgr: EngineSelectors.getContactMgr(state),
     engineInit: EngineSelectors.getEngineInit(state),
   }

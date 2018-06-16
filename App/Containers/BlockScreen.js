@@ -5,23 +5,31 @@ import styles from './Styles/BlockScreenStyle'
 import { Button } from 'react-native-elements'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import firebase from 'react-native-firebase';
 
 class BlockScreen extends Component {
   _signOutAsync = async () => {
     const {BlockstackNativeModule} = NativeModules
-    const { userData } = this.props
-    if (userData) {
-      const publicKey = userData['appPublicKey']
-      await firebase.database().ref(`/global/session/${publicKey}`).set({platform: 'none'})
-    }
+    const { publicKey } = this.props
+    await firebase.database().ref(`/global/session/${publicKey}`).set({platform: 'none'})
+    this.props.clearUserData(publicKey);
     await AsyncStorage.clear()
     await BlockstackNativeModule.signOut()
     this.props.navigation.navigate('Auth')
   }
   _unlockEngine = async () => {
-    const publicKey = this.props.userData['appPublicKey']
+    const { publicKey } = this.props
     await firebase.database().ref(`/global/session/${publicKey}`).set({platform: Platform.OS})
-    this.props.navigation.navigate('App')
+    const userData = JSON.parse(await AsyncStorage.getItem('userData'));
+    this.setupVars(userData)
+  }
+  setupVars = async (userData) => {
+    this.props.setUserData(userData)
+    const userProfile = JSON.parse(await AsyncStorage.getItem('userProfile'));
+    this.props.setUserProfile(userProfile)
+    const token = await AsyncStorage.getItem('token')
+    this.props.setToken(token)
+    this.props.navigation.navigate('App');
   }
   render () {
     return (
@@ -56,12 +64,13 @@ class BlockScreen extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    userData: EngineSelectors.getUserData(state),
+    publicKey: EngineSelectors.getPublicKey(state),
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    clearUserData: (publicKey) => dispatch(EngineActions.clearUserData(publicKey)),
   }
 }
 

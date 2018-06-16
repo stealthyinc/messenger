@@ -41,7 +41,7 @@ class ProfileScreen extends React.Component {
 
   _signOutAsync = async () => {
     const {BlockstackNativeModule} = NativeModules;
-    const publicKey = this.props.userData['appPublicKey']
+    const { publicKey } = this.props
     await firebase.database().ref(`/global/session/${publicKey}`).set({platform: 'none'})
     this.props.clearUserData(publicKey);
     await AsyncStorage.clear();
@@ -170,6 +170,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
   return {
     userProfile: EngineSelectors.getUserProfile(state),
+    publicKey: EngineSelectors.getPublicKey(state),
     userData: EngineSelectors.getUserData(state),
     userSettings: EngineSelectors.getUserSettings(state),
   }

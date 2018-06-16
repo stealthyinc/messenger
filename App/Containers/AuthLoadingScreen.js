@@ -69,7 +69,6 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
   return {
-    lockEngine: EngineSelectors.getEngineLock(state),
   }
 }
 

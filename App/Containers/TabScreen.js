@@ -1,7 +1,5 @@
 import React from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { AsyncStorage, Image, View } from 'react-native';
-import { Text, Card, Button } from 'react-native-elements'
 import { TabNavigator, TabBarBottom } from 'react-navigation';
 import ConversationScreen from './ConversationScreen'
 import ProfileScreen from './ProfileScreen'

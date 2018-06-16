@@ -182,7 +182,6 @@ export function * getActiveUserProfile (api, action) {
   const username = id.substring(0, id.lastIndexOf('.'))
   const response = yield call(api.getUserProfile, username)
   if (response.ok) {
-    console.log(JSON.stringify(response.data))
     const userProfile = response.data[username]
     yield put(EngineActions.setActiveUserProfile(userProfile))
   } else {
