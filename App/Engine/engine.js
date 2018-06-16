@@ -61,6 +61,8 @@ import getQueryString from './misc/getQueryString';
 const { Timer } = require('./misc/timer.js');
 const { PeerManager } = require('./network/PeerManager.js');
 
+const common = require('./../common.js');
+
 import chatIcon from './images/blue256.png';
 
 const RELAY_IDS = [
@@ -228,21 +230,11 @@ export class MessagingEngine extends EventEmitter {
     if (!firebase.auth().currentUser) {
       firebase.auth().signInAnonymously()
       .then(() => {
-        this.io = (ENABLE_GAIA) ?
-          new GaiaIO(this.logger, LOG_GAIAIO) :
-          new FirebaseIO(this.logger, firebase, STEALTHY_PAGE, LOG_GAIAIO);
-
-        this._fetchUserSettings();
+        this._configureSessionManagement();
       });
     } else {
-      this.io = (ENABLE_GAIA) ?
-        new GaiaIO(this.logger, LOG_GAIAIO) :
-        new FirebaseIO(this.logger, firebase, STEALTHY_PAGE, LOG_GAIAIO);
-
-      this._fetchUserSettings();
+      this._configureSessionManagement();
     }
-
-    this.emit('me-mount-work-done');
   }
 
   async shutdown() {
@@ -541,6 +533,9 @@ export class MessagingEngine extends EventEmitter {
 
     this.conversations.loadContactBundles(this.contactMgr.getContactIds())
     .then(() => {
+      // TODO TODO TODO:  change this to be an emitter that sends the ids of sent
+      //                  messages back to the engine so we don't have to make
+      //                  a conversations ref in offlineMsgSvc
       this.offlineMsgSvc.setConversationManager(this.conversations);
 
       const activeContact = this.contactMgr.getActiveContact();
@@ -598,6 +593,38 @@ export class MessagingEngine extends EventEmitter {
       this.logger('INFO: No contact bundles to load.');
       this.emit('me-initialized', true);
     });
+  }
+
+  _configureSessionManagement() {
+    // Get the firebase session lock key (assume that it's set to us, throw if it's none).
+    // Setup a shutdown listener to close this session if we lose the session lock key.
+    // Considerations:
+    //   - TODO: throw if no firebase
+    //   - TODO: what to save on loss of session lock key
+    const ref = firebase.database().ref(common.getSessionRef(this.publicKey))
+    ref.once('value')
+    .then((snapshot) => {
+      if (!snapshot.exists() || snapshot.val() === common.NO_SESSION) {
+        throw `ERROR(engine.js::_configureSessionManagement): session is unlocked.`;
+      }
+
+      this.logger(`INFO(engine.js::_configureSessionManagement): session is locked to ${session}.`);
+
+      ref.on('child_changed')
+      .then((snapshot) => {
+        const session = snapshot.val();
+      })
+
+      this._configureIO();
+    })
+  }
+
+  _configureIO() {
+    this.io = (ENABLE_GAIA) ?
+      new GaiaIO(this.logger, LOG_GAIAIO) :
+      new FirebaseIO(this.logger, firebase, STEALTHY_PAGE, LOG_GAIAIO);
+
+    this._fetchUserSettings();
   }
 
   _fetchUserSettings() {

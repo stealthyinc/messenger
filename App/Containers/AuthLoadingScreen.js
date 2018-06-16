@@ -12,6 +12,8 @@ import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import firebase from 'react-native-firebase';
 
+const common = require('./../common.js');
+
 class AuthLoadingScreen extends React.Component {
   constructor(props) {
     super(props);
@@ -26,10 +28,11 @@ class AuthLoadingScreen extends React.Component {
     }
     else {
       const publicKey = userData['appPublicKey']
-      const ref = firebase.database().ref(`/global/session/${publicKey}`)
+
+      const ref = firebase.database().ref(common.getSessionRef(publicKey));
       await ref.once('value')
       .then((snapshot) => {
-        if (snapshot.exists() && snapshot.child('platform').val() === Platform.OS) {
+        if (snapshot.exists() && snapshot.val() === common.getSessionId()) {
           this.setupVars(userData)
         }
         else {

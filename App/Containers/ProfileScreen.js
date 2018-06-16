@@ -7,6 +7,8 @@ import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import { Toast } from 'native-base';
 import firebase from 'react-native-firebase';
 
+const common = require('./../common.js');
+
 const stock = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
 
 class ProfileScreen extends React.Component {
@@ -16,7 +18,7 @@ class ProfileScreen extends React.Component {
       headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold'}}>Profile</Text>,
       headerBackTitle: 'Back',
       headerRight: (
-        <TouchableOpacity onPress={() => params.showOverlay()} style={{marginRight: 10}}> 
+        <TouchableOpacity onPress={() => params.showOverlay()} style={{marginRight: 10}}>
           <Ionicons name="ios-information-circle-outline" size={30} color='#037aff'/>
         </TouchableOpacity>
       ),
@@ -42,7 +44,7 @@ class ProfileScreen extends React.Component {
   _signOutAsync = async () => {
     const {BlockstackNativeModule} = NativeModules;
     const { publicKey } = this.props
-    await firebase.database().ref(`/global/session/${publicKey}`).set({platform: 'none'})
+    await firebase.database().ref(common.getSessionRef(publicKey)).set(common.NO_SESSION)
     this.props.clearUserData(publicKey);
     await AsyncStorage.clear();
     await BlockstackNativeModule.signOut();
@@ -144,9 +146,9 @@ class ProfileScreen extends React.Component {
             icon={{name: 'launch', color: 'white'}}
             buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#037aff'}}
             titleStyle={{ fontSize: 18, fontWeight: "bold"}}
-            title='Log Out' 
+            title='Log Out'
           />
-        </View>  
+        </View>
         <View style={{flex: 20}} />
       </View>
     );

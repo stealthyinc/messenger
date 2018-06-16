@@ -7,11 +7,13 @@ import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import firebase from 'react-native-firebase';
 
+const common = require('./../common.js');
+
 class BlockScreen extends Component {
   _signOutAsync = async () => {
     const {BlockstackNativeModule} = NativeModules
     const { publicKey } = this.props
-    await firebase.database().ref(`/global/session/${publicKey}`).set({platform: 'none'})
+    await firebase.database().ref(common.getSessionRef(publicKey).set(common.NO_SESSION))
     this.props.clearUserData(publicKey);
     await AsyncStorage.clear()
     await BlockstackNativeModule.signOut()
@@ -19,7 +21,7 @@ class BlockScreen extends Component {
   }
   _unlockEngine = async () => {
     const { publicKey } = this.props
-    await firebase.database().ref(`/global/session/${publicKey}`).set({platform: Platform.OS})
+    await firebase.database().ref(common.getSessionRef(publicKey)).set(common.getSessionId())
     const userData = JSON.parse(await AsyncStorage.getItem('userData'));
     this.setupVars(userData)
   }
@@ -54,7 +56,7 @@ class BlockScreen extends Component {
           icon={{name: 'launch', color: 'white'}}
           buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#037aff'}}
           titleStyle={{ fontSize: 18, fontWeight: "bold"}}
-          title='Log Out' 
+          title='Log Out'
         />
         />
       </View>
