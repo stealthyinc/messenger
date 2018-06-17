@@ -612,7 +612,8 @@ export class MessagingEngine extends EventEmitter {
 
       this.logger(`INFO(engine.js::_configureSessionManagement): session is locked to ${snapshot.val()}.`);
 
-      ref.on('child_changed', (childSnapshot, prevChildKey) => {
+      const parentRef = firebase.database().ref(common.getRootRef(this.publicKey))
+      parentRef.on('child_changed', (childSnapshot, prevChildKey) => {
         const currentSession = (childSnapshot.exists()) ? childSnapshot.val() : 'undefined';
         if (currentSession != this.sessionId) {
           this.logger(`INFO(engine.js:_configureSessionManagement): current session has changed to ${currentSession}. Shutting down.`)

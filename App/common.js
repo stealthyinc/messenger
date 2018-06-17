@@ -3,10 +3,7 @@ import {Platform} from 'react-native';
 export const NO_SESSION = 'none'
 
 module.exports.getSessionRef = function(aPublicKey) {
-  // ud --> user data:
-  return (process.env.NODE_ENV === 'production') ?
-    `${module.exports.getRootRef(aPublicKey)}/session` :
-    `${module.exports.getRootRef(aPublicKey)}/session`
+  return `${module.exports.getRootRef(aPublicKey)}/session`
 };
 
 module.exports.getRootRef = function(aPublicKey) {
