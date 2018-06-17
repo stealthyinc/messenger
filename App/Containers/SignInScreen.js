@@ -152,8 +152,8 @@ class SignInScreen extends React.Component {
               await ref.once('value')
               .then((snapshot) => {
                 if (!snapshot.exists() || snapshot.val() === 'none') {
-                  this.props.setUserData(this.userData)
                   ref.set(common.getSessionId());
+                  this.props.setUserData(this.userData)
                   this.props.navigation.navigate('App');
                 }
                 else {
