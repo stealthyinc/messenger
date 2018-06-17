@@ -78,10 +78,6 @@ class ReduxNavigation extends React.Component {
     if (Platform.OS !== 'ios') {
       BackHandler.removeEventListener('hardwareBackPress')
     }
-    const { publicKey } = this.props
-    if (this.ref) {
-      this.ref.off();
-    }
   }
   _signOutAsync = async (publicKey) => {
     const {BlockstackNativeModule} = NativeModules;
@@ -91,7 +87,7 @@ class ReduxNavigation extends React.Component {
     this.props.dispatch(EngineActions.clearUserData(publicKey));
     await AsyncStorage.clear();
     await BlockstackNativeModule.signOut();
-    // this.props.nav.navigate('Auth');
+    this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' })
   };
   render () {
     return (
