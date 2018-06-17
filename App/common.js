@@ -5,8 +5,15 @@ export const NO_SESSION = 'none'
 module.exports.getSessionRef = function(aPublicKey) {
   // ud --> user data:
   return (process.env.NODE_ENV === 'production') ?
-    `/global/ud/${aPublicKey}/session` :
-    `/global/development/ud/${aPublicKey}/session`
+    `${module.exports.getRootRef(aPublicKey)}/session` :
+    `${module.exports.getRootRef(aPublicKey)}/session`
+};
+
+module.exports.getRootRef = function(aPublicKey) {
+  // ud --> user data:
+  return (process.env.NODE_ENV === 'production') ?
+    `/global/ud/${aPublicKey}` :
+    `/global/development/ud/${aPublicKey}`
 };
 
 var __sessionId = undefined;

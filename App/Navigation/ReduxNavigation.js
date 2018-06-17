@@ -8,6 +8,7 @@ import { Root } from "native-base";
 import BackgroundFetch from "react-native-background-fetch";
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import firebase from 'react-native-firebase';
+const common = require('./../common.js');
 
 class ReduxNavigation extends React.Component {
   constructor(props) {
@@ -63,17 +64,14 @@ class ReduxNavigation extends React.Component {
   }
   componentWillReceiveProps (nextProps) {
     const { publicKey } = nextProps
-    if (!this.state.fbListner) {
-      this.setState({fbListner: true})
-
-      if (publicKey && !this.ref) {
-        this.ref = firebase.database().ref(common.getSessionRef(publicKey))
-        this.ref.on('child_changed', (childSnapshot, prevChildKey) => {
-          const platform = childSnapshot.child('platform').val()
-          if (platform !== Platform.OS && platform !== 'none')
-            this._signOutAsync(childSnapshot.key)
-        });
-      }
+    if (publicKey && !this.ref) {
+      const sessionRef = common.getRootRef(publicKey)
+      this.ref = firebase.database().ref(sessionRef)
+      this.ref.on('child_changed', (childSnapshot, prevChildKey, publicKey) => {
+        const session = childSnapshot.val()
+        if (session !== common.getSessionId())
+          this._signOutAsync(publicKey)
+      });
     }
   }
   componentWillUnmount () {
