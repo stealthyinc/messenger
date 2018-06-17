@@ -19,6 +19,8 @@ import API from '../Services/Api'
 import DebugConfig from '../Config/DebugConfig'
 import firebase from 'react-native-firebase';
 
+const common = require('./../common.js');
+
 let EngineInstance = undefined;
 
 const logger = (...args) => {
@@ -32,14 +34,13 @@ const createEngine = (userData) => {
   return new MessagingEngine(
                               logger,
                               userData['privateKey'],
-                              userData['appPublicKey'],
-                              false,
-                              userData['profileURL'],
-                              '',
-                              true,
-                              {
-                                neverWebRTC: true
-                              })
+                              userData['appPublicKey'],   // publicKey
+                              false,                      // plugIn
+                              userData['profileURL'],     // avatarUrl
+                              '',                         // discoveryPath
+                              common.getSessionId(),      // sessionId
+                              true,                       // isMobile
+                            )
 }
 
 function* watchInitialzedEventChannel() {

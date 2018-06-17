@@ -134,6 +134,7 @@ export class MessagingEngine extends EventEmitter {
               plugIn,
               avatarUrl,
               discoveryPath,
+              sessionId,
               isMobile=false) {
     super();
     this.logger = logger;
@@ -142,6 +143,7 @@ export class MessagingEngine extends EventEmitter {
     this.plugIn = plugIn;
     this.avatarUrl = avatarUrl;
     this.discoveryPath = discoveryPath;
+    this.sessionId = sessionId;
     this.isMobile = isMobile;
 
     this.settings = {}
@@ -610,10 +612,14 @@ export class MessagingEngine extends EventEmitter {
 
       this.logger(`INFO(engine.js::_configureSessionManagement): session is locked to ${snapshot.val()}.`);
 
-      // ref.on('child_changed')
-      // .then((snapshot) => {
-      //   const session = snapshot.val();
-      // })
+      ref.on('child_changed', (childSnapshot, prevChildKey) => {
+        const currentSession = (childSnapshot.exists()) ? childSnapshot.val() : 'undefined';
+        if (currentSession != this.sessionId) {
+          this.logger(`INFO(engine.js:_configureSessionManagement): current session has changed to ${currentSession}. Shutting down.`)
+          this.logger(`  prevChildKey=${prevChildKey}`)
+          // TODO: shutdown
+        }
+      })
 
       this._configureIO();
     })
