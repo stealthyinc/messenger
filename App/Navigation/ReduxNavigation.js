@@ -63,17 +63,20 @@ class ReduxNavigation extends React.Component {
     });
   }
   componentWillReceiveProps (nextProps) {
-    const { publicKey } = nextProps
-    if (publicKey && !this.ref) {
+    const { publicKey, engineShutdown } = nextProps
+    if (engineShutdown) {
+      this._signOutAsync(publicKey)    
+    }
+    else if (publicKey && !this.ref) {
       const sessionRef = common.getRootRef(publicKey)
       this.ref = firebase.database().ref(sessionRef)
       this.ref.on('child_changed', (childSnapshot, prevChildKey, publicKey) => {
         const session = childSnapshot.val()
         if (session !== common.getSessionId()) {
-
-          this.props.dispatch(EngineActions.)
-
-          this._signOutAsync(publicKey)
+          if (this.ref) {
+            this.ref.off();
+          }
+          this.props.dispatch(EngineActions.initShutdown())
         }
       });
     }
@@ -85,9 +88,6 @@ class ReduxNavigation extends React.Component {
   }
   _signOutAsync = async (publicKey) => {
     const {BlockstackNativeModule} = NativeModules;
-    if (this.ref) {
-      this.ref.off();
-    }
     this.props.dispatch(EngineActions.clearUserData(publicKey));
     await AsyncStorage.clear();
     await BlockstackNativeModule.signOut();
@@ -106,6 +106,7 @@ const mapStateToProps = (state) => {
   return {
     nav: state.nav,
     publicKey: EngineSelectors.getPublicKey(state),
+    engineShutdown: EngineSelectors.getEngineShutdown(state),
   }
 }
 

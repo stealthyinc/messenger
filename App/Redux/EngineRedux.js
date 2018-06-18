@@ -25,6 +25,7 @@ const { Types, Creators } = createActions({
   handleDeleteContact: ['deleteContact'],
   clearUserData: ['publicKey'],
   setCurrentPlatform: ['currentPlatform'],
+  initShutdown: [''],
 })
 
 export const EngineTypes = Types

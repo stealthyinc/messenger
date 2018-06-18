@@ -114,7 +114,7 @@ function* watchShutDownChannel() {
   yield put(EngineActions.setEngineShutdown(engineShutdown))
 }
 
-function* handleShutDownRequest(action) {
+function* handleShutDownRequest() {
   EngineInstance.handleShutDownRequest();
 }
 
@@ -168,7 +168,7 @@ export function* startEngine (action) {
   yield fork(watchContactAddedChannel)
   yield fork(watchUserSettingsChannel)
   yield fork(watchShutDownChannel)
-  yield takeLatest(EngineTypes.ENGINE_SHUTDOWN, handleShutDownRequest)
+  yield takeLatest(EngineTypes.INIT_SHUTDOWN, handleShutDownRequest)
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
   yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)
   yield takeLatest(EngineTypes.ADD_NEW_CONTACT, handleSearchSelect)
@@ -208,5 +208,4 @@ export default function* engineSagas(api) {
   yield takeLatest(EngineTypes.SET_USER_DATA, startEngine)
   yield takeLatest(EngineTypes.SET_USER_DATA, getUserProfile, api)
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, getActiveUserProfile, api)
-  yield takeLatest(EngineTypes.)
 }
