@@ -69,8 +69,12 @@ class ReduxNavigation extends React.Component {
       this.ref = firebase.database().ref(sessionRef)
       this.ref.on('child_changed', (childSnapshot, prevChildKey, publicKey) => {
         const session = childSnapshot.val()
-        if (session !== common.getSessionId())
+        if (session !== common.getSessionId()) {
+
+          this.props.dispatch(EngineActions.)
+
           this._signOutAsync(publicKey)
+        }
       });
     }
   }

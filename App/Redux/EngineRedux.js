@@ -19,6 +19,7 @@ const { Types, Creators } = createActions({
   setToken: ['token'],
   sendNotification: ['recepientToken'],
   setUserSettings: ['userSettings'],
+  setEngineShutdown: ['engineShutdown'],
   updateUserSettings: ['radioSetting'],
   backgroundRefresh: [''],
   handleDeleteContact: ['deleteContact'],
@@ -38,6 +39,7 @@ export const INITIAL_STATE = Immutable({
   userProfile: null,
   activeUserProfile: null,
   engineInit: false,
+  engineShutdown: false,
   contactMgr: null,
   messages: null,
   contactAdded: false,
@@ -63,11 +65,12 @@ export const EngineSelectors = {
   getCurrentPlatform: state => state.engine.currentPlatform,
   getEngineLock: state => state.engine.lockEngine,
   getPublicKey: state => state.engine.publicKey,
+  getEngineShutdown: state => state.engine.engineShutdown,
 }
 
 /* ------------- Reducers ------------- */
 
-// set current platform 
+// set current platform
 export const setCurrentPlatform = (state, { currentPlatform }) => {
   return state.merge({ currentPlatform })
 }
@@ -88,7 +91,6 @@ export const clearUserData = (state, { publicKey }) => {
   return newState
 }
 
-// engine clear data
 export const setPublicKey = (state, { publicKey }) => {
   return state.merge({ publicKey })
 }
@@ -131,6 +133,11 @@ export const setUserSettings = (state, { userSettings }) => {
   return state.merge({ userSettings })
 }
 
+// engine has shutdown (done saving stuff - safe to terminate)
+export const setEngineShutdown = (state, { engineShutdown }) => {
+  return state.merge({ engineShutdown })
+}
+
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -147,4 +154,5 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_CONTACT_ADDED]: setContactAdded,
   [Types.SET_TOKEN]: setToken,
   [Types.SET_USER_SETTINGS]: setUserSettings,
+  [Types.SET_ENGINE_SHUTDOWN]: setEngineShutdown
 })

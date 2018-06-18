@@ -17,7 +17,6 @@ import {
 } from 'react-native';
 import API from '../Services/Api'
 import DebugConfig from '../Config/DebugConfig'
-import firebase from 'react-native-firebase';
 
 const common = require('./../common.js');
 
@@ -106,6 +105,19 @@ function* watchUserSettingsChannel() {
   }
 }
 
+function* watchShutDownChannel() {
+  const channel = eventChannel(emitter => {
+    EngineInstance.on('me-shutdown-complete', (engineShutdown) => emitter(engineShutdown))
+    return () => { console.log('Messaging Engine Shutdown')}
+  })
+  const engineShutdown = yield take(channel)
+  yield put(EngineActions.setEngineShutdown(engineShutdown))
+}
+
+function* handleShutDownRequest(action) {
+  EngineInstance.handleShutDownRequest();
+}
+
 function* handleContactClick(action) {
   const { activeContact } = action
   EngineInstance.handleContactClick(activeContact)
@@ -155,6 +167,8 @@ export function* startEngine (action) {
   yield fork(watchMessagesEventChannel)
   yield fork(watchContactAddedChannel)
   yield fork(watchUserSettingsChannel)
+  yield fork(watchShutDownChannel)
+  yield takeLatest(EngineTypes.ENGINE_SHUTDOWN, handleShutDownRequest)
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
   yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)
   yield takeLatest(EngineTypes.ADD_NEW_CONTACT, handleSearchSelect)
@@ -194,4 +208,5 @@ export default function* engineSagas(api) {
   yield takeLatest(EngineTypes.SET_USER_DATA, startEngine)
   yield takeLatest(EngineTypes.SET_USER_DATA, getUserProfile, api)
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, getActiveUserProfile, api)
+  yield takeLatest(EngineTypes.)
 }
