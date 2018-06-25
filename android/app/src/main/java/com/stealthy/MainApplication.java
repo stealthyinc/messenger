@@ -1,17 +1,14 @@
 package com.stealthy;
 
 import android.app.Application;
+import org.blockstack.android.sdk.*;
 
 import com.facebook.react.ReactApplication;
-import com.rn.ecc.ECCPackage;
 import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
-import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
 import io.invertase.firebase.RNFirebasePackage;
-import com.airbnb.android.react.maps.MapsPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
-import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -19,6 +16,9 @@ import com.facebook.soloader.SoLoader;
 
 import java.util.Arrays;
 import java.util.List;
+import io.invertase.firebase.auth.RNFirebaseAuthPackage;
+import io.invertase.firebase.messaging.RNFirebaseMessagingPackage;
+import io.invertase.firebase.database.RNFirebaseDatabasePackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -32,15 +32,14 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-            new ECCPackage(),
             new RNBackgroundFetchPackage(),
-            new RandomBytesPackage(),
             new ReactNativePushNotificationPackage(),
             new ReactNativeConfigPackage(),
             new RNFirebasePackage(),
-            new MapsPackage(),
-            new VectorIconsPackage(),
-            new RNDeviceInfo()
+            new RNFirebaseAuthPackage(),
+            new RNFirebaseMessagingPackage(),
+            new RNFirebaseDatabasePackage(),
+            new VectorIconsPackage()
       );
     }
 

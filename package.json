@@ -21,7 +21,8 @@
     "lint": "standard --verbose | snazzy",
     "lintdiff": "git diff --name-only --cached --relative | grep '\\.js$' | xargs standard | snazzy",
     "fixcode": "standard --fix",
-    "git-hook": "npm run lint -s && npm run test -s"
+    "git-hook": "npm run lint -s && npm run test -s",
+    "haul": "haul"
   },
   "dependencies": {
     "apisauce": "^0.14.2",
@@ -40,11 +41,9 @@
     "react-native-camera-roll-picker": "^1.2.3",
     "react-native-collapsible": "^0.11.2",
     "react-native-config": "^0.10.0",
-    "react-native-device-info": "0.11.0",
     "react-native-elements": "^1.0.0-beta5",
     "react-native-firebase": "^4.1.0",
     "react-native-gifted-chat": "^0.4.3",
-    "react-native-maps": "0.16.4",
     "react-native-push-notification": "^3.0.2",
     "react-native-swipeout": "^2.3.3",
     "react-native-vector-icons": "^4.6.0",
@@ -73,6 +72,7 @@
     "babel-preset-react-native": "^3.0.2",
     "enzyme": "^3.2.0",
     "enzyme-adapter-react-16": "^1.1.0",
+    "haul": "^1.0.0-rc.4",
     "husky": "^0.14.3",
     "ignite-animatable": "^1.0.0",
     "ignite-dev-screens": "^2.3.0",
