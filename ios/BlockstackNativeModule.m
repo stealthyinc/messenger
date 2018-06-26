@@ -6,7 +6,9 @@
 //  Copyright © 2018 Facebook. All rights reserved.
 //
 
-#import "BlockstackNativeModule.h"
+#import "BlockstackNativeModule.hh"
+#import "CryptoECIES.hpp"
+
 @import Blockstack;
 
 @implementation BlockstackNativeModule

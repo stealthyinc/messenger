@@ -49,7 +49,6 @@
 		51F33F0A80CA4015B267E5E2 /* Feather.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 030E2592934749A9896B336F /* Feather.ttf */; };
 		5C07D823B0164FBEB1037686 /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 54A984F9CB91427D93B75E34 /* FontAwesome.ttf */; };
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
-		74520037BC1F4A1EB6E8BCCC /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 39D8646F0585427B939E4DC8 /* libRNDeviceInfo.a */; };
 		7502F8C020D0CA0B00232E72 /* libRNBackgroundFetch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7502F8BC20D0C9F000232E72 /* libRNBackgroundFetch.a */; };
 		7502F8C220D0CA6200232E72 /* TSBackgroundFetch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7502F8C120D0CA6200232E72 /* TSBackgroundFetch.framework */; };
 		754C0C2120D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 754C0BF620D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m */; };
@@ -59,6 +58,7 @@
 		75A52FC420A932E200AC6DAD /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A52FC120A932D800AC6DAD /* libRCTPushNotification.a */; };
 		75C3EB3E20E1B12400F5E81F /* libcryptopp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C3EB3D20E1B12400F5E81F /* libcryptopp.a */; };
 		75F0E51220AB428000CB49D4 /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75F0E51020AB424300CB49D4 /* libRNFirebase.a */; };
+		793936C820E2DB3400268769 /* CryptoECIES.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 793936C620E2DB3400268769 /* CryptoECIES.cpp */; };
 		7E7B15E340FF4A17BC21AEB9 /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63157C5EDFFC41D1A751CEF9 /* SimpleLineIcons.ttf */; };
 		81E027F76EF443B9B308F210 /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9B6F186014334C3B97FAD098 /* FontAwesome.ttf */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
@@ -66,7 +66,6 @@
 		90BA0B7FAAFC4FF6A088084F /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DACEF3361A97459CBF7EED26 /* Ionicons.ttf */; };
 		95A8B604804D4839868A664C /* libRNRandomBytes-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF5D58D8C08E4E96BD6AE983 /* libRNRandomBytes-tvOS.a */; };
 		96A4A7AC07E54A479594755E /* Roboto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A6EF6B5E2C5A47A091F248F7 /* Roboto.ttf */; };
-		982DBB810D4242B98EC61121 /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 278A953D8761407F9D08591A /* libRNECC.a */; };
 		9E81386671464A869FF33FD2 /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3E51D955A6484354B8C696C7 /* Octicons.ttf */; };
 		A667D3369037499BB3243DAA /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 02BF7144A18844E288BAC83B /* Entypo.ttf */; };
 		A9F73A858FBC48A3BD3E2509 /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D2D4FA5C0EB941D5AFBAACD8 /* SimpleLineIcons.ttf */; };
@@ -473,6 +472,8 @@
 		75C3EB3D20E1B12400F5E81F /* libcryptopp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcryptopp.a; path = "../../../../../usr/local/cryptopp-ios/lib/libcryptopp.a"; sourceTree = "<group>"; };
 		75CB635A5D65494A95309E91 /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
+		793936C620E2DB3400268769 /* CryptoECIES.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CryptoECIES.cpp; sourceTree = "<group>"; };
+		793936C720E2DB3400268769 /* CryptoECIES.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CryptoECIES.hpp; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		9B6F186014334C3B97FAD098 /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
 		9B9573B9B9544671A8B573A4 /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/native-base/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
@@ -529,10 +530,8 @@
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
 				75C3EB3E20E1B12400F5E81F /* libcryptopp.a in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
-				74520037BC1F4A1EB6E8BCCC /* libRNDeviceInfo.a in Frameworks */,
 				0EAF18B096674ACBA98A5FC0 /* libRNVectorIcons.a in Frameworks */,
 				F352F9D294F05CD267109619 /* Pods_stealthy.framework in Frameworks */,
-				982DBB810D4242B98EC61121 /* libRNECC.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -645,6 +644,8 @@
 		13B07FAE1A68108700A75B9A /* stealthy */ = {
 			isa = PBXGroup;
 			children = (
+				793936C620E2DB3400268769 /* CryptoECIES.cpp */,
+				793936C720E2DB3400268769 /* CryptoECIES.hpp */,
 				754C0BF620D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m */,
 				75A52FFD20A9355900AC6DAD /* stealthy.entitlements */,
 				75A52FB820A930CC00AC6DAD /* BlockstackNativeModule.m */,
@@ -926,8 +927,8 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "stealthy" */;
 			buildPhases = (
-				AD0CE2C91E925489006FC317 /* Integrate Haul with React Native */,
 				A1414D4F139CF11510F90980 /* [CP] Check Pods Manifest.lock */,
+				AD0CE2C91E925489006FC317 /* Integrate Haul with React Native */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
@@ -1623,6 +1624,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				793936C820E2DB3400268769 /* CryptoECIES.cpp in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				75A52FB920A930CC00AC6DAD /* BlockstackNativeModule.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
@@ -1755,12 +1757,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libstdc++";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = stealthy/stealthy.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
 				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = CQ2BXUTMQT;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/Blockstack\"",
@@ -1773,7 +1778,7 @@
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/notifications",
-					"/usr/local/cryptoapp-ios/include",
+					"/usr/local/cryptopp-ios/include",
 				);
 				INFOPLIST_FILE = stealthy/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -1786,7 +1791,6 @@
 					"-ObjC",
 					"-lc++",
 					"$(inherited)",
-					"-libc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "stealthy-im";
 				PRODUCT_NAME = stealthy;
@@ -1803,11 +1807,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libstdc++";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = stealthy/stealthy.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = NO;
 				DEVELOPMENT_TEAM = CQ2BXUTMQT;
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/Blockstack\"",
@@ -1820,7 +1827,7 @@
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/notifications",
-					"/usr/local/cryptoapp-ios/include",
+					"/usr/local/cryptopp-ios/include",
 				);
 				INFOPLIST_FILE = stealthy/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -1833,7 +1840,6 @@
 					"-ObjC",
 					"-lc++",
 					"$(inherited)",
-					"-libc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "stealthy-im";
 				PRODUCT_NAME = stealthy;
