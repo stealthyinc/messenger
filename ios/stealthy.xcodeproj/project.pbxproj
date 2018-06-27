@@ -59,6 +59,7 @@
 		75C3EB3E20E1B12400F5E81F /* libcryptopp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C3EB3D20E1B12400F5E81F /* libcryptopp.a */; };
 		75F0E51220AB428000CB49D4 /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75F0E51020AB424300CB49D4 /* libRNFirebase.a */; };
 		793936C820E2DB3400268769 /* CryptoECIES.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 793936C620E2DB3400268769 /* CryptoECIES.cpp */; };
+		793936F420E2FD5200268769 /* CryptoECIESWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 793936F320E2FD5200268769 /* CryptoECIESWrapper.mm */; };
 		7E7B15E340FF4A17BC21AEB9 /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63157C5EDFFC41D1A751CEF9 /* SimpleLineIcons.ttf */; };
 		81E027F76EF443B9B308F210 /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9B6F186014334C3B97FAD098 /* FontAwesome.ttf */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
@@ -474,6 +475,8 @@
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		793936C620E2DB3400268769 /* CryptoECIES.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CryptoECIES.cpp; sourceTree = "<group>"; };
 		793936C720E2DB3400268769 /* CryptoECIES.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CryptoECIES.hpp; sourceTree = "<group>"; };
+		793936F320E2FD5200268769 /* CryptoECIESWrapper.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CryptoECIESWrapper.mm; sourceTree = "<group>"; };
+		793936F520E3038500268769 /* CryptoECIESWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoECIESWrapper.h; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		9B6F186014334C3B97FAD098 /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
 		9B9573B9B9544671A8B573A4 /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/native-base/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
@@ -658,6 +661,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				793936F320E2FD5200268769 /* CryptoECIESWrapper.mm */,
+				793936F520E3038500268769 /* CryptoECIESWrapper.h */,
 			);
 			name = stealthy;
 			sourceTree = "<group>";
@@ -1624,6 +1629,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				793936F420E2FD5200268769 /* CryptoECIESWrapper.mm in Sources */,
 				793936C820E2DB3400268769 /* CryptoECIES.cpp in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				75A52FB920A930CC00AC6DAD /* BlockstackNativeModule.m in Sources */,

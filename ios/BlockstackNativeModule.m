@@ -6,8 +6,9 @@
 //  Copyright © 2018 Facebook. All rights reserved.
 //
 
-#import "BlockstackNativeModule.hh"
-#import "CryptoECIES.hpp"
+#import "BlockstackNativeModule.h"
+
+#import "CryptoECIESWrapper.h"
 
 @import Blockstack;
 
@@ -28,6 +29,10 @@ RCT_EXPORT_METHOD(signIn:(NSString *)redirectURI appDomain:(NSString *)appDomain
     if (profileName != nil) {
       userDataDictionary[@"profileName"] = profileName;
     }
+    
+    CryptoECIESWrapper* wrapper = [[CryptoECIESWrapper alloc] init];
+    NSString* result = [wrapper getHelloString];
+    
     //TODO: add other user attributes to the dictionary passed to javascript
     completion(@[error ? error.localizedDescription : [NSNull null], userDataDictionary]);
   }];
