@@ -56,7 +56,7 @@
 		75A52FB920A930CC00AC6DAD /* BlockstackNativeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 75A52FB820A930CC00AC6DAD /* BlockstackNativeModule.m */; };
 		75A52FBA20A9311100AC6DAD /* BlockstackNativeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 75A52FB820A930CC00AC6DAD /* BlockstackNativeModule.m */; };
 		75A52FC420A932E200AC6DAD /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A52FC120A932D800AC6DAD /* libRCTPushNotification.a */; };
-		75C3EB3E20E1B12400F5E81F /* libcryptopp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C3EB3D20E1B12400F5E81F /* libcryptopp.a */; };
+		75C3EB3E20E1B12400F5E81F /* libcryptopp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C3EB3D20E1B12400F5E81F /* libcryptopp.a */; settings = {ATTRIBUTES = (Required, ); }; };
 		75F0E51220AB428000CB49D4 /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75F0E51020AB424300CB49D4 /* libRNFirebase.a */; };
 		793936C820E2DB3400268769 /* CryptoECIES.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 793936C620E2DB3400268769 /* CryptoECIES.cpp */; };
 		793936F420E2FD5200268769 /* CryptoECIESWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 793936F320E2FD5200268769 /* CryptoECIESWrapper.mm */; };
@@ -933,7 +933,6 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "stealthy" */;
 			buildPhases = (
 				A1414D4F139CF11510F90980 /* [CP] Check Pods Manifest.lock */,
-				AD0CE2C91E925489006FC317 /* Integrate Haul with React Native */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
@@ -953,7 +952,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2D02E4BA1E0B4A5E006451C7 /* Build configuration list for PBXNativeTarget "stealthy-tvOS" */;
 			buildPhases = (
-				AD0CE2C91E925489006FC317 /* Integrate Haul with React Native */,
 				2D02E4771E0B4A5D006451C7 /* Sources */,
 				2D02E4781E0B4A5D006451C7 /* Frameworks */,
 				2D02E4791E0B4A5D006451C7 /* Resources */,
@@ -1582,20 +1580,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		AD0CE2C91E925489006FC317 /* Integrate Haul with React Native */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Integrate Haul with React Native";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "bash ../node_modules/haul/src/utils/haul-integrate.sh";
-		};
 		CC60A8B99237F5413F756C06 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1764,7 +1748,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = stealthy/stealthy.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
@@ -1814,7 +1798,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = stealthy/stealthy.entitlements;
 				CURRENT_PROJECT_VERSION = 1;

@@ -1,16 +1,7 @@
 // const Config = require('Config');
 import Secrets from 'react-native-config'
 
-// TODO: get these through Blockstack iOS API
-// const { encryptECIES, decryptECIES } = require('blockstack/lib/encryption');
-function encryptECIES(arg1, arg2) {
-  throw 'TODO: in utils.js, need to get encryption methods from iOS Blockstack'
-}
-
-function decryptECIES(arg1, arg2) {
-  throw 'TODO: in utils.js, need to get encryption methods from iOS Blockstack'
-}
-
+import {NativeModules, Platform} from 'react-native';
 
 // Determines if a js object is empty.
 //
@@ -55,6 +46,10 @@ module.exports.deepCopyObj = function (anObj) {
   return JSON.parse(JSON.stringify(anObj));
 };
 
+module.exports.is_iOS = function() {
+  return Platform.OS === 'ios';
+}
+
 module.exports.getAppContext = function(appToken) {
   let context = 'Stealthy';
 
@@ -78,35 +73,111 @@ module.exports.resolveAfterMilliseconds = function (milliseconds) {
   });
 };
 
-module.exports.encryptSerializedObj = function (aKey, aSerializedObj) {
-  _throwIfKeyUndefined(aKey, 'encryptSerializedObj');
+// Methods to convert the Blockstack.js / Android encryptECIES/decryptECIES methods
+// to a promise (for compatibilty with our iOS encryption)
+async function jsEncryptECIES(aKey, theContent) {
+  return new Promise((resolve, reject) => {
+    const cipherObject = encryptECIES(aKey, theContent);
+    if (cipherObject) {
+      resolve(cipherObject)
+    } else {
+      reject('ERROR encrypting provided content with given key.')
+    }
+  })
+}
+//
+async function jsDecryptECIES(aKey, theCipherObject) {
+  return new Promise((resolve, reject) => {
+    const recovered = decryptECIES(aKey, theContent);
+    // Recovering an empty string might be okay since we can encrypt an empty one.
+    if (recovered && recovered !== "") {
+      resolve(recovered)
+    } else {
+      reject('ERROR decrypting provided content with given key.')
+    }
+  })
+}
 
-  const cipherData = encryptECIES(aKey, aSerializedObj);
-  const stringifyCipher = JSON.stringify(cipherData);
-  return stringifyCipher;
+async function iosEncryptECIES(aKey, theContent) {
+  return new Promise((resolve, reject) => {
+    const {BlockstackNativeModule} = NativeModules;
+    BlockstackNativeModule.encryptCryptoppECIES(aKey, theContent, (error, cipherObject) => {
+      if (error) {
+        reject(error)
+      } else {
+        const wasString = typeof theContent === 'string'
+        cipherObject['wasString'] = wasString
+
+        resolve(cipherObject)
+      }
+    })
+  })
+}
+
+async function iosDecryptECIES(aKey, theCipherObject) {
+  return new Promise((resolve, reject) => {
+    const {BlockstackNativeModule} = NativeModules;
+    BlockstackNativeModule.decryptCryptoppECIES(aKey, theCipherObject, (error, recovered) => {
+        if(error) {
+          reject(error)
+        } else {
+          const {wasString} = theCipherObject
+          resolve(wasString ? recovered.toString() : recovered)
+        }
+      });
+  })
+}
+
+module.exports.encrypt = async function(aKey, theContent) {
+  if (module.exports.is_iOS()) {
+    return iosEncryptECIES(aKey, theContent)
+  } else {
+    return jsEncryptECIES(aKey, theContent)
+  }
+}
+
+module.exports.decrypt = async function(aKey, theCipherObject) {
+  if (module.exports.is_iOS()) {
+    return iosDecryptECIES(aKey, theCipherObject)
+  } else {
+    return jsDecryptECIES(aKey, theCipherObject)
+  }
+}
+
+module.exports.encryptObj = async function (aKey, anObject, enable=undefined) {
+  module.exports.throwIfUndef('enable', enable)
+
+  if (enable) {
+    _throwIfKeyUndefined(aKey, 'encryptObj');
+    const serializedObj = JSON.stringify(anObject);
+
+    return module.exports.encrypt(aKey, serializedObj)
+    .then(cipherObject => {
+      return JSON.stringify(cipherObject);
+    })
+  } else {
+    return new Promise((resolve, reject) => {
+      resolve(anObject)
+    })
+  }
 };
 
-module.exports.encryptObj = function (aKey, anObject) {
-  _throwIfKeyUndefined(aKey, 'encryptObj');
+module.exports.decryptObj = async function (aKey, aStringifiedCipherObj, enable=undefined) {
+  module.exports.throwIfUndef('enable', enable)
+  
+  if (enable) {
+    _throwIfKeyUndefined(aKey, 'decryptObj');
+    const cipherData = JSON.parse(aStringifiedCipherObj);
 
-  const serializedObj = JSON.stringify(anObject);
-  return module.exports.encryptSerializedObj(aKey, serializedObj);
-};
-
-module.exports.decryptToSerializedObj = function (aKey, aStringifiedCipherObj) {
-  _throwIfKeyUndefined(aKey, 'decryptToSerializedObj');
-
-  const cipherData = JSON.parse(aStringifiedCipherObj);
-  const serializedObj = decryptECIES(aKey, cipherData);
-  return serializedObj;
-};
-
-module.exports.decryptToObj = function (aKey, aStringifiedCipherObj) {
-  _throwIfKeyUndefined(aKey, 'decryptToObj');
-
-  const serializedObj = module.exports.decryptToSerializedObj(aKey, aStringifiedCipherObj);
-  const object = JSON.parse(serializedObj);
-  return object;
+    return module.exports.decrypt(aKey, cipherData)
+    .then(recovered => {
+      return JSON.parse(recovered)
+    })
+  } else {
+    return new Promise((resolve, reject) => {
+      resolve(aStringifiedCipherObj)
+    })
+  }
 };
 
 function _throwIfKeyUndefined(aKey, aMethodName) {
@@ -119,6 +190,6 @@ module.exports.cleanPathForFirebase = function (path) {
   if ((path === null) || (path === undefined)) {
     throw (`ERROR(utils::cleanPathForFirebase): path is null or undefined.`);
   }
-  
+
   return path.replace(/[\.-]/g, '_');
 }

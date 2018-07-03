@@ -378,7 +378,7 @@ class OfflineMessagingServices extends EventEmitter {
   }
 
   stopRecvService() {
-    this.enableSendService = false;
+    this.enableRecvService = false;
   }
 }
 

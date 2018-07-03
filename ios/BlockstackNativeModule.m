@@ -30,9 +30,6 @@ RCT_EXPORT_METHOD(signIn:(NSString *)redirectURI appDomain:(NSString *)appDomain
       userDataDictionary[@"profileName"] = profileName;
     }
     
-    CryptoECIESWrapper* wrapper = [[CryptoECIESWrapper alloc] init];
-    NSString* result = [wrapper getHelloString];
-    
     //TODO: add other user attributes to the dictionary passed to javascript
     completion(@[error ? error.localizedDescription : [NSNull null], userDataDictionary]);
   }];
@@ -92,7 +89,8 @@ RCT_EXPORT_METHOD(decryptPrivateKey:(NSString*)privateKey hexedEncrypted:(NSStri
                decrypted ? decrypted : [NSNull null]]);
 }
 
-RCT_EXPORT_METHOD(encryptPrivateKey:(NSString*)publicKey privatekey:(NSString*) privateKey completion:(RCTResponseSenderBlock)completion) {
+RCT_EXPORT_METHOD(encryptPrivateKey:(NSString*)publicKey privatekey:(NSString*) privateKey completion:(RCTResponseSenderBlock)completion)
+{
   NSString* cipherObjectJSONString = [Encryption encryptPrivateKeyWithPublicKey:publicKey privateKey:privateKey];
   NSError *error = nil;
   
@@ -104,6 +102,51 @@ RCT_EXPORT_METHOD(encryptPrivateKey:(NSString*)publicKey privatekey:(NSString*) 
   
   completion(@[error ? error.localizedDescription : [NSNull null],
                cipherObjectJSONString ? cipherObjectJSONString : [NSNull null]]);
+}
+
+//
+//
+// Bridging Stealthy IOS Encryption Methods (Blockstack Interoperable)
+////////////////////////////////////////////////////////////////////////////
+//
+//  Note: Tried using RCT_REMAP_METHOD to change these to return promises, but was unable
+//        to get that working properly after considerable time. Not quite sure what was going
+//        wrong--observed strange things in the debugger.
+//        TODO: in future might be better to convert to that method if we can make it work properly.
+//  Resources:
+//        - https://facebook.github.io/react-native/docs/native-modules-ios.html
+//        - https://stackoverflow.com/questions/45099173/react-nativerct-remap-method-how-to-export-a-method-with-a-parameter-and-ret
+//        - https://stackoverflow.com/questions/42577511/how-to-bridge-react-native-promise-to-swift
+//        - https://stackoverflow.com/questions/29771622/react-native-how-to-export-a-method-with-a-return-value
+RCT_EXPORT_METHOD(decryptCryptoppECIES:(NSString*)privateKey cipherObject:(NSDictionary*)cipherObject completion:(RCTResponseSenderBlock)completion)
+{
+  CryptoECIESWrapper* wrapper = [[CryptoECIESWrapper alloc] init];
+  NSString* recovered = [wrapper DecryptECIES:privateKey cipherObject:cipherObject];
+  NSLog(@"data = %@", recovered);
+  
+  NSError *error = NULL;
+  if (!recovered) {
+    error = [NSError errorWithDomain:@"im.stealthy.www"
+                                code:0
+                            userInfo:@{@"failed to decrypt`": @"Unable to decrypt provided cipher object."}];
+  }
+
+  completion(@[error ? error.localizedDescription : [NSNull null], recovered ? recovered : [NSNull null]]);
+}
+
+RCT_EXPORT_METHOD(encryptCryptoppECIES:(NSString*)publicKey content:(NSString*)content completion:(RCTResponseSenderBlock)completion)
+{
+  CryptoECIESWrapper* wrapper = [[CryptoECIESWrapper alloc] init];
+  NSDictionary* cipherObject = [wrapper EncryptECIES:publicKey content:content];
+  
+  NSError *error = NULL;
+  if (!cipherObject) {
+    error = [NSError errorWithDomain:@"im.stealthy.www"
+                      code:0
+                      userInfo:@{@"failed to encrypt`": @"Unable to encrypt provided content."}];
+  }
+  
+  completion(@[error ? error.localizedDescription : [NSNull null], cipherObject ? cipherObject : [NSNull null]]);
 }
 
 //
@@ -132,7 +175,6 @@ RCT_EXPORT_METHOD(getRawFile:(NSString *)path completion:(RCTResponseSenderBlock
     completion(@[error ? error.localizedDescription : [NSNull null], contentStr]);
   }];
 }
-
 
 //
 //

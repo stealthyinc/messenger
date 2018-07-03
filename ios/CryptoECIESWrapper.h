@@ -15,7 +15,8 @@
 @end
 
 @interface CryptoECIESWrapper ()
-- (NSString *)getHelloString;
+- (NSDictionary *)EncryptECIES:(NSString *)publicKey content:(NSString *)content;
+- (NSString *)DecryptECIES:(NSString *)privateKey cipherObject:(NSDictionary *)cipherObject;
 @end
-
+  
 #endif /* CryptoECIESWrapper_h */

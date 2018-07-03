@@ -9,6 +9,7 @@ import BackgroundFetch from "react-native-background-fetch";
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import firebase from 'react-native-firebase';
 const common = require('./../common.js');
+const utils = require('./../Engine/misc/utils.js')
 
 class ReduxNavigation extends React.Component {
   constructor(props) {
@@ -16,7 +17,8 @@ class ReduxNavigation extends React.Component {
     this.state = {
       fbListner: false
     }
-    this.ref = undefined;
+    this.ref = undefined
+    this.shutDownSignOut = false;
   }
   componentWillMount () {
     if (Platform.OS !== 'ios') {
@@ -65,18 +67,35 @@ class ReduxNavigation extends React.Component {
   componentWillReceiveProps (nextProps) {
     const { publicKey, engineShutdown } = nextProps
     if (engineShutdown) {
-      this._signOutAsync(publicKey)    
-    }
-    else if (publicKey && !this.ref) {
+      this._shutdownRequest(publicKey)
+    } else if (publicKey && !this.ref) {
       const sessionRef = common.getRootRef(publicKey)
       this.ref = firebase.database().ref(sessionRef)
       this.ref.on('child_changed', (childSnapshot, prevChildKey, publicKey) => {
+        this.shutDownSignOut = false
+
         const session = childSnapshot.val()
         if (session !== common.getSessionId()) {
           if (this.ref) {
             this.ref.off();
+            this.ref = undefined;
           }
           this.props.dispatch(EngineActions.initShutdown())
+
+          const TIMEOUT_BEFORE_SHUTDOWN_MS = 11 * 1000;
+          utils.resolveAfterMilliseconds(TIMEOUT_BEFORE_SHUTDOWN_MS)
+          .then(() => {
+            if (!this.shutDownSignOut) {
+              console.log('INFO(ReduxNavigation:componentWillReceiveProps): timed out waiting for engine shutdown.')
+              this._shutdownRequest(publicKey)
+            }
+          })
+          .catch((err) => {
+            console.log(`ERROR(ReduxNavigation:componentWillReceiveProps): error during timeout wait for engine shutdown.\n${err}\n`)
+            if (!this.shutDownSignOut) {
+              this._shutdownRequest(publicKey)
+            }
+          });
         }
       });
     }
@@ -84,6 +103,12 @@ class ReduxNavigation extends React.Component {
   componentWillUnmount () {
     if (Platform.OS !== 'ios') {
       BackHandler.removeEventListener('hardwareBackPress')
+    }
+  }
+  _shutdownRequest(aPublicKey) {
+    if (!this.shutDownSignOut) {
+      this.shutDownSignOut = true;
+      this._signOutAsync(aPublicKey)
     }
   }
   _signOutAsync = async (publicKey) => {

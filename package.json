@@ -21,8 +21,7 @@
     "lint": "standard --verbose | snazzy",
     "lintdiff": "git diff --name-only --cached --relative | grep '\\.js$' | xargs standard | snazzy",
     "fixcode": "standard --fix",
-    "git-hook": "npm run lint -s && npm run test -s",
-    "haul": "haul"
+    "git-hook": "npm run lint -s && npm run test -s"
   },
   "dependencies": {
     "apisauce": "^0.14.2",
@@ -72,7 +71,6 @@
     "babel-preset-react-native": "^3.0.2",
     "enzyme": "^3.2.0",
     "enzyme-adapter-react-16": "^1.1.0",
-    "haul": "^1.0.0-rc.4",
     "husky": "^0.14.3",
     "ignite-animatable": "^1.0.0",
     "ignite-dev-screens": "^2.3.0",

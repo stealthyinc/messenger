@@ -18,31 +18,12 @@ struct CipherObject {
   std::string ephemeralPK;
   std::string iv;
   std::string mac;
-  bool wasString;
 };
 
 class CryptoECIES {
   public:
-    std::string getHelloString();
-  
-    CipherObject EncryptECIES(const std::string& publicKey, const std::string& content);
-  
-//    void EncryptECIESWrapper(const std::string& publicKey,
-//                             const std::string& content,
-//                             std::string& cipherText,
-//                             std::string& ephemeralPK,
-//                             std::string& iv,
-//                             std::string& mac,
-//                             bool& wasString);
-//  
-//    std::string DecryptECIES(const std::string& privateKey, const std::string& cipherObject);
-//  
-//    std::string DecryptECIESWrapper(const std::string& privateKey,
-//                                    const std::string& cipherText,
-//                                    const std::string& ephemeralPK,
-//                                    const std::string& iv,
-//                                    const std::string& mac,
-//                                    const bool wasString);
+    static CipherObject EncryptECIES(const std::string& publicKey, const std::string& content);
+    static std::string DecryptECIES(const std::string& privateKey, const CipherObject& cipherObject);
 };
 
 #endif /* CryptoECIES_hpp */

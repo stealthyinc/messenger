@@ -18,6 +18,7 @@ const { MessagingEngine } = require('../Engine/engine.js');
 import firebase from 'react-native-firebase';
 
 const common = require('./../common.js');
+const utils = require('./../Engine/misc/utils.js');
 
 // import FAQ from '../Components/FAQ'
 
@@ -147,6 +148,7 @@ class SignInScreen extends React.Component {
               userData['appPublicKey'] = publicKey;
               this.props.setPublicKey(publicKey)
               this.userData = userData;
+
               AsyncStorage.setItem('userData', JSON.stringify(this.userData));
               const ref = firebase.database().ref(common.getSessionRef(publicKey));
               await ref.once('value')

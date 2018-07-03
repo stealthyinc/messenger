@@ -10,15 +10,8 @@ const Peer = undefined;
 const EventEmitter = require('EventEmitter');
 const sdpParser = require('sdp-transform');
 
-// TODO: get these through Blockstack iOS API
-// const { encryptECIES } = require('blockstack/lib/encryption');
-function encryptECIES(arg1, arg2) {
-  throw 'TODO: in connectionManager.js, need to get encryption methods from iOS Blockstack'
-}
-
-
 const { RESPONSE_TYPE, OFFER_TYPE } = require('./PeerManager');
-const { getSimplePeerOpts } = require('./utils.js');
+const { getSimplePeerOpts, encryptObj } = require('./utils.js');
 
 
 const ENABLE_FAILED_ICE_REJECTION = true;
@@ -46,11 +39,13 @@ class ConnectionManager extends EventEmitter {
 
     p.on('signal', (data) => {
       this.logger(`Peer signal with ${targetUser}`);
-      // TODO: something less ugly for encryption
-      const outgoingSignalData = (targetUserPublicKey) ?
-        JSON.stringify(encryptECIES(targetUserPublicKey, JSON.stringify(data))) :
-        data;
-      this.sdpManager.writeSdpInvite(targetUser, outgoingSignalData);
+      const enableEncrypt = ((targetUserPublicKey !== undefined) &&
+                             (targetUserPublicKey !== null) &&
+                             (targetUserPublicKey !== ''))
+      encryptObj(targetUserPublicKey, data, enableEncrypt)
+      .then(result => {
+        this.sdpManager.writeSdpInvite(targetUser, result);
+      })
     });
 
     p.on('connect', () => {

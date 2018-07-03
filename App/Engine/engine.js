@@ -239,28 +239,6 @@ export class MessagingEngine extends EventEmitter {
     }
   }
 
-  async shutdown() {
-    // Most important things to do on shutdown:
-    //
-    //  Write any stray messages to disk.
-    //
-    this._writeConversations();
-
-    this.offlineMsgSvc.skipSendService();
-    this.offlineMsgSvc.sendMessagesToStorage();
-    this.offlineMsgSvc.skipSendService(false);
-
-    // We stopped doing this after every incoming msg etc. to
-    // speed things along, hence write here.
-    //   - to avoid the popup, we should have a timer periodically write
-    //     all these and use a dirty flag to determine if we even need to do this.
-    this._writeContactList(contactMgr.getAllContacts());
-
-    // Clearing invite/response json files (but if the person chooses to stay,
-    // then you want to tell the infrastructure it may need to reissue those?).
-    //
-  }
-
   startWebRtc() {
     this.logger('startWebRtc:');
 
@@ -396,11 +374,13 @@ export class MessagingEngine extends EventEmitter {
       ENCRYPT_CONTACTS = false;
       ENCRYPT_SETTINGS = false;
       ENCRYPT_SDP = true;
-    } else if (this.userId === 'alexc.id') {
+    } else if ((this.userId === 'alexc.id') ||
+               (this.userId === 'alex.stealthy.id') ||
+               (this.userId === 'relay.id')) {
       // AC Dev Settings:
       ENABLE_GAIA = false;
       ENCRYPT_MESSAGES = false;
-      ENCRYPT_CONTACTS = false;
+      ENCRYPT_CONTACTS = true;
       ENCRYPT_SETTINGS = false;
       ENCRYPT_SDP = true;
     } else {
@@ -599,7 +579,6 @@ export class MessagingEngine extends EventEmitter {
 
   _configureSessionManagement() {
     // Get the firebase session lock key (assume that it's set to us, throw if it's none).
-    // Setup a shutdown listener to close this session if we lose the session lock key.
     // Considerations:
     //   - TODO: throw if no firebase
     //   - TODO: what to save on loss of session lock key
@@ -612,17 +591,18 @@ export class MessagingEngine extends EventEmitter {
 
       this.logger(`INFO(engine.js::_configureSessionManagement): session is locked to ${snapshot.val()}.`);
 
-      const parentRef = firebase.database().ref(common.getRootRef(this.publicKey))
-      parentRef.on('child_changed', (childSnapshot, prevChildKey) => {
-        const currentSession = (childSnapshot.exists()) ? childSnapshot.val() : 'undefined';
-        if (currentSession != this.sessionId) {
-          this.logger(`INFO(engine.js:_configureSessionManagement): current session has changed to ${currentSession}. Shutting down.`)
-          this.logger(`  prevChildKey=${prevChildKey}`)
-          // TODO: shutdown
-        }
-      })
+      // const parentRef = firebase.database().ref(common.getRootRef(this.publicKey))
+      // parentRef.on('child_changed', (childSnapshot, prevChildKey) => {
+      //   const currentSession = (childSnapshot.exists()) ? childSnapshot.val() : 'undefined';
+      //   if (currentSession != this.sessionId) {
+      //     this.logger(`INFO(engine.js:_configureSessionManagement): current session has changed to ${currentSession}. Shutting down.`)
+      //     this.logger(`  prevChildKey=${prevChildKey}`)
+      //     // TODO: shutdown
+      //   }
+      // })
 
       this._configureIO();
+      return
     })
   }
 
@@ -640,8 +620,13 @@ export class MessagingEngine extends EventEmitter {
     this.io.readLocalFile(this.userId, 'settings.json')
     .then((settingsData) => {
       if (settingsData && settingsData !== null) {
-        this.settings = (ENCRYPT_SETTINGS) ?
-          utils.decryptToObj(this.privateKey, settingsData) : settingsData;
+        utils.decryptObj(this.privateKey, settingsData, ENCRYPT_SETTINGS)
+        .then(settingsData => {
+          this.settings = settingsData
+
+          this.initSettings();
+          this._fetchDataAndCompleteInit();
+        })
       } else {
         // THIS HAPPENS FIRST TIME ONLY
         // centralized discovery on by default
@@ -657,10 +642,10 @@ export class MessagingEngine extends EventEmitter {
           // this.handleIntroOpen();
           this.emit('me-handle-intro-open');
         }
-      }
 
-      this.initSettings();
-      this._fetchDataAndCompleteInit();
+        this.initSettings();
+        this._fetchDataAndCompleteInit();
+      }
     })
     .catch((error) => {
       // TODO: Prabhaav--shouldn't this set the default settings from above?
@@ -716,21 +701,33 @@ export class MessagingEngine extends EventEmitter {
     .then((contactsData) => {
       // debugger
       if (contactsData && contactsData !== null) {
-        contactArr = (ENCRYPT_CONTACTS) ?
-          utils.decryptToObj(this.privateKey, contactsData) : contactsData;
+        utils.decryptObj(this.privateKey, contactsData, ENCRYPT_CONTACTS)
+        .then(contactArr => {
+          this._initWithContacts(contactArr);
+
+          if (!this.isMobile) {
+            // add query contact if there is one
+            const queryContact = getQueryString('add');
+            const existingUserIds = this.contactMgr.getAllContactIds();
+            const checkId = `${queryContact}.id`;
+            if (queryContact && !existingUserIds.includes(checkId)) {
+              this.emit('me-add-query-contact', queryContact);
+            }
+          }
+        })
       } else {
         this.logger('No data read from contacts file. Initializing with no contacts.');
         contactArr = [];
-      }
-      this._initWithContacts(contactArr);
+        this._initWithContacts(contactArr);
 
-      if (!this.isMobile) {
-        // add query contact if there is one
-        const queryContact = getQueryString('add');
-        const existingUserIds = this.contactMgr.getAllContactIds();
-        const checkId = `${queryContact}.id`;
-        if (queryContact && !existingUserIds.includes(checkId)) {
-          this.emit('me-add-query-contact', queryContact);
+        if (!this.isMobile) {
+          // add query contact if there is one
+          const queryContact = getQueryString('add');
+          const existingUserIds = this.contactMgr.getAllContactIds();
+          const checkId = `${queryContact}.id`;
+          if (queryContact && !existingUserIds.includes(checkId)) {
+            this.emit('me-add-query-contact', queryContact);
+          }
         }
       }
     })
@@ -803,8 +800,51 @@ export class MessagingEngine extends EventEmitter {
   // ////////////////////////////////////////////////////////////////////////////
   //
   handleShutDownRequest() {
-    // TODO:
-    this.emit('me-shutdown-complete', true)
+    this.offlineMsgSvc.skipSendService();
+    this.offlineMsgSvc.stopSendService();
+    this.offlineMsgSvc.stopRecvService();
+
+    this.heartBeat.stopBeat()
+    this.heartBeat.stopMonitor()
+
+
+    const promises = []
+    promises.push(this._writeConversations())
+
+    // We stopped doing this after every incoming msg etc. to
+    // speed things along, hence write here.
+    //   - to avoid the popup, we should have a timer periodically write
+    //     all these and use a dirty flag to determine if we even need to do this.
+    promises.push(this._writeContactList(this.contactMgr.getAllContacts()))
+
+    // This is probably higher priority than writing the contact list but since
+    // it uses await, we're waiting to launch it until launching the other io
+    // promises above
+    this.offlineMsgSvc.sendMessagesToStorage();
+
+    // TODO: make this more intelligent (i.e. only delete if we issued an invite / response)
+    // if (this.sdpManager) {
+    //   for (const contactId of this.contactMgr.getContactIds()) {
+    //     promises.push(this.sdpManager.deleteSdpInvite(contactId));
+    //     promises.push(this.sdpManager.deleteSdpResponse(contactId));
+    //   }
+    // }
+    // See also:  componentWillUnmountWork (TODO)
+
+    Promise.all(promises)
+    .then(() => {
+      this.offlineMsgSvc = undefined
+      this.heartbeat = undefined
+
+      this.logger('INFO:(engine.js::handleShutDownRequest): engine shutdown successful.')
+      this.emit('me-shutdown-complete', true)
+      return
+    })
+    .catch((err) => {
+      console.log(`ERROR(engine.js::handleShutDownRequest): ${err}`)
+      this.emit('me-shutdown-complete', true)
+      return
+    })
   }
 
   //
@@ -997,31 +1037,42 @@ export class MessagingEngine extends EventEmitter {
     this.logger(`New connection to ${newConnectionUserId}, ${aPeerObjType}!`);
     this.anonalytics.aeWebRtcConnectionEstablished();
 
-    // TODO: need to check connections read messages before sending these unsent.
-    //       If found, need to update our messge properties.
-    //
-    const unsentMessages =
-      this.conversations.getUnsentMessages(newConnectionUserId);
-
     this.peerMgr.setPeerConnected(newConnectionUserId, aPeerObjType);
-    for (const message of unsentMessages) {
-      const outgoingPublicKey =
-        this.contactMgr.getPublicKey(newConnectionUserId);
 
-      const packet = (ENCRYPT_MESSAGES) ?
-        utils.encryptObj(outgoingPublicKey, message) :
-        JSON.stringify(message);
+    // TODO: we'll need to test this given the re-write due to encryptObj being a promise
+    const peerObj = this.peerMgr.getConnection(newConnectionUserId);
+    if (peerObj) {
+      const outgoingPublicKey = this.contactMgr.getPublicKey(newConnectionUserId);
 
-      const peerObj = this.peerMgr.getConnection(newConnectionUserId);
-      if (peerObj) {
-        message.sent = true;
-        peerObj.send(packet);
-      } else {
-        this.logger('Peer not connected in handleNewConnection.');
+      // TODO: need to check connections read messages before sending these unsent.
+      //       If found, need to update our messge properties.
+      //
+      const unsentMessages = this.conversations.getUnsentMessages(newConnectionUserId);
+      const sendPromises = []
+
+      for (const message of unsentMessages) {
+        const sendPromise = utils.encryptObj(outgoingPublicKey, message, ENCRYPT_MESSAGES)
+                            .then(result => {
+                              const packet = ENCRYPT_MESSAGES ? result : JSON.stringify(result)
+                              message.sent = true
+                              peerObj.send(packet)
+                            })
+
+        sendPromises.push(sendPromise)
       }
+
+      // The wait for promise completion on write conversations is to ensure the
+      // message.sent is registered in the persisted conversation
+      //   TODO: need to check assumption that message.sent updates the conversation
+      //         that is persisted.
+      Promise.all(sendPromises)
+      .then(() => {
+        this._writeConversations();
+      })
+    } else {
+      this.logger('Peer not connected in handleNewConnection.');
     }
 
-    this._writeConversations();
     this.contactMgr.setStatus(newConnectionUserId, statusIndicators.available);
     this.updateContactMgr();
   }
@@ -1452,65 +1503,68 @@ export class MessagingEngine extends EventEmitter {
   // Might need to rethink this as it can probably get called multiple times
   // concurrently (TODO: AC - think about queuing new packets for processing)
   handleIncomingMessage(incomingUserId, packet) {
-    const chatMsg = (ENCRYPT_MESSAGES) ?
-      utils.decryptToObj(this.privateKey, packet) : JSON.parse(packet);
+    utils.decryptObj(this.privateKey, packet, ENCRYPT_MESSAGES)
+    .then(result => {
+      const chatMsg = ENCRYPT_MESSAGES ? result : JSON.parse(result)
 
-    if (chatMsg && (chatMsg.type === MESSAGE_TYPE.VIDEO_SDP)) {
-      this.logger(`Received VIDEO_SDP message from ${chatMsg.from}.`);
-      // TODO: what if we're already video chatting ...
-      if (chatMsg.content.type === 'offer') {
-        // Pops a dialog asking user if yes/no on video invite.
-        //   - If yes, calls handleVideoOpen, which requires that chatMsg is
-        //     assigned to a member (shitty way to pass it).
-        //   - If no, calls handleVideoInviteClose, which should unassign the
-        //     member, and ideally TODO, send a response to the invitee that
-        //     there call was rejected.
-        this.videoInviteChatMsg = chatMsg;
-        this.emit('me-request-video');
-      } else {
-        this.handleVideoResponse(chatMsg);
+      if (chatMsg && (chatMsg.type === MESSAGE_TYPE.VIDEO_SDP)) {
+        this.logger(`Received VIDEO_SDP message from ${chatMsg.from}.`);
+        // TODO: what if we're already video chatting ...
+        if (chatMsg.content.type === 'offer') {
+          // Pops a dialog asking user if yes/no on video invite.
+          //   - If yes, calls handleVideoOpen, which requires that chatMsg is
+          //     assigned to a member (shitty way to pass it).
+          //   - If no, calls handleVideoInviteClose, which should unassign the
+          //     member, and ideally TODO, send a response to the invitee that
+          //     there call was rejected.
+          this.videoInviteChatMsg = chatMsg;
+          this.emit('me-request-video');
+        } else {
+          this.handleVideoResponse(chatMsg);
+        }
+        return;
+      } else if (chatMsg && (chatMsg.type === MESSAGE_TYPE.SCREEN_SHARE_SDP)) {
+        this.logger(`Received SCREEN_SHARE_SDP message from ${chatMsg.from}.`);
+        // TODO: what if we're already video chatting ...
+        if (chatMsg.content.type === 'offer') {
+          // Pops a dialog asking user if yes/no on video invite.
+          //   - If yes, calls handleVideoOpen, which requires that chatMsg is
+          //     assigned to a member (shitty way to pass it).
+          //   - If no, calls handleVideoInviteClose, which should unassign the
+          //     member, and ideally TODO, send a response to the invitee that
+          //     there call was rejected.
+          this.videoInviteChatMsg = chatMsg;
+          // this.emit('me-request-video');
+          this.handleScreenShareInviteOpen();
+        } else {
+          // this.handleVideoResponse(chatMsg);
+          this.handleScreenShareResponse(chatMsg);
+        }
+        return;
+      } else if (chatMsg && (chatMsg.type === MESSAGE_TYPE.RECEIPT)) {
+        this.logger(`Received RECEIPT message from ${chatMsg.from}.`);
+        this.handleReceipt(chatMsg);
+        return;
       }
-      return;
-    } else if (chatMsg && (chatMsg.type === MESSAGE_TYPE.SCREEN_SHARE_SDP)) {
-      this.logger(`Received SCREEN_SHARE_SDP message from ${chatMsg.from}.`);
-      // TODO: what if we're already video chatting ...
-      if (chatMsg.content.type === 'offer') {
-        // Pops a dialog asking user if yes/no on video invite.
-        //   - If yes, calls handleVideoOpen, which requires that chatMsg is
-        //     assigned to a member (shitty way to pass it).
-        //   - If no, calls handleVideoInviteClose, which should unassign the
-        //     member, and ideally TODO, send a response to the invitee that
-        //     there call was rejected.
-        this.videoInviteChatMsg = chatMsg;
-        // this.emit('me-request-video');
-        this.handleScreenShareInviteOpen();
-      } else {
-        // this.handleVideoResponse(chatMsg);
-        this.handleScreenShareResponse(chatMsg);
-      }
-      return;
-    } else if (chatMsg && (chatMsg.type === MESSAGE_TYPE.RECEIPT)) {
-      this.logger(`Received RECEIPT message from ${chatMsg.from}.`);
-      this.handleReceipt(chatMsg);
-      return;
-    }
 
-    // TODO TODO TODO: Fix this workaround--suspect it'r reflected messaging bug
-    //                 from the duplex peer manager.
-    if (chatMsg && WORKAROUND__DISABLE_REFLECTED_PACKET) {
-      const isSelf = (chatMsg.to === chatMsg.from);
-      if (!isSelf) {
-        if (chatMsg.from === this.userId) {
-          // Discard handling this message for now.
-          return;
+      // TODO TODO TODO: Fix this workaround--suspect it'r reflected messaging bug
+      //                 from the duplex peer manager.
+      if (chatMsg && WORKAROUND__DISABLE_REFLECTED_PACKET) {
+        const isSelf = (chatMsg.to === chatMsg.from);
+        if (!isSelf) {
+          if (chatMsg.from === this.userId) {
+            // Discard handling this message for now.
+            return;
+          }
         }
       }
-    }
 
-    const messages = [chatMsg];
-    this.addIncomingMessage(messages);
-    this.updateContactOrderAndStatus(messages);
-    this.sendMessageReceipts(messages);
+      const messages = [chatMsg];
+      this.addIncomingMessage(messages);
+      this.updateContactOrderAndStatus(messages);
+      this.sendMessageReceipts(messages);
+
+    })
   }
 
   // SO MUCH TODO TODO TODO
@@ -1829,9 +1883,12 @@ export class MessagingEngine extends EventEmitter {
   _sendOutgoingMessage(anOutgoingUserId, aChatMsg, aPublicKey) {
     aChatMsg.sent = true;
     aChatMsg.msgState = MESSAGE_STATE.SENT_REALTIME;
-    const packet = (ENCRYPT_MESSAGES) ?
-      utils.encryptObj(aPublicKey, aChatMsg) : JSON.stringify(aChatMsg);
-    this.peerMgr.getConnection(anOutgoingUserId).send(packet);
+
+    utils.encryptObj(aPublicKey, aChatMsg, ENCRYPT_MESSAGES)
+    .then(result => {
+      let packet = ENCRYPT_MESSAGES ? result : JSON.stringify(result)
+      this.peerMgr.getConnection(anOutgoingUserId).send(packet);
+    })
   }
 
   _sendOutgoingMessageOffline(aChatMsg) {
@@ -1870,11 +1927,13 @@ export class MessagingEngine extends EventEmitter {
         aMsgType);
       chatMsg.sent = true;
 
-      const packet = (ENCRYPT_MESSAGES) ?
-        utils.encryptObj(outgoingPublicKey, chatMsg) : JSON.stringify(chatMsg);
+      utils.encryptObj(outgoingPublicKey, chatMsg, ENCRYPT_MESSAGES)
+      .then(result => {
+        let packet = ENCRYPT_MESSAGES ? result : JSON.stringify(result)
 
-      this.logger(`Sending video invite request chatMsg to ${outgoingId}.`);
-      this.peerMgr.getConnection(outgoingId).send(packet);
+        this.logger(`Sending video invite request chatMsg to ${outgoingId}.`);
+        this.peerMgr.getConnection(outgoingId).send(packet);
+      })
     });
 
     if (!(this.avPeerMgr.isSelf() && this.avPeerMgr.isInitiator())) {
@@ -2077,19 +2136,34 @@ export class MessagingEngine extends EventEmitter {
   // ////////////////////////////////////////////////////////////////////////////
   //
   _writeContactList(aContactArr) {
-    const contactsFileData = (ENCRYPT_CONTACTS) ?
-      utils.encryptObj(this.publicKey, aContactArr) : aContactArr;
-    this.io.writeLocalFile(this.userId, 'contacts.json', contactsFileData)
-    .then(() => {
-      // TODO: get this event out of here--it shouldn't be tied to contact save,
-      //       but rather to the event/code that was started by showAdd.
-      // TODO: is this even needed?
-      this.emit('me-close-add-ui');
-    });
+    return utils.encryptObj(this.publicKey, aContactArr, ENCRYPT_CONTACTS)
+    .then(contactsFileData => {
+      return this.io.writeLocalFile(this.userId, 'contacts.json', contactsFileData)
+      .then(() => {
+        // TODO: get this event out of here--it shouldn't be tied to contact save,
+        //       but rather to the event/code that was started by showAdd.
+        // TODO: is this even needed?
+        this.emit('me-close-add-ui');
+        return
+      })
+      .catch((err) => {
+        console.log(`ERROR(engine.js::_writeContactList): ${err}`)
+        return
+      })
+    })
   }
 
   _writeConversations() {
-    this.conversations.storeContactBundles();
+    // TODO:
+    // 1. call this less often
+    return this.conversations.storeContactBundles()
+    .then(() => {
+      return
+    })
+    .catch((err) => {
+      console.log(`ERROR(engine.js::_writeConversations): ${err}`)
+      return
+    })
   }
 
   writeSettings(theSettings) {
@@ -2098,11 +2172,10 @@ export class MessagingEngine extends EventEmitter {
         time: Date.now()
       };
     }
-
-    const settingsData = (ENCRYPT_SETTINGS) ?
-      utils.encryptObj(this.publicKey, theSettings) : theSettings;
-
-    this.io.writeLocalFile(this.userId, 'settings.json', settingsData);
+    utils.encryptObj(this.publicKey, theSettings, ENCRYPT_SETTINGS)
+    .then(settingsData => {
+      this.io.writeLocalFile(this.userId, 'settings.json', settingsData);
+    })
   }
 
 

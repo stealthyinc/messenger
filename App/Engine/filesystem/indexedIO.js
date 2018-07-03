@@ -49,8 +49,8 @@ class IndexedIO {
 
     return this.ioInst.readRemoteFile(remoteUser, indexFilePath)
     .then((sharedIndexData) => {
-      if (sharedIndexData && this.useEncryption) {
-        return utils.decryptToObj(this.privateKey, sharedIndexData);
+      if (sharedIndexData) {
+        return utils.decryptObj(this.privateKey, sharedIndexData, this.useEncryption);
       }
       return sharedIndexData;
     })
@@ -70,8 +70,8 @@ class IndexedIO {
 
     return this.ioInst.readLocalFile(this.userId, indexFilePath)
     .then((indexData) => {
-      if (indexData && this.useEncryption) {
-        return utils.decryptToObj(this.privateKey, indexData);
+      if (indexData) {
+        return utils.decryptObj(this.privateKey, indexData, this.useEncryption);
       }
       return indexData;
     })
@@ -92,32 +92,28 @@ class IndexedIO {
     indexData.time = time;
 
     const indexFilePath = IndexedIO._getIndexPath(dirPath);
-    const writeData = (this.useEncryption) ?
-      utils.encryptObj(this.publicKey, indexData) : indexData;
 
-    const writePromises = [];
-    writePromises.push(
-      this.ioInst.writeLocalFile(this.userId, indexFilePath, writeData));
-
-    if (someonesPubKey) {
-      writePromises.push(
-        this._writeSharedIndex(dirPath, indexData, someonesPubKey));
-    }
-
-    // IndexedIO._logIndex(this.logger, indexData);
-
-    return Promise.all(writePromises);
+    return utils.encryptObj(this.publicKey, indexData, this.useEncryption)
+    .then(writeData => {
+      const writePromises = [];
+      writePromises.push(this.ioInst.writeLocalFile(this.userId, indexFilePath, writeData));
+      if (someonesPubKey) {
+        writePromises.push(this._writeSharedIndex(dirPath, indexData, someonesPubKey));
+      }
+      // IndexedIO._logIndex(this.logger, indexData);
+      return Promise.all(writePromises);
+    })
   }
 
   // Private -- don't call this outside of this class.
   //
   _writeSharedIndex(dirPath, indexData, someonesPubKey) {
     const sharedIndexFilePath = IndexedIO._getSharedIndexPath(dirPath);
-    const sharedWriteData = (this.useEncryption) ?
-      utils.encryptObj(someonesPubKey, indexData) : indexData;
 
-    return this.ioInst.writeLocalFile(
-      this.userId, sharedIndexFilePath, sharedWriteData);
+    return utils.encryptObj(someonesPubKey, indexData, this.useEncryption)
+    .then(sharedWriteData => {
+      return this.ioInst.writeLocalFile(this.userId, sharedIndexFilePath, sharedWriteData);
+    })
   }
 
   static _logIndex(logger, indexData) {
@@ -165,16 +161,17 @@ class IndexedIO {
       sanoIndexData.active[fileName] = { time };
 
       const encKey = (someonesPubKey) || this.publicKey;
-      const encData = (this.useEncryption) ? utils.encryptObj(encKey, data) : data;
-
-      return this.writeLocalIndex(path, sanoIndexData, someonesPubKey)
-      .then(() => {
-        return this.ioInst.writeLocalFile(this.userId, filePath, encData)
+      return utils.encryptObj(encKey, data, this.useEncryption)
+      .then(encData => {
+        return this.writeLocalIndex(path, sanoIndexData, someonesPubKey)
+        .then(() => {
+          return this.ioInst.writeLocalFile(this.userId, filePath, encData)
+        })
+        .catch((err) => {
+          this.logger(`ERROR(IndexedIO::writeLocalFile) writing index: ${err}.`);
+          return undefined;
+        });
       })
-      .catch((err) => {
-        this.logger(`ERROR(IndexedIO::writeLocalFile) writing index: ${err}.`);
-        return undefined;
-      });
     })
     .catch((err) => {
       this.logger(`ERROR(IndexedIO::writeLocalFile) fetching index: ${err}.`);
@@ -196,9 +193,7 @@ class IndexedIO {
     indexData.time = time;
 
     const indexFilePath = IndexedIO._getIndexPath(dirPath);
-    const writeData = (this.useEncryption) ?
-      utils.encryptObj(this.publicKey, indexData) : indexData;
-
+    const writeData = await utils.encryptObj(this.publicKey, indexData, this.useEncryption)
     await this.ioInst.writeLocalFile(this.userId, indexFilePath, writeData);
 
     if (someonesPubKey) {
@@ -276,7 +271,7 @@ class IndexedIO {
     sanoIndexData.active[fileName] = { time };
 
     const encKey = (someonesPubKey) || this.publicKey;
-    const encData = (this.useEncryption) ? utils.encryptObj(encKey, data) : data;
+    const encData = await utils.encryptObj(encData, data, this.useEncryption)
 
     try {
       await this.seqWriteLocalIndex(path, sanoIndexData, someonesPubKey);
@@ -398,10 +393,7 @@ class IndexedIO {
       if ((data === undefined) || (data === null)) {
         return data;
       }
-      if (this.useEncryption) {
-        return utils.decryptToObj(this.privateKey, data);
-      }
-      return data;
+      return utils.decryptObj(this.privateKey, data, this.useEncryption);
     })
     .catch((err) => {
       this.logger(`ERROR(IndexedIO::readLocalFile): ${err}.`);
@@ -419,10 +411,7 @@ class IndexedIO {
       if (utils.isEmptyObj(data)) {
         return undefined;
       }
-      if (this.useEncryption) {
-        return utils.decryptToObj(this.privateKey, data);
-      }
-      return data;
+      return utils.decryptObj(this.privateKey, data, this.useEncryption);
     })
     .catch((err) => {
       this.logger(`ERROR(IndexedIO::readRemoteFile): ${err}.`);

@@ -239,6 +239,8 @@ class ConversationManager {
   }
 
   storeContactBundles() {
+    const promises = [];
+
     for (const contactId in this.conversations) {
       const bundlePath = `${contactId}/conversations/bundles`;
 
@@ -246,13 +248,31 @@ class ConversationManager {
       for (const bundle of bundles) {
         if (bundle.isModified()) {
           const bundleFilePath = `${bundlePath}/${bundle.bundleFile}`;
-          this.idxIoInst.writeLocalFile(bundleFilePath, bundle);
-          // TODO: this should probably be moved to happen only when there's
-          //       no error.
-          bundle.setModified(false);
+
+          const wrPromise = new Promise((resolve, reject) => {
+            this.idxIoInst.writeLocalFile(bundleFilePath, bundle)
+            .then(() => {
+              bundle.setModified(false);
+              resolve()
+            })
+            .catch((err) => {
+              reject(err)
+            })
+          })
+
+          promises.push(wrPromise)
         }
       }
     }
+
+    return Promise.all(promises)
+    .then(() => {
+      return
+    })
+    .catch((err) => {
+      console.log(`ERROR(conversationManager::storeContactBundles): ${err}`)
+      return
+    })
   }
 
   hasMessage(aChatMessage) {

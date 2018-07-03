@@ -64,6 +64,10 @@ class InvitationPolling extends EventEmitter {
       this.log('invite polling ...');
       // TODO: Tuning of this alg. to take advantage of concurrency.
       //
+      const enableDecrypt = ((this.privateKey !== undefined) &&
+                             (this.privateKey !== null) &&
+                             (this.privateKey !== ''))
+
       for (const contactId of this.contactIds) {
         if (this.excludedUserIds.includes(contactId)) {
           continue;
@@ -75,8 +79,7 @@ class InvitationPolling extends EventEmitter {
         if (res && !utils.isEmptyObj(res)) {
           this.log('found sdp invitation ...');
 
-          const sdpData = (this.privateKey) ?
-            utils.decryptToObj(this.privateKey, res) : res;
+          const sdpData = await utils.decryptObj(this.privateKey, res, enableDecrypt)
 
           if (!this.enablePolling) {
             // Get out of this fn if polling has been disabled (async wait
@@ -127,6 +130,11 @@ class ResponsePolling {
   async _pollForSdpResponse(resolve, reject) {
     let timeout = this.timeout;
     const sleepForMs = (this.interval * 1000);
+
+    const enableDecrypt = ((this.privateKey !== undefined) &&
+                           (this.privateKey !== null) &&
+                           (this.privateKey !== ''))
+
     while (timeout >= 0) {
       this.log('response polling ...');
       const res = await this.sdpManager.readSdpResponse(this.respondent);
@@ -134,8 +142,7 @@ class ResponsePolling {
       if (res && !utils.isEmptyObj(res)) {
         this.log('got sdp response ...');
 
-        const sdpData = (this.privateKey) ?
-          utils.decryptToObj(this.privateKey, res) : res;
+        const sdpData = await utils.decryptObj(this.privateKey, res, enableDecrypt)
 
         if (!utils.isEmptyObj(sdpData)) {
           return resolve(sdpData);
