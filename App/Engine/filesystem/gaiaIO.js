@@ -2,16 +2,22 @@ import {
   NativeModules
 } from 'react-native';
 
-const {BlockstackNativeModule} = NativeModules;
-const {getFile, putFile} = BlockstackNativeModule;
-
-// const {
-  // getFile,
-  // putFile,
-  // Person,
-// } = require('blockstack');
-
 const utils = require('./../misc//utils.js');
+const BlockstackNativeModule = NativeModules.BlockstackNativeModule;
+const {getRawFile, putRawFile} = BlockstackNativeModule;
+// let getFile = undefined;
+// let getRawFile = undefined;
+// let putFile = undefined;
+// if (utils.is_iOS()) {
+//   getFile = NativeModules.BlockstackNativeModule.getRawFile;
+//   putFile = NativeModules.BlockstackNativeModule.putFile;
+//   // {getRawFile, putFile} = NativeModules.BlockstackNativeModule;
+// } else {
+//   const blockstack = require('blockstack');
+//   getFile = blockstack.getFile;
+//   putFile = blockstack.putFile;
+// }
+
 const BaseIO = require('./baseIO.js');
 
 const NAME_ENDPOINT = 'https://core.blockstack.org/v1/names';
@@ -67,19 +73,33 @@ module.exports = class GaiaIO extends BaseIO {
   _write(username, filePath, data) {
     this.log(`Writing data to ${username}'s GAIA in: '${filePath}'`);
     try {
-      return putFile(filePath, JSON.stringify(data), {encrypt: false})
-      .then(() => {
-        this.log(`Success writing ${filePath} to ${username}'s GAIA.`);
-        // this.logger('   Wrote:');
-        // this.logger(JSON.stringify(data));
-        return;
-      })
-      .catch((error) => {
-        this.logger(`ERROR(gaiaIO::_write): writing ${filePath} to ${username}'s GAIA.\n${error}`);
-        // this.logger('   Attempting to write:');
-        // this.logger(JSON.stringify(data));
-        return;
-      });
+      if (utils.is_iOS()) {
+        // TODO: modify Blockstack -> RCT to use promises instead of completion
+        return new Promise((resolve, reject) => {
+
+          putRawFile(filePath, JSON.stringify(data), (error) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve();
+            }
+          })
+        })
+      } else {
+        return putFile(filePath, JSON.stringify(data), {encrypt: false})
+        .then(() => {
+          this.log(`Success writing ${filePath} to ${username}'s GAIA.`);
+          // this.logger('   Wrote:');
+          // this.logger(JSON.stringify(data));
+          return;
+        })
+        .catch((error) => {
+          this.logger(`ERROR(gaiaIO::_write): writing ${filePath} to ${username}'s GAIA.\n${error}`);
+          // this.logger('   Attempting to write:');
+          // this.logger(JSON.stringify(data));
+          return;
+        });
+      }
     } catch (err) {
       this.logger(`ERROR(gaiaIO::_write): unable to write ${username}'s file ${filename}. ${err}`);
       return undefined;
@@ -91,18 +111,42 @@ module.exports = class GaiaIO extends BaseIO {
     const options = { username, zoneFileLookupURL: NAME_ENDPOINT, decrypt: false };
 
     try {
-      return getFile(filePath, options)
-      .then((data) => {
-        if (data) {
-          return JSON.parse(data);
-        }
-        this.log(`gaiaIO: no data reading ${filePath} from ${username}'s GAIA.'`);
-        return undefined;
-      })
-      .catch((error) => {
-        this.logger(`ERROR(gaiaIO::_read): reading ${filePath} from ${username}'s GAIA.\n${error}`);
-        return;
-      });
+      if (utils.is_iOS()) {
+        // TODO: modify Blockstack -> RCT to use promises instead of completion
+        return new Promise((resolve, reject) => {
+          getRawFile(filePath, (error, content) => {
+            if (error) {
+              reject(error);
+            } else {
+              try {
+                if (content && content.includes('<Error><Code>BlobNotFound')) {
+                  // Empty file
+                  resolve(undefined)
+                } else {
+                  const jsonContent = JSON.parse(content);
+                  resolve(jsonContent);
+                }
+              } catch (error) {
+                console.log(`ERROR(gaiaIO.js::_read): ${error}`)
+                reject(error);
+              }
+            }
+          })
+        })
+      } else {
+        return getFile(filePath, options)
+        .then((data) => {
+          if (data) {
+            return JSON.parse(data);
+          }
+          this.log(`gaiaIO: no data reading ${filePath} from ${username}'s GAIA.'`);
+          return undefined;
+        })
+        .catch((error) => {
+          this.logger(`ERROR(gaiaIO::_read): reading ${filePath} from ${username}'s GAIA.\n${error}`);
+          return;
+        });
+      }
     } catch (err) {
       this.logger(`ERROR(gaiaIO::_read): unable to read ${username}'s file ${filename}.\n${err}`);
       return undefined;

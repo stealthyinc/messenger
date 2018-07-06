@@ -1,5 +1,5 @@
 import React from 'react'
-import { AsyncStorage, BackHandler, Platform, NativeModules } from 'react-native'
+import { AsyncStorage, BackHandler, NativeModules } from 'react-native'
 import { addNavigationHelpers } from 'react-navigation'
 import { createReduxBoundAddListener } from 'react-navigation-redux-helpers'
 import { connect } from 'react-redux'
@@ -21,7 +21,7 @@ class ReduxNavigation extends React.Component {
     this.shutDownSignOut = false;
   }
   componentWillMount () {
-    if (Platform.OS !== 'ios') {
+    if (!utils.is_iOS()) {
       BackHandler.addEventListener('hardwareBackPress', () => {
         const { dispatch, nav } = this.props
         // change to whatever is your first screen, otherwise unpredictable results may occur
@@ -101,7 +101,7 @@ class ReduxNavigation extends React.Component {
     }
   }
   componentWillUnmount () {
-    if (Platform.OS !== 'ios') {
+    if (!utils.is_iOS()) {
       BackHandler.removeEventListener('hardwareBackPress')
     }
   }

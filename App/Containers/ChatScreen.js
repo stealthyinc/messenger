@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Button, Platform, ScrollView, TouchableOpacity, View, Text } from 'react-native'
+import { Button, ScrollView, TouchableOpacity, View, Text } from 'react-native'
 import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -10,6 +10,8 @@ import CustomActions from './chat/CustomActions';
 import CustomView from './chat/CustomView';
 import firebase from 'react-native-firebase';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+
+const utils = require('./../Engine/misc/utils.js');
 
 class ChatScreen extends Component {
 
@@ -193,7 +195,7 @@ class ChatScreen extends Component {
   }
 
   renderCustomActions = (props) => {
-    if (Platform.OS === 'ios') {
+    if (utils.is_iOS()) {
       return (
         <CustomActions
           {...props}

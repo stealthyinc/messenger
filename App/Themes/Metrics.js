@@ -2,6 +2,8 @@ import {Dimensions, Platform} from 'react-native'
 
 const { width, height } = Dimensions.get('window')
 
+const utils = require('./../Engine/misc/utils.js');
+
 // Used via Metrics.baseMargin
 const metrics = {
   marginHorizontal: 10,
@@ -14,7 +16,7 @@ const metrics = {
   horizontalLineHeight: 1,
   screenWidth: width < height ? width : height,
   screenHeight: width < height ? height : width,
-  navBarHeight: (Platform.OS === 'ios') ? 64 : 54,
+  navBarHeight: utils.is_iOS() ? 64 : 54,
   buttonRadius: 4,
   icons: {
     tiny: 15,

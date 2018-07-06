@@ -176,6 +176,12 @@ RCT_EXPORT_METHOD(getRawFile:(NSString *)path completion:(RCTResponseSenderBlock
   }];
 }
 
+RCT_EXPORT_METHOD(putRawFile:(NSString *)path stringContent:(NSString*)stringContent completion:(RCTResponseSenderBlock)completion) {
+  [[Blockstack sharedInstance] putRawFileWithPath:path stringContent:stringContent completion:^(NSString * response, NSError * error) {
+    completion(@[error ? error.localizedDescription : [NSNull null]]);
+  }];
+}
+
 //
 //
 // Bridging Experimental Blockstack Methods

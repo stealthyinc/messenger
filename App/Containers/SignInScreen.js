@@ -171,7 +171,9 @@ class SignInScreen extends React.Component {
   };
   _signInAsync = async () => {
     const {BlockstackNativeModule} = NativeModules;
-    await BlockstackNativeModule.signIn("https://www.stealthy.im/redirect.html", "https://www.stealthy.im", null, (error, events) => {
+    // const baseUrl = "http://localhost:/3030"
+    const baseUrl = "https://www.stealthy.im"
+    await BlockstackNativeModule.signIn(`${baseUrl}/redirect.html`, baseUrl, null, (error, events) => {
       if (!error) {
         this._getUserData()
       }

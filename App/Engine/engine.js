@@ -369,25 +369,25 @@ export class MessagingEngine extends EventEmitter {
 
     if (this.userId === 'pbj.id') {
       // PBJ Dev Settings:
-      ENABLE_GAIA = false;
-      ENCRYPT_MESSAGES = false;
-      ENCRYPT_CONTACTS = false;
-      ENCRYPT_SETTINGS = false;
+      ENABLE_GAIA = true;
+      ENCRYPT_MESSAGES = true;
+      ENCRYPT_CONTACTS = true;
+      ENCRYPT_SETTINGS = true;
       ENCRYPT_SDP = true;
     } else if ((this.userId === 'alexc.id') ||
                (this.userId === 'alex.stealthy.id') ||
                (this.userId === 'relay.id')) {
       // AC Dev Settings:
-      ENABLE_GAIA = false;
-      ENCRYPT_MESSAGES = false;
+      ENABLE_GAIA = true;
+      ENCRYPT_MESSAGES = true;
       ENCRYPT_CONTACTS = true;
-      ENCRYPT_SETTINGS = false;
+      ENCRYPT_SETTINGS = true;
       ENCRYPT_SDP = true;
     } else {
-      ENABLE_GAIA = false;
-      ENCRYPT_MESSAGES = false;
-      ENCRYPT_CONTACTS = false;
-      ENCRYPT_SETTINGS = false;
+      ENABLE_GAIA = true;
+      ENCRYPT_MESSAGES = true;
+      ENCRYPT_CONTACTS = true;
+      ENCRYPT_SETTINGS = true;
       ENCRYPT_SDP = true;
     }
   }

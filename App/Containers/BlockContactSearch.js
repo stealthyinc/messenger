@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Container, Header, Content, List, ListItem, Thumbnail, Text, Body } from 'native-base';
+import { Platform } from 'react-native'
 import { SearchBar } from 'react-native-elements'
 import BlockstackContactsActions, { BlockstackContactsSelectors } from '../Redux/BlockstackContactsRedux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
@@ -50,7 +51,7 @@ class BlockContactSearch extends Component {
     const found = contactMgr.getContact(fullyQualifiedName)
     if (found) {
       this.props.navigation.goBack()
-      this.props.navigation.navigate('ChatRoom')      
+      this.props.navigation.navigate('ChatRoom')
     }
     const { image, name, description } = profile
     if (image && image.length) {
@@ -103,7 +104,7 @@ class BlockContactSearch extends Component {
           lightTheme
           round
           cancelButtonTitle='Cancel'
-          platform="ios"
+          platform={Platform.OS}
           ref={search => this.search = search}
           searchIcon={{ color: 'white', size: 24 }}
           onChangeText={this.onChangeText}
