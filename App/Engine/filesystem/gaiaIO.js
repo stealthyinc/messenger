@@ -34,6 +34,9 @@ function _getGaiaHubAddrWorkaround(aUserName) {
       case 'prabhaav.stealthy.id':
         gaiaHubAddr = 'https://gaia.blockstack.org/hub/1Hy3X5u2gt5DyYDcHFGnRPaDKCkr6vFzd9';
         break;
+      case 'braphaav.personal.id':
+        gaiaHubAddr = 'https://gaia.blockstack.org/hub/1PjsHZ5Ws752E2kAdVtnVM5k5axB6TbJoJ';
+        break;
       default:
     }
   }
