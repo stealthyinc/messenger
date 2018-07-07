@@ -271,7 +271,7 @@ class IndexedIO {
     sanoIndexData.active[fileName] = { time };
 
     const encKey = (someonesPubKey) || this.publicKey;
-    const encData = await utils.encryptObj(encData, data, this.useEncryption)
+    const encData = await utils.encryptObj(encKey, data, this.useEncryption)
 
     try {
       await this.seqWriteLocalIndex(path, sanoIndexData, someonesPubKey);
