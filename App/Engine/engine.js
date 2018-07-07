@@ -70,6 +70,8 @@ const RELAY_IDS = [
   'relay.stealthy.id'
 ];
 
+const ENABLE_HEARTBEAT = true;
+
 // Dev. constants not set in ctor:
 const ENABLE_AUTOCONNECT = false;
 const ENCRYPT_INDEXED_IO = true;
@@ -506,7 +508,9 @@ export class MessagingEngine extends EventEmitter {
     this.heartBeat.on('monitor', (theHeartBeats) => {
       this._handleHeartBeatMonitor(theHeartBeats);
     });
-    this.heartBeat.startBeat();
+    if (ENABLE_HEARTBEAT) {
+      this.heartBeat.startBeat();
+    }
 
 
     // Lots of possiblities here (i.e. lazy load etc.)

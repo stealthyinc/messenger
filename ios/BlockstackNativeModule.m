@@ -168,15 +168,21 @@ RCT_EXPORT_METHOD(getPublicKeyFromPrivate:(NSString *) aPrivateKey completion:(R
                publicKey ? publicKey : [NSNull null]]);
 }
 
-RCT_EXPORT_METHOD(getRawFile:(NSString *)path completion:(RCTResponseSenderBlock)completion) {
-  [[Blockstack sharedInstance] getRawFileWithPath:path completion:^(id content, NSError * error) {
+RCT_EXPORT_METHOD(getRawFile:(NSString *)path
+                  workaroundPath:(NSString *)workaroundPath
+                  completion:(RCTResponseSenderBlock)completion)
+{
+  [[Blockstack sharedInstance] getRawFileWithPath:path workaroundPath:workaroundPath completion:^(id content, NSError * error) {
     NSData* myData = content;
     NSString* contentStr = [[NSString alloc] initWithData:myData encoding:NSUTF8StringEncoding];
     completion(@[error ? error.localizedDescription : [NSNull null], contentStr]);
   }];
 }
 
-RCT_EXPORT_METHOD(putRawFile:(NSString *)path stringContent:(NSString*)stringContent completion:(RCTResponseSenderBlock)completion) {
+RCT_EXPORT_METHOD(putRawFile:(NSString *)path
+                  stringContent:(NSString*)stringContent
+                  completion:(RCTResponseSenderBlock)completion)
+{
   [[Blockstack sharedInstance] putRawFileWithPath:path stringContent:stringContent completion:^(NSString * response, NSError * error) {
     completion(@[error ? error.localizedDescription : [NSNull null]]);
   }];

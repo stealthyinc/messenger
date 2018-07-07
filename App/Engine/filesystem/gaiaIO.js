@@ -3,24 +3,42 @@ import {
 } from 'react-native';
 
 const utils = require('./../misc//utils.js');
+
+// TODO: need a way of switching putFile/getFile for putRawFile/getRawFile for
+//       different build targets
 const BlockstackNativeModule = NativeModules.BlockstackNativeModule;
 const {getRawFile, putRawFile} = BlockstackNativeModule;
-// let getFile = undefined;
-// let getRawFile = undefined;
-// let putFile = undefined;
-// if (utils.is_iOS()) {
-//   getFile = NativeModules.BlockstackNativeModule.getRawFile;
-//   putFile = NativeModules.BlockstackNativeModule.putFile;
-//   // {getRawFile, putFile} = NativeModules.BlockstackNativeModule;
-// } else {
-//   const blockstack = require('blockstack');
-//   getFile = blockstack.getFile;
-//   putFile = blockstack.putFile;
-// }
+
+const ENABLE_IOS_LOOKUP_WORKAROUND = true;
 
 const BaseIO = require('./baseIO.js');
 
 const NAME_ENDPOINT = 'https://core.blockstack.org/v1/names';
+
+function _getGaiaHubAddrWorkaround(aUserName) {
+  let gaiaHubAddr = '';
+  if (ENABLE_IOS_LOOKUP_WORKAROUND) {
+    switch (aUserName) {
+      case 'alexc.id':
+        gaiaHubAddr = 'https://gaia.blockstack.org/hub/1MkrVDKyiPRh4qNXfnMXt67VHQwxLy9CXH';
+        break;
+      case 'alex.stealthy.id':
+        gaiaHubAddr = 'https://gaia.blockstack.org/hub/16yRrbugMxKtiEZ2rR7poMDrRvRYRvXWxh';
+        break;
+      case 'relay.id':
+        gaiaHubAddr = 'https://gaia.blockstack.org/hub/1K71xLJvF79b5SufRXiKTCkUU1qx7U6MH4';
+        break;
+      case 'pbj.id':
+        gaiaHubAddr = 'https://gaia.blockstack.org/hub/15paoVceRfxE4UzEFnSWLXd5pPiB3UvH1q';
+        break;
+      case 'prabhaav.stealthy.id':
+        gaiaHubAddr = 'https://gaia.blockstack.org/hub/1Hy3X5u2gt5DyYDcHFGnRPaDKCkr6vFzd9';
+        break;
+      default:
+    }
+  }
+  return gaiaHubAddr;
+}
 
 module.exports = class GaiaIO extends BaseIO {
   constructor(logger,
@@ -114,20 +132,22 @@ module.exports = class GaiaIO extends BaseIO {
       if (utils.is_iOS()) {
         // TODO: modify Blockstack -> RCT to use promises instead of completion
         return new Promise((resolve, reject) => {
-          getRawFile(filePath, (error, content) => {
+          getRawFile(filePath, _getGaiaHubAddrWorkaround(username), (error, content) => {
             if (error) {
               reject(error);
             } else {
               try {
                 if (content && content.includes('<Error><Code>BlobNotFound')) {
+                  console.log(`INFO(gaiaIO.js::_read): blob not found ${username}//${filePath}`)
                   // Empty file
                   resolve(undefined)
                 } else {
                   const jsonContent = JSON.parse(content);
+                  console.log(`INFO(gaiaIO.js::_read): ${username}//${filePath} resolved to:\n${jsonContent}`)
                   resolve(jsonContent);
                 }
               } catch (error) {
-                console.log(`ERROR(gaiaIO.js::_read): ${error}`)
+                console.log(`ERROR(gaiaIO.js::_read): blob not found ${username}//${filePath}.\n${error}`)
                 reject(error);
               }
             }
