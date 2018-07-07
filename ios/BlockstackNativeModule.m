@@ -58,51 +58,51 @@ RCT_EXPORT_METHOD(getUserData:(RCTResponseSenderBlock)completion) {
                udoDict ? udoDict : [NSNull null]]);
 }
 
-RCT_EXPORT_METHOD(putFile:(NSString *)path content:(NSDictionary *)content completion:(RCTResponseSenderBlock)completion) {
-  [[Blockstack sharedInstance] putFileWithPath:path content:content completion:^(NSString * response, NSError * error) {
-    completion(@[error ? error.localizedDescription : [NSNull null]]);
-  }];
-}
-
-RCT_EXPORT_METHOD(getFile:(NSString *)path completion:(RCTResponseSenderBlock)completion) {
-  [[Blockstack sharedInstance] getFileWithPath:path completion:^(id content, NSError * error) {
-    completion(@[error ? error.localizedDescription : [NSNull null], content]);
-  }];
-}
+//RCT_EXPORT_METHOD(putFile:(NSString *)path content:(NSDictionary *)content completion:(RCTResponseSenderBlock)completion) {
+//  [[Blockstack sharedInstance] putFileWithPath:path content:content completion:^(NSString * response, NSError * error) {
+//    completion(@[error ? error.localizedDescription : [NSNull null]]);
+//  }];
+//}
+//
+//RCT_EXPORT_METHOD(getFile:(NSString *)path completion:(RCTResponseSenderBlock)completion) {
+//  [[Blockstack sharedInstance] getFileWithPath:path completion:^(id content, NSError * error) {
+//    completion(@[error ? error.localizedDescription : [NSNull null], content]);
+//  }];
+//}
 
 //
 //
 // Bridging Proposed Blockstack Methods
 ////////////////////////////////////////////////////////////////////////////
-
-RCT_EXPORT_METHOD(decryptPrivateKey:(NSString*)privateKey hexedEncrypted:(NSString*) hexedEncrypted completion:(RCTResponseSenderBlock)completion) {
-  NSString* decrypted = [Encryption decryptPrivateKeyWithPrivateKey:privateKey hexedEncrypted:hexedEncrypted];
-  NSError *error = nil;
-  
-  if (!privateKey) {
-    error = [NSError errorWithDomain:@"im.stealthy.www"
-                                code:0
-                            userInfo:@{@"failed to decrypt private key": @"Unable to decrypt private key"}];
-  }
-  
-  completion(@[error ? error.localizedDescription : [NSNull null],
-               decrypted ? decrypted : [NSNull null]]);
-}
-
-RCT_EXPORT_METHOD(encryptPrivateKey:(NSString*)publicKey privatekey:(NSString*) privateKey completion:(RCTResponseSenderBlock)completion)
-{
-  NSString* cipherObjectJSONString = [Encryption encryptPrivateKeyWithPublicKey:publicKey privateKey:privateKey];
-  NSError *error = nil;
-  
-  if (!cipherObjectJSONString) {
-    error = [NSError errorWithDomain:@"im.stealthy.www"
-                                code:0
-                            userInfo:@{@"failed to encrypt private key": @"Unable to encrypt private key"}];
-  }
-  
-  completion(@[error ? error.localizedDescription : [NSNull null],
-               cipherObjectJSONString ? cipherObjectJSONString : [NSNull null]]);
-}
+//
+//RCT_EXPORT_METHOD(decryptPrivateKey:(NSString*)privateKey hexedEncrypted:(NSString*) hexedEncrypted completion:(RCTResponseSenderBlock)completion) {
+//  NSString* decrypted = [Encryption decryptPrivateKeyWithPrivateKey:privateKey hexedEncrypted:hexedEncrypted];
+//  NSError *error = nil;
+//
+//  if (!privateKey) {
+//    error = [NSError errorWithDomain:@"im.stealthy.www"
+//                                code:0
+//                            userInfo:@{@"failed to decrypt private key": @"Unable to decrypt private key"}];
+//  }
+//
+//  completion(@[error ? error.localizedDescription : [NSNull null],
+//               decrypted ? decrypted : [NSNull null]]);
+//}
+//
+//RCT_EXPORT_METHOD(encryptPrivateKey:(NSString*)publicKey privatekey:(NSString*) privateKey completion:(RCTResponseSenderBlock)completion)
+//{
+//  NSString* cipherObjectJSONString = [Encryption encryptPrivateKeyWithPublicKey:publicKey privateKey:privateKey];
+//  NSError *error = nil;
+//
+//  if (!cipherObjectJSONString) {
+//    error = [NSError errorWithDomain:@"im.stealthy.www"
+//                                code:0
+//                            userInfo:@{@"failed to encrypt private key": @"Unable to encrypt private key"}];
+//  }
+//
+//  completion(@[error ? error.localizedDescription : [NSNull null],
+//               cipherObjectJSONString ? cipherObjectJSONString : [NSNull null]]);
+//}
 
 //
 //
