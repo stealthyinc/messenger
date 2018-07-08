@@ -27,23 +27,24 @@ class ContactProfile extends React.Component {
     if (!activeUserProfile) return null
     const activeContact = contactMgr.getActiveContact()
     const { id, title, image, status } = activeContact
+    let nTitle = (title) ? title : ''
     const { profile } = activeUserProfile
     const { account, description } = profile
     const checkDescription = (description) ? description : ''
     return (
       <Card
         style={styles.container}
-        title={`${title} (${id})`}
+        title={`${nTitle} (${id})`}
         image={{ uri: image}}>
         <Text>
           {checkDescription}
         </Text>
         {this.getSocial(profile)}
-        <Button
+        {/*<Button
           icon={<Icon name='heartbeat' type='font-awesome' color='#ffffff' />}
           fontFamily='Lato'
           buttonStyle={{marginTop: 10, backgroundColor: status}}
-          title={(status === 'green') ? 'ONLINE' : (status === 'yellow') ? 'AWAY' : 'OFFLINE'} />
+          title={(status === 'green') ? 'ONLINE' : (status === 'yellow') ? 'AWAY' : 'OFFLINE'} />*/}
       </Card>
     );
   }
