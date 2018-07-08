@@ -20,7 +20,8 @@ class ChatScreen extends Component {
     return {
       headerTitle: params.name,
       headerRight: (
-        <TouchableOpacity onPress={() => params.navigation.navigate("DrawerOpen")} style={{marginRight: 10}}>
+        // <TouchableOpacity onPress={() => params.navigation.navigate("DrawerOpen")} style={{marginRight: 10}}>
+        <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
           <Ionicons name="ios-information-circle-outline" size={30} color='#037aff'/>
         </TouchableOpacity>
       ),

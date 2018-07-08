@@ -1866,7 +1866,7 @@ export class MessagingEngine extends EventEmitter {
     // TODO: predicate this by checking if unread is already zero ...
     this.contactMgr.setActiveContact(contact);
     // ACTODO: this method makes shit break...............
-    // this.contactMgr.clearUnread(selectedUserId);
+    this.contactMgr.clearUnread(selectedUserId);
 
     const seenMessages = this.markReceivedMessagesSeen(selectedUserId);
     this.sendMessageReceipts(seenMessages);

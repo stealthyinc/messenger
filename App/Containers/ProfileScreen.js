@@ -9,7 +9,7 @@ import firebase from 'react-native-firebase';
 
 const common = require('./../common.js');
 
-const stock = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
+import defaultProfile from '../Images/defaultProfile.png'
 
 class ProfileScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -68,7 +68,7 @@ class ProfileScreen extends React.Component {
     const { profile } = userProfile
     const { username } = userData
     const { name, image } = profile
-    let userImage = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
+    let userImage = undefined
     if (image && image[0]) {
       userImage = image[0].contentUrl
     }
@@ -87,7 +87,7 @@ class ProfileScreen extends React.Component {
           <Avatar
             size="xlarge"
             rounded
-            source={{uri: userImage}}
+            source={(userImage) ? {uri: userImage} : defaultProfile}
             onPress={() => console.log("Works!")}
             activeOpacity={0.7}
             containerStyle={{marginBottom: 15}}
