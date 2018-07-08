@@ -34,7 +34,7 @@ const { ConversationManager } = require('./messaging/conversationManager.js');
 const { OfflineMessagingServices } = require('./messaging/offlineMessagingServices.js');
 
 const utils = require('./misc/utils.js');
-const { Anonalytics } = require('./misc/anonalytics.js');
+const { Anonalytics } = require('../Analytics.js');
 
 const FirebaseIO = require('./filesystem/firebaseIO.js');
 const GaiaIO = require('./filesystem/gaiaIO.js');
@@ -665,7 +665,7 @@ export class MessagingEngine extends EventEmitter {
 
     if (this.anonalytics === undefined) {
       this.anonalytics = new Anonalytics(this.userId);
-      this.anonalytics.setDatabase(firebase);
+      // this.anonalytics.setDatabase(firebase);
     }
 
     this.anonalytics.aeLogin();
@@ -782,10 +782,9 @@ export class MessagingEngine extends EventEmitter {
     const cid = contactId.substring(0, contactId.indexOf('.id'));
     const cleanContactId = cid.replace(/\./g, '_');
     const cleanId = id.replace(/\./g, '_');
-    //`/global/${process.env.NODE_ENV}/${aPublicKey}/ud/`
-    let path
+    let path = `/global/discovery/`;
     if (development) {
-      path = `/global/development/${cleanContactId}`
+      path += `development/${cleanContactId}`
     }
     else {
       path += `${cleanContactId}`;

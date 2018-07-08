@@ -125,14 +125,18 @@ class Anonalytics {
 
   _storeEvent(anEventName, aString = undefined) {
     if (anEventName && this.userId) {
-      const ueEventName = anEventName;  // unencrypted event name.
       const eventTimeMs = Date.now();
       const AWS_LIMIT = 1000;
       const isProduction = (process.env.NODE_ENV === 'production');
-      let awsCleanString = (aString.length >= AWS_LIMIT) ?
-        aString.substring(0, AWS_LIMIT -2) :
-        aString;
-        Analytics.record(eventObj.ueEventName, {data: awsCleanString, production: isProduction});
+      if (aString) {
+        let awsCleanString = (aString.length >= AWS_LIMIT) ?
+          aString.substring(0, AWS_LIMIT -2) :
+          aString;
+        Analytics.record(anEventName, {data: awsCleanString, id: this.userId, production: isProduction});
+      }
+      else {
+        Analytics.record(anEventName, {id: this.userId, production: isProduction});
+      }
     }
   }
 }

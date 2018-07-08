@@ -97,9 +97,9 @@ class ConversationScreen extends React.Component {
                   <Text note>{item.summary}</Text>
                 </Body>
                 <Right>
-                  <Badge style={{ backgroundColor: '#037aff' }}>
+                  {/*<Badge style={{ backgroundColor: '#037aff' }}>
                     <Text style={{ color: 'white' }}>3</Text>
-                  </Badge>
+                  </Badge>*/}
                 </Right>
               </ListItem>}
             renderRightHiddenRow={(data, secId, rowId, rowMap) =>
