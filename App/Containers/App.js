@@ -71,6 +71,7 @@ class App extends Component {
       // Get information about the notification that was opened
       const notification: Notification = notificationOpen.notification;
       console.log("notification opened")
+      PushNotificationIOS.setApplicationIconBadgeNumber(0)
       store.dispatch(EngineActions.newNotification(notification._body))
       // alert("notification opened")
     });
