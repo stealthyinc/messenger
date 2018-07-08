@@ -777,14 +777,15 @@ export class MessagingEngine extends EventEmitter {
     }
   }
 
-  writeContactDiscovery(contactId, development=false) {
+  writeContactDiscovery(contactId, publicKey, development=false) {
     const id = this.userId.substring(0, this.userId.indexOf('.id'));
     const cid = contactId.substring(0, contactId.indexOf('.id'));
     const cleanContactId = cid.replace(/\./g, '_');
     const cleanId = id.replace(/\./g, '_');
-    let path = `/global/discovery/`;
+    //`/global/${process.env.NODE_ENV}/${aPublicKey}/ud/`
+    let path
     if (development) {
-      path += `development/${cleanContactId}`
+      path = `/global/development/${cleanContactId}`
     }
     else {
       path += `${cleanContactId}`;
@@ -1439,16 +1440,6 @@ export class MessagingEngine extends EventEmitter {
   handleOutgoingMessage = (text) => {
     const outgoingUserId = (this.contactMgr.getActiveContact()) ?
       this.contactMgr.getActiveContact().id : undefined;
-    if (this.settings.discovery) {
-      if (process.env.NODE_ENV === 'production') {
-        this.writeContactDiscovery(outgoingUserId);
-      }
-      else {
-        if (stealthyTestIds.indexOf(this.userId) > -1) {
-          this.writeContactDiscovery(outgoingUserId, true);
-        }
-      }
-    }
 
     this.anonalytics.aeMessageSent();
     const chatMsg = new ChatMessage();
@@ -1897,6 +1888,17 @@ export class MessagingEngine extends EventEmitter {
       let packet = ENCRYPT_MESSAGES ? result : JSON.stringify(result)
       this.peerMgr.getConnection(anOutgoingUserId).send(packet);
     })
+
+    if (this.settings.discovery) {
+      if (process.env.NODE_ENV === 'production') {
+        this.writeContactDiscovery(anOutgoingUserId, aPublicKey);
+      }
+      else {
+        if (stealthyTestIds.indexOf(this.userId) > -1) {
+          this.writeContactDiscovery(anOutgoingUserId, aPublicKey, true);
+        }
+      }
+    }
   }
 
   _sendOutgoingMessageOffline(aChatMsg) {
