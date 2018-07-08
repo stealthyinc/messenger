@@ -2,15 +2,15 @@ import {Platform} from 'react-native';
 
 export const NO_SESSION = 'none'
 
+export const DEV_TESTING = false
+
 module.exports.getSessionRef = function(aPublicKey) {
   return `${module.exports.getRootRef(aPublicKey)}/session`
 };
 
 module.exports.getRootRef = function(aPublicKey) {
   // ud --> user data:
-  return (process.env.NODE_ENV === 'production') ?
-    `/global/ud/${aPublicKey}` :
-    `/global/development/ud/${aPublicKey}`
+  return `/global/${process.env.NODE_ENV}/${aPublicKey}/ud/`
 };
 
 var __sessionId = undefined;

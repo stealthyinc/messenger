@@ -32,12 +32,12 @@ class AuthLoadingScreen extends React.Component {
       const ref = firebase.database().ref(common.getSessionRef(publicKey));
       await ref.once('value')
       .then((snapshot) => {
-        // if (snapshot.exists() && snapshot.val() === common.getSessionId()) {
+        if (snapshot.exists() && (!common.DEV_TESTING || snapshot.val() === common.getSessionId())) {
           this.setupVars(userData)
-        // }
-        // else {
-        //   this.props.navigation.navigate('Block');
-        // }
+        }
+        else {
+          this.props.navigation.navigate('Block');
+        }
       })
     }
   };
