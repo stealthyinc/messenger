@@ -36,6 +36,7 @@ class ChatScreen extends Component {
       isLoadingEarlier: false,
       activeContact: null,
       token: '',
+      publicKey: '',
     };
 
     this._isMounted = false;
@@ -49,7 +50,7 @@ class ChatScreen extends Component {
     const { profile } = userProfile
     const { name, image } = profile
     let userImage = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
-    if (image[0]) {
+    if (image && image[0]) {
       userImage = image[0].contentUrl
     }
     this.state.author = {
@@ -62,10 +63,8 @@ class ChatScreen extends Component {
       activeContact = contactMgr.getActiveContact();
     }
     const { publicKey } = activeContact
-    let path = `/global/notifications/development/${publicKey}/`
-    if (process.env.NODE_ENV === 'production') {
-      path = `/global/notifications/${publicKey}/`
-    }
+    this.state.publicKey = publicKey
+    let path = `/global/${process.env.NODE_ENV}/${publicKey}/notifications/`
     firebase.database().ref(`${path}/token`).once('value')
     .then((snapshot) => {
       if (snapshot.val()) {
@@ -172,9 +171,9 @@ class ChatScreen extends Component {
   }
 
   onSend = (messages = []) => {
-    const { token } = this.state
+    const { token, publicKey } = this.state
     if (token) {
-      this.props.sendNotification(token)
+      this.props.sendNotification(token, publicKey)
     }
     this.props.handleOutgoingMessage(messages[0].text);
     this.setState((previousState) => {
@@ -306,7 +305,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     handleOutgoingMessage: (message) => dispatch(EngineActions.setOutgoingMessage(message)),
-    sendNotification: (publicKey) => dispatch(EngineActions.sendNotification(publicKey)),
+    sendNotification: (token, publicKey) => dispatch(EngineActions.sendNotification(token, publicKey)),
   }
 }
 

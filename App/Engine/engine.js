@@ -870,6 +870,10 @@ export class MessagingEngine extends EventEmitter {
     }
   }
 
+  handleMobileNotifications(senderInfo) {
+    console.log('New Notification Received', senderInfo)
+  }
+
   //
   //  Contact Management
   // ////////////////////////////////////////////////////////////////////////////

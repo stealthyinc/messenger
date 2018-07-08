@@ -48,11 +48,8 @@ class ConversationScreen extends React.Component {
   }
   async componentWillMount() {
     const { userData, token, publicKey } = this.props
-    let npath = `/global/notifications/development/${publicKey}/`
-    if (process.env.NODE_ENV === 'production') {
-      npath = `/global/notifications/${publicKey}/`
-    }
-    firebase.database().ref(npath).set({
+    let path = `/global/${process.env.NODE_ENV}/${publicKey}/notifications/`
+    firebase.database().ref(path).set({
       token,
     })
     this.props.navigation.setParams({ goToChatRoom: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });

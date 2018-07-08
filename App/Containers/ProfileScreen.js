@@ -66,7 +66,7 @@ class ProfileScreen extends React.Component {
     const { username } = userData
     const { name, image } = profile
     let userImage = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
-    if (image[0]) {
+    if (image && image[0]) {
       userImage = image[0].contentUrl
     }
     return (

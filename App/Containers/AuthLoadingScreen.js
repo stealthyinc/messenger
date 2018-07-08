@@ -28,16 +28,16 @@ class AuthLoadingScreen extends React.Component {
     }
     else {
       const publicKey = userData['appPublicKey']
-
+      this.props.setPublicKey(publicKey)
       const ref = firebase.database().ref(common.getSessionRef(publicKey));
       await ref.once('value')
       .then((snapshot) => {
-        if (snapshot.exists() && snapshot.val() === common.getSessionId()) {
+        // if (snapshot.exists() && snapshot.val() === common.getSessionId()) {
           this.setupVars(userData)
-        }
-        else {
-          this.props.navigation.navigate('Block');
-        }
+        // }
+        // else {
+        //   this.props.navigation.navigate('Block');
+        // }
       })
     }
   };
@@ -78,6 +78,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     setUserData: (userData) => dispatch(EngineActions.setUserData(userData)),
+    setPublicKey: (publicKey) => dispatch(EngineActions.setPublicKey(publicKey)),
     setUserProfile: (userProfile) => dispatch(EngineActions.setUserProfile(userProfile)),
     setToken: (token) => dispatch(EngineActions.setToken(token)),
   }

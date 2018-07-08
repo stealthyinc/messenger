@@ -8,7 +8,7 @@ import { AsyncStorage, PushNotificationIOS } from 'react-native'
 
 import firebase from 'react-native-firebase';
 import type { Notification, NotificationOpen } from 'react-native-firebase';
-// import PushNotification from 'react-native-push-notification';
+import EngineActions from '../Redux/EngineRedux'
 
 // create our store
 const store = createStore()
@@ -71,6 +71,7 @@ class App extends Component {
       // Get information about the notification that was opened
       const notification: Notification = notificationOpen.notification;
       console.log("notification opened")
+      store.dispatch(EngineActions.newNotification())
       // alert("notification opened")
     });
   }

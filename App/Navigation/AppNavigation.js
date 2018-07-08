@@ -22,7 +22,7 @@ import BlockContactSearch from '../Containers/BlockContactSearch'
 console.disableYellowBox = true;
 
 if (!firebase.auth().currentUser) {
-  firebase.auth().signInAnonymously()
+  firebase.auth().signInAnonymouslyAndRetrieveData()
 }
 
 const ChatRoom = DrawerNavigator(

@@ -10,7 +10,7 @@
 *    you'll need to define a constant in that file.
 *************************************************************/
 import { eventChannel } from 'redux-saga'
-import { apply, call, fork, put, select, take, takeLatest } from 'redux-saga/effects'
+import { apply, call, fork, put, select, take, takeLatest, takeEvery } from 'redux-saga/effects'
 import EngineActions, { EngineSelectors, EngineTypes } from '../Redux/EngineRedux'
 import {
   AsyncStorage,
@@ -148,13 +148,19 @@ function* sendNotificationWorker(action) {
   // - check fb under /global/notifications/senderPK
   // - decrypt data and look up receiver's user device token
   // - send a request to fb server to notify the person of a new message
-  const { recepientToken } = action
-  const api = DebugConfig.useFixtures ? FixtureAPI : API.notification('https://fcm.googleapis.com/fcm/send', recepientToken)
+  const { recepientToken, publicKey } = action
+  const pk = publicKey.substr(publicKey.length - 4)
+  const api = DebugConfig.useFixtures ? FixtureAPI : API.notification('https://fcm.googleapis.com/fcm/send', recepientToken, pk)
   yield call (api.send)
 }
 
 function* backgroundTasks() {
   EngineInstance.handleMobileBackgroundUpdate()
+}
+
+function* notificationTasks(action) {
+  const { senderInfo } = action
+  EngineInstance.handleMobileNotifications(senderInfo)
 }
 
 export function* startEngine (action) {
@@ -176,6 +182,7 @@ export function* startEngine (action) {
   yield takeLatest(EngineTypes.UPDATE_USER_SETTINGS, updateUserSettings)
   yield takeLatest(EngineTypes.BACKGROUND_REFRESH, backgroundTasks)
   yield takeLatest(EngineTypes.HANDLE_DELETE_CONTACT, deleteContact)
+  yield takeEvery(EngineTypes.NEW_NOTIFICATION, notificationTasks)
 }
 
 export function * getUserProfile (api, action) {

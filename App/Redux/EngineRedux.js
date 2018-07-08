@@ -17,7 +17,7 @@ const { Types, Creators } = createActions({
   addNewContact: ['newContact'],
   setContactAdded: ['contactAdded'],
   setToken: ['token'],
-  sendNotification: ['recepientToken'],
+  sendNotification: ['recepientToken', 'publicKey'],
   setUserSettings: ['userSettings'],
   setEngineShutdown: ['engineShutdown'],
   updateUserSettings: ['radioSetting'],
@@ -26,6 +26,7 @@ const { Types, Creators } = createActions({
   clearUserData: ['publicKey'],
   setCurrentPlatform: ['currentPlatform'],
   initShutdown: [''],
+  newNotification: ['senderInfo'],
 })
 
 export const EngineTypes = Types

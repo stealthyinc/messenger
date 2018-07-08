@@ -58,7 +58,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
 }
 
 // our "constructor"
-const notification = (baseURL, token) => {
+const notification = (baseURL, token, pk) => {
 // curl --header "Content-Type: application/json" \
 // --header "Authorization: key=AAAAhdS8lMY:APA91bEdMbEj2Qw4Xj7HXYzsuZTzrDrnyAWBlPVbSK76kkxlmWls24MUAoQ6oBUTO36LnSfTT3kByFLrP_tAavQQyDaWYn5bFefG7bA1_u3EIqtyOkHk5naQBRGnTNBT7WSVbU9uO6gD" \
 // https://fcm.googleapis.com/fcm/send \
@@ -83,7 +83,7 @@ const notification = (baseURL, token) => {
       'Authorization': `key=${fb_server_key}`,
     },
     data: {
-      "notification": {"title": "New Message", "sound": "default"},
+      "notification": {"title": "New Message", "body": pk, "sound": "default"},
       "priority": "high",
       "to": token,
     },
