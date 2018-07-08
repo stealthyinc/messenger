@@ -201,10 +201,9 @@ export function * getUserProfile (api, action) {
 export function * getActiveUserProfile (api, action) {
   const { activeContact } = action
   const { id } = activeContact
-  const username = id.substring(0, id.lastIndexOf('.'))
-  const response = yield call(api.getUserProfile, username)
+  const response = yield call(api.getUserProfile, id)
   if (response.ok) {
-    const userProfile = response.data[username]
+    const userProfile = response.data[id]
     yield put(EngineActions.setActiveUserProfile(userProfile))
   } else {
     yield put(EngineActions.setActiveUserProfile(null))

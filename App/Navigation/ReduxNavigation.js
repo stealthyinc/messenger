@@ -114,6 +114,9 @@ class ReduxNavigation extends React.Component {
   _signOutAsync = async (publicKey) => {
     const {BlockstackNativeModule} = NativeModules;
     this.props.dispatch(EngineActions.clearUserData(publicKey));
+    if (!common.DEV_TESTING) {
+      await firebase.database().ref(common.getSessionRef(publicKey)).set(common.NO_SESSION)
+    }
     await AsyncStorage.clear();
     await BlockstackNativeModule.signOut();
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' })

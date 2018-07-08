@@ -11,6 +11,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import firebase from 'react-native-firebase';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
+import defaultProfile from '../Images/defaultProfile.png'
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -90,17 +92,23 @@ class ConversationScreen extends React.Component {
             renderRow={item =>
               <ListItem style={{marginLeft: 5}} avatar onPress={this.contactSelected.bind(this, item.id)}>
                 <Left>
-                  <Thumbnail source={{ uri: item.image}} />
+                  <Thumbnail source={(item.image) ? { uri: item.image } : defaultProfile} />
                 </Left>
                 <Body>
-                  <Text>{item.title}</Text>
+                  <Text style={{fontWeight: 'bold', fontSize: 18}}>{(item.title) ? item.title : item.id}</Text>
                   <Text note>{item.summary}</Text>
                 </Body>
-                <Right>
-                  {/*<Badge style={{ backgroundColor: '#037aff' }}>
-                    <Text style={{ color: 'white' }}>3</Text>
-                  </Badge>*/}
-                </Right>
+                {(item.unread > 0) ? <Right>
+                  <Text style={{ 
+                    fontWeight: 'bold', 
+                    fontSize: 18, 
+                    borderRadius: 2,
+                    borderWidth: 2,
+                    padding: 3,
+                    borderColor: '#037aff', 
+                    color: '#037aff' 
+                  }}>{item.unread}</Text>
+                </Right> : null}
               </ListItem>}
             renderRightHiddenRow={(data, secId, rowId, rowMap) =>
               <Button full danger onPress={_ => this.deleteRow(data, secId, rowId, rowMap)}>

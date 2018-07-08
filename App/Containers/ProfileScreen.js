@@ -9,7 +9,7 @@ import firebase from 'react-native-firebase';
 
 const common = require('./../common.js');
 
-const stock = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
+import defaultProfile from '../Images/defaultProfile.png'
 
 class ProfileScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -44,10 +44,13 @@ class ProfileScreen extends React.Component {
   _signOutAsync = async () => {
     const {BlockstackNativeModule} = NativeModules;
     const { publicKey } = this.props
-    await firebase.database().ref(common.getSessionRef(publicKey)).set(common.NO_SESSION)
+    if (!common.DEV_TESTING) {
+      await firebase.database().ref(common.getSessionRef(publicKey)).set(common.NO_SESSION)
+    }
     this.props.clearUserData(publicKey);
     await AsyncStorage.clear();
     await BlockstackNativeModule.signOut();
+    this.props.initShutdown();
     this.props.navigation.navigate('Auth');
   };
 
@@ -65,7 +68,7 @@ class ProfileScreen extends React.Component {
     const { profile } = userProfile
     const { username } = userData
     const { name, image } = profile
-    let userImage = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
+    let userImage = undefined
     if (image && image[0]) {
       userImage = image[0].contentUrl
     }
@@ -84,7 +87,7 @@ class ProfileScreen extends React.Component {
           <Avatar
             size="xlarge"
             rounded
-            source={{uri: userImage}}
+            source={(userImage) ? {uri: userImage} : defaultProfile}
             onPress={() => console.log("Works!")}
             activeOpacity={0.7}
             containerStyle={{marginBottom: 15}}
@@ -183,6 +186,7 @@ const mapDispatchToProps = (dispatch) => {
     handleOutgoingMessage: (message) => dispatch(EngineActions.setOutgoingMessage(message)),
     updateUserSettings: (radio) => dispatch(EngineActions.updateUserSettings(radio)),
     clearUserData: (publicKey) => dispatch(EngineActions.clearUserData(publicKey)),
+    initShutdown: () => dispatch(EngineActions.initShutdown()),
   }
 }
 
