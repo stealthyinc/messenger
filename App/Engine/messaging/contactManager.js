@@ -169,6 +169,25 @@ class ContactManager {
     return this.dropDownContacts;
   }
 
+  // aPKMask is the last 4 hex digits of a contact's PK
+  getContactIdsWithMatchingPKMask = (aPKMask) => {
+    const matchingUserIds = [];
+    for (const contact of this.contactArr) {
+      const pk = contact.publicKey;
+      if (!pk) {
+        continue;
+      }
+
+      const pkLength = pk.length;
+      const pkLast4 = pk.subString(pkLength-4-1, pkLength);
+      if (aPKMask == pkLast4) {
+        matchingUserIds.push(contact.id);
+      }
+    }
+
+    return matchingUserIds;
+  }
+
 //
 //
 // Single contact operations:

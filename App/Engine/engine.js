@@ -70,7 +70,7 @@ const RELAY_IDS = [
   'relay.stealthy.id'
 ];
 
-const ENABLE_HEARTBEAT = true;
+const ENABLE_HEARTBEAT = false;
 
 // Dev. constants not set in ctor:
 const ENABLE_AUTOCONNECT = false;
@@ -870,8 +870,19 @@ export class MessagingEngine extends EventEmitter {
     }
   }
 
+  // If senderInfo provided, do an immediate fetch of that sender's messages to us.
+  // SenderInfo is the last 4 of the contact's pk.
+  // After fetching the messages, send an updated contact mgr to pbj.
+  // If senderInfo is not provided, try and get a fetch of all messages from our contacts.
+  //   TODO: display a spinner / status of that read to the user if possible.
+  //
   handleMobileNotifications(senderInfo) {
-    console.log('New Notification Received', senderInfo)
+    console.log('New Notification Received', senderInfo);
+    // if (senderInfo) {
+    //   const potentialSenders = this.contactMgr.getContactIdsWithMatchingPKMask(senderInfo);
+    // } else {
+    //
+    // }
   }
 
   //
