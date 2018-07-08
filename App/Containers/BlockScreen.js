@@ -11,14 +11,17 @@ const common = require('./../common.js');
 
 class BlockScreen extends Component {
   _signOutAsync = async () => {
-    const {BlockstackNativeModule} = NativeModules
+    const {BlockstackNativeModule} = NativeModules;
     const { publicKey } = this.props
-    await firebase.database().ref(common.getSessionRef(publicKey).set(common.NO_SESSION))
+    if (!common.DEV_TESTING) {
+      await firebase.database().ref(common.getSessionRef(publicKey)).set(common.NO_SESSION)
+    }
     this.props.clearUserData(publicKey);
-    await AsyncStorage.clear()
-    await BlockstackNativeModule.signOut()
-    this.props.navigation.navigate('Auth')
-  }
+    await AsyncStorage.clear();
+    await BlockstackNativeModule.signOut();
+    this.props.initShutdown();
+    this.props.navigation.navigate('Auth');
+  };
   _unlockEngine = async () => {
     const { publicKey } = this.props
     if (publicKey) {
@@ -80,6 +83,7 @@ const mapDispatchToProps = (dispatch) => {
     setUserProfile: (userProfile) => dispatch(EngineActions.setUserProfile(userProfile)),
     clearUserData: (publicKey) => dispatch(EngineActions.clearUserData(publicKey)),
     setToken: (token) => dispatch(EngineActions.setToken(token)),
+    initShutdown: () => dispatch(EngineActions.initShutdown()),
   }
 }
 

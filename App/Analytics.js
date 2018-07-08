@@ -4,6 +4,12 @@ const MAX_QUEUE = 100;
 class Anonalytics {
   constructor(aUserId = undefined) {
     this.userId = aUserId;
+    if (process.env.NODE_ENV === 'production') {
+      Analytics.enable();
+    }
+    else {
+      Analytics.disable();
+    }
   }
 
   // Homepage Events:
@@ -127,15 +133,16 @@ class Anonalytics {
     if (anEventName && this.userId) {
       const eventTimeMs = Date.now();
       const AWS_LIMIT = 1000;
-      const isProduction = (process.env.NODE_ENV === 'production');
+      const d = new Date();
+      const dateStamp = d.toDateString();
       if (aString) {
         let awsCleanString = (aString.length >= AWS_LIMIT) ?
           aString.substring(0, AWS_LIMIT -2) :
           aString;
-        Analytics.record(anEventName, {data: awsCleanString, id: this.userId, production: isProduction});
+        Analytics.record(anEventName, {data: awsCleanString, id: this.userId, dateStamp});
       }
       else {
-        Analytics.record(anEventName, {id: this.userId, production: isProduction});
+        Analytics.record(anEventName, {id: this.userId, dateStamp});
       }
     }
   }

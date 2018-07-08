@@ -96,11 +96,11 @@ class ConversationScreen extends React.Component {
                   <Text>{item.title}</Text>
                   <Text note>{item.summary}</Text>
                 </Body>
-                <Right>
-                  {/*<Badge style={{ backgroundColor: '#037aff' }}>
-                    <Text style={{ color: 'white' }}>3</Text>
-                  </Badge>*/}
-                </Right>
+                {(item.unread > 0) ? <Right>
+                  <Badge style={{ backgroundColor: '#037aff' }}>
+                    <Text style={{ color: 'white' }}>{item.unread}</Text>
+                  </Badge>
+                </Right> : null}
               </ListItem>}
             renderRightHiddenRow={(data, secId, rowId, rowMap) =>
               <Button full danger onPress={_ => this.deleteRow(data, secId, rowId, rowMap)}>
