@@ -34,6 +34,9 @@ function _getGaiaHubAddrWorkaround(aUserName) {
       case 'prabhaav.stealthy.id':
         gaiaHubAddr = 'https://gaia.blockstack.org/hub/1Hy3X5u2gt5DyYDcHFGnRPaDKCkr6vFzd9';
         break;
+      case 'braphaav.personal.id':
+        gaiaHubAddr = 'https://gaia.blockstack.org/hub/1PjsHZ5Ws752E2kAdVtnVM5k5axB6TbJoJ';
+        break;
       default:
     }
   }
@@ -138,12 +141,12 @@ module.exports = class GaiaIO extends BaseIO {
             } else {
               try {
                 if (content && content.includes('<Error><Code>BlobNotFound')) {
-                  console.log(`INFO(gaiaIO.js::_read): blob not found ${username}//${filePath}`)
+                  // console.log(`INFO(gaiaIO.js::_read): blob not found ${username}//${filePath}`)
                   // Empty file
                   resolve(undefined)
                 } else {
                   const jsonContent = JSON.parse(content);
-                  console.log(`INFO(gaiaIO.js::_read): ${username}//${filePath} resolved to:\n${jsonContent}`)
+                  // console.log(`INFO(gaiaIO.js::_read): ${username}//${filePath} resolved to:\n${jsonContent}`)
                   resolve(jsonContent);
                 }
               } catch (error) {
@@ -159,7 +162,7 @@ module.exports = class GaiaIO extends BaseIO {
           if (data) {
             return JSON.parse(data);
           }
-          this.log(`gaiaIO: no data reading ${filePath} from ${username}'s GAIA.'`);
+          // this.log(`gaiaIO: no data reading ${filePath} from ${username}'s GAIA.'`);
           return undefined;
         })
         .catch((error) => {
