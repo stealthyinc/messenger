@@ -20,8 +20,8 @@ class ChatScreen extends Component {
     return {
       headerTitle: params.name,
       headerRight: (
-        // <TouchableOpacity onPress={() => params.navigation.navigate("DrawerOpen")} style={{marginRight: 10}}>
-        <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
+        // <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
+        <TouchableOpacity onPress={() => params.navigation.navigate("DrawerOpen")} style={{marginRight: 10}}>
           <Ionicons name="ios-information-circle-outline" size={30} color='#037aff'/>
         </TouchableOpacity>
       ),
@@ -64,7 +64,6 @@ class ChatScreen extends Component {
       activeContact = contactMgr.getActiveContact();
     }
     const { publicKey } = activeContact
-    this.state.publicKey = publicKey
     let path = `/global/${process.env.NODE_ENV}/${publicKey}/notifications/`
     firebase.database().ref(`${path}/token`).once('value')
     .then((snapshot) => {
@@ -172,7 +171,8 @@ class ChatScreen extends Component {
   }
 
   onSend = (messages = []) => {
-    const { token, publicKey } = this.state
+    const { token } = this.state
+    const { publicKey } = this.props
     if (token) {
       this.props.sendNotification(token, publicKey)
     }
@@ -300,6 +300,7 @@ const mapStateToProps = (state) => {
     messages: EngineSelectors.getMessages(state),
     contactMgr: EngineSelectors.getContactMgr(state),
     userProfile: EngineSelectors.getUserProfile(state),
+    publicKey: EngineSelectors.getPublicKey(state),
   }
 }
 
