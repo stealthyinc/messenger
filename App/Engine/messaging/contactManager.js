@@ -178,8 +178,7 @@ class ContactManager {
         continue;
       }
 
-      const pkLength = pk.length;
-      const pkLast4 = pk.subString(pkLength-4-1, pkLength);
+      const pkLast4 = pk.substr(pk.length - 4);
       if (aPKMask == pkLast4) {
         matchingUserIds.push(contact.id);
       }

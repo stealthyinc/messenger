@@ -627,6 +627,10 @@ export class MessagingEngine extends EventEmitter {
         utils.decryptObj(this.privateKey, settingsData, ENCRYPT_SETTINGS)
         .then(settingsData => {
           this.settings = settingsData
+          if (utils.isMobile) {
+            // ignore WebRTC on mobile
+            this.settings.webrtc = false;
+          }
 
           this.initSettings();
           this._fetchDataAndCompleteInit();
@@ -639,6 +643,7 @@ export class MessagingEngine extends EventEmitter {
           heartbeat: true,
           notifications: true,
           discovery: true,
+          webrtc: !this.isMobile,
         }
         if (!this.plugin && !this.isMobile) {
           this.addProfile('relay.stealthy');
@@ -878,11 +883,11 @@ export class MessagingEngine extends EventEmitter {
   //
   handleMobileNotifications(senderInfo) {
     console.log('New Notification Received', senderInfo);
-    // if (senderInfo) {
-    //   const potentialSenders = this.contactMgr.getContactIdsWithMatchingPKMask(senderInfo);
-    // } else {
-    //
-    // }
+    if (senderInfo) {
+      const potentialSenders = this.contactMgr.getContactIdsWithMatchingPKMask(senderInfo);
+    } else {
+
+    }
   }
 
   //
@@ -1023,19 +1028,22 @@ export class MessagingEngine extends EventEmitter {
         }
       }
     } else if (name === 'webrtc') {
-      this.settings.webrtc = !this.settings.webrtc;
-      this.anonalytics.aeSettings(`webrtc:${this.settings.webrtc}`);
-      if (!this.settings.webrtc) {
-        try {
-          this.stopWebRtc();
-        } catch (err) {
-          this.logger(`ERROR: Recommend restarting Stealthy. Problem encountered stopping WebRTC services.\n${err}\n`);
-        }
-      } else {
-        try {
-          this.startWebRtc();
-        } catch (err) {
-          this.logger(`ERROR: Recommend restarting Stealthy. Problem encountered starting WebRTC services.\n${err}\n`);
+      // if iOS, ignore user setting this for now
+      if (!utils.is_iOS()) {
+        this.settings.webrtc = !this.settings.webrtc;
+        this.anonalytics.aeSettings(`webrtc:${this.settings.webrtc}`);
+        if (!this.settings.webrtc) {
+          try {
+            this.stopWebRtc();
+          } catch (err) {
+            this.logger(`ERROR: Recommend restarting Stealthy. Problem encountered stopping WebRTC services.\n${err}\n`);
+          }
+        } else {
+          try {
+            this.startWebRtc();
+          } catch (err) {
+            this.logger(`ERROR: Recommend restarting Stealthy. Problem encountered starting WebRTC services.\n${err}\n`);
+          }
         }
       }
     }

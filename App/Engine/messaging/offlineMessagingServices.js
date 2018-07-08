@@ -147,6 +147,11 @@ class OfflineMessagingServices extends EventEmitter {
     // index file clobbering. It causes sendMessagesToStorage calls to be ignored
     // because a call to this method is already working on the queue.
     this.sending = false;
+
+    // This boolean tracks whether we're reading files to get offline messages.
+    // It is used for mobile when a notification is rx and we want to just fetch
+    // a msg from one user.
+    this.receiving = false;
   }
 
   // Convert node 'on' method to react 'addListener' method for RN EventEmitter
@@ -308,6 +313,9 @@ class OfflineMessagingServices extends EventEmitter {
     this.enableSendService = false;
   }
 
+  isReceiving() {
+    return this.receiving;
+  }
 
   static _getNameMinusExtension(aFileName, isFirebase = false) {
     const extSep = (isFirebase) ? EXT_SEP_FB : EXT_SEP;
@@ -320,61 +328,70 @@ class OfflineMessagingServices extends EventEmitter {
   }
 
   async startRecvService() {
-    const isFirebase = this.idxIoInst.isFirebase();
     this.enableRecvService = true;
     while (this.enableRecvService) {
       this.log('Offline Messaging Receive Service:');
 
-
-      const chatMessagesReadPromises = [];
-      for (const contact of this.contactArr) {
-        // Using Contact obj. here for future expansion w.r.t. heartBeat.
-        const contactId = contact.id;
-        const offlineDirPath = `${this.userId}/conversations/offline`;
-
-        let indexData;
-        try {
-          indexData = await this.idxIoInst.readRemoteIndex(contactId, offlineDirPath);
-          this.log(`   Finished reading remote index of ${contactId} (${offlineDirPath}).`);
-        } catch (err) {
-          // Suppress 404 for users who haven't written a sharedIndex yet.
-        }
-
-        if (indexData && indexData.active) {
-          for (const chatMsgFileName in indexData.active) {
-            const msgIdForFile =
-              OfflineMessagingServices._getNameMinusExtension(chatMsgFileName, isFirebase);
-            if (this.rcvdOfflineMsgs.hasMessage(contactId, msgIdForFile)) {
-              continue;
-            }
-
-            const chatMsgFilePath = `${offlineDirPath}/${chatMsgFileName}`;
-            chatMessagesReadPromises.push(this.idxIoInst.readRemoteFile(contactId, chatMsgFilePath));
-          }
-        }
-      }
-
-      Promise.all(chatMessagesReadPromises)
-      .then((chatMessageObjs) => {
-        let count = 0;
-        for (const chatMsg of chatMessageObjs) {
-          if (this.rcvdOfflineMsgs.addMessage(chatMsg)) {
-            count++;
-          }
-        }
-
-        if (count) {
-          this.log(`   received ${count} offline messages.`);
-          const allMessages = this.rcvdOfflineMsgs.getAllMessages();
-          this.emit('new messages', allMessages);
-        }
-      })
-      .catch((err) => {
-        this.logger(`ERROR: offline messaging services failed to read chat message. ${err}.`);
-      });
+      await this.receiveMessages();
 
       const sleepResult = await utils.resolveAfterMilliseconds(RECV_INTERVAL * 1000);
     }
+  }
+
+  async receiveMessages() {
+    const isFirebase = this.idxIoInst.isFirebase();
+
+    this.receiving = true;
+    const chatMessagesReadPromises = [];
+    for (const contact of this.contactArr) {
+      // Using Contact obj. here for future expansion w.r.t. heartBeat.
+      const contactId = contact.id;
+      const offlineDirPath = `${this.userId}/conversations/offline`;
+
+      let indexData;
+      try {
+        indexData = await this.idxIoInst.readRemoteIndex(contactId, offlineDirPath);
+        this.log(`   Finished reading remote index of ${contactId} (${offlineDirPath}).`);
+      } catch (err) {
+        // Suppress 404 for users who haven't written a sharedIndex yet.
+      }
+
+      if (indexData && indexData.active) {
+        for (const chatMsgFileName in indexData.active) {
+          const msgIdForFile =
+            OfflineMessagingServices._getNameMinusExtension(chatMsgFileName, isFirebase);
+          if (this.rcvdOfflineMsgs.hasMessage(contactId, msgIdForFile)) {
+            continue;
+          }
+
+          const chatMsgFilePath = `${offlineDirPath}/${chatMsgFileName}`;
+          chatMessagesReadPromises.push(this.idxIoInst.readRemoteFile(contactId, chatMsgFilePath));
+        }
+      }
+    }
+
+    return Promise.all(chatMessagesReadPromises)
+    .then((chatMessageObjs) => {
+      let count = 0;
+      for (const chatMsg of chatMessageObjs) {
+        if (this.rcvdOfflineMsgs.addMessage(chatMsg)) {
+          count++;
+        }
+      }
+
+      if (count) {
+        this.log(`   received ${count} offline messages.`);
+        const allMessages = this.rcvdOfflineMsgs.getAllMessages();
+        this.emit('new messages', allMessages);
+      }
+      this.receiving = false;
+      return;
+    })
+    .catch((err) => {
+      this.receiving = false;
+      this.logger(`ERROR: offline messaging services failed to read chat message. ${err}.`);
+      return;
+    });
   }
 
   stopRecvService() {
