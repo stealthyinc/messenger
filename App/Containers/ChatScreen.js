@@ -111,6 +111,7 @@ class ChatScreen extends Component {
 
   componentWillUnmount() {
     this._isMounted = false;
+    this.props.handleContactClick()
   }
 
   setupMessages = (inputMessages) => {
@@ -308,6 +309,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     handleOutgoingMessage: (message) => dispatch(EngineActions.setOutgoingMessage(message)),
     sendNotification: (token, publicKey) => dispatch(EngineActions.sendNotification(token, publicKey)),
+    handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),
   }
 }
 

@@ -23,6 +23,8 @@ const store = createStore()
  */
 class App extends Component {
   async componentWillMount () {
+    // When key is wrong and mac error happens
+    // await AsyncStorage.clear()
     const enabled = await firebase.messaging().hasPermission();
     if (enabled) {
       // user has permissions

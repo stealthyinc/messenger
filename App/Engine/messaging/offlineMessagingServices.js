@@ -152,6 +152,8 @@ class OfflineMessagingServices extends EventEmitter {
     // It is used for mobile when a notification is rx and we want to just fetch
     // a msg from one user.
     this.receiving = false;
+
+    this.skipRecvService = false;
   }
 
   // Convert node 'on' method to react 'addListener' method for RN EventEmitter
@@ -328,27 +330,45 @@ class OfflineMessagingServices extends EventEmitter {
   }
 
   async startRecvService() {
+    // Don't run the loop twice if we're already running (i.e. loop is singlton)
+    if (this.enableRecvService) {
+      return;
+    }
+
     this.enableRecvService = true;
     while (this.enableRecvService) {
-      this.log('Offline Messaging Receive Service:');
-
-      await this.receiveMessages();
+      if (!this.skipRecvService) {
+        this.log('Offline Messaging Receive Service:');
+        await this.receiveMessages();
+      }
 
       const sleepResult = await utils.resolveAfterMilliseconds(RECV_INTERVAL * 1000);
     }
   }
 
-  async receiveMessages() {
-    const isFirebase = this.idxIoInst.isFirebase();
+  pauseRecvService() {
+    this.skipRecvService = true;
+  }
 
+  resumeRecvService() {
+    this.skipRecvService = false;
+  }
+
+  async receiveMessages(contacts) {
+    if (!contacts || contacts.length === 0) {
+       contacts = this.contactArr
+    }
+
+    const isFirebase = this.idxIoInst.isFirebase();
     this.receiving = true;
     const chatMessagesReadPromises = [];
-    for (const contact of this.contactArr) {
+
+    for (const contact of contacts) {
       // Using Contact obj. here for future expansion w.r.t. heartBeat.
       const contactId = contact.id;
       const offlineDirPath = `${this.userId}/conversations/offline`;
 
-      let indexData;
+      let indexData = undefined;
       try {
         indexData = await this.idxIoInst.readRemoteIndex(contactId, offlineDirPath);
         this.log(`   Finished reading remote index of ${contactId} (${offlineDirPath}).`);
@@ -358,14 +378,19 @@ class OfflineMessagingServices extends EventEmitter {
 
       if (indexData && indexData.active) {
         for (const chatMsgFileName in indexData.active) {
-          const msgIdForFile =
-            OfflineMessagingServices._getNameMinusExtension(chatMsgFileName, isFirebase);
-          if (this.rcvdOfflineMsgs.hasMessage(contactId, msgIdForFile)) {
-            continue;
-          }
+          const msgIdForFile = OfflineMessagingServices._getNameMinusExtension(chatMsgFileName, isFirebase);
+          if (!this.rcvdOfflineMsgs.hasMessage(contactId, msgIdForFile)) {
+            const chatMsgFilePath = `${offlineDirPath}/${chatMsgFileName}`;
 
-          const chatMsgFilePath = `${offlineDirPath}/${chatMsgFileName}`;
-          chatMessagesReadPromises.push(this.idxIoInst.readRemoteFile(contactId, chatMsgFilePath));
+            // Add the promise with a catch to bypass the fail fast behavior of Promise.all below
+            chatMessagesReadPromises.push(
+              this.idxIoInst.readRemoteFile(contactId, chatMsgFilePath)
+              .catch(error => {
+                console.log(`INFO(offlineMessagingServices): unable to read ${chatMsgFilePath} from ${contactId}`);
+                return undefined
+              })
+            );
+          }
         }
       }
     }
@@ -374,7 +399,8 @@ class OfflineMessagingServices extends EventEmitter {
     .then((chatMessageObjs) => {
       let count = 0;
       for (const chatMsg of chatMessageObjs) {
-        if (this.rcvdOfflineMsgs.addMessage(chatMsg)) {
+        // Check if chatMsg is defined too (failed reads make it undefined)
+        if (chatMsg && this.rcvdOfflineMsgs.addMessage(chatMsg)) {
           count++;
         }
       }
@@ -389,7 +415,7 @@ class OfflineMessagingServices extends EventEmitter {
     })
     .catch((err) => {
       this.receiving = false;
-      this.logger(`ERROR: offline messaging services failed to read chat message. ${err}.`);
+      this.logger(`ERROR: offline messaging services failed to read chat messages. ${err}.`);
       return;
     });
   }

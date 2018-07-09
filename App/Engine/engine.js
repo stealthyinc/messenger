@@ -190,7 +190,7 @@ export class MessagingEngine extends EventEmitter {
     // We clone this here so that the GUI actually updates the contacts on
     // state change. (React setState didn't detect changes unless the whole array
     // object changes.)
-    const contactMgr = new ContactManager();
+    const contactMgr = new ContactManager(!this.isMobile);
     contactMgr.clone(this.contactMgr);
 
     this.emit('me-update-contactmgr', contactMgr);
@@ -397,7 +397,7 @@ export class MessagingEngine extends EventEmitter {
   _initWithContacts(contactArr) {
     this.myTimer.logEvent('Enter _initWithContacts')
 
-    this.contactMgr = new ContactManager();
+    this.contactMgr = new ContactManager(!this.isMobile);
     this.contactMgr.initFromStoredArray(contactArr);
     this.contactMgr.setAllContactsStatus();
 
@@ -409,13 +409,18 @@ export class MessagingEngine extends EventEmitter {
       for (let i = 0; i < length; i++) {
         const str = 'id'+i
         const recipientId = getQueryString(str)
-        if (contactMgr.getContact(recipientId)) {
-          contactMgr.setPlugInMode(recipientId);
-          contactMgr.setActiveContact(contactMgr.getContact(recipientId))
+        if (this.contactMgr.getContact(recipientId)) {
+          this.contactMgr.setPlugInMode(recipientId);
+          this.contactMgr.setActiveContact(this.contactMgr.getContact(recipientId))
         } else {
           this.addProfile(aUserId);
         }
       }
+    }
+
+    if (this.isMobile) {
+      // No contact is selected initially in mobile, so unset the active contact
+      this.contactMgr.setActiveContact(undefined);
     }
 
     this.updateContactMgr();
@@ -873,6 +878,21 @@ export class MessagingEngine extends EventEmitter {
       //
       // this.heartBeat.readHeartBeatFiles();
     }
+
+    // TODO: - should the service only start on background update and stop when background update done?
+    //       - can the service fail if shut down inappropriately (i.e. while waiting on request)?
+    if (!this.offlineMsgSvc.isReceiving()) {
+      this.offlineMsgSvc.pauseRecvService();
+
+      this.offlineMsgSvc.receiveMessages()
+      .then(() => {
+        this.offlineMsgSvc.resumeRecvService();
+      })
+      .catch((err) => {
+        console.log(`ERROR:(engine.js::handleMobileBackgroundUpdate): ${err}`);
+        this.offlineMsgSvc.resumeRecvService();
+      })
+    }
   }
 
   // If senderInfo provided, do an immediate fetch of that sender's messages to us.
@@ -881,12 +901,27 @@ export class MessagingEngine extends EventEmitter {
   // If senderInfo is not provided, try and get a fetch of all messages from our contacts.
   //   TODO: display a spinner / status of that read to the user if possible.
   //
+  //   TODO: challenges:
+  //         - what to do if isReceiving() is true? (wait and check again?)
+  //
   handleMobileNotifications(senderInfo) {
     console.log('New Notification Received', senderInfo);
+    let contactsToCheck = undefined;
     if (senderInfo) {
-      const potentialSenders = this.contactMgr.getContactIdsWithMatchingPKMask(senderInfo);
-    } else {
+      contactsToCheck = this.contactMgr.getContactsWithMatchingPKMask(senderInfo);
+    }
 
+    if (!this.offlineMsgSvc.isReceiving()) {
+      this.offlineMsgSvc.pauseRecvService();
+
+      this.offlineMsgSvc.receiveMessages(contactsToCheck)
+      .then(() => {
+        this.offlineMsgSvc.resumeRecvService();
+      })
+      .catch((err) => {
+        console.log(`ERROR:(engine.js::handleMobileNotifications): ${err}`);
+        this.offlineMsgSvc.resumeRecvService();
+      });
     }
   }
 
@@ -1803,13 +1838,16 @@ export class MessagingEngine extends EventEmitter {
 
   updateContactOrderAndStatus(messages, writeContacts = true) {
     let updateActiveMsgs = false;
+    const lastMsgIdxStr = `${messages.length-1}`;
     for (const idx in messages) {
       const message = messages[idx];
       const incomingId = message.from;
 
       // message.sent = true;
 
-      const isLastOne = (idx === (messages.length - 1));
+      // idx is a string representing the index (comparsion to length directly
+      // fails since it's an int)
+      const isLastOne = (idx == lastMsgIdxStr);
       const isActive = this.contactMgr.isActiveContactId(incomingId);
 
       this.contactMgr.setSummary(incomingId, message.content);
@@ -1822,8 +1860,11 @@ export class MessagingEngine extends EventEmitter {
       } else {
         this.contactMgr.incrementUnread(incomingId);
         const count = this.contactMgr.getAllUnread()
-        document.title = "(" + count + ") Stealthy | Decentralized Communication"
-        this.notifyMe();
+        if (!this.isMobile) {
+          document.title = "(" + count + ") Stealthy | Decentralized Communication"
+          this.notifyMe();  // TODO: PBJ is this non mobile only? (It calls window)
+        }
+
       }
 
       if (isLastOne) {
@@ -1870,6 +1911,12 @@ export class MessagingEngine extends EventEmitter {
   }
 
   handleContactClick = (contact) => {
+    if (!contact && !this.forceActiveContact) {
+      this.contactMgr.setActiveContact(undefined);
+      this.updateContactMgr()
+      return
+    }
+
     const selectedUserId = contact.id;
 
     // TODO: need to send a packet back indicating messages seen.

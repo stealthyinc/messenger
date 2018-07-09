@@ -9,11 +9,12 @@ const LEAN_PLUGIN = false;
 // re-using / connecting existing objects (b/c we wouldn't want an activeContact
 // that is not contained in the contactArr).
 class ContactManager {
-  constructor() {
+  constructor(forceActiveContact=true) {
     this.contactArr = [];
     this.activeContact = undefined;
     this.pluginMode = false;
     this.dropDownContacts = [];
+    this.forceActiveContact = forceActiveContact;
   }
 
   clone = (aContactManager) =>{
@@ -22,6 +23,7 @@ class ContactManager {
       const activeContact = aContactManager.getActiveContact();
 
       this.pluginMode = aContactManager.isPlugin();
+      this.forceActiveContact = aContactManager.forceActiveContact;
 
       this.initFromArray(contactArr, activeContact);
     }
@@ -64,7 +66,7 @@ class ContactManager {
             break;
           }
         }
-      } else {
+      } else if (this.forceActiveContact) {
         this.activeContact = this.contactArr[0];
       }
       this.dropDownContacts = this.initContactDetailsForDropDown()
@@ -170,8 +172,8 @@ class ContactManager {
   }
 
   // aPKMask is the last 4 hex digits of a contact's PK
-  getContactIdsWithMatchingPKMask = (aPKMask) => {
-    const matchingUserIds = [];
+  getContactsWithMatchingPKMask = (aPKMask) => {
+    const matchingContacts = [];
     for (const contact of this.contactArr) {
       const pk = contact.publicKey;
       if (!pk) {
@@ -180,11 +182,11 @@ class ContactManager {
 
       const pkLast4 = pk.substr(pk.length - 4);
       if (aPKMask == pkLast4) {
-        matchingUserIds.push(contact.id);
+        matchingContacts.push(contact);
       }
     }
 
-    return matchingUserIds;
+    return matchingContacts;
   }
 
 //
