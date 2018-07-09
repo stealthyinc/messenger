@@ -34,7 +34,8 @@ class ContactManager {
   initFromStoredArray = (aContactArr) => {
     if (aContactArr && (aContactArr.length > 0)) {
       for (const contact of aContactArr) {
-        contact.unread = 0;
+        // Don't clear unread--it's confusing users into thinking they haven't lost info.
+        // contact.unread = 0;
         contact.time = '';
         contact.timeMs = '';
       }

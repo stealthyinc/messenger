@@ -5,7 +5,7 @@ const { MESSAGE_STATE } = require('./chatMessage.js');
 
 const ENABLE_SEND_QUEUEING = false;
 const SEND_INTERVAL = 10;
-const RECV_INTERVAL = 15;
+const RECV_INTERVAL = 10;
 
 
 const EXT_SEP = '.';

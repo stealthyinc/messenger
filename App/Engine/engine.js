@@ -905,7 +905,8 @@ export class MessagingEngine extends EventEmitter {
   //         - what to do if isReceiving() is true? (wait and check again?)
   //
   handleMobileNotifications(senderInfo) {
-    console.log('New Notification Received', senderInfo);
+    const logPrefix = "INFO(engine.js::handleMobileNotifications)";
+    console.log(`${logPrefix}: received notification ${senderInfo}`);
     let contactsToCheck = undefined;
     if (senderInfo) {
       contactsToCheck = this.contactMgr.getContactsWithMatchingPKMask(senderInfo);
@@ -922,6 +923,9 @@ export class MessagingEngine extends EventEmitter {
         console.log(`ERROR:(engine.js::handleMobileNotifications): ${err}`);
         this.offlineMsgSvc.resumeRecvService();
       });
+      console.log(`${logPrefix}: shortcutting offline message service with fast read.`)
+    } else {
+      console.log(`${logPrefix}: offline message service already receiving.`)
     }
   }
 
