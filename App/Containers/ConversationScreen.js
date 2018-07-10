@@ -33,7 +33,7 @@ class ConversationScreen extends React.Component {
       headerBackTitle: 'Back',
       headerRight: (
         //params.sendMessage()
-        <TouchableOpacity onPress={() => params.goToChatRoom.navigate('BlockContactSearch')} style={{marginRight: 10}}>
+        <TouchableOpacity onPress={() => params.navigation.navigate('BlockContactSearch')} style={{marginRight: 10}}>
           <Ionicons name="ios-paper-plane-outline" size={30} color='#037aff'/>
         </TouchableOpacity>
       ),
@@ -54,7 +54,7 @@ class ConversationScreen extends React.Component {
     firebase.database().ref(path).set({
       token,
     })
-    this.props.navigation.setParams({ goToChatRoom: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
+    this.props.navigation.setParams({ navigation: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
   }
   componentWillReceiveProps(nextProps) {
     const { contactMgr, engineInit } = nextProps

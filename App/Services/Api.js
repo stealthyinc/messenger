@@ -83,7 +83,7 @@ const notification = (baseURL, token, pk) => {
       'Authorization': `key=${fb_server_key}`,
     },
     data: {
-      "notification": {"title": "New Message", "body": pk, "sound": "default"},
+      "notification": {"title": "New Message", "data": pk, "badge": 1, "sound": "default"},
       "priority": "high",
       "to": token,
     },

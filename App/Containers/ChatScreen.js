@@ -118,13 +118,14 @@ class ChatScreen extends Component {
     let messages = []
     const { description, id } = this.state.activeContact
     for (const message of inputMessages) {
-      const { author, body, time, image, seen } = message
-      if (message.author === id) {
+      const { author, body, time, image, state } = message
+      const seen = (state === "seen")
+      if (author === id) {
         messages.push({
           _id: Math.round(Math.random() * 1000000),
           text: body,
           createdAt: time,
-          sent: true,
+          sent: seen,
           received: seen,
           user: {
             _id: author,

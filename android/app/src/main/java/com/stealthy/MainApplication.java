@@ -4,6 +4,12 @@ import android.app.Application;
 import org.blockstack.android.sdk.*;
 
 import com.facebook.react.ReactApplication;
+import com.oblador.vectoricons.VectorIconsPackage;
+import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
+import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
+import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
+import com.amazonaws.amplify.pushnotification.RNPushNotificationPackage;
+import io.invertase.firebase.RNFirebasePackage;
 import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
@@ -32,6 +38,12 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new VectorIconsPackage(),
+            new ReactNativePushNotificationPackage(),
+            new ReactNativeConfigPackage(),
+            new RNBackgroundFetchPackage(),
+            new RNPushNotificationPackage(),
+            new RNFirebasePackage(),
             new RNBackgroundFetchPackage(),
             new ReactNativePushNotificationPackage(),
             new ReactNativeConfigPackage(),

@@ -145,6 +145,14 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-vector-icons')
+    compile project(':react-native-push-notification')
+    compile project(':react-native-config')
+    compile project(':react-native-background-fetch')
+    compile project(':aws-amplify-react-native')
+    compile(project(':react-native-firebase')) {
+        transitive = false
+    }
     implementation project(':react-native-background-fetch')
     implementation project(':react-native-push-notification')
     implementation project(':react-native-config')

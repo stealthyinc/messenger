@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { Provider } from 'react-redux'
 import RootContainer from './RootContainer'
 import createStore from '../Redux'
-import { AsyncStorage, PushNotificationIOS } from 'react-native'
+import { AppState, AsyncStorage, PushNotificationIOS } from 'react-native'
 
 import firebase from 'react-native-firebase';
 import type { Notification, NotificationOpen } from 'react-native-firebase';
@@ -22,6 +22,9 @@ const store = createStore()
  * We separate like this to play nice with React Native's hot reloading.
  */
 class App extends Component {
+  state = {
+    appState: AppState.currentState
+  }
   async componentWillMount () {
     // When key is wrong and mac error happens
     // await AsyncStorage.clear()
@@ -47,6 +50,7 @@ class App extends Component {
     }
   }
   async componentDidMount() {
+    AppState.addEventListener('change', this._handleAppStateChange);
     const notificationOpen: NotificationOpen = await firebase.notifications().getInitialNotification();
     if (notificationOpen) {
       // App was opened by a notification
@@ -61,6 +65,7 @@ class App extends Component {
       // Process your notification as required
       // ANDROID: Remote notifications do not contain the channel ID. You will have to specify this manually if you'd like to re-display the notification.
       console.log("notification displayed")
+      PushNotificationIOS.setApplicationIconBadgeNumber(1)
       // alert("notification displayed")
     });
     this.notificationListener = firebase.notifications().onNotification((notification: Notification) => {
@@ -72,16 +77,24 @@ class App extends Component {
       const action = notificationOpen.action;
       // Get information about the notification that was opened
       const notification: Notification = notificationOpen.notification;
-      console.log("notification opened")
-      PushNotificationIOS.setApplicationIconBadgeNumber(0)
-      store.dispatch(EngineActions.newNotification(notification._body))
+      // console.log("notification opened", notification)
+      const data = notification._data["gcm.notification.data"]
+      store.dispatch(EngineActions.newNotification(data))
       // alert("notification opened")
     });
   }
   componentWillUnmount() {
+    AppState.removeEventListener('change', this._handleAppStateChange);
     this.notificationListener();
     this.notificationOpenedListener();
     this.notificationDisplayedListener();
+  }
+  _handleAppStateChange = (nextAppState) => {
+    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+      console.log('App has come to the foreground!')
+      PushNotificationIOS.setApplicationIconBadgeNumber(0)
+    }
+    this.setState({appState: nextAppState});
   }
   render () {
     return (
