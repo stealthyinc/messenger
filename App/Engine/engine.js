@@ -597,18 +597,7 @@ export class MessagingEngine extends EventEmitter {
       if (!snapshot.exists() || snapshot.val() === common.NO_SESSION) {
         throw `ERROR(engine.js::_configureSessionManagement): session is unlocked.`;
       }
-
       this.logger(`INFO(engine.js::_configureSessionManagement): session is locked to ${snapshot.val()}.`);
-
-      // const parentRef = firebase.database().ref(common.getRootRef(this.publicKey))
-      // parentRef.on('child_changed', (childSnapshot, prevChildKey) => {
-      //   const currentSession = (childSnapshot.exists()) ? childSnapshot.val() : 'undefined';
-      //   if (currentSession != this.sessionId) {
-      //     this.logger(`INFO(engine.js:_configureSessionManagement): current session has changed to ${currentSession}. Shutting down.`)
-      //     this.logger(`  prevChildKey=${prevChildKey}`)
-      //     // TODO: shutdown
-      //   }
-      // })
 
       this._configureIO();
       return
@@ -816,25 +805,40 @@ export class MessagingEngine extends EventEmitter {
   handleShutDownRequest() {
     this.offlineMsgSvc.skipSendService();
     this.offlineMsgSvc.stopSendService();
+    this.offlineMsgSvc.pauseRecvService();
     this.offlineMsgSvc.stopRecvService();
 
-    this.heartBeat.stopBeat()
-    this.heartBeat.stopMonitor()
-
+    if (this.heartBeat) {
+      this.heartBeat.stopBeat();
+      this.heartBeat.stopMonitor();
+    }
 
     const promises = []
-    promises.push(this._writeConversations())
-
+    promises.push(
+      this.offlineMsgSvc.sendMessagesToStorage()
+      .catch(err => {
+        console.log(`ERROR(engine.js::handleShutDownRequest): sending messages to storage. ${err}`);
+        return undefined;
+      })
+    );
+    promises.push(
+      this._writeConversations()
+      .catch(err => {
+        console.log(`ERROR(engine.js::handleShutDownRequest): writing conversations. ${err}`);
+        return undefined;
+      })
+    );
     // We stopped doing this after every incoming msg etc. to
     // speed things along, hence write here.
     //   - to avoid the popup, we should have a timer periodically write
     //     all these and use a dirty flag to determine if we even need to do this.
-    promises.push(this._writeContactList(this.contactMgr.getAllContacts()))
-
-    // This is probably higher priority than writing the contact list but since
-    // it uses await, we're waiting to launch it until launching the other io
-    // promises above
-    this.offlineMsgSvc.sendMessagesToStorage();
+    promises.push(
+      this._writeContactList(this.contactMgr.getAllContacts())
+      .catch(err => {
+        console.log(`ERROR(engine.js::handleShutDownRequest): writing contact list. ${err}`);
+        return undefined;
+      })
+    )
 
     // TODO: make this more intelligent (i.e. only delete if we issued an invite / response)
     // if (this.sdpManager) {
