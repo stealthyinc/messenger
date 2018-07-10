@@ -36,7 +36,7 @@ export default class CustomActions extends React.Component {
   }
 
   onActionsPress() {
-    const options = ['Choose From Library', 'Send Location', 'Cancel'];
+    const options = ['Graphite Docs', 'Blockusign PDFs', 'TravelStack Photos', 'Cancel'];
     const cancelButtonIndex = options.length - 1;
     this.context.actionSheet().showActionSheetWithOptions({
       options,
@@ -146,12 +146,6 @@ export default class CustomActions extends React.Component {
             this.setModalVisible(false);
           }}
         >
-          <CameraRollPicker
-            maximum={10}
-            imagesPerRow={4}
-            callback={this.selectImages}
-            selected={[]}
-          />
         </Modal>
         {this.renderIcon()}
       </TouchableOpacity>
