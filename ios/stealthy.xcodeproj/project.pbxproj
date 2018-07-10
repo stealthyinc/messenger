@@ -15,7 +15,6 @@
 		00E356F31AD99517003FC87E /* stealthyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* stealthyTests.m */; };
 		03B4077EFE0941FEB4B59177 /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E1EDDD1C60A54184B85F2CCE /* Zocial.ttf */; };
 		0D46135AC56B738C4FCF83EE /* Pods_stealthyTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7182A450258327CD189F21EF /* Pods_stealthyTests.framework */; };
-		0EAF18B096674ACBA98A5FC0 /* libRNVectorIcons.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AB36EEEA723C409BBAA1C0D5 /* libRNVectorIcons.a */; };
 		107151A6DC554B2AA6F7DB75 /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C337D41CF06C4BAF8467175D /* Zocial.ttf */; };
 		133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 78C398B91ACF4ADC00677621 /* libRCTLinking.a */; };
 		139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 139105C11AF99BAD00B5F7CC /* libRCTSettings.a */; };
@@ -53,6 +52,19 @@
 		7502F8C220D0CA6200232E72 /* TSBackgroundFetch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7502F8C120D0CA6200232E72 /* TSBackgroundFetch.framework */; };
 		754C0C2120D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 754C0BF620D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m */; };
 		7578E71720AA27D600D60C9A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7578E71620AA27D600D60C9A /* GoogleService-Info.plist */; };
+		75A1371820F4017F00D89EA6 /* FirebaseCoreDiagnostics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1370E20F4017D00D89EA6 /* FirebaseCoreDiagnostics.framework */; };
+		75A1371920F4017F00D89EA6 /* FirebaseInstanceID.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1370F20F4017E00D89EA6 /* FirebaseInstanceID.framework */; };
+		75A1371A20F4017F00D89EA6 /* GoogleToolboxForMac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371020F4017E00D89EA6 /* GoogleToolboxForMac.framework */; };
+		75A1371B20F4017F00D89EA6 /* FirebaseAuth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371120F4017E00D89EA6 /* FirebaseAuth.framework */; };
+		75A1371C20F4017F00D89EA6 /* FirebaseNanoPB.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371220F4017E00D89EA6 /* FirebaseNanoPB.framework */; };
+		75A1371D20F4017F00D89EA6 /* FirebaseCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371320F4017E00D89EA6 /* FirebaseCore.framework */; };
+		75A1371E20F4017F00D89EA6 /* FirebaseAnalytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371420F4017E00D89EA6 /* FirebaseAnalytics.framework */; };
+		75A1371F20F4017F00D89EA6 /* FirebaseMessaging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371520F4017E00D89EA6 /* FirebaseMessaging.framework */; };
+		75A1372020F4017F00D89EA6 /* FirebaseDatabase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371620F4017F00D89EA6 /* FirebaseDatabase.framework */; };
+		75A1372120F4017F00D89EA6 /* GTMSessionFetcher.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371720F4017F00D89EA6 /* GTMSessionFetcher.framework */; };
+		75A1372520F401A100D89EA6 /* leveldb-library.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1372220F401A100D89EA6 /* leveldb-library.framework */; };
+		75A1372620F401A100D89EA6 /* nanopb.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1372320F401A100D89EA6 /* nanopb.framework */; };
+		75A1372720F401A100D89EA6 /* Protobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1372420F401A100D89EA6 /* Protobuf.framework */; };
 		75A52FB920A930CC00AC6DAD /* BlockstackNativeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 75A52FB820A930CC00AC6DAD /* BlockstackNativeModule.m */; };
 		75A52FBA20A9311100AC6DAD /* BlockstackNativeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 75A52FB820A930CC00AC6DAD /* BlockstackNativeModule.m */; };
 		75A52FC420A932E200AC6DAD /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A52FC120A932D800AC6DAD /* libRCTPushNotification.a */; };
@@ -65,7 +77,6 @@
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		8625A7A91E01407581E71E60 /* MaterialIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 75CB635A5D65494A95309E91 /* MaterialIcons.ttf */; };
 		90BA0B7FAAFC4FF6A088084F /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DACEF3361A97459CBF7EED26 /* Ionicons.ttf */; };
-		95A8B604804D4839868A664C /* libRNRandomBytes-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF5D58D8C08E4E96BD6AE983 /* libRNRandomBytes-tvOS.a */; };
 		96A4A7AC07E54A479594755E /* Roboto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A6EF6B5E2C5A47A091F248F7 /* Roboto.ttf */; };
 		9E81386671464A869FF33FD2 /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3E51D955A6484354B8C696C7 /* Octicons.ttf */; };
 		A667D3369037499BB3243DAA /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 02BF7144A18844E288BAC83B /* Entypo.ttf */; };
@@ -415,12 +426,10 @@
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
 		1C97C53691574BFEA284F08B /* rubicon-icon-font.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "rubicon-icon-font.ttf"; path = "../node_modules/native-base/Fonts/rubicon-icon-font.ttf"; sourceTree = "<group>"; };
 		254EAEB53DE026190D154832 /* Pods-stealthyTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-stealthyTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-stealthyTests/Pods-stealthyTests.debug.xcconfig"; sourceTree = "<group>"; };
-		278A953D8761407F9D08591A /* libRNECC.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNECC.a; sourceTree = "<group>"; };
 		29B796142E6E41EDA79519D7 /* RNFirebase.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNFirebase.xcodeproj; path = "../node_modules/react-native-firebase/ios/RNFirebase.xcodeproj"; sourceTree = "<group>"; };
 		2D02E47B1E0B4A5D006451C7 /* stealthy-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "stealthy-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E4901E0B4A5D006451C7 /* stealthy-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "stealthy-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D16E6891FA4F8E400B85C8A /* libReact.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libReact.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		39D8646F0585427B939E4DC8 /* libRNDeviceInfo.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNDeviceInfo.a; sourceTree = "<group>"; };
 		3E51D955A6484354B8C696C7 /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
 		403D1E0A446C478FB77A85E1 /* MaterialCommunityIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialCommunityIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf"; sourceTree = "<group>"; };
 		501F8F8086C3417DB75C339C /* Ionicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Ionicons.ttf; path = "../node_modules/native-base/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
@@ -435,12 +444,24 @@
 		753E71819135E1A15C288F57 /* Pods-stealthy.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-stealthy.release.xcconfig"; path = "Pods/Target Support Files/Pods-stealthy/Pods-stealthy.release.xcconfig"; sourceTree = "<group>"; };
 		754C0BF620D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RNBackgroundFetch+AppDelegate.m"; path = "../node_modules/react-native-background-fetch/ios/RNBackgroundFetch/RNBackgroundFetch+AppDelegate.m"; sourceTree = "<group>"; };
 		7578E71620AA27D600D60C9A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		75A1370B20F3ECB800D89EA6 /* Firebase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Firebase.h; path = Firebase/Firebase.h; sourceTree = "<group>"; };
+		75A1370E20F4017D00D89EA6 /* FirebaseCoreDiagnostics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseCoreDiagnostics.framework; path = Firebase/FirebaseCoreDiagnostics.framework; sourceTree = "<group>"; };
+		75A1370F20F4017E00D89EA6 /* FirebaseInstanceID.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseInstanceID.framework; path = Firebase/FirebaseInstanceID.framework; sourceTree = "<group>"; };
+		75A1371020F4017E00D89EA6 /* GoogleToolboxForMac.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GoogleToolboxForMac.framework; path = Firebase/GoogleToolboxForMac.framework; sourceTree = "<group>"; };
+		75A1371120F4017E00D89EA6 /* FirebaseAuth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseAuth.framework; path = Firebase/FirebaseAuth.framework; sourceTree = "<group>"; };
+		75A1371220F4017E00D89EA6 /* FirebaseNanoPB.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseNanoPB.framework; path = Firebase/FirebaseNanoPB.framework; sourceTree = "<group>"; };
+		75A1371320F4017E00D89EA6 /* FirebaseCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseCore.framework; path = Firebase/FirebaseCore.framework; sourceTree = "<group>"; };
+		75A1371420F4017E00D89EA6 /* FirebaseAnalytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseAnalytics.framework; path = Firebase/FirebaseAnalytics.framework; sourceTree = "<group>"; };
+		75A1371520F4017E00D89EA6 /* FirebaseMessaging.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseMessaging.framework; path = Firebase/FirebaseMessaging.framework; sourceTree = "<group>"; };
+		75A1371620F4017F00D89EA6 /* FirebaseDatabase.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseDatabase.framework; path = Firebase/FirebaseDatabase.framework; sourceTree = "<group>"; };
+		75A1371720F4017F00D89EA6 /* GTMSessionFetcher.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GTMSessionFetcher.framework; path = Firebase/GTMSessionFetcher.framework; sourceTree = "<group>"; };
+		75A1372220F401A100D89EA6 /* leveldb-library.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "leveldb-library.framework"; path = "Firebase/leveldb-library.framework"; sourceTree = "<group>"; };
+		75A1372320F401A100D89EA6 /* nanopb.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = nanopb.framework; path = Firebase/nanopb.framework; sourceTree = "<group>"; };
+		75A1372420F401A100D89EA6 /* Protobuf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Protobuf.framework; path = Firebase/Protobuf.framework; sourceTree = "<group>"; };
 		75A52FB720A9309400AC6DAD /* BlockstackNativeModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BlockstackNativeModule.h; sourceTree = "<group>"; };
 		75A52FB820A930CC00AC6DAD /* BlockstackNativeModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BlockstackNativeModule.m; sourceTree = "<group>"; };
 		75A52FBB20A932D800AC6DAD /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		75A52FFD20A9355900AC6DAD /* stealthy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = stealthy.entitlements; path = stealthy/stealthy.entitlements; sourceTree = "<group>"; };
-		75A52FFE20AA0E7100AC6DAD /* Blockstack.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Blockstack.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		75A5300020AA0E8B00AC6DAD /* Blockstack.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Blockstack.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		75C3EB3D20E1B12400F5E81F /* libcryptopp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcryptopp.a; path = "../../../../../usr/local/cryptopp-ios/lib/libcryptopp.a"; sourceTree = "<group>"; };
 		75CB635A5D65494A95309E91 /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
@@ -452,14 +473,11 @@
 		9B6F186014334C3B97FAD098 /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
 		9B9573B9B9544671A8B573A4 /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/native-base/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
 		A6EF6B5E2C5A47A091F248F7 /* Roboto.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Roboto.ttf; path = "../node_modules/native-base/Fonts/Roboto.ttf"; sourceTree = "<group>"; };
-		AB36EEEA723C409BBAA1C0D5 /* libRNVectorIcons.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNVectorIcons.a; sourceTree = "<group>"; };
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
-		AF5D58D8C08E4E96BD6AE983 /* libRNRandomBytes-tvOS.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = "libRNRandomBytes-tvOS.a"; sourceTree = "<group>"; };
 		B53705AE14A347578F21410B /* EvilIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = EvilIcons.ttf; path = "../node_modules/native-base/Fonts/EvilIcons.ttf"; sourceTree = "<group>"; };
 		C2B92B492DA14A0DA1A68079 /* RNVectorIcons.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNVectorIcons.xcodeproj; path = "../node_modules/react-native-vector-icons/RNVectorIcons.xcodeproj"; sourceTree = "<group>"; };
 		C337D41CF06C4BAF8467175D /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/native-base/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
 		C39ED776E6984F56A59D5DEF /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/native-base/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
-		C51F4983DF244D788765FBB0 /* libRNRandomBytes.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNRandomBytes.a; sourceTree = "<group>"; };
 		D2D4FA5C0EB941D5AFBAACD8 /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = SimpleLineIcons.ttf; path = "../node_modules/native-base/Fonts/SimpleLineIcons.ttf"; sourceTree = "<group>"; };
 		D5C8BA4624DDACA84E596202 /* Pods-stealthyTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-stealthyTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-stealthyTests/Pods-stealthyTests.release.xcconfig"; sourceTree = "<group>"; };
 		D719A13518564780885CF668 /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/native-base/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
@@ -467,7 +485,6 @@
 		DC1243BBCF424614812A3640 /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
 		E1EDDD1C60A54184B85F2CCE /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
 		EA4F83C3B87C4C68B8EA8741 /* Entypo.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Entypo.ttf; path = "../node_modules/native-base/Fonts/Entypo.ttf"; sourceTree = "<group>"; };
-		FD06C466EA394F11967011DB /* libRNFirebase.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNFirebase.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -489,21 +506,33 @@
 				75F0E51220AB428000CB49D4 /* libRNFirebase.a in Frameworks */,
 				75A52FC420A932E200AC6DAD /* libRCTPushNotification.a in Frameworks */,
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,
+				75A1371F20F4017F00D89EA6 /* FirebaseMessaging.framework in Frameworks */,
 				5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */,
+				75A1372620F401A100D89EA6 /* nanopb.framework in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
+				75A1371B20F4017F00D89EA6 /* FirebaseAuth.framework in Frameworks */,
 				5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */,
+				75A1371A20F4017F00D89EA6 /* GoogleToolboxForMac.framework in Frameworks */,
 				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
 				00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */,
 				00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */,
 				133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */,
+				75A1371820F4017F00D89EA6 /* FirebaseCoreDiagnostics.framework in Frameworks */,
 				00C302E91ABCBA2D00DB3ED1 /* libRCTNetwork.a in Frameworks */,
 				139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */,
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
+				75A1371C20F4017F00D89EA6 /* FirebaseNanoPB.framework in Frameworks */,
 				75C3EB3E20E1B12400F5E81F /* libcryptopp.a in Frameworks */,
+				75A1371920F4017F00D89EA6 /* FirebaseInstanceID.framework in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
-				0EAF18B096674ACBA98A5FC0 /* libRNVectorIcons.a in Frameworks */,
 				F352F9D294F05CD267109619 /* Pods_stealthy.framework in Frameworks */,
+				75A1371D20F4017F00D89EA6 /* FirebaseCore.framework in Frameworks */,
+				75A1372020F4017F00D89EA6 /* FirebaseDatabase.framework in Frameworks */,
+				75A1372120F4017F00D89EA6 /* GTMSessionFetcher.framework in Frameworks */,
+				75A1371E20F4017F00D89EA6 /* FirebaseAnalytics.framework in Frameworks */,
+				75A1372520F401A100D89EA6 /* leveldb-library.framework in Frameworks */,
+				75A1372720F401A100D89EA6 /* Protobuf.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -519,7 +548,6 @@
 				2D02E4C61E0B4AEC006451C7 /* libRCTSettings-tvOS.a in Frameworks */,
 				2D02E4C71E0B4AEC006451C7 /* libRCTText-tvOS.a in Frameworks */,
 				2D02E4C81E0B4AEC006451C7 /* libRCTWebSocket-tvOS.a in Frameworks */,
-				95A8B604804D4839868A664C /* libRNRandomBytes-tvOS.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -616,6 +644,7 @@
 		13B07FAE1A68108700A75B9A /* stealthy */ = {
 			isa = PBXGroup;
 			children = (
+				75A1370B20F3ECB800D89EA6 /* Firebase.h */,
 				793936C620E2DB3400268769 /* CryptoECIES.cpp */,
 				793936C720E2DB3400268769 /* CryptoECIES.hpp */,
 				754C0BF620D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m */,
@@ -664,8 +693,19 @@
 			children = (
 				7502F8C120D0CA6200232E72 /* TSBackgroundFetch.framework */,
 				75C3EB3D20E1B12400F5E81F /* libcryptopp.a */,
-				75A5300020AA0E8B00AC6DAD /* Blockstack.framework */,
-				75A52FFE20AA0E7100AC6DAD /* Blockstack.framework */,
+				75A1372220F401A100D89EA6 /* leveldb-library.framework */,
+				75A1372320F401A100D89EA6 /* nanopb.framework */,
+				75A1372420F401A100D89EA6 /* Protobuf.framework */,
+				75A1371420F4017E00D89EA6 /* FirebaseAnalytics.framework */,
+				75A1371120F4017E00D89EA6 /* FirebaseAuth.framework */,
+				75A1371320F4017E00D89EA6 /* FirebaseCore.framework */,
+				75A1371620F4017F00D89EA6 /* FirebaseDatabase.framework */,
+				75A1371520F4017E00D89EA6 /* FirebaseMessaging.framework */,
+				75A1371220F4017E00D89EA6 /* FirebaseNanoPB.framework */,
+				75A1370E20F4017D00D89EA6 /* FirebaseCoreDiagnostics.framework */,
+				75A1370F20F4017E00D89EA6 /* FirebaseInstanceID.framework */,
+				75A1371020F4017E00D89EA6 /* GoogleToolboxForMac.framework */,
+				75A1371720F4017F00D89EA6 /* GTMSessionFetcher.framework */,
 				2D16E6891FA4F8E400B85C8A /* libReact.a */,
 				09E89F39247AAB3BC07F7EE1 /* Pods_stealthy.framework */,
 				7182A450258327CD189F21EF /* Pods_stealthyTests.framework */,
@@ -723,12 +763,6 @@
 		757B48F42095225200B18E99 /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
-				39D8646F0585427B939E4DC8 /* libRNDeviceInfo.a */,
-				AB36EEEA723C409BBAA1C0D5 /* libRNVectorIcons.a */,
-				FD06C466EA394F11967011DB /* libRNFirebase.a */,
-				C51F4983DF244D788765FBB0 /* libRNRandomBytes.a */,
-				AF5D58D8C08E4E96BD6AE983 /* libRNRandomBytes-tvOS.a */,
-				278A953D8761407F9D08591A /* libRNECC.a */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -1441,21 +1475,11 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-stealthy/Pods-stealthy-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Blockstack/Blockstack.framework",
-				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher/GTMSessionFetcher.framework",
-				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
-				"${BUILT_PRODUCTS_DIR}/Protobuf/Protobuf.framework",
-				"${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework",
-				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
 				"${BUILT_PRODUCTS_DIR}/secp256k1.swift/secp256k1.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Blockstack.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GTMSessionFetcher.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Protobuf.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/leveldb.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/secp256k1.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1662,14 +1686,16 @@
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/Blockstack\"",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/secp256k1.swift\"",
 					"$(PROJECT_DIR)/../node_modules/react-native-background-fetch/ios/**",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Firebase",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/../node_modules/react-native-device-info/RNDeviceInfo",
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
-					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/notifications",
 					"/usr/local/cryptopp-ios/include",
+					"$(SRCROOT)/Firebase",
+					"$(SRCROOT)/Firebase/Headers",
 				);
 				INFOPLIST_FILE = stealthy/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -1711,14 +1737,16 @@
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/Blockstack\"",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/secp256k1.swift\"",
 					"$(PROJECT_DIR)/../node_modules/react-native-background-fetch/ios/**",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Firebase",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/../node_modules/react-native-device-info/RNDeviceInfo",
 					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
-					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/notifications",
 					"/usr/local/cryptopp-ios/include",
+					"$(SRCROOT)/Firebase",
+					"$(SRCROOT)/Firebase/Headers",
 				);
 				INFOPLIST_FILE = stealthy/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;

@@ -6,34 +6,13 @@ target 'stealthy' do
   use_frameworks!
 
   # Pods for Stealthy
-  #pod 'Blockstack', :git => 'https://github.com/Blockstack/Blockstack-ios.git', :branch => 'rn-test'
-  #pod 'Blockstack', :git => 'https://github.com/michalciurus/blockstack-ios.git', :branch => 'objc_support'
-  #pod 'Blockstack', :git => 'https://github.com/AC-FTW/blockstack-ios.git', :branch => 'encryption'
-  #pod 'Blockstack', :git => 'https://github.com/AC-FTW/blockstack-ios.git', :branch => 'experiment/enc_dec_content'
-  #pod 'Blockstack', :git => 'https://github.com/AC-FTW/blockstack-ios.git', :branch => 'stealthy_encryption_blockstack'
   pod 'Blockstack', :git => 'https://github.com/AC-FTW/blockstack-ios.git', :branch => 'stealthy_blockstack'
 
-  #pod 'EllipticCurveKeyPair'
-
-  pod 'Firebase/Core'
+  #pod 'Firebase/Core'
   #pod 'Firebase/Core', '~> 4.13.0'
-  pod 'Firebase/Auth'
-  pod 'Firebase/Database'
-  #pod 'FirebaseAnalytics'
-  pod 'Firebase/Messaging'
-
-  #pod "yoga", :path => "../node_modules/react-native/ReactCommon/yoga"
-  #pod "React", :path => "../node_modules/react-native", :subspecs => [
-    #'Core',
-    #'CxxBridge',
-    #'DevSupport',
-    #'RCTText',
-    #'RCTImage',
-    #'RCTNetwork',
-    #'RCTSettings',
-    #'RCTWebSocket', # needed for debugging
-  #]
-  #pod 'RNBackgroundFetch', :path => '../node_modules/react-native-background-fetch'
+  #pod 'Firebase/Auth'
+  #pod 'Firebase/Database'
+  #pod 'Firebase/Messaging'
 
   #pod 'react-native-config', :path => '../node_modules/react-native-config'
 

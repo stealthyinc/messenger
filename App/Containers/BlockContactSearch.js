@@ -29,7 +29,8 @@ class BlockContactSearch extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      showLoading: false
+      showLoading: false,
+      searchInit: false
     }
   }
   componentDidMount() {
@@ -38,7 +39,8 @@ class BlockContactSearch extends Component {
   }
   componentWillReceiveProps(nextProps) {
     const { contactAdded } = nextProps
-    if (contactAdded) {
+    const { searchInit } = this.state
+    if (contactAdded && searchInit) {
       this.props.navigation.goBack()
       this.props.navigation.navigate('ChatRoom')
       this.props.setContactAdded(false)
@@ -68,6 +70,7 @@ class BlockContactSearch extends Component {
       title: name
     }
     this.props.addNewContact(cleanItem)
+    this.props.setActiveContact(fullyQualifiedName);
   }
   createListItem(payload) {
     return (payload && payload.results) ? payload.results.map((item, i) => (
@@ -85,17 +88,17 @@ class BlockContactSearch extends Component {
     if (text.length > 1) {
       setTimeout(() => {
         this.props.request(text)
-        this.setState({showLoading: true})
+        this.setState({showLoading: true, searchInit: true})
       }, timeout);
     }
     else if (text.length === 0) {
       this.props.request('')
-      this.setState({showLoading: false})
+      this.setState({showLoading: false, searchInit: false})
     }
   }
   onClear = () => {
     this.props.request('')
-    this.setState({showLoading: false})
+    this.setState({showLoading: false, searchInit: false})
   }
   render() {
     return (
@@ -136,6 +139,7 @@ const mapDispatchToProps = (dispatch) => {
     clear: () => dispatch(BlockstackContactsActions.blockstackContactsClear()),
     addNewContact: (contact) => dispatch(EngineActions.addNewContact(contact)),
     setContactAdded: (flag) => dispatch(EngineActions.setContactAdded(flag)),
+    setActiveContact: (contact) => dispatch(EngineActions.setActiveContact(contact)),
   }
 }
 

@@ -13,22 +13,46 @@
 
 // firebase stuff
 #import <Firebase.h>
-#import "RNFirebaseNotifications.h"
 #import "RNFirebaseMessaging.h"
+#import "RNFirebaseNotifications.h"
 //@import Firebase;
+
+#import <UserNotifications/UserNotifications.h>
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  NSURL *jsCodeLocation;
-  
-  jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
-  //  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
-  
   // firebase stuff
   [FIRApp configure];
   [RNFirebaseNotifications configure];
+  
+//  if ([UNUserNotificationCenter class] != nil) {
+//    // iOS 10 or later
+//    // For iOS 10 display notification (sent via APNS)
+//    [UNUserNotificationCenter currentNotificationCenter].delegate = self;
+//    UNAuthorizationOptions authOptions = UNAuthorizationOptionAlert |
+//    UNAuthorizationOptionSound | UNAuthorizationOptionBadge;
+//    [FIRMessaging messaging].delegate = self;
+//    [[UNUserNotificationCenter currentNotificationCenter]
+//     requestAuthorizationWithOptions:authOptions
+//     completionHandler:^(BOOL granted, NSError * _Nullable error) {
+//       if (error) { NSLog(@"%@", error); }
+//     }];
+//  } else {
+//    // iOS 10 notifications aren't available; fall back to iOS 8-9 notifications.
+//    UIUserNotificationType allNotificationTypes =
+//    (UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge);
+//    UIUserNotificationSettings *settings =
+//    [UIUserNotificationSettings settingsForTypes:allNotificationTypes categories:nil];
+//    [application registerUserNotificationSettings:settings];
+//  }
+//  [application registerForRemoteNotifications];
+  
+  NSURL *jsCodeLocation;
+  
+  jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
+//  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
   
   // Register for remote notifications.
   [[UIApplication sharedApplication] registerForRemoteNotifications];
@@ -62,33 +86,5 @@ fetchCompletionHandler:(nonnull void (^)(UIBackgroundFetchResult))completionHand
 }
 
 // end firebase stuff
-
-// Required to register for notifications
-//- (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
-//{
-//  [RCTPushNotificationManager didRegisterUserNotificationSettings:notificationSettings];
-//}
-// Required for the register event.
-//- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
-//{
-//  [RCTPushNotificationManager didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
-//}
-// Required for the notification event. You must call the completion handler after handling the remote notification.
-//- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
-//fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
-//{
-////  NSLog(@"push-notification received: %@", notification);
-//  [RCTPushNotificationManager didReceiveRemoteNotification:userInfo fetchCompletionHandler:completionHandler];
-//}
-// Required for the registrationError event.
-//- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
-//{
-//  [RCTPushNotificationManager didFailToRegisterForRemoteNotificationsWithError:error];
-//}
-// Required for the localNotification event.
-//- (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
-//{
-//  [RCTPushNotificationManager didReceiveLocalNotification:notification];
-//}
 
 @end
