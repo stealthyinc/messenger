@@ -134,7 +134,7 @@ class ContactManager {
 
   getContacts = () => {
     if (this.pluginMode && LEAN_PLUGIN) {
-      return [this.activeContact];
+      return (this.activeContact) ? [this.activeContact] : [];
     }
 
     return this.contactArr;
@@ -150,7 +150,7 @@ class ContactManager {
 
   getContactIds = () => {
     if (this.pluginMode && LEAN_PLUGIN) {
-      return [this.activeContact.id];
+      return (this.activeContact) ? [this.activeContact.id] : [];
     }
 
     const userIds = [];
@@ -255,7 +255,8 @@ class ContactManager {
       const thisMemContact = this.getContact(aContact.id);
       if (thisMemContact) {
         const idx = this.contactArr.indexOf(thisMemContact);
-        const deletingActiveContact = (thisMemContact.id === this.activeContact.id);
+        const deletingActiveContact = (this.activeContact) ?
+          (thisMemContact.id === this.activeContact.id) : false;
 
         if (idx !== -1) {
           const newContactArr = this.contactArr.slice();
@@ -279,6 +280,8 @@ class ContactManager {
     if (aContact) {
       return (aContact.publicKey) ? (aContact.publicKey !== '') : false;
     }
+
+    return false;
   }
 
   getPublicKey = (aContactId) => {
