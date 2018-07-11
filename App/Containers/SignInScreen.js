@@ -15,7 +15,6 @@ import { Icon, Button, Overlay, SocialIcon } from 'react-native-elements'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 const { MessagingEngine } = require('../Engine/engine.js');
-import firebase from 'react-native-firebase';
 
 const common = require('./../common.js');
 const utils = require('./../Engine/misc/utils.js');
@@ -150,7 +149,7 @@ class SignInScreen extends React.Component {
               this.userData = userData;
 
               AsyncStorage.setItem('userData', JSON.stringify(this.userData));
-              const ref = firebase.database().ref(common.getSessionRef(publicKey));
+              const ref = MyFirebase.getFirebaseRef(common.getSessionRef(publicKey));
               await ref.once('value')
               .then((snapshot) => {
                 if (!snapshot.exists() || snapshot.val() === 'none') {

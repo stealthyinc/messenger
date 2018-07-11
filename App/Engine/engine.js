@@ -93,10 +93,10 @@ let STEALTHY_PAGE = DONT_CHANGE_THIS_HERE_DO_IT_IN_THE_CTOR;
 
 // Logging Scopes
 const LOG_AUTOCONNECT = false;
-const LOG_GAIAIO = true;
+const LOG_GAIAIO = false;
 const LOG_INVITEPOLLING = false;
 const LOG_RESPONSEPOLLING = false;
-const LOG_OFFLINEMESSAGING = true;
+const LOG_OFFLINEMESSAGING = false;
 
 const stealthyTestIds = [
   'pbj.id',

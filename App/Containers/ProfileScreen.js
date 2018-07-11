@@ -5,9 +5,10 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import { Toast } from 'native-base';
-import firebase from 'react-native-firebase';
 
 const common = require('./../common.js');
+
+const { firebaseInstance } = require('../Engine/Firebase.js');
 
 import defaultProfile from '../Images/defaultProfile.png'
 
@@ -45,7 +46,7 @@ class ProfileScreen extends React.Component {
     const {BlockstackNativeModule} = NativeModules;
     const { publicKey } = this.props
     if (!common.DEV_TESTING) {
-      await firebase.database().ref(common.getSessionRef(publicKey)).set(common.NO_SESSION)
+      firebaseInstance.setFirebaseData(common.getSessionRef(publicKey), common.NO_SESSION)
     }
     this.props.clearUserData(publicKey);
     await AsyncStorage.clear();

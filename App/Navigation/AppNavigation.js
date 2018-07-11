@@ -3,8 +3,6 @@ import { NativeModules, ScrollView, Text, Image, View } from 'react-native'
 import { DrawerNavigator, StackNavigator, SwitchNavigator } from 'react-navigation';
 import { Images } from '../Themes'
 
-import firebase from 'react-native-firebase';
-
 // Styles
 import styles from './Styles/NavigationStyles'
 import HomeScreen from '../Containers/HomeScreen'
@@ -20,10 +18,6 @@ import ContactProfile from '../Containers/ContactProfile'
 import BlockContactSearch from '../Containers/BlockContactSearch'
 
 console.disableYellowBox = true;
-
-if (!firebase.auth().currentUser) {
-  firebase.auth().signInAnonymouslyAndRetrieveData()
-}
 
 const ChatRoom = DrawerNavigator(
   {
