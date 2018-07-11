@@ -13,6 +13,8 @@ import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 const utils = require('./../Engine/misc/utils.js');
 
+const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js');
+
 class ChatScreen extends Component {
 
   static navigationOptions = ({ navigation }) => {
@@ -119,14 +121,15 @@ class ChatScreen extends Component {
     const { description, id } = this.state.activeContact
     for (const message of inputMessages) {
       const { author, body, time, image, state } = message
-      const seen = (state === "seen")
+      const sent = (state === MESSAGE_STATE.SENT_OFFLINE || state === MESSAGE_STATE.SENT_REALTIME || state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
+      const received = (state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
       if (author === id) {
         messages.push({
           _id: Math.round(Math.random() * 1000000),
           text: body,
           createdAt: time,
-          sent: seen,
-          received: seen,
+          sent: sent,
+          received: received,
           user: {
             _id: author,
             name: description,
@@ -139,8 +142,8 @@ class ChatScreen extends Component {
           _id: Math.round(Math.random() * 1000000),
           text: body,
           createdAt: time,
-          sent: seen,
-          received: seen,
+          sent: sent,
+          received: received,
           user: {
             _id: author,
             name: author,
