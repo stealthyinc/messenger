@@ -30,34 +30,22 @@ class BlockContactSearch extends Component {
     super(props)
     this.state = {
       showLoading: false,
-      searchInit: false
     }
     this.numContacts = (props.contactMgr) ?
-      (props.contactMgr.getAllContacts().length) : undefined;
+      (props.contactMgr.getAllContacts().length) : 0;
   }
   componentDidMount() {
     this.search.focus()
     this.props.request('')
   }
   componentWillReceiveProps(nextProps) {
-    const { contactAdded } = nextProps
-    const { searchInit } = this.state
-
-    if (searchInit &&
-        this.numContacts &&
-        nextProps.contactMgr &&
-        nextProps.contactMgr.getAllContacts() > this.numContacts) {
-      this.numContacts = nextProps.contactMgr.getAllContacts().length;
+    const { contactAdded, contactMgr } = nextProps
+    if (contactMgr && contactMgr.getAllContacts().length > this.numContacts) {
+      this.numContacts = contactMgr.getAllContacts().length;
       this.props.navigation.goBack();
       this.props.navigation.navigate('ChatRoom')
       this.props.setContactAdded(false)
     }
-
-    // if (contactAdded && searchInit) {
-    //   this.props.navigation.goBack()
-    //   this.props.navigation.navigate('ChatRoom')
-    //   this.props.setContactAdded(false)
-    // }
   }
   parseContact(item) {
     let userImage = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
@@ -101,17 +89,17 @@ class BlockContactSearch extends Component {
     if (text.length > 1) {
       setTimeout(() => {
         this.props.request(text)
-        this.setState({showLoading: true, searchInit: true})
+        this.setState({showLoading: true})
       }, timeout);
     }
     else if (text.length === 0) {
       this.props.request('')
-      this.setState({showLoading: false, searchInit: false})
+      this.setState({showLoading: false})
     }
   }
   onClear = () => {
     this.props.request('')
-    this.setState({showLoading: false, searchInit: false})
+    this.setState({showLoading: false})
   }
   render() {
     return (
