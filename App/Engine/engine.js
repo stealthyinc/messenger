@@ -1,26 +1,9 @@
 const platform = require('platform');
 // const firebase = require('firebase');
 import firebase from 'react-native-firebase';
-const adapter = require('webrtc-adapter');
 
 const EventEmitter = require('EventEmitter');
 import EngineActions from '../Redux/EngineRedux'
-
-// const { getScreenConstraints,
-//         getChromeExtensionStatus } = require('./ext/Screen-Capturing');
-// import { requestScreenShare } from 'iframe-screenshare';
-
-// TODO: something like rn-nodeify simple peer (existing problems though--naming
-// goals, yarn etc.). See:
-//    - https://www.npmjs.com/package/rn-nodeify
-//    - https://github.com/feross/simple-peer/issues/109
-//    - https://github.com/tradle/rn-nodeify
-//    - https://github.com/philikon/ReactNativify
-// const SimplePeer = require('simple-peer');
-const SimplePeer = undefined;
-
-
-// const Config = require('Config');
 
 import {
   NativeModules
@@ -39,28 +22,13 @@ const { Anonalytics } = require('../Analytics.js');
 const FirebaseIO = require('./filesystem/firebaseIO.js');
 const GaiaIO = require('./filesystem/gaiaIO.js');
 const { IndexedIO } = require('./filesystem/indexedIO.js');
-const { InvitationPolling,
-        ResponsePolling } = require('./network/polling.js');
-const { HeartBeat } = require('./network/heartBeat.js');
-const SdpManager = require('./network/sdpManager.js');
-const { ConnectionManager } = require('./network/connectionManager.js');
-const { RESPONSE_TYPE,
-        OFFER_TYPE,
-        PEER_OBJ_TYPES } = require('./network/PeerManager.js');
-const { getSimplePeerOpts } = require('./network/utils.js');
-
-const { AVPeerMgr } = require('./network/avPeerMgr.js');
 
 const constants = require('./misc/constants.js');
 const statusIndicators = constants.statusIndicators;
 
 const { ContactManager } = require('./messaging/contactManager.js');
-
 import getQueryString from './misc/getQueryString';
-
 const { Timer } = require('./misc/timer.js');
-const { PeerManager } = require('./network/PeerManager.js');
-
 const common = require('./../common.js');
 
 import chatIcon from './images/blue256.png';
@@ -70,10 +38,7 @@ const RELAY_IDS = [
   'relay.stealthy.id'
 ];
 
-const ENABLE_HEARTBEAT = false;
-
 // Dev. constants not set in ctor:
-const ENABLE_AUTOCONNECT = false;
 const ENCRYPT_INDEXED_IO = true;
 
 const ENABLE_RECEIPTS = true;
@@ -88,15 +53,11 @@ let ENABLE_GAIA = DONT_CHANGE_THIS_HERE_DO_IT_IN_THE_CTOR;
 let ENCRYPT_MESSAGES = DONT_CHANGE_THIS_HERE_DO_IT_IN_THE_CTOR;
 let ENCRYPT_CONTACTS = DONT_CHANGE_THIS_HERE_DO_IT_IN_THE_CTOR;
 let ENCRYPT_SETTINGS = DONT_CHANGE_THIS_HERE_DO_IT_IN_THE_CTOR;
-let ENCRYPT_SDP = DONT_CHANGE_THIS_HERE_DO_IT_IN_THE_CTOR;
 let STEALTHY_PAGE = DONT_CHANGE_THIS_HERE_DO_IT_IN_THE_CTOR;
 
 // Logging Scopes
-const LOG_AUTOCONNECT = false;
-const LOG_GAIAIO = false;
-const LOG_INVITEPOLLING = false;
-const LOG_RESPONSEPOLLING = false;
-const LOG_OFFLINEMESSAGING = false;
+const LOG_GAIAIO = true;
+const LOG_OFFLINEMESSAGING = true;
 
 const stealthyTestIds = [
   'pbj.id',
@@ -111,12 +72,6 @@ const stealthyTestIds = [
   'relay.steatlhy.id',
   'repeater.stealthy.id',
 ]
-
-const SHARED_STREAM_TYPES = {
-  VIDEO: 0,
-  AUDIO: 1,
-  DESKTOP: 2
-}
 
 // TODO: need a better way to indicate an ID is a relay:
 //       * subdomain reg:  e.g. blockstack.relay.id   (relay.id being the subdoain)
@@ -157,16 +112,8 @@ export class MessagingEngine extends EventEmitter {
 
     this.conversations = undefined;
     this.offlineMsgSvc = undefined;
-    this.sdpManager = undefined;
-    this.connectionManager = undefined;
-    this.invitePolling = undefined;
-    this.peerMgr = new PeerManager(this.logger);
-    this.invitations = [];   // TODO: Should probably be a Set (unique elements)
     this.io = undefined;
-    this.heartBeat = undefined;
-    this.avPeerMgr = undefined;
     this.shuttingDown = false;
-    this.videoInviteChatMsg = undefined;
     this.anonalytics = undefined;
   }
 
@@ -241,94 +188,11 @@ export class MessagingEngine extends EventEmitter {
     }
   }
 
-  startWebRtc() {
-    this.logger('startWebRtc:');
-
-    if (!utils.isDef(this.sdpManager)) {
-      utils.throwIfUndef('userId', this.userId);
-      utils.throwIfUndef('this.io', this.io);
-      utils.throwIfUndef('this.anonalytics', this.anonalytics);
-
-      this.sdpManager = new SdpManager(this.userId, this.io, this.anonalytics);
-    }
-
-    if (!utils.isDef(this.connectionManager)) {
-      utils.throwIfUndef('this.anonalytics', this.anonalytics);
-
-      this.connectionManager = new ConnectionManager(
-        this.logger,
-        this.sdpManager,
-        this.anonalytics);
-
-      this.connectionManager.on('new connection', (userId, peerObjType) => {
-        this.handleNewConnection(userId, peerObjType);
-      });
-
-      this.connectionManager.on('incoming message', (userId, packet) => {
-        this.handleIncomingMessage(userId, packet);
-      });
-
-      this.connectionManager.on('close connection', (userId, peerObjType) => {
-        this.handleCloseConnection(userId, peerObjType);
-      });
-    }
-
-    if (!utils.isDef(this.invitePolling)) {
-      const userIds = this.contactMgr.getContactIds();
-      this._initAndLaunchSdpInvitePolling(userIds);
-    } else {
-      this.invitePolling.pollForSdpInvitations();
-    }
-
-    this.invitePolling.on('received', (userId, sdpInvite) => {
-      this._handleSdpInvite(userId, sdpInvite)
-    });
-  }
-
-  stopWebRtc() {
-    this.logger('stopWebrtc:');
-
-    if (this.invitePolling) {
-      this.invitePolling.stopPolling();
-    }
-
-    this.peerMgr.destroyPeers();
-
-    if (this.sdpManager) {
-      const deletionPromises = [];
-      for (const contactId of this.contactMgr.getContactIds()) {
-        deletionPromises.push(this.sdpManager.deleteSdpInvite(contactId));
-        deletionPromises.push(this.sdpManager.deleteSdpResponse(contactId));
-      }
-    }
-
-    for (const userId of this.contactMgr.getContactIds()) {
-      const userStatus = this.peerMgr.isUserConnected(userId) ?
-        statusIndicators.available : statusIndicators.offline;
-      this.contactMgr.setStatus(userId, userStatus);
-    }
-
-    this.updateContactMgr();
-  }
-
   // Don't muck with this--it affects the WebPack HMR I believe (multiple timers
   // objects etc. if this is not here):
   componentWillUnmountWork() {
     this.logger('componentWillUnmountWork:');
     this.shuttingDown = true;
-
-    if (this.invitePolling) {
-      this.invitePolling.stopPolling();
-    }
-    this.invitePolling = undefined;
-
-    if (this.heartBeat) {
-      this.heartBeat.stopBeat();
-      this.heartBeat.stopMonitor();
-    }
-    this.heartBeat = undefined;
-
-    this.peerMgr.destroyPeers();
 
     this.offlineMsgSvc.stopSendService();
     this.offlineMsgSvc.stopRecvService();
@@ -336,15 +200,6 @@ export class MessagingEngine extends EventEmitter {
     // Don't put anything below here in this fn--it's not guaranteed to be run
     // due to some issue tbd.
     // ------------------------------------------------------------------------
-
-    // Remove any invite & response JSON files outstanding.
-    if (this.sdpManager) {
-      const deletionPromises = [];
-      for (const contactId of this.contactMgr.getContactIds()) {
-        deletionPromises.push(this.sdpManager.deleteSdpInvite(contactId));
-        deletionPromises.push(this.sdpManager.deleteSdpResponse(contactId));
-      }
-    }
 
     // let deleteResolves = Promise.all(deletionPromises);
 
@@ -375,7 +230,6 @@ export class MessagingEngine extends EventEmitter {
       ENCRYPT_MESSAGES = true;
       ENCRYPT_CONTACTS = true;
       ENCRYPT_SETTINGS = true;
-      ENCRYPT_SDP = true;
     } else if ((this.userId === 'alexc.id') ||
                (this.userId === 'alex.stealthy.id') ||
                (this.userId === 'relay.id')) {
@@ -384,13 +238,11 @@ export class MessagingEngine extends EventEmitter {
       ENCRYPT_MESSAGES = true;
       ENCRYPT_CONTACTS = true;
       ENCRYPT_SETTINGS = true;
-      ENCRYPT_SDP = true;
     } else {
       ENABLE_GAIA = true;
       ENCRYPT_MESSAGES = true;
       ENCRYPT_CONTACTS = true;
       ENCRYPT_SETTINGS = true;
-      ENCRYPT_SDP = true;
     }
   }
 
@@ -424,39 +276,6 @@ export class MessagingEngine extends EventEmitter {
     }
 
     this.updateContactMgr();
-
-    if (this.settings.webrtc) {
-      const userIds = this.contactMgr.getContactIds();
-
-      // TODO: can probably get rid of this conditional safely--with an empty
-      //       list the promise will resolve similarly--just quicker? (AC)
-      if (userIds.length === 0) {
-        // New user or empty contact list.
-        this.logger('Init & Launch Invite Polling:');
-        this._initAndLaunchSdpInvitePolling(userIds);
-        this.invitePolling.on('received', (userId, sdpInvite) => {
-          this._handleSdpInvite(userId, sdpInvite)
-        });
-      } else {
-        // Remove any old invites and responses before polling:
-        //
-        const deletionPromises = [];
-        for (const contactId of userIds) {
-          deletionPromises.push(this.sdpManager.deleteSdpInvite(contactId));
-          deletionPromises.push(this.sdpManager.deleteSdpResponse(contactId));
-        }
-        Promise.all(deletionPromises)
-        .then((values) => {
-          // Initialize and launch the file based signaling system (polling):
-          //
-          this._initAndLaunchSdpInvitePolling(userIds);
-          this.invitePolling.on('received', (userId, sdpInvite) => {
-            this._handleSdpInvite(userId, sdpInvite)
-          });
-        });
-      }
-    }
-
 
     this.offlineMsgSvc =
       new OfflineMessagingServices(this.logger,
@@ -497,26 +316,6 @@ export class MessagingEngine extends EventEmitter {
         this.updateMessages(newMessages);
       }
     });
-
-
-    const heartbeatIoDriver = (ENABLE_GAIA) ?
-      new GaiaIO(this.logger, LOG_GAIAIO) :
-      new FirebaseIO(this.logger, firebase, STEALTHY_PAGE, LOG_GAIAIO);
-    this.heartBeat = new HeartBeat(
-      this.logger,
-      heartbeatIoDriver,
-      this.userId,
-      this.contactMgr.getContacts());
-
-    // Explicit scoping required to get correct this context in
-    // _handleHeartBeatMonitor.
-    this.heartBeat.on('monitor', (theHeartBeats) => {
-      this._handleHeartBeatMonitor(theHeartBeats);
-    });
-    if (ENABLE_HEARTBEAT) {
-      this.heartBeat.startBeat();
-    }
-
 
     // Lots of possiblities here (i.e. lazy load etc.)
     this.conversations = new ConversationManager(
@@ -621,11 +420,6 @@ export class MessagingEngine extends EventEmitter {
         utils.decryptObj(this.privateKey, settingsData, ENCRYPT_SETTINGS)
         .then(settingsData => {
           this.settings = settingsData
-          if (utils.isMobile) {
-            // ignore WebRTC on mobile
-            this.settings.webrtc = false;
-          }
-
           this.initSettings();
           this._fetchDataAndCompleteInit();
         })
@@ -634,10 +428,10 @@ export class MessagingEngine extends EventEmitter {
         // centralized discovery on by default
         this.logger('No data read from settings file. Initializing with default settings.');
         this.settings = {
-          heartbeat: true,
           notifications: true,
           discovery: true,
-          webrtc: !this.isMobile,
+          heartbeat: false,
+          webrtc: false,
         }
         if (!this.plugin && !this.isMobile) {
           this.addProfile('relay.stealthy');
@@ -677,27 +471,6 @@ export class MessagingEngine extends EventEmitter {
     this.idxIo = new IndexedIO(this.logger, this.io, this.userId, this.privateKey, this.publicKey, ENCRYPT_INDEXED_IO);
 
     this.io.writeLocalFile(this.userId, 'pk.txt', this.publicKey);
-
-    // TODO: probably disable init of this with webrtc
-    if (this.settings.webrtc) {
-      this.sdpManager = new SdpManager(this.userId, this.io, this.anonalytics);
-      this.connectionManager = new ConnectionManager(
-        this.logger,
-        this.sdpManager,
-        this.anonalytics);
-
-        this.connectionManager.on('new connection', (userId, peerObjType) => {
-          this.handleNewConnection(userId, peerObjType);
-        });
-
-        this.connectionManager.on('incoming message', (userId, packet) => {
-          this.handleIncomingMessage(userId, packet);
-        });
-
-        this.connectionManager.on('close connection', (userId, peerObjType) => {
-          this.handleCloseConnection(userId, peerObjType);
-        });
-    }
 
     let contactArr = [];
     this.io.readLocalFile(this.userId, 'contacts.json')
@@ -808,11 +581,6 @@ export class MessagingEngine extends EventEmitter {
     this.offlineMsgSvc.pauseRecvService();
     this.offlineMsgSvc.stopRecvService();
 
-    if (this.heartBeat) {
-      this.heartBeat.stopBeat();
-      this.heartBeat.stopMonitor();
-    }
-
     const promises = []
     promises.push(
       this.offlineMsgSvc.sendMessagesToStorage()
@@ -840,19 +608,9 @@ export class MessagingEngine extends EventEmitter {
       })
     )
 
-    // TODO: make this more intelligent (i.e. only delete if we issued an invite / response)
-    // if (this.sdpManager) {
-    //   for (const contactId of this.contactMgr.getContactIds()) {
-    //     promises.push(this.sdpManager.deleteSdpInvite(contactId));
-    //     promises.push(this.sdpManager.deleteSdpResponse(contactId));
-    //   }
-    // }
-    // See also:  componentWillUnmountWork (TODO)
-
     Promise.all(promises)
     .then(() => {
       this.offlineMsgSvc = undefined
-      this.heartbeat = undefined
 
       this.logger('INFO:(engine.js::handleShutDownRequest): engine shutdown successful.')
       this.emit('me-shutdown-complete', true)
@@ -872,16 +630,6 @@ export class MessagingEngine extends EventEmitter {
   //
   handleMobileBackgroundUpdate() {
     console.log('MessagingEngine::handleMobileBackgroundUpdate:');
-
-    if (this.heartBeat) {
-      this.heartBeat.writeHeartBeatFile();
-
-      // TODO: Think about including this. If this method is getting called,
-      //       we're in the background anyway so what's the point of getting
-      //       the heartBeat files?
-      //
-      // this.heartBeat.readHeartBeatFiles();
-    }
 
     // TODO: - should the service only start on background update and stop when background update done?
     //       - can the service fail if shut down inappropriately (i.e. while waiting on request)?
@@ -978,17 +726,7 @@ export class MessagingEngine extends EventEmitter {
 
       this.contactMgr.addNewContact(contact, id, publicKey);
 
-      if (this.settings.webrtc) {
-        if (this.invitePolling) {
-          this.invitePolling.updateContactIds(this.contactMgr.getContactIds());
-        }
-      }
       this._writeContactList(this.contactMgr.getContacts());
-
-
-      // TODO(AC): probably change heartBeat to accept a contactMgr
-      this.heartBeat.addContact(id, publicKey);
-
 
       this.conversations.createConversation(id);
       this._writeConversations();
@@ -1012,21 +750,12 @@ export class MessagingEngine extends EventEmitter {
   handleDeleteContact = (e, { contact }) => {
     this.contactMgr.deleteContact(contact);
 
-    if (this.settings.webrtc) {
-      if (this.invitePolling) {
-        this.invitePolling.updateContactIds(this.contactMgr.getContactIds());
-      }
-    }
     this._writeContactList(this.contactMgr.getAllContacts());
 
     this.conversations.removeConversation(contact.id);
     this._writeConversations();
 
     this.offlineMsgSvc.removeMessages(contact);
-
-    this.peerMgr.removePeerAllTypes(contact.id);
-
-    this.heartBeat.deleteContact(contact.id);
 
     this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
 
@@ -1052,9 +781,6 @@ export class MessagingEngine extends EventEmitter {
     if (name === 'console') {
       this.settings.console = !this.settings.console;
       this.anonalytics.aeSettings(`console:${this.settings.console}`);
-    } else if (name === 'heartbeat') {
-      this.settings.heartbeat = !this.settings.heartbeat;
-      // this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`);
     } else if (name === 'notifications') {
       this.settings.notifications = !this.settings.notifications;
       // this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`);
@@ -1070,133 +796,13 @@ export class MessagingEngine extends EventEmitter {
           this.readContactDiscovery(this.settings.discovery);
         }
       }
-    } else if (name === 'webrtc') {
-      // if iOS, ignore user setting this for now
-      if (!utils.is_iOS()) {
-        this.settings.webrtc = !this.settings.webrtc;
-        this.anonalytics.aeSettings(`webrtc:${this.settings.webrtc}`);
-        if (!this.settings.webrtc) {
-          try {
-            this.stopWebRtc();
-          } catch (err) {
-            this.logger(`ERROR: Recommend restarting Stealthy. Problem encountered stopping WebRTC services.\n${err}\n`);
-          }
-        } else {
-          try {
-            this.startWebRtc();
-          } catch (err) {
-            this.logger(`ERROR: Recommend restarting Stealthy. Problem encountered starting WebRTC services.\n${err}\n`);
-          }
-        }
-      }
-    }
+    } // webrtc, heartbeat is ignored
 
     this.emit('me-update-settings', this.settings);
     this.writeSettings(this.settings);
   }
 
-  //
-  //  Connectivity
-  // ////////////////////////////////////////////////////////////////////////////
-  // ////////////////////////////////////////////////////////////////////////////
-  //
-  handleNewConnection(newConnectionUserId, aPeerObjType) {
-    this.myTimer.logEvent(`handleNewConnection ${newConnectionUserId}`);
-    this.logger(this.myTimer.getEvents());
-
-    this.logger(`New connection to ${newConnectionUserId}, ${aPeerObjType}!`);
-    this.anonalytics.aeWebRtcConnectionEstablished();
-
-    this.peerMgr.setPeerConnected(newConnectionUserId, aPeerObjType);
-
-    // TODO: we'll need to test this given the re-write due to encryptObj being a promise
-    const peerObj = this.peerMgr.getConnection(newConnectionUserId);
-    if (peerObj) {
-      const outgoingPublicKey = this.contactMgr.getPublicKey(newConnectionUserId);
-
-      // TODO: need to check connections read messages before sending these unsent.
-      //       If found, need to update our messge properties.
-      //
-      const unsentMessages = this.conversations.getUnsentMessages(newConnectionUserId);
-      const sendPromises = []
-
-      for (const message of unsentMessages) {
-        const sendPromise = utils.encryptObj(outgoingPublicKey, message, ENCRYPT_MESSAGES)
-                            .then(result => {
-                              const packet = ENCRYPT_MESSAGES ? result : JSON.stringify(result)
-                              message.sent = true
-                              peerObj.send(packet)
-                            })
-
-        sendPromises.push(sendPromise)
-      }
-
-      // The wait for promise completion on write conversations is to ensure the
-      // message.sent is registered in the persisted conversation
-      //   TODO: need to check assumption that message.sent updates the conversation
-      //         that is persisted.
-      Promise.all(sendPromises)
-      .then(() => {
-        this._writeConversations();
-      })
-    } else {
-      this.logger('Peer not connected in handleNewConnection.');
-    }
-
-    this.contactMgr.setStatus(newConnectionUserId, statusIndicators.available);
-    this.updateContactMgr();
-  }
-
-  handleCloseConnection(closeConnectionId, aPeerObjType) {
-    if (this.shuttingDown) {
-      this.logger('Skipping handleCloseConnection.');
-      return;
-    }
-
-    this.logger(`Closing connection to ${closeConnectionId}:`);
-    // TODO: what type?
-    this.peerMgr.removePeer(closeConnectionId, aPeerObjType);
-
-    // Remove the invite or response file to prevent future issues (i.e. Reading
-    // the invite again by accident or the response).
-    if (this.sdpManager) {
-      if (aPeerObjType === OFFER_TYPE) {
-        this.sdpManager.deleteSdpInvite(closeConnectionId);
-        this.logger(`Deleted SDP Invite for ${closeConnectionId}.`);
-      } else {
-        this.sdpManager.deleteSdpResponse(closeConnectionId);
-        this.logger(`Deleted SDP Response for ${closeConnectionId}.`);
-      }
-    }
-
-    // TODO: Look into if we still want this
-    // Remove from active invite list (invitation failed--permits retry).
-    if (aPeerObjType === OFFER_TYPE &&
-        this.invitations.includes(closeConnectionId)) {
-      const index = this.invitations.indexOf(closeConnectionId);
-      if (index !== -1) {
-        this.invitations.splice(index, 1);
-      }
-    }
-
-    // Remove from polling exclusion list (i.e. if we're closing a response
-    // peer obj, then start polling for invites again so we can issue a response.)
-    if (aPeerObjType === RESPONSE_TYPE) {
-      this.invitePolling.unexcludeUserId(closeConnectionId);
-    }
-
-    // Update the status indicators of the contacts array. (Must create
-    // a new object or set state call will not result in a render).
-    // TODO: refactor out status indicators into a dictionary to make
-    //       this more efficient.
-    if (!this.peerMgr.isUserConnected(closeConnectionId)) {
-      this.contactMgr.setStatus(closeConnectionId, statusIndicators.offline);
-      this.updateContactMgr();
-    }
-  }
-
   updateContactPubKeys() {
-    // Check for heartbeat files not yet collected and update if found ...
     for (const contact of this.contactMgr.getContacts()) {
       const contactIds = [];
       const fetchPromises = [];
@@ -1217,7 +823,6 @@ export class MessagingEngine extends EventEmitter {
             if (pk) {
               needsUpdate = true;
               this.contactMgr.setPublicKey(contactId, pk);
-              this.heartBeat.addContact(contactId, pk);
             }
           }
 
@@ -1230,166 +835,6 @@ export class MessagingEngine extends EventEmitter {
       .catch((err) => {
         // ignore ...
       });
-    }
-  }
-
-  _handleHeartBeatMonitor(theHeartBeats) {
-    const currTimeMs = Date.now();
-
-    for (const contact of this.contactMgr.getContacts()) {
-      const contactId = contact.id;
-
-      let timeStr = 'presence unknown.';
-      const timeSinceOnlineMs = undefined;
-      if ((contactId in theHeartBeats) && theHeartBeats[contactId]) {
-        const timeSinceOnlineMs = currTimeMs - theHeartBeats[contactId].time;
-        timeStr = ContactManager.getContactTimeStr(timeSinceOnlineMs);
-      }
-      this.contactMgr.setTime(contactId, timeStr);
-      this.contactMgr.setTimeMs(contactId, timeSinceOnlineMs);
-    }
-
-    this.updateContactMgr();
-    this.updateContactPubKeys();
-
-    // TODO: refactor autoconnect out of here.
-    //
-    if (!ENABLE_AUTOCONNECT || !this.settings.webrtc) {
-      return;
-    }
-    // Oh oh, what is this? Some Auto-connect hackery.
-    const MAX_CONTACTS_PER_ITERATION = 10;
-    this.log(LOG_AUTOCONNECT, '');
-    this.log(LOG_AUTOCONNECT, 'AutoConnect v0.1');
-    this.log(LOG_AUTOCONNECT, '...............................................................');
-    let index = 0;
-    const tooMuchTimeOffline = 3 * 60 * 1000;
-    for (const contact of this.contactMgr.getContacts()) {
-      const contactId = contact.id;
-      if (index >= MAX_CONTACTS_PER_ITERATION) {
-        break;
-      }
-
-      if (!(contactId in theHeartBeats) ||
-          (theHeartBeats[contactId] === undefined)) {
-        this.log(LOG_AUTOCONNECT, `Skipping ${contactId}, insufficient heartbeat data.`);
-        continue;
-      }
-
-      if (this.invitations.includes(contactId)) {
-        this.log(LOG_AUTOCONNECT, `Skipping ${contactId}, there is a pending invite for them.`);
-        continue;
-      }
-
-      if (this.peerMgr.isUserConnected(contactId)) {
-        this.log(LOG_AUTOCONNECT, `Skipping ${contactId}, they're connected.`);
-        continue;
-      }
-
-      const timeSinceOnline = currTimeMs - theHeartBeats[contactId].time;
-      if (timeSinceOnline > tooMuchTimeOffline) {
-        const timeStr = ContactManager.getContactTimeStr(timeSinceOnline);
-        this.log(LOG_AUTOCONNECT, `Skipping ${contactId}, they were ${timeStr}`);
-        continue;
-      }
-
-      this.myTimer.logEvent(`AutoConnect Invite ${contactId}`);
-      this._inviteUserToChat(contactId, contact.publicKey);
-      index++;
-    }
-  }
-
-  _inviteUserToChat(anOutgoingUserId, aPublicKey) {
-    // Establish a connection to the user if possible and not already done:
-    this.invitations.push(anOutgoingUserId);
-
-    // TODO:
-    //   1. Prevent a double click from clobbering/issuing two invites.
-    //
-    //
-    this.logger(`   Sending SDP invite to ${anOutgoingUserId}`);
-    const targetUserPublicKey = (ENCRYPT_SDP) ?
-      aPublicKey : undefined;
-    this.logger(`\n\n\nTARGET PUBLIC KEY ${targetUserPublicKey}, ENCRYPT_SDP=${ENCRYPT_SDP}`);
-
-    // Send an SDP Invitation and poll for a response.
-    const p = this.connectionManager.invite(anOutgoingUserId, targetUserPublicKey);
-
-    const privateKey = (ENCRYPT_SDP) ? this.privateKey : undefined;
-    const responsePolling = new ResponsePolling(
-      this.logger, this.sdpManager, anOutgoingUserId, privateKey, LOG_RESPONSEPOLLING);
-    // TODO: refactor to a separate handler (AC)
-    responsePolling.pollForSdpResponse()
-    .then((sdpResponse) => {
-      if (this.settings.webrtc) {
-        if (sdpResponse) {
-          this.logger(`   Completing connection to ${anOutgoingUserId}`);
-
-          p.signal(sdpResponse);
-          this.peerMgr.addOfferPeer(anOutgoingUserId, p);
-
-          // Remove from invite list (invitation is complete):
-          const index = this.invitations.indexOf(anOutgoingUserId);
-          if (index !== -1) {
-            this.invitations.splice(index, 1);
-          }
-        } else {
-          this.logger(`   SDP invite to ${anOutgoingUserId} was unsuccessful. Cancelling.`);
-          p.destroy();
-          // Don't thing we need to do more as the peer doesn't get added to Peer
-          // Manager unless we get a response.
-        }
-      } else {
-        // Peer manager was disabled--likely to stop WebRTC -- destroy our peer
-        // and move on.
-        this.logger(`   SDP invite to ${anOutgoingUserId} ignored. WebRTC disabled.`);
-        p.destroy();
-      }
-    });
-  }
-
-  _initAndLaunchSdpInvitePolling(userIds) {
-    this.myTimer.logEvent('Enter _initAndLaunchSdpInvitePolling')
-
-    const privateKey = (ENCRYPT_SDP) ? this.privateKey : undefined;
-    this.invitePolling = new InvitationPolling(
-      this.logger, this.sdpManager, userIds, privateKey, LOG_INVITEPOLLING);
-    this.invitePolling.pollForSdpInvitations();
-  }
-
-  _handleSdpInvite(userId, sdpInvite) {
-    this.myTimer.logEvent(`_handleSdpInvite ${userId}`);
-    const targetUserPublicKey = this.contactMgr.getPublicKey(userId);
-
-    if (targetUserPublicKey) {
-      this._initiateSdpResponse(userId, targetUserPublicKey, sdpInvite);
-    } else {
-      this._fetchPublicKey(userId)
-      .then((publicKey) => {
-        if (publicKey) {
-          this.logger(`Fetched publicKey for ${userId}.`);
-          this._initiateSdpResponse(userId, publicKey, sdpInvite);
-
-          this.contactMgr.setPublicKey(userId, publicKey);
-          this._writeContactList(this.contactMgr.getAllContacts());
-          this.updateContactMgr();
-        } else {
-          this.logger(`Unable to fetch publicKey for ${userId}. Cannot write response.`);
-        }
-      });
-    }
-  }
-
-  _initiateSdpResponse(aTargetUserId, aTargetUserPublicKey, anSdpInvite) {
-    this.myTimer.logEvent(`_initiateSdpResponse ${aTargetUserId}`);
-
-    const targetUserPublicKey = (ENCRYPT_SDP) ? aTargetUserPublicKey : undefined;
-
-    const peerObj = this.connectionManager.respond(
-      anSdpInvite, aTargetUserId, targetUserPublicKey);
-    if (peerObj) {
-      this.peerMgr.addResponsePeer(aTargetUserId, peerObj);
-      this.invitePolling.excludeUserId(aTargetUserId);
     }
   }
 
@@ -1449,15 +894,7 @@ export class MessagingEngine extends EventEmitter {
 
       const outgoingPublicKey = this.contactMgr.getPublicKey(outgoingUserId);
       if (outgoingPublicKey) {
-        if (this.peerMgr.isUserConnected(outgoingUserId)) {
-          this._sendOutgoingMessage(outgoingUserId, chatMsg, outgoingPublicKey);
-        } else {
-          this._sendOutgoingMessageOffline(chatMsg);
-
-          if ((!this.invitations.includes(outgoingUserId)) && this.settings.webrtc ) {
-            this._inviteUserToChat(outgoingUserId, outgoingPublicKey);
-          }
-        }
+        this._sendOutgoingMessageOffline(chatMsg);
       } else {
         this._fetchPublicKey(outgoingUserId)
         .then((publicKey) => {
@@ -1468,15 +905,7 @@ export class MessagingEngine extends EventEmitter {
 
             this.logger(`Fetched publicKey for ${outgoingUserId}.`);
 
-            if (this.peerMgr.isUserConnected(outgoingUserId)) {
-              this._sendOutgoingMessage(outgoingUserId, chatMsg, publicKey);
-            } else {
-              this._sendOutgoingMessageOffline(chatMsg);
-
-              if ((!this.invitations.includes(outgoingUserId)) && this.settings.webrtc ) {
-                this._inviteUserToChat(outgoingUserId, publicKey);
-              }
-            }
+            this._sendOutgoingMessageOffline(chatMsg);
           } else {
             this.logger(`Unable to fetch publicKey for ${outgoingUserId}. Cannot write response.`);
           }
@@ -1514,30 +943,14 @@ export class MessagingEngine extends EventEmitter {
     const outgoingPublicKey = this.contactMgr.getPublicKey(outgoingUserId);
 
     if (outgoingPublicKey) {
-      if (this.peerMgr.isUserConnected(outgoingUserId)) {
-        this._sendOutgoingMessage(outgoingUserId, chatMsg, outgoingPublicKey);
-      } else {
-        this._sendOutgoingMessageOffline(chatMsg);
-
-        if ((!this.invitations.includes(outgoingUserId)) && this.settings.webrtc ) {
-          this._inviteUserToChat(outgoingUserId, outgoingPublicKey);
-        }
-      }
+      this._sendOutgoingMessageOffline(chatMsg);
     } else {
       this._fetchPublicKey(outgoingUserId)
       .then((publicKey) => {
         if (publicKey) {
           this.logger(`Fetched publicKey for ${outgoingUserId}.`);
 
-          if (this.peerMgr.isUserConnected(outgoingUserId)) {
-            this._sendOutgoingMessage(outgoingUserId, chatMsg, publicKey);
-          } else {
-            this._sendOutgoingMessageOffline(chatMsg);
-
-            if ((!this.invitations.includes(outgoingUserId)) && this.settings.webrtc ) {
-              this._inviteUserToChat(outgoingUserId, publicKey);
-            }
-          }
+          this._sendOutgoingMessageOffline(chatMsg);
 
           this.contactMgr.setPublicKey(outgoingUserId, publicKey);
           this._writeContactList(this.contactMgr.getAllContacts());
@@ -1558,73 +971,6 @@ export class MessagingEngine extends EventEmitter {
 
     const newMessages = this._getMessageArray(outgoingUserId);
     this.updateMessages(newMessages);
-  }
-
-  // Might need to rethink this as it can probably get called multiple times
-  // concurrently (TODO: AC - think about queuing new packets for processing)
-  handleIncomingMessage(incomingUserId, packet) {
-    utils.decryptObj(this.privateKey, packet, ENCRYPT_MESSAGES)
-    .then(result => {
-      const chatMsg = ENCRYPT_MESSAGES ? result : JSON.parse(result)
-
-      if (chatMsg && (chatMsg.type === MESSAGE_TYPE.VIDEO_SDP)) {
-        this.logger(`Received VIDEO_SDP message from ${chatMsg.from}.`);
-        // TODO: what if we're already video chatting ...
-        if (chatMsg.content.type === 'offer') {
-          // Pops a dialog asking user if yes/no on video invite.
-          //   - If yes, calls handleVideoOpen, which requires that chatMsg is
-          //     assigned to a member (shitty way to pass it).
-          //   - If no, calls handleVideoInviteClose, which should unassign the
-          //     member, and ideally TODO, send a response to the invitee that
-          //     there call was rejected.
-          this.videoInviteChatMsg = chatMsg;
-          this.emit('me-request-video');
-        } else {
-          this.handleVideoResponse(chatMsg);
-        }
-        return;
-      } else if (chatMsg && (chatMsg.type === MESSAGE_TYPE.SCREEN_SHARE_SDP)) {
-        this.logger(`Received SCREEN_SHARE_SDP message from ${chatMsg.from}.`);
-        // TODO: what if we're already video chatting ...
-        if (chatMsg.content.type === 'offer') {
-          // Pops a dialog asking user if yes/no on video invite.
-          //   - If yes, calls handleVideoOpen, which requires that chatMsg is
-          //     assigned to a member (shitty way to pass it).
-          //   - If no, calls handleVideoInviteClose, which should unassign the
-          //     member, and ideally TODO, send a response to the invitee that
-          //     there call was rejected.
-          this.videoInviteChatMsg = chatMsg;
-          // this.emit('me-request-video');
-          this.handleScreenShareInviteOpen();
-        } else {
-          // this.handleVideoResponse(chatMsg);
-          this.handleScreenShareResponse(chatMsg);
-        }
-        return;
-      } else if (chatMsg && (chatMsg.type === MESSAGE_TYPE.RECEIPT)) {
-        this.logger(`Received RECEIPT message from ${chatMsg.from}.`);
-        this.handleReceipt(chatMsg);
-        return;
-      }
-
-      // TODO TODO TODO: Fix this workaround--suspect it'r reflected messaging bug
-      //                 from the duplex peer manager.
-      if (chatMsg && WORKAROUND__DISABLE_REFLECTED_PACKET) {
-        const isSelf = (chatMsg.to === chatMsg.from);
-        if (!isSelf) {
-          if (chatMsg.from === this.userId) {
-            // Discard handling this message for now.
-            return;
-          }
-        }
-      }
-
-      const messages = [chatMsg];
-      this.addIncomingMessage(messages);
-      this.updateContactOrderAndStatus(messages);
-      this.sendMessageReceipts(messages);
-
-    })
   }
 
   // SO MUCH TODO TODO TODO
@@ -1695,11 +1041,7 @@ export class MessagingEngine extends EventEmitter {
           continue;
         }
 
-        if (this.peerMgr.isUserConnected(destId)) {
-          this._sendOutgoingMessage(destId, receiptMsg, destPublicKey);
-        } else {
-          this._sendOutgoingMessageOffline(receiptMsg);
-        }
+        this._sendOutgoingMessageOffline(receiptMsg);
       }
     }
   }
@@ -1952,264 +1294,11 @@ export class MessagingEngine extends EventEmitter {
     this.closeContactSearch();
   }
 
-  _sendOutgoingMessage(anOutgoingUserId, aChatMsg, aPublicKey) {
-    aChatMsg.sent = true;
-    aChatMsg.msgState = MESSAGE_STATE.SENT_REALTIME;
-
-    utils.encryptObj(aPublicKey, aChatMsg, ENCRYPT_MESSAGES)
-    .then(result => {
-      let packet = ENCRYPT_MESSAGES ? result : JSON.stringify(result)
-      this.peerMgr.getConnection(anOutgoingUserId).send(packet);
-    })
-
-    if (this.settings.discovery) {
-      if (process.env.NODE_ENV === 'production') {
-        this.writeContactDiscovery(anOutgoingUserId, aPublicKey);
-      }
-      else {
-        if (stealthyTestIds.indexOf(this.userId) > -1) {
-          this.writeContactDiscovery(anOutgoingUserId, aPublicKey, true);
-        }
-      }
-    }
-  }
-
   _sendOutgoingMessageOffline(aChatMsg) {
     const outgoingUserId = aChatMsg.to;
     aChatMsg.msgState = MESSAGE_STATE.SENDING;
     const contact = this.contactMgr.getContact(outgoingUserId);
     this.offlineMsgSvc.sendMessage(contact, aChatMsg);
-  }
-
-
-  //
-  //  Audio / Video P2P
-  // ////////////////////////////////////////////////////////////////////////////
-  // ////////////////////////////////////////////////////////////////////////////
-  //
-  createAVPeer(stream, aMsgType = MESSAGE_TYPE.VIDEO_SDP) {
-    const simplePeerOpts =
-      getSimplePeerOpts(this.avPeerMgr.isInitiator(), { stream });
-    const peerObj = SimplePeer(simplePeerOpts);
-    this.avPeerMgr.setPeerObj(peerObj);
-
-    peerObj.on('signal', (sdpData) => {
-      this.logger('Video Peer Signal callback.');
-      // TODO: this could probably be shared with handleOutgoingMessage in some ways.
-      const outgoingId = this.avPeerMgr.getTargetId();
-      const outgoingPublicKey =
-        this.contactMgr.getPublicKey(outgoingId);
-
-      const chatMsg = new ChatMessage();
-      chatMsg.init(
-        this.avPeerMgr.getUserId(),
-         outgoingId,
-        this._getNewMessageId(),
-        sdpData,
-        Date.now(),
-        aMsgType);
-      chatMsg.sent = true;
-
-      utils.encryptObj(outgoingPublicKey, chatMsg, ENCRYPT_MESSAGES)
-      .then(result => {
-        let packet = ENCRYPT_MESSAGES ? result : JSON.stringify(result)
-
-        this.logger(`Sending video invite request chatMsg to ${outgoingId}.`);
-        this.peerMgr.getConnection(outgoingId).send(packet);
-      })
-    });
-
-    if (!(this.avPeerMgr.isSelf() && this.avPeerMgr.isInitiator())) {
-      peerObj.on('stream', (stream) => {
-        const video = document.querySelector('video');
-        try {
-          video.srcObject = stream;
-        } catch (error) {
-          video.src = window.URL.createObjectURL(stream);
-        }
-        video.play();
-      });
-    }
-
-    if (!this.avPeerMgr.isInitiator()) {
-      peerObj.signal(this.avPeerMgr.getSdpInvite());
-    }
-
-    peerObj.on('close', () => {
-      this.logger('Closing Video / Audio p2p session.');
-      this.handleVideoClose();
-    });
-
-    peerObj.on('error', (err) => {
-      this.logger(`ERROR: Video / Audio p2p session. ${err}.`);
-      this.anonalytics.aeAVWebRtcError(`${err}`)
-      this.handleVideoClose();
-    });
-  }
-
-  _handleStreamShare(aStreamType) {
-    utils.throwIfUndef('aStreamType', aStreamType);
-
-    if (this.avPeerMgr) {
-      this.logger('INFO(_handleStreamShare): Stream request ignored, session in progress.');
-      return;
-    }
-
-    const targetId = this.contactMgr.getActiveContact().id;
-    if (!this.peerMgr.isUserConnected(targetId)) {
-      this.logger(`INFO(_handleStreamShare): Stream request ignored. Realtime connection to ${targetId} required.`);
-      return;
-    }
-
-    if (!this.videoInviteChatMsg) {
-      // TODO: need to error here if video is already open (can't be initiator and
-      //       open video twice).
-
-      // This happens if you are the initiator:
-      this.avPeerMgr = new AVPeerMgr(this.userId, targetId, true);
-      this._openMedia(aStreamType);
-    } else {
-      // This happens if you are the recipient
-      this.handleVideoInvite(this.videoInviteChatMsg);
-      this.videoInviteChatMsg = undefined;  // Clear for next time.
-    }
-  }
-
-  handleShareDesktopOpen() {
-    this._handleStreamShare(SHARED_STREAM_TYPES.DESKTOP);
-  }
-
-  handleVideoOpen() {
-    this.anonalytics.aeVideoChatButton();
-    this._handleStreamShare(SHARED_STREAM_TYPES.VIDEO);
-  }
-
-  handleShareDesktopClose() {
-    if (this.avPeerMgr) {
-      this.avPeerMgr.close();
-      this.avPeerMgr = undefined;
-    }
-    this.videoInviteChatMsg = undefined;  // Clear for next time.
-  }
-
-  handleVideoInvite(aChatMsg) {
-    if (this.avPeerMgr && this.avPeerMgr.isSelf()) {
-      this.avPeerMgr.setInitiator(false);
-      this.avPeerMgr.setSdpInvite(aChatMsg.content);
-      this.createAVPeer(undefined);
-    } else if (this.avPeerMgr && this.avPeerMgr.isInitiator()) {
-      this.logger('INFO(handleVideoInvite): Video chat request ignored while video chat session is already being negotiated / in progress.');
-    } else {
-      this.avPeerMgr = new AVPeerMgr(this.userId, aChatMsg.from, false);
-      this.avPeerMgr.setSdpInvite(aChatMsg.content);
-      this._openMedia(SHARED_STREAM_TYPES.VIDEO);
-    }
-  }
-
-  handleVideoResponse(aChatMsg) {
-    this.avPeerMgr.setSdpResponse(aChatMsg.content);
-    this.avPeerMgr.getPeerObjInitiator().signal(this.avPeerMgr.getSdpResponse());
-  }
-
-  handleVideoClose() {
-    if (this.avPeerMgr) {
-      this.avPeerMgr.close();
-      this.avPeerMgr = undefined;
-    }
-    this.videoInviteChatMsg = undefined;  // Clear for next time.
-  }
-
-  _startStreaming(theConstraints, aMsgType) {
-    navigator.mediaDevices.getUserMedia(theConstraints)
-    .then((stream) => {
-      // Code to debug local (comment out code below it):
-      //
-      // this.emit('me-show-video');
-      // const video = document.querySelector('video');
-      // try {
-      //   video.srcObject = stream;
-      // } catch (error) {
-      //   video.src = window.URL.createObjectURL(stream);
-      // }
-      // video.play();
-
-      this.avPeerMgr.setStream(stream);
-      this.createAVPeer(stream, aMsgType);
-      this.emit('me-show-video');
-    })
-    .catch((error) => {
-      this.handleVideoClose();
-      this.logger(`ERROR: An error occured accessing media: ${error}`);
-    });
-  }
-
-  _openMedia(aStreamType) {
-    switch (aStreamType) {
-
-      case SHARED_STREAM_TYPES.AUDIO:
-        // TODO:
-        break;
-
-      case SHARED_STREAM_TYPES.VIDEO:
-        const constraints = {
-          video: true,
-          audio: true
-        }
-        this._startStreaming(constraints, MESSAGE_TYPE.VIDEO_SDP);
-        break;
-
-      case SHARED_STREAM_TYPES.DESKTOP:
-        // let res = requestScreenShare()
-
-        // getChromeExtensionStatus((status) => {
-        //   this.logger(`INFO: Chrome extension status = ${status}`)
-        //   switch (status) {
-        //     case 'not-chrome':
-        //     case 'installed-enabled':
-        //       // Do nothing, run getScreenConstraints.
-        //       break;
-        //     case 'installed-disabled':
-        //       let showMeThePlugin = confirm(
-        //         "The Stealthy Screen Chrome Plugin must be enabled to share your desktop. " +
-        //         "Would you like to do that now?");
-
-        //       if (showMeThePlugin) {
-        //         window.open('//chrome://extensions/?id=ololhidlkciconhglnndlojapdiklgha', '_blank');
-        //       }
-        //       this.handleVideoClose();
-        //       return;
-        //     case 'not-installed':
-        //       let installThePlugin = confirm(
-        //         "The Stealthy Screen Chrome Plugin must be installed to share your desktop. " +
-        //         "Would you like to do that now?");
-
-        //       if (installThePlugin) {
-        //         window.open('https://chrome.google.com/webstore/detail/stealthy-screen/ololhidlkciconhglnndlojapdiklgha', '_blank');
-        //       }
-        //       this.handleVideoClose();
-        //       return;
-        //     default:
-
-        //   }
-
-        //   getScreenConstraints((error, screen_constraints) => {
-        //     if (error) {
-        //       this.handleVideoClose();
-        //       return alert(error);
-        //     }
-        //     const constraints = {
-        //       video: screen_constraints,
-        //       // audio: true
-        //     }
-        //     // TODO: make this use screen share
-        //     // this._startStreaming(constraints, MESSAGE_TYPE.SCREEN_SHARE_SDP);
-        //     this._startStreaming(constraints, MESSAGE_TYPE.VIDEO_SDP);
-        //   });
-        // });
-        break;
-      default:
-        throw 'ERROR: unrecognized stream type for sharing.'
-    }
   }
 
 
@@ -2313,9 +1402,5 @@ export class MessagingEngine extends EventEmitter {
 
   getAnonalytics() {
     return this.anonalytics;
-  }
-
-  clearVideoInviteChatMsg() {
-    this.videoInviteChatMsg = undefined;
   }
 }
