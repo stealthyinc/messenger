@@ -22,7 +22,6 @@ const { Anonalytics } = require('../Analytics.js');
 const FirebaseIO = require('./filesystem/firebaseIO.js');
 const GaiaIO = require('./filesystem/gaiaIO.js');
 const { IndexedIO } = require('./filesystem/indexedIO.js');
-const { HeartBeat } = require('./network/heartBeat.js');
 
 const constants = require('./misc/constants.js');
 const statusIndicators = constants.statusIndicators;
@@ -38,8 +37,6 @@ const RELAY_IDS = [
   // 'relay.id',
   'relay.stealthy.id'
 ];
-
-const ENABLE_HEARTBEAT = false;
 
 // Dev. constants not set in ctor:
 const ENCRYPT_INDEXED_IO = true;
@@ -116,7 +113,6 @@ export class MessagingEngine extends EventEmitter {
     this.conversations = undefined;
     this.offlineMsgSvc = undefined;
     this.io = undefined;
-    this.heartBeat = undefined;
     this.shuttingDown = false;
     this.anonalytics = undefined;
   }
@@ -197,12 +193,6 @@ export class MessagingEngine extends EventEmitter {
   componentWillUnmountWork() {
     this.logger('componentWillUnmountWork:');
     this.shuttingDown = true;
-
-    if (this.heartBeat) {
-      this.heartBeat.stopBeat();
-      this.heartBeat.stopMonitor();
-    }
-    this.heartBeat = undefined;
 
     this.offlineMsgSvc.stopSendService();
     this.offlineMsgSvc.stopRecvService();
@@ -327,26 +317,6 @@ export class MessagingEngine extends EventEmitter {
       }
     });
 
-
-    const heartbeatIoDriver = (ENABLE_GAIA) ?
-      new GaiaIO(this.logger, LOG_GAIAIO) :
-      new FirebaseIO(this.logger, firebase, STEALTHY_PAGE, LOG_GAIAIO);
-    this.heartBeat = new HeartBeat(
-      this.logger,
-      heartbeatIoDriver,
-      this.userId,
-      this.contactMgr.getContacts());
-
-    // Explicit scoping required to get correct this context in
-    // _handleHeartBeatMonitor.
-    this.heartBeat.on('monitor', (theHeartBeats) => {
-      this._handleHeartBeatMonitor(theHeartBeats);
-    });
-    if (ENABLE_HEARTBEAT) {
-      this.heartBeat.startBeat();
-    }
-
-
     // Lots of possiblities here (i.e. lazy load etc.)
     this.conversations = new ConversationManager(
       this.logger, this.userId, this.idxIo);
@@ -450,11 +420,6 @@ export class MessagingEngine extends EventEmitter {
         utils.decryptObj(this.privateKey, settingsData, ENCRYPT_SETTINGS)
         .then(settingsData => {
           this.settings = settingsData
-          if (utils.isMobile) {
-            // ignore WebRTC on mobile
-            this.settings.webrtc = false;
-          }
-
           this.initSettings();
           this._fetchDataAndCompleteInit();
         })
@@ -463,10 +428,10 @@ export class MessagingEngine extends EventEmitter {
         // centralized discovery on by default
         this.logger('No data read from settings file. Initializing with default settings.');
         this.settings = {
-          heartbeat: true,
           notifications: true,
           discovery: true,
-          webrtc: !this.isMobile,
+          heartbeat: false,
+          webrtc: false,
         }
         if (!this.plugin && !this.isMobile) {
           this.addProfile('relay.stealthy');
@@ -616,11 +581,6 @@ export class MessagingEngine extends EventEmitter {
     this.offlineMsgSvc.pauseRecvService();
     this.offlineMsgSvc.stopRecvService();
 
-    if (this.heartBeat) {
-      this.heartBeat.stopBeat();
-      this.heartBeat.stopMonitor();
-    }
-
     const promises = []
     promises.push(
       this.offlineMsgSvc.sendMessagesToStorage()
@@ -651,7 +611,6 @@ export class MessagingEngine extends EventEmitter {
     Promise.all(promises)
     .then(() => {
       this.offlineMsgSvc = undefined
-      this.heartbeat = undefined
 
       this.logger('INFO:(engine.js::handleShutDownRequest): engine shutdown successful.')
       this.emit('me-shutdown-complete', true)
@@ -671,16 +630,6 @@ export class MessagingEngine extends EventEmitter {
   //
   handleMobileBackgroundUpdate() {
     console.log('MessagingEngine::handleMobileBackgroundUpdate:');
-
-    if (this.heartBeat) {
-      this.heartBeat.writeHeartBeatFile();
-
-      // TODO: Think about including this. If this method is getting called,
-      //       we're in the background anyway so what's the point of getting
-      //       the heartBeat files?
-      //
-      // this.heartBeat.readHeartBeatFiles();
-    }
 
     // TODO: - should the service only start on background update and stop when background update done?
     //       - can the service fail if shut down inappropriately (i.e. while waiting on request)?
@@ -779,11 +728,6 @@ export class MessagingEngine extends EventEmitter {
 
       this._writeContactList(this.contactMgr.getContacts());
 
-
-      // TODO(AC): probably change heartBeat to accept a contactMgr
-      this.heartBeat.addContact(id, publicKey);
-
-
       this.conversations.createConversation(id);
       this._writeConversations();
 
@@ -813,8 +757,6 @@ export class MessagingEngine extends EventEmitter {
 
     this.offlineMsgSvc.removeMessages(contact);
 
-    this.heartBeat.deleteContact(contact.id);
-
     this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
 
     const activeUser = this.contactMgr.getActiveContact();
@@ -839,9 +781,6 @@ export class MessagingEngine extends EventEmitter {
     if (name === 'console') {
       this.settings.console = !this.settings.console;
       this.anonalytics.aeSettings(`console:${this.settings.console}`);
-    } else if (name === 'heartbeat') {
-      this.settings.heartbeat = !this.settings.heartbeat;
-      // this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`);
     } else if (name === 'notifications') {
       this.settings.notifications = !this.settings.notifications;
       // this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`);
@@ -857,33 +796,13 @@ export class MessagingEngine extends EventEmitter {
           this.readContactDiscovery(this.settings.discovery);
         }
       }
-    } else if (name === 'webrtc') {
-      // if iOS, ignore user setting this for now
-      if (!utils.is_iOS()) {
-        this.settings.webrtc = !this.settings.webrtc;
-        this.anonalytics.aeSettings(`webrtc:${this.settings.webrtc}`);
-        if (!this.settings.webrtc) {
-          try {
-            this.stopWebRtc();
-          } catch (err) {
-            this.logger(`ERROR: Recommend restarting Stealthy. Problem encountered stopping WebRTC services.\n${err}\n`);
-          }
-        } else {
-          try {
-            this.startWebRtc();
-          } catch (err) {
-            this.logger(`ERROR: Recommend restarting Stealthy. Problem encountered starting WebRTC services.\n${err}\n`);
-          }
-        }
-      }
-    }
+    } // webrtc, heartbeat is ignored
 
     this.emit('me-update-settings', this.settings);
     this.writeSettings(this.settings);
   }
 
   updateContactPubKeys() {
-    // Check for heartbeat files not yet collected and update if found ...
     for (const contact of this.contactMgr.getContacts()) {
       const contactIds = [];
       const fetchPromises = [];
@@ -904,7 +823,6 @@ export class MessagingEngine extends EventEmitter {
             if (pk) {
               needsUpdate = true;
               this.contactMgr.setPublicKey(contactId, pk);
-              this.heartBeat.addContact(contactId, pk);
             }
           }
 
@@ -918,26 +836,6 @@ export class MessagingEngine extends EventEmitter {
         // ignore ...
       });
     }
-  }
-
-  _handleHeartBeatMonitor(theHeartBeats) {
-    const currTimeMs = Date.now();
-
-    for (const contact of this.contactMgr.getContacts()) {
-      const contactId = contact.id;
-
-      let timeStr = 'presence unknown.';
-      const timeSinceOnlineMs = undefined;
-      if ((contactId in theHeartBeats) && theHeartBeats[contactId]) {
-        const timeSinceOnlineMs = currTimeMs - theHeartBeats[contactId].time;
-        timeStr = ContactManager.getContactTimeStr(timeSinceOnlineMs);
-      }
-      this.contactMgr.setTime(contactId, timeStr);
-      this.contactMgr.setTimeMs(contactId, timeSinceOnlineMs);
-    }
-
-    this.updateContactMgr();
-    this.updateContactPubKeys();
   }
 
   //
