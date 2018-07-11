@@ -8,10 +8,10 @@ import SectionHeader from './contacts/SectionHeader';
 import { SearchBar, Text } from 'react-native-elements'
 import { Button, Badge, Container, Header, Content, List, ListItem, Left, Body, Right, Item, Icon, Input, Thumbnail, Title } from 'native-base';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import firebase from 'react-native-firebase';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 import defaultProfile from '../Images/defaultProfile.png'
+const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
 
 const styles = StyleSheet.create({
   container: {
@@ -51,9 +51,7 @@ class ConversationScreen extends React.Component {
   async componentWillMount() {
     const { userData, token, publicKey } = this.props
     let path = `/global/${process.env.NODE_ENV}/${publicKey}/notifications/`
-    firebase.database().ref(path).set({
-      token,
-    })
+    firebaseInstance.setFirebaseData(path, {token})
     this.props.navigation.setParams({ navigation: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
   }
   componentWillReceiveProps(nextProps) {

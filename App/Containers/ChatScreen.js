@@ -8,9 +8,9 @@ import styles from './Styles/ChatStyle'
 import {GiftedChat, Actions, Bubble, SystemMessage} from 'react-native-gifted-chat';
 import CustomActions from './chat/CustomActions';
 import CustomView from './chat/CustomView';
-import firebase from 'react-native-firebase';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
+const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 const utils = require('./../Engine/misc/utils.js');
 
 const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js');
@@ -67,7 +67,7 @@ class ChatScreen extends Component {
     }
     const { publicKey } = activeContact
     let path = `/global/${process.env.NODE_ENV}/${publicKey}/notifications/`
-    firebase.database().ref(`${path}/token`).once('value')
+    firebaseInstance.getFirebaseRef(`${path}/token`).once('value')
     .then((snapshot) => {
       if (snapshot.val()) {
         this.state.token = snapshot.val()

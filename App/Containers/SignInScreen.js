@@ -18,6 +18,7 @@ const { MessagingEngine } = require('../Engine/engine.js');
 
 const common = require('./../common.js');
 const utils = require('./../Engine/misc/utils.js');
+const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
 
 // import FAQ from '../Components/FAQ'
 
@@ -149,7 +150,7 @@ class SignInScreen extends React.Component {
               this.userData = userData;
 
               AsyncStorage.setItem('userData', JSON.stringify(this.userData));
-              const ref = MyFirebase.getFirebaseRef(common.getSessionRef(publicKey));
+              const ref = firebaseInstance.getFirebaseRef(common.getSessionRef(publicKey));
               await ref.once('value')
               .then((snapshot) => {
                 if (!snapshot.exists() || snapshot.val() === 'none') {

@@ -6,6 +6,8 @@ import { Button } from 'react-native-elements'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
+const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
+
 const common = require('./../common.js');
 
 class BlockScreen extends Component {
@@ -13,7 +15,7 @@ class BlockScreen extends Component {
     const {BlockstackNativeModule} = NativeModules;
     const { publicKey } = this.props
     if (!common.DEV_TESTING) {
-      MyFirebase.setFirebaseData(common.getSessionRef(publicKey), common.NO_SESSION)
+      firebaseInstance.setFirebaseData(common.getSessionRef(publicKey), common.NO_SESSION)
     }
     this.props.clearUserData(publicKey);
     await AsyncStorage.clear();
@@ -24,7 +26,7 @@ class BlockScreen extends Component {
   _unlockEngine = async () => {
     const { publicKey } = this.props
     if (publicKey) {
-      MyFirebase.setFirebaseData(common.getSessionRef(publicKey), common.getSessionId())
+      firebaseInstance.setFirebaseData(common.getSessionRef(publicKey), common.getSessionId())
       const userData = JSON.parse(await AsyncStorage.getItem('userData'));
       this.setupVars(userData)
     } else {
