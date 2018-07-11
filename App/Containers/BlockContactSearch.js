@@ -32,6 +32,8 @@ class BlockContactSearch extends Component {
       showLoading: false,
       searchInit: false
     }
+    this.numContacts = (props.contactMgr) ?
+      (props.contactMgr.getAllContacts().length) : undefined;
   }
   componentDidMount() {
     this.search.focus()
@@ -40,11 +42,22 @@ class BlockContactSearch extends Component {
   componentWillReceiveProps(nextProps) {
     const { contactAdded } = nextProps
     const { searchInit } = this.state
-    if (contactAdded && searchInit) {
-      this.props.navigation.goBack()
+
+    if (searchInit &&
+        this.numContacts &&
+        nextProps.contactMgr &&
+        nextProps.contactMgr.getAllContacts() > this.numContacts) {
+      this.numContacts = nextProps.contactMgr.getAllContacts().length;
+      this.props.navigation.goBack();
       this.props.navigation.navigate('ChatRoom')
       this.props.setContactAdded(false)
     }
+
+    // if (contactAdded && searchInit) {
+    //   this.props.navigation.goBack()
+    //   this.props.navigation.navigate('ChatRoom')
+    //   this.props.setContactAdded(false)
+    // }
   }
   parseContact(item) {
     let userImage = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
