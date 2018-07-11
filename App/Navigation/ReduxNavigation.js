@@ -9,7 +9,7 @@ import BackgroundFetch from "react-native-background-fetch";
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 const common = require('./../common.js');
 const utils = require('./../Engine/misc/utils.js')
-const { getFirebaseInstance } = require('../Engine/Firebase.js');
+const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
 
 class ReduxNavigation extends React.Component {
   constructor(props) {
@@ -19,7 +19,6 @@ class ReduxNavigation extends React.Component {
     }
     this.ref = undefined
     this.shutDownSignOut = false;
-    this.firebaseInstance = getFirebaseInstance()
   }
   componentWillMount () {
     if (!utils.is_iOS()) {
@@ -71,7 +70,7 @@ class ReduxNavigation extends React.Component {
       this._shutdownRequest(publicKey)
     } else if (publicKey && !this.ref) {
       const sessionRef = common.getRootRef(publicKey)
-      this.ref = this.firebaseInstance.getFirebaseRef(sessionRef);
+      this.ref = firebaseInstance.getFirebaseRef(sessionRef);
       this.ref.on('child_changed', (childSnapshot, prevChildKey, publicKey) => {
         this.shutDownSignOut = false
 

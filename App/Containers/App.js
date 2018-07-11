@@ -6,7 +6,8 @@ import RootContainer from './RootContainer'
 import createStore from '../Redux'
 import { AppState, AsyncStorage, PushNotificationIOS } from 'react-native'
 
-const { getFirebaseInstance } = require('../Engine/Firebase.js');
+const { initFirebaseInstance } = require('../Engine/firebaseWrapper.js')
+
 import EngineActions from '../Redux/EngineRedux'
 
 // create our store
@@ -27,16 +28,18 @@ class App extends Component {
   async componentWillMount () {
     // When key is wrong and mac error happens
     // await AsyncStorage.clear()
-    this.firebaseInstance = getFirebaseInstance()
-    this.firebaseInstance.setFirebasePermissions()
+
+    firebaseInstance.setFirebasePermissions()
+    // this.firebaseInstance = getFirebaseInstance()
+    // this.firebaseInstance.setFirebasePermissions()
   }
   async componentDidMount() {
     AppState.addEventListener('change', this._handleAppStateChange);
-    this.firebaseInstance.setFirebaseNotifications(store)
+    firebaseInstance.setFirebaseNotifications(store)
   }
   componentWillUnmount() {
     AppState.removeEventListener('change', this._handleAppStateChange);
-    this.firebaseInstance.cleanListners()
+    firebaseInstance.cleanListners()
   }
   _handleAppStateChange = (nextAppState) => {
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {

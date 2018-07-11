@@ -2,16 +2,7 @@ import firebase from 'react-native-firebase';
 import type { Notification, NotificationOpen } from 'react-native-firebase';
 import { AsyncStorage, PushNotificationIOS } from 'react-native'
 
-var firebaseInstance;
-
-function getFirebaseInstance() {
-  if (!firebaseInstance) {
-    firebaseInstance = new Firebase()
-  }
-  return firebaseInstance
-}
-
-class Firebase {
+class FirebaseWrapper {
   constructor() {
     if (!firebase.auth().currentUser) {
       firebase.auth().signInAnonymouslyAndRetrieveData()
@@ -110,4 +101,6 @@ class Firebase {
   }
 }
 
-module.exports = { getFirebaseInstance };
+// Singleton global of our firebase wrapper. Must appear after the class definition above.
+//
+export var firebaseInstance = new FirebaseWrapper()

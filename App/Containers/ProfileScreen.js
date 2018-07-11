@@ -8,7 +8,7 @@ import { Toast } from 'native-base';
 
 const common = require('./../common.js');
 
-const { firebaseInstance } = require('../Engine/Firebase.js');
+const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
 
 import defaultProfile from '../Images/defaultProfile.png'
 
