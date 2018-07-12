@@ -371,6 +371,9 @@ export class MessagingEngine extends EventEmitter {
           this.initSettings();
           this._fetchDataAndCompleteInit();
         })
+        .catch(err => {
+          console.log(`ERROR reading settings.json: ${err}`)
+        })
       } else {
         // THIS HAPPENS FIRST TIME ONLY
         // centralized discovery on by default
