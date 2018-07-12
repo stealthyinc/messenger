@@ -5,7 +5,7 @@ export const NO_SESSION = 'none'
 export const DEV_TESTING = false
 
 module.exports.getSessionRef = function(aPublicKey) {
-  return `${module.exports.getRootRef(aPublicKey)}/session`
+  return `${module.exports.getRootRef(aPublicKey)}session`
 };
 
 module.exports.getRootRef = function(aPublicKey) {

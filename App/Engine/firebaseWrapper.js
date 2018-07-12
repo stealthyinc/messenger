@@ -44,6 +44,10 @@ class FirebaseWrapper {
     const enabled = await firebase.messaging().hasPermission();
     if (enabled) {
       // user has permissions
+      firebase.messaging().getToken().then(token => {
+        AsyncStorage.setItem('token', token);
+        // console.log("token", token)
+      });
       this.onTokenRefreshListener = firebase.messaging().onTokenRefresh(fcmToken => {
         // Process your token as required
         firebase.messaging().getToken().then(token => {

@@ -6,9 +6,13 @@ import RootContainer from './RootContainer'
 import createStore from '../Redux'
 import { AppState, AsyncStorage, PushNotificationIOS } from 'react-native'
 
-const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
-
 import EngineActions from '../Redux/EngineRedux'
+import Amplify, { Analytics } from 'aws-amplify';
+import aws_exports from '../../aws-exports';
+
+Amplify.configure(aws_exports);
+
+const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 
 // create our store
 const store = createStore()

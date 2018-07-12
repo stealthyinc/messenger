@@ -4,5 +4,5 @@ features:
     components:
       analytics: !com.amazonaws.mobilehub.v0.PinpointAnalytics {}
   sign-in: !com.amazonaws.mobilehub.v0.SignIn {}
-name: stealthyMobile-2018-07-05-20-55-59
+name: stealthyMobileTest
 region: us-west-2

@@ -4,13 +4,12 @@ const MAX_QUEUE = 100;
 class Anonalytics {
   constructor(aUserId = undefined) {
     this.userId = aUserId;
-    Analytics.enable();
-    // if (process.env.NODE_ENV === 'production') {
-    //   Analytics.enable();
-    // }
-    // else {
-    //   Analytics.disable();
-    // }
+    if (process.env.NODE_ENV === 'production') {
+      Analytics.enable();
+    }
+    else {
+      Analytics.disable();
+    }
   }
 
   // Homepage Events:
@@ -132,7 +131,6 @@ class Anonalytics {
 
   _storeEvent(anEventName, aString = undefined) {
     if (anEventName && this.userId) {
-      Analytics.record('FIRST-EVENT-NAME')
       const eventTimeMs = Date.now();
       const AWS_LIMIT = 1000;
       const d = new Date();

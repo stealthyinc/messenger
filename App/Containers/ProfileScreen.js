@@ -120,7 +120,7 @@ class ProfileScreen extends React.Component {
                 })
                 this.props.updateUserSettings('notifications')}
               } />
-            <Icon
+            {/*<Icon
               reverse
               name='heartbeat'
               type='font-awesome'
@@ -143,7 +143,7 @@ class ProfileScreen extends React.Component {
                   duration: 1500
                 })
                 this.props.updateUserSettings('webrtc')}
-              } />
+              } />*/}
           </View>
           <Button
             onPress={this._signOutAsync}
