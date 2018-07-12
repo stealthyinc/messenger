@@ -5,10 +5,7 @@ import firebase from 'react-native-firebase';
 const EventEmitter = require('EventEmitter');
 import EngineActions from '../Redux/EngineRedux'
 
-import {
-  NativeModules
-} from 'react-native';
-
+import { NativeModules } from 'react-native';
 
 const { MESSAGE_TYPE,
         MESSAGE_STATE,
@@ -33,32 +30,28 @@ const common = require('./../common.js');
 
 import chatIcon from './images/blue256.png';
 
-const RELAY_IDS = [
-  // 'relay.id',
-  'relay.stealthy.id'
-];
-
-// Dev. constants not set in ctor:
+// TODO: refactor to relay.js
+const RELAY_IDS = ['relay.stealthy.id'];
+//
 const ENCRYPT_INDEXED_IO = true;
-
+//
 const ENABLE_RECEIPTS = true;
 const ENABLE_RELAY = true;
-
+let ENABLE_GAIA = true;
+let ENCRYPT_MESSAGES = true;
+let ENCRYPT_CONTACTS = true;
+let ENCRYPT_SETTINGS = true;
+//
+// Options include: 'LOCALHOST', 'TEST_STEALTHY', & 'STEALTHY'
+let STEALTHY_PAGE = 'LOCALHOST';
+//
 // Bugs to Fix (temporary workarounds):
 const WORKAROUND__DISABLE_REFLECTED_PACKET = true;
-
-// Dev. "constants" now set in ctor based on user name--change them there, not here:
-const DONT_CHANGE_THIS_HERE_DO_IT_IN_THE_CTOR = undefined;
-let ENABLE_GAIA = DONT_CHANGE_THIS_HERE_DO_IT_IN_THE_CTOR;
-let ENCRYPT_MESSAGES = DONT_CHANGE_THIS_HERE_DO_IT_IN_THE_CTOR;
-let ENCRYPT_CONTACTS = DONT_CHANGE_THIS_HERE_DO_IT_IN_THE_CTOR;
-let ENCRYPT_SETTINGS = DONT_CHANGE_THIS_HERE_DO_IT_IN_THE_CTOR;
-let STEALTHY_PAGE = DONT_CHANGE_THIS_HERE_DO_IT_IN_THE_CTOR;
-
+//
 // Logging Scopes
 const LOG_GAIAIO = true;
 const LOG_OFFLINEMESSAGING = true;
-
+//
 const stealthyTestIds = [
   'pbj.id',
   'alexc.id',
@@ -143,9 +136,8 @@ export class MessagingEngine extends EventEmitter {
     this.emit('me-update-contactmgr', contactMgr);
   }
 
-  updateMessages(theMessages) {
-    // console.log('updateMessages:')
-    // console.log(`   active id:  ${this.contactMgr.getActiveContact().id}`)
+  updateMessages(aContactId) {
+    const theMessages = this._getMessageArray(aContactId);
     this.emit('me-update-messages', theMessages);
   }
 
@@ -170,13 +162,7 @@ export class MessagingEngine extends EventEmitter {
 
     this.userId = userId;
 
-    this.setupDevelopmentConstants();
-
     this.myTimer.logEvent('Enter componentDidMountWork')
-
-    // this.logger('Build Date: ', Config.BUILD_DATE_STAMP);
-    // this.logger('Build Time: ', Config.BUILD_TIME_STAMP);
-    // this.logger('Build Version: ', Config.BUILD_VERSION);
 
     if (!firebase.auth().currentUser) {
       firebase.auth().signInAnonymously()
@@ -211,41 +197,6 @@ export class MessagingEngine extends EventEmitter {
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   //
-  setupDevelopmentConstants() {
-
-    // const url = window.location.href;
-    // if (url.indexOf('localhost') > -1) {
-    //   STEALTHY_PAGE = 'LOCALHOST';
-    // } else if (url.indexOf('test') > -1) {
-    //   STEALTHY_PAGE = 'TEST_STEALTHY';
-    // } else {
-    //   STEALTHY_PAGE = 'STEALTHY';
-    // }
-
-    STEALTHY_PAGE = 'LOCALHOST'
-
-    if (this.userId === 'pbj.id') {
-      // PBJ Dev Settings:
-      ENABLE_GAIA = true;
-      ENCRYPT_MESSAGES = true;
-      ENCRYPT_CONTACTS = true;
-      ENCRYPT_SETTINGS = true;
-    } else if ((this.userId === 'alexc.id') ||
-               (this.userId === 'alex.stealthy.id') ||
-               (this.userId === 'relay.id')) {
-      // AC Dev Settings:
-      ENABLE_GAIA = true;
-      ENCRYPT_MESSAGES = true;
-      ENCRYPT_CONTACTS = true;
-      ENCRYPT_SETTINGS = true;
-    } else {
-      ENABLE_GAIA = true;
-      ENCRYPT_MESSAGES = true;
-      ENCRYPT_CONTACTS = true;
-      ENCRYPT_SETTINGS = true;
-    }
-  }
-
   _initWithContacts(contactArr) {
     this.myTimer.logEvent('Enter _initWithContacts')
 
@@ -312,8 +263,7 @@ export class MessagingEngine extends EventEmitter {
 
       const ac = this.contactMgr.getActiveContact();
       if (ac) {
-        const newMessages = this._getMessageArray(ac.id);
-        this.updateMessages(newMessages);
+        this.updateMessages(ac.id);
       }
     });
 
@@ -329,11 +279,10 @@ export class MessagingEngine extends EventEmitter {
       this.offlineMsgSvc.setConversationManager(this.conversations);
 
       const activeContact = this.contactMgr.getActiveContact();
+      const activeContactId = activeContact.id;
 
-      const seenMessages = this.markReceivedMessagesSeen(activeContact.id);
+      const seenMessages = this.markReceivedMessagesSeen(activeContactId);
       this.sendMessageReceipts(seenMessages);
-
-      const newMessages = this._getMessageArrayForContact(activeContact);
 
       // TODO: send these as a packet to the other user.
 
@@ -343,7 +292,6 @@ export class MessagingEngine extends EventEmitter {
       // use a setter to fix this issue (setting the object property directly
       // doesn't work b/c it's read only).
       //   TODO: clean this up into method(s) on conversations and contactMgr (AC)
-      const activeContactId = activeContact.id;
       for (const contactId of this.contactMgr.getContactIds()) {
         const messages = this.conversations.getMessages(contactId);
 
@@ -373,7 +321,7 @@ export class MessagingEngine extends EventEmitter {
         }
       }
 
-      this.updateMessages(newMessages);
+      this.updateMessages(activeContactId);
       this.updateContactMgr();
 
       this.emit('me-initialized', true);
@@ -734,9 +682,8 @@ export class MessagingEngine extends EventEmitter {
 
       this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
 
-      const newMessages = this._getMessageArray(id);
       this.updateContactMgr();
-      this.updateMessages(newMessages);
+      this.updateMessages(id);
       this.closeContactSearch();
 
       if (status) {
@@ -760,10 +707,8 @@ export class MessagingEngine extends EventEmitter {
     this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
 
     const activeUser = this.contactMgr.getActiveContact();
-    let newMessages = []
     if (activeUser) {
       const activeUserId = activeUser.id;
-      const newMessages = this._getMessageArray(activeUserId);
       this.contactMgr.clearUnread(activeUserId);
     }
 
@@ -774,7 +719,7 @@ export class MessagingEngine extends EventEmitter {
     }
 
     this.updateContactMgr();
-    this.updateMessages(newMessages);
+    this.updateMessages(activeUser ? activeUser.id : undefined);
   }
 
   handleRadio (e, { name }) {
@@ -923,8 +868,9 @@ export class MessagingEngine extends EventEmitter {
     this._writeContactList(this.contactMgr.getAllContacts());
     this.updateContactMgr();
 
-    const newMessages = this._getMessageArray(this.contactMgr.getActiveContact().id);
-    this.updateMessages(newMessages);
+    const activeContactId = this.contactMgr.getActiveContact() ?
+      this.contactMgr.getActiveContact().id : undefined;
+    this.updateMessages(activeContactId);
   }
 
   handleOutgoingMessage = (text) => {
@@ -969,8 +915,7 @@ export class MessagingEngine extends EventEmitter {
     this._writeContactList(this.contactMgr.getAllContacts());
     this.updateContactMgr();
 
-    const newMessages = this._getMessageArray(outgoingUserId);
-    this.updateMessages(newMessages);
+    this.updateMessages(outgoingUserId);
   }
 
   // SO MUCH TODO TODO TODO
@@ -1091,10 +1036,9 @@ export class MessagingEngine extends EventEmitter {
         this._writeConversations();
 
         const ac = this.contactMgr.getActiveContact();
-        const needsMsgListUpdate = (recipientId === ac.id);
+        const needsMsgListUpdate = ac && (recipientId === ac.id);
         if (needsMsgListUpdate) {
-          const newMessages = this._getMessageArray(ac.id);
-          this.updateMessages(newMessages);
+          this.updateMessages(recipientId);
         }
       }
 
@@ -1223,9 +1167,9 @@ export class MessagingEngine extends EventEmitter {
     }
 
     if (updateActiveMsgs) {
-      const activeId = this.contactMgr.getActiveContact().id;
-      const newMessages = this._getMessageArray(activeId);
-      this.updateMessages(newMessages);
+      const activeId = this.contactMgr.getActiveContact() ?
+        this.contactMgr.getActiveContact().id : undefined;
+      this.updateMessages(activeId);
     }
 
     if (writeContacts) {
@@ -1287,10 +1231,8 @@ export class MessagingEngine extends EventEmitter {
     const seenMessages = this.markReceivedMessagesSeen(selectedUserId);
     this.sendMessageReceipts(seenMessages);
 
-    const newMessages = this._getMessageArray(selectedUserId);
-
     this.updateContactMgr();
-    this.updateMessages(newMessages);
+    this.updateMessages(selectedUserId);
     this.closeContactSearch();
   }
 
@@ -1357,35 +1299,30 @@ export class MessagingEngine extends EventEmitter {
   // ////////////////////////////////////////////////////////////////////////////
   //
 
-  _getMessageArrayForContact(aContact) {
-    if (aContact) {
-      return this._getMessageArray(aContact.id);
-    }
-    return [];
-  }
-
   // This method transforms engine formatted messages to gui formatted ones. TODO:
   // we should push this into the GUI or make the GUI work with the native format.
   _getMessageArray(aRecipientId) {
-    const recipient = this.contactMgr.getContact(aRecipientId);
-    const recipientImageUrl = (recipient) ? recipient.image : undefined;
-
     const messages = [];
 
-    const chatMessages = this.conversations.getMessages(aRecipientId);
-    for (const chatMessage of chatMessages) {
-      const isMe = (chatMessage.from === this.userId);
-      const message = {
-        me: isMe,
-        image: (isMe ? this.avatarUrl : recipientImageUrl),
-        author: (isMe ? this.userId : aRecipientId),
-        body: chatMessage.content,
-        delivered: chatMessage.sent,
-        seen: chatMessage.seen,
-        time: chatMessage.time,
-        state: chatMessage.msgState,
-      };
-      messages.push(message);
+    if (aRecipientId) {
+      const recipient = this.contactMgr.getContact(aRecipientId);
+      const recipientImageUrl = (recipient) ? recipient.image : undefined;
+
+      const chatMessages = this.conversations.getMessages(aRecipientId);
+      for (const chatMessage of chatMessages) {
+        const isMe = (chatMessage.from === this.userId);
+        const message = {
+          me: isMe,
+          image: (isMe ? this.avatarUrl : recipientImageUrl),
+          author: (isMe ? this.userId : aRecipientId),
+          body: chatMessage.content,
+          delivered: chatMessage.sent,
+          seen: chatMessage.seen,
+          time: chatMessage.time,
+          state: chatMessage.msgState,
+        };
+        messages.push(message);
+      }
     }
 
     return messages;
