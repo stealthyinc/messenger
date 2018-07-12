@@ -28,6 +28,7 @@ const { Types, Creators } = createActions({
   setCurrentPlatform: ['currentPlatform'],
   initShutdown: [''],
   newNotification: ['senderInfo'],
+  setBearerToken: ['bearerToken']
 })
 
 export const EngineTypes = Types
@@ -51,6 +52,7 @@ export const INITIAL_STATE = Immutable({
   currentPlatform: '',
   lockEngine: false,
   publicKey: '',
+  bearerToken: '',
 })
 
 /* ------------- Selectors ------------- */
@@ -69,6 +71,7 @@ export const EngineSelectors = {
   getEngineLock: state => state.engine.lockEngine,
   getPublicKey: state => state.engine.publicKey,
   getEngineShutdown: state => state.engine.engineShutdown,
+  getBearerToken: state => state.engine.bearerToken,
 }
 
 /* ------------- Reducers ------------- */
@@ -131,6 +134,11 @@ export const setToken = (state, { token }) => {
   return state.merge({ token })
 }
 
+// set token
+export const setBearerToken = (state, { bearerToken }) => {
+  return state.merge({ bearerToken })
+}
+
 // read user settings from engine
 export const setUserSettings = (state, { userSettings }) => {
   return state.merge({ userSettings })
@@ -161,5 +169,6 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_CONTACT_ADDED]: setContactAdded,
   [Types.SET_TOKEN]: setToken,
   [Types.SET_USER_SETTINGS]: setUserSettings,
-  [Types.SET_ENGINE_SHUTDOWN]: setEngineShutdown
+  [Types.SET_ENGINE_SHUTDOWN]: setEngineShutdown,
+  [Types.SET_BEARER_TOKEN]: setBearerToken,
 })

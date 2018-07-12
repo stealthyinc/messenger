@@ -177,9 +177,9 @@ class ChatScreen extends Component {
 
   onSend = (messages = []) => {
     const { token } = this.state
-    const { publicKey } = this.props
+    const { publicKey, bearerToken } = this.props
     if (token) {
-      this.props.sendNotification(token, publicKey)
+      this.props.sendNotification(token, publicKey, bearerToken)
     }
     this.props.handleOutgoingMessage(messages[0].text);
     this.setState((previousState) => {
@@ -306,6 +306,7 @@ const mapStateToProps = (state) => {
     contactMgr: EngineSelectors.getContactMgr(state),
     userProfile: EngineSelectors.getUserProfile(state),
     publicKey: EngineSelectors.getPublicKey(state),
+    bearerToken: EngineSelectors.getBearerToken(state),
   }
 }
 

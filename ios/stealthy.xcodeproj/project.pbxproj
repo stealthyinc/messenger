@@ -50,6 +50,7 @@
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
 		7502F8C020D0CA0B00232E72 /* libRNBackgroundFetch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7502F8BC20D0C9F000232E72 /* libRNBackgroundFetch.a */; };
 		7502F8C220D0CA6200232E72 /* TSBackgroundFetch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7502F8C120D0CA6200232E72 /* TSBackgroundFetch.framework */; };
+		7526ECD120F7B8F400DA857E /* FirebaseFunctions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7526ECD020F7B8F400DA857E /* FirebaseFunctions.framework */; };
 		754C0C2120D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 754C0BF620D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m */; };
 		7578E71720AA27D600D60C9A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7578E71620AA27D600D60C9A /* GoogleService-Info.plist */; };
 		75A1371820F4017F00D89EA6 /* FirebaseCoreDiagnostics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1370E20F4017D00D89EA6 /* FirebaseCoreDiagnostics.framework */; };
@@ -441,6 +442,7 @@
 		71BA2A747FF149DC89CA7CB7 /* EvilIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = EvilIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf"; sourceTree = "<group>"; };
 		7502F89020D0C9F000232E72 /* RNBackgroundFetch.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNBackgroundFetch.xcodeproj; path = "../node_modules/react-native-background-fetch/ios/RNBackgroundFetch.xcodeproj"; sourceTree = "<group>"; };
 		7502F8C120D0CA6200232E72 /* TSBackgroundFetch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TSBackgroundFetch.framework; path = "../node_modules/react-native-background-fetch/ios/RNBackgroundFetch/TSBackgroundFetch.framework"; sourceTree = "<group>"; };
+		7526ECD020F7B8F400DA857E /* FirebaseFunctions.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FirebaseFunctions.framework; sourceTree = "<group>"; };
 		753E71819135E1A15C288F57 /* Pods-stealthy.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-stealthy.release.xcconfig"; path = "Pods/Target Support Files/Pods-stealthy/Pods-stealthy.release.xcconfig"; sourceTree = "<group>"; };
 		754C0BF620D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RNBackgroundFetch+AppDelegate.m"; path = "../node_modules/react-native-background-fetch/ios/RNBackgroundFetch/RNBackgroundFetch+AppDelegate.m"; sourceTree = "<group>"; };
 		7578E71620AA27D600D60C9A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -522,6 +524,7 @@
 				139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */,
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
+				7526ECD120F7B8F400DA857E /* FirebaseFunctions.framework in Frameworks */,
 				75A1371C20F4017F00D89EA6 /* FirebaseNanoPB.framework in Frameworks */,
 				75C3EB3E20E1B12400F5E81F /* libcryptopp.a in Frameworks */,
 				75A1371920F4017F00D89EA6 /* FirebaseInstanceID.framework in Frameworks */,
@@ -705,6 +708,7 @@
 				75A1370E20F4017D00D89EA6 /* FirebaseCoreDiagnostics.framework */,
 				75A1370F20F4017E00D89EA6 /* FirebaseInstanceID.framework */,
 				75A1371020F4017E00D89EA6 /* GoogleToolboxForMac.framework */,
+				7526ECD020F7B8F400DA857E /* FirebaseFunctions.framework */,
 				75A1371720F4017F00D89EA6 /* GTMSessionFetcher.framework */,
 				2D16E6891FA4F8E400B85C8A /* libReact.a */,
 				09E89F39247AAB3BC07F7EE1 /* Pods_stealthy.framework */,
@@ -1714,6 +1718,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "stealthy-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
+				VALID_ARCHS = arm64;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -1764,6 +1769,7 @@
 				PRODUCT_NAME = stealthy;
 				SWIFT_OBJC_BRIDGING_HEADER = "stealthy-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
+				VALID_ARCHS = arm64;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
