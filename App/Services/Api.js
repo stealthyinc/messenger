@@ -108,7 +108,7 @@ const notification = (baseURL, token, pk, bearerToken) => {
     headers: {
       'Cache-Control': 'no-cache',
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${bearer}`,
+      'Authorization': `Bearer ${bearerToken}`,
     },
     "message": {
       "token" : token,
