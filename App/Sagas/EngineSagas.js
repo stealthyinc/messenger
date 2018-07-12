@@ -161,7 +161,8 @@ function* sendNotificationWorker(action) {
   console.log('bearerToken', bearerToken)
   const pk = publicKey.substr(publicKey.length - 4)
   const api = DebugConfig.useFixtures ? FixtureAPI : API.notification('https://fcm.googleapis.com/v1/projects/coldmessage-ae5bc/messages:send', recepientToken, pk, bearerToken)
-  yield call (api.send)
+  const response = yield call (api.send)
+  console.log("response", response)
 }
 
 function* backgroundTasks() {
