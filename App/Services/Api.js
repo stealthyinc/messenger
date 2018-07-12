@@ -85,6 +85,21 @@ const notification = (baseURL, token, pk, bearerToken) => {
   //
   // Create and configure an apisauce-based api object.
   //
+  // Test this below if shit doesn't work
+  // curl -X POST -H "Authorization: Bearer ya29.c.Elr2BS8k3XudE24_ZkKhnwT_MrIiiQkuKBK5proXokDc68aflEuHvdIFOq_1dZFyqYHKBz_5gmAN943iR3NXLkxWk0ahDb1bG857r1aZc3XrY1FHgPeSgkHU7Bs" -H "Content-Type: application/json" -d '{
+  // "message":{
+  //   "notification": {
+  //     "title": "New Message",
+  //   },
+  //   "data": {
+  //    "test": "boobs",
+  //   },
+  //   "apns": {
+  //     "payload": {"aps":{"badge":1,"sound":"default"}},
+  //   },
+  //   "token": "cKJhfsmPh9I:APA91bH_YPje6gPkob6lyK82EUubDy_XbGjwSnJbEA98wlAGbnCjtLF7QHkDDUkBORoVfRvV-0_iP2d0IR3sTP2RowlFZe4UyVncsChKgSBxDOtuaymcyqz8uPcBm8B5CrnOiB-b8O1pO9zTpUUgABWHcjk8Bx7aeQ"
+  //   }
+  // }' "https://fcm.googleapis.com/v1/projects/coldmessage-ae5bc/messages:send"
 
   const api = apisauce.create({
     // base URL is read from the "constructor"
@@ -99,11 +114,13 @@ const notification = (baseURL, token, pk, bearerToken) => {
       "token" : token,
       "notification": {
         "title": "New Message",
-        "data": pk,
-        "badge": 1, 
-        "sound": "default"
       },
-      "priority": "high",
+      "apns": {
+        "payload": {"aps":{"badge":1,"sound":"default"}},
+      },
+      "data": {
+        pk,
+      }
     },
     // 10 second timeout...
     timeout: 10000

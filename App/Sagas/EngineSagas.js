@@ -147,6 +147,7 @@ function* getToken() {
   const api = DebugConfig.useFixtures ? FixtureAPI : API.getAccessToken("https://us-central1-coldmessage-ae5bc.cloudfunctions.net/getAccessToken")
   const response = yield call (api.token)
   if (response.ok) {
+    console.log('bearerToken', response.data)
     yield put(EngineActions.setBearerToken(response.data))
   }
 }
@@ -157,6 +158,7 @@ function* sendNotificationWorker(action) {
   // - decrypt data and look up receiver's user device token
   // - send a request to fb server to notify the person of a new message
   const { recepientToken, publicKey, bearerToken } = action
+  console.log('bearerToken', bearerToken)
   const pk = publicKey.substr(publicKey.length - 4)
   const api = DebugConfig.useFixtures ? FixtureAPI : API.notification('https://fcm.googleapis.com/v1/projects/coldmessage-ae5bc/messages:send', recepientToken, pk, bearerToken)
   yield call (api.send)
