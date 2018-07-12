@@ -313,7 +313,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     handleOutgoingMessage: (message) => dispatch(EngineActions.setOutgoingMessage(message)),
-    sendNotification: (token, publicKey) => dispatch(EngineActions.sendNotification(token, publicKey)),
+    sendNotification: (token, publicKey, bearerToken) => dispatch(EngineActions.sendNotification(token, publicKey, bearerToken)),
     handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),
   }
 }

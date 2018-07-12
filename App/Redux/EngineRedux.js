@@ -17,7 +17,7 @@ const { Types, Creators } = createActions({
   addNewContact: ['newContact'],
   setContactAdded: ['contactAdded'],
   setToken: ['token'],
-  sendNotification: ['recepientToken', 'publicKey'],
+  sendNotification: ['recepientToken', 'publicKey', 'bearerToken'],
   setUserSettings: ['userSettings'],
   setEngineShutdown: ['engineShutdown'],
   updateUserSettings: ['radioSetting'],

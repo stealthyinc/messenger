@@ -101,6 +101,7 @@ const notification = (baseURL, token, pk, bearerToken) => {
   //   }
   // }' "https://fcm.googleapis.com/v1/projects/coldmessage-ae5bc/messages:send"
 
+  console.log("info", baseURL, token, pk, bearerToken)
   const api = apisauce.create({
     // base URL is read from the "constructor"
     baseURL,
@@ -108,19 +109,19 @@ const notification = (baseURL, token, pk, bearerToken) => {
     headers: {
       'Cache-Control': 'no-cache',
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${bearerToken}`,
+      'Authorization': `Bearer ${bearerToken}`
     },
     "message": {
-      "token" : token,
       "notification": {
-        "title": "New Message",
-      },
-      "apns": {
-        "payload": {"aps":{"badge":1,"sound":"default"}},
+        "title": "New Message"
       },
       "data": {
-        pk,
-      }
+        "pk": pk
+      },
+      "apns": {
+        "payload": {"aps":{"badge":1,"sound":"default"}}
+      },
+      "token" : token
     },
     // 10 second timeout...
     timeout: 10000
