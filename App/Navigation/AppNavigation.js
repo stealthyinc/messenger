@@ -5,7 +5,6 @@ import { Images } from '../Themes'
 
 // Styles
 import styles from './Styles/NavigationStyles'
-import HomeScreen from '../Containers/HomeScreen'
 import AuthLoadingScreen from '../Containers/AuthLoadingScreen'
 import SignInScreen from '../Containers/SignInScreen'
 import TabScreen from '../Containers/TabScreen'
@@ -36,7 +35,7 @@ const PrimaryNav = StackNavigator({
   ChatMenu: { screen: ChatMenuScreen },
 });
 
-const AuthStack = StackNavigator({ 
+const AuthStack = StackNavigator({
   SignIn: { screen: SignInScreen }
 });
 

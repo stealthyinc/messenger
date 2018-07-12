@@ -1,4 +1,5 @@
 import { createReducer, createActions } from 'reduxsauce'
+import { NativeModules } from 'react-native'
 import Immutable from 'seamless-immutable'
 
 /* ------------- Types and Action Creators ------------- */
@@ -137,6 +138,10 @@ export const setUserSettings = (state, { userSettings }) => {
 
 // engine has shutdown (done saving stuff - safe to terminate)
 export const setEngineShutdown = (state, { engineShutdown }) => {
+  if (engineShutdown) {
+    const {BlockstackNativeModule} = NativeModules;
+    BlockstackNativeModule.signOut(); // Promise, might need return in .then
+  }
   return state.merge({ engineShutdown })
 }
 

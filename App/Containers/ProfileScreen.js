@@ -48,10 +48,9 @@ class ProfileScreen extends React.Component {
     if (!common.DEV_TESTING) {
       firebaseInstance.setFirebaseData(common.getSessionRef(publicKey), common.NO_SESSION)
     }
+    this.props.initShutdown();
     this.props.clearUserData(publicKey);
     await AsyncStorage.clear();
-    await BlockstackNativeModule.signOut();
-    this.props.initShutdown();
     this.props.navigation.navigate('Auth');
   };
 
