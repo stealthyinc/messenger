@@ -143,14 +143,22 @@ function* deleteContact(action) {
   EngineInstance.handleDeleteContact(null, { contact: deleteContact })
 }
 
+function* getToken() {
+  const api = DebugConfig.useFixtures ? FixtureAPI : API.getAccessToken("https://us-central1-coldmessage-ae5bc.cloudfunctions.net/getAccessToken")
+  const response = yield call (api.token)
+  if (response.ok) {
+    yield put(EngineActions.setBearerToken(response.data))
+  }
+}
+
 function* sendNotificationWorker(action) {
   // process for sending a notification
   // - check fb under /global/notifications/senderPK
   // - decrypt data and look up receiver's user device token
   // - send a request to fb server to notify the person of a new message
-  const { recepientToken, publicKey } = action
+  const { recepientToken, publicKey, bearerToken } = action
   const pk = publicKey.substr(publicKey.length - 4)
-  const api = DebugConfig.useFixtures ? FixtureAPI : API.notification('https://fcm.googleapis.com/fcm/send', recepientToken, pk)
+  const api = DebugConfig.useFixtures ? FixtureAPI : API.notification('https://fcm.googleapis.com/v1/projects/coldmessage-ae5bc/messages:send', recepientToken, pk, bearerToken)
   yield call (api.send)
 }
 
@@ -215,6 +223,7 @@ export function * getActiveUserProfile (api, action) {
 }
 
 export default function* engineSagas(api) {
+  yield takeLatest(EngineTypes.SET_USER_DATA, getToken)
   yield takeLatest(EngineTypes.SET_USER_DATA, startEngine)
   yield takeLatest(EngineTypes.SET_USER_DATA, getUserProfile, api)
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, getActiveUserProfile, api)

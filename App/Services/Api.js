@@ -57,22 +57,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   }
 }
 
-// our "constructor"
-const notification = (baseURL, token, pk) => {
-// curl --header "Content-Type: application/json" \
-// --header "Authorization: key=AAAAhdS8lMY:APA91bEdMbEj2Qw4Xj7HXYzsuZTzrDrnyAWBlPVbSK76kkxlmWls24MUAoQ6oBUTO36LnSfTT3kByFLrP_tAavQQyDaWYn5bFefG7bA1_u3EIqtyOkHk5naQBRGnTNBT7WSVbU9uO6gD" \
-// https://fcm.googleapis.com/fcm/send \
-// -d '{"notification": {"title": "New Message", "sound": "default"},
-// "priority": "high",
-// "to": "fnIkBB46C2E:APA91bH2Q9J_rfYztmZZXCI8aXcUSBEaePS6Mzjft4MB_eeiGDJ6LBGF9VdYSY68Xe54S3yY5UAQRBDQ0JuK5X5RE3RnFKJLPcLamP9JOeyoFPN_F0AtCrcj92C6LmdU651z5ySgciOe"}'
-  // ------
-  // STEP 1
-  // ------
-  //
-  // Create and configure an apisauce-based api object.
-  //
-
-  const fb_server_key = 'AAAAhdS8lMY:APA91bEdMbEj2Qw4Xj7HXYzsuZTzrDrnyAWBlPVbSK76kkxlmWls24MUAoQ6oBUTO36LnSfTT3kByFLrP_tAavQQyDaWYn5bFefG7bA1_u3EIqtyOkHk5naQBRGnTNBT7WSVbU9uO6gD'
+const getAccessToken = (baseURL) => {
   const api = apisauce.create({
     // base URL is read from the "constructor"
     baseURL,
@@ -80,12 +65,45 @@ const notification = (baseURL, token, pk) => {
     headers: {
       'Cache-Control': 'no-cache',
       'Content-Type': 'application/json',
-      'Authorization': `key=${fb_server_key}`,
     },
-    data: {
-      "notification": {"title": "New Message", "data": pk, "badge": 1, "sound": "default"},
+    // 10 second timeout...
+    timeout: 10000
+  })
+
+  const token = () => api.get()
+
+  return {
+    token
+  }
+}
+
+// our "constructor"
+const notification = (baseURL, token, pk, bearerToken) => {
+  // ------
+  // STEP 1
+  // ------
+  //
+  // Create and configure an apisauce-based api object.
+  //
+
+  const api = apisauce.create({
+    // base URL is read from the "constructor"
+    baseURL,
+    // here are some default headers
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${bearer}`,
+    },
+    "message": {
+      "token" : token,
+      "notification": {
+        "title": "New Message",
+        "data": pk,
+        "badge": 1, 
+        "sound": "default"
+      },
       "priority": "high",
-      "to": token,
     },
     // 10 second timeout...
     timeout: 10000
@@ -128,5 +146,6 @@ const notification = (baseURL, token, pk) => {
 // let's return back our create method as the default.
 export default {
   create,
+  getAccessToken,
   notification
 }
