@@ -195,3 +195,45 @@ module.exports.cleanPathForFirebase = function (path) {
 
   return path.replace(/[\.-]/g, '_');
 }
+
+//
+// Blockstack namespace and top-level domain (TLD) utils
+////////////////////////////////////////////////////////////////////////////////
+module.exports.DEFAULT_TLD = '.id'
+module.exports.DEFAULT_TLDS = ['.id.blockstack', '.id']
+
+module.exports.removeTld = function(
+  aName, theTlds = module.exports.DEFAULT_TLDS)
+{
+  if (aName) {
+    // Descending sort to catch .id.blockstack before .blockstack -- i.e. ignore
+    // subsets of a tld in a name.
+    theTlds.sort(function(a, b) {
+      return b.length - a.length;
+    })
+
+    for (const tld of theTlds) {
+      if (aName.endsWith(tld)) {
+        return aName.substring(0, aName.indexOf(tld))
+      }
+    }
+  }
+
+  return aName
+}
+
+module.exports.addTld = function(aName, aTld = module.exports.DEFAULT_TLD) {
+  if (aName && aTld && !aName.endsWith(aTld)) {
+    return `${aName}${aTld}`
+  }
+
+  return aName
+}
+
+module.exports.removeIdTld = function(aName) {
+  return module.exports.removeTld(aName, [module.exports.DEFAULT_TLD])
+}
+
+module.exports.addIdTld = function(aName) {
+  return module.exports.addTld(aName)
+}

@@ -1,5 +1,6 @@
 // a library to wrap and simplify api calls
 import apisauce from 'apisauce'
+const utils = require('./../Engine/misc/utils.js');
 
 // our "constructor"
 const create = (baseURL = 'https://core.blockstack.org') => {
@@ -36,7 +37,44 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   //
   const getBlockstackContacts = (username) => api.get(`/v1/search?query=${username}`)
 
+  // Legacy endpoint profile search: https://core.blockstack.org/#resolver-endpoints-lookup-user
   const getUserProfile = (username) => api.get(`/v1/users/${username}`)
+
+  // NS (New school) profile search endpoint
+  //   - https://core.blockstack.org/#resolver-endpoints-profile-search
+  //   - works with all TLDs except '.id', hence we strip that off the username
+  //     before passing it as the query.
+  //   - endpoint returns multiple results so we comb through that and find the exact match
+  //   - we return the specific user's gaia hub for specified app
+  const getUserGaiaNS = (username, app = 'https://www_stealthy_im') => {
+    // Ensure username doesn't end in tld .id
+    const cleanUserName = utils.removeIdTld(username)
+    return api.get(`/v1/search?query=${cleanUserName}`)
+    .then((queryResult) => {
+      if (queryResult &&
+          ("data" in queryResult) &&
+          ("results" in queryResult["data"])) {
+        for (const result of queryResult["data"]["results"]) {
+          if ((!"fullyQualifiedName" in result) ||
+              (result["fullyQualifiedName"] !== username)) {
+            continue
+          }
+
+          if (("profile" in result) &&
+              ("apps" in result["profile"]) &&
+              (app in result["profile"]["apps"])) {
+            return result["profile"]["apps"][app]
+          }
+        }
+      }
+      console.log(`INFO(Api.js::getUserGaiaNS): gaia not found for ${username}`)
+      return undefined
+    })
+    .catch((err) => {
+      console.log(`ERROR(Api.js::getUserGaiaNS): ${err}`)
+      return undefined
+    })
+  }
 
   // ------
   // STEP 3
@@ -53,7 +91,8 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   return {
     // a list of the API functions from step 2
     getBlockstackContacts,
-    getUserProfile
+    getUserProfile,
+    getUserGaiaNS
   }
 }
 

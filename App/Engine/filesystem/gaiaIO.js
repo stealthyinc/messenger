@@ -1,47 +1,17 @@
-import {
-  NativeModules
-} from 'react-native';
-
+const BaseIO = require('./baseIO.js');
 const utils = require('./../misc//utils.js');
 
 // TODO: need a way of switching putFile/getFile for putRawFile/getRawFile for
 //       different build targets
+import { NativeModules } from 'react-native';
 const BlockstackNativeModule = NativeModules.BlockstackNativeModule;
 const {getRawFile, putRawFile} = BlockstackNativeModule;
 
-const ENABLE_IOS_LOOKUP_WORKAROUND = true;
-
-const BaseIO = require('./baseIO.js');
+import API from './../../Services/Api'
+const api = API.create()
 
 const NAME_ENDPOINT = 'https://core.blockstack.org/v1/names';
-
-function _getGaiaHubAddrWorkaround(aUserName) {
-  let gaiaHubAddr = '';
-  if (ENABLE_IOS_LOOKUP_WORKAROUND) {
-    switch (aUserName) {
-      case 'alexc.id':
-        gaiaHubAddr = 'https://gaia.blockstack.org/hub/1MkrVDKyiPRh4qNXfnMXt67VHQwxLy9CXH';
-        break;
-      case 'alex.stealthy.id':
-        gaiaHubAddr = 'https://gaia.blockstack.org/hub/16yRrbugMxKtiEZ2rR7poMDrRvRYRvXWxh';
-        break;
-      case 'relay.id':
-        gaiaHubAddr = 'https://gaia.blockstack.org/hub/1K71xLJvF79b5SufRXiKTCkUU1qx7U6MH4';
-        break;
-      case 'pbj.id':
-        gaiaHubAddr = 'https://gaia.blockstack.org/hub/15paoVceRfxE4UzEFnSWLXd5pPiB3UvH1q';
-        break;
-      case 'prabhaav.stealthy.id':
-        gaiaHubAddr = 'https://gaia.blockstack.org/hub/1Hy3X5u2gt5DyYDcHFGnRPaDKCkr6vFzd9';
-        break;
-      case 'braphaav.personal.id':
-        gaiaHubAddr = 'https://gaia.blockstack.org/hub/1PjsHZ5Ws752E2kAdVtnVM5k5axB6TbJoJ';
-        break;
-      default:
-    }
-  }
-  return gaiaHubAddr;
-}
+const ENABLE_IOS_LOOKUP_WORKAROUND = true;
 
 module.exports = class GaiaIO extends BaseIO {
   constructor(logger,
@@ -50,6 +20,7 @@ module.exports = class GaiaIO extends BaseIO {
 
     utils.throwIfUndef('logger', logger);
 
+    this.hubCache = {};
     this.logger = logger;
     this.logOutput = logOutput;
   }
@@ -58,6 +29,10 @@ module.exports = class GaiaIO extends BaseIO {
     if (this.logOutput) {
       this.logger(...args);
     }
+  }
+
+  clearHubCache() {
+    this.hubCache = {}
   }
 
   // Public:
@@ -127,51 +102,73 @@ module.exports = class GaiaIO extends BaseIO {
     }
   }
 
-  _read(username, filePath) {
-    this.log(`Reading from ${username}'s GAIA in '${filePath}'`);
+  _readWeb(username, filePath) {
     const options = { username, zoneFileLookupURL: NAME_ENDPOINT, decrypt: false };
 
-    try {
-      if (utils.is_iOS()) {
-        // TODO: modify Blockstack -> RCT to use promises instead of completion
-        return new Promise((resolve, reject) => {
-          getRawFile(filePath, _getGaiaHubAddrWorkaround(username), (error, content) => {
-            if (error) {
-              reject(error);
-            } else {
-              try {
-                if (content && content.includes('<Error><Code>BlobNotFound')) {
-                  // console.log(`INFO(gaiaIO.js::_read): blob not found ${username}//${filePath}`)
-                  // Empty file
-                  resolve(undefined)
-                } else {
-                  const jsonContent = JSON.parse(content);
-                  // console.log(`INFO(gaiaIO.js::_read): ${username}//${filePath} resolved to:\n${jsonContent}`)
-                  resolve(jsonContent);
-                }
-              } catch (error) {
-                console.log(`ERROR(gaiaIO.js::_read): blob not found ${username}//${filePath}.\n${error}`)
-                reject(error);
-              }
-            }
-          })
-        })
+    return getFile(filePath, options)
+    .then((data) => {
+      return (data ? JSON.parse(data) : undefined)
+    })
+    .catch((error) => {
+      this.logger(`ERROR(gaiaIO::_readWeb): reading ${filePath} from ${username}'s GAIA.\n${error}`);
+      return;
+    });
+  }
+
+  _getGaiaHubAddrWorkaround(aUserName, useCache = true) {
+    return new Promise((resolve, reject) => {
+      if (!aUserName) {
+        reject(aUserName)
+      } else if (useCache && (aUserName in this.hubCache)) {
+        resolve(this.hubCache[aUserName])
       } else {
-        return getFile(filePath, options)
-        .then((data) => {
-          if (data) {
-            return JSON.parse(data);
-          }
-          // this.log(`gaiaIO: no data reading ${filePath} from ${username}'s GAIA.'`);
-          return undefined;
+        api.getUserGaiaNS(aUserName)
+        .then((gaiaHub) => {
+          this.hubCache[aUserName] = gaiaHub
+          resolve(gaiaHub)
         })
         .catch((error) => {
-          this.logger(`ERROR(gaiaIO::_read): reading ${filePath} from ${username}'s GAIA.\n${error}`);
-          return;
-        });
+          console.log(`ERROR(gaiaIO.js::_getGaiaHubAddrWorkaround): ${error}`)
+          reject(undefined)
+        })
+      }
+    })
+  }
+
+  async _read_iOS(username, filePath) {
+    // TODO: modify Blockstack -> RCT to use promises instead of completion
+    let gaiaHubPath = undefined
+    try {
+      gaiaHubPath = await this._getGaiaHubAddrWorkaround(username)
+      if (!gaiaHubPath) {
+        throw 'gaiaHubPath undefined'
       }
     } catch (err) {
-      this.logger(`ERROR(gaiaIO::_read): unable to read ${username}'s file ${filename}.\n${err}`);
+      console.log(`ERROR(gaiaIO.js::_read_iOS): ${err}`)
+      return
+    }
+
+    return new Promise((resolve, reject) => {
+      getRawFile(filePath, gaiaHubPath, (error, content) => {
+        if (error) {
+          reject(error);
+        } else {
+          const result = (!content || content.includes('<Error><Code>BlobNotFound')) ?
+            undefined : JSON.parse(content)
+
+          resolve(result)
+        }
+      })
+    })
+  }
+
+  _read(username, filePath) {
+    this.log(`Reading from ${username}'s GAIA in '${filePath}'`);
+    try {
+      return (utils.is_iOS()) ?
+        this._read_iOS(username, filePath) : this._readWeb(username, filePath)
+    } catch (err) {
+      this.logger(`ERROR(gaiaIO::_read): unable to read ${username}'s file ${filePath}.\n${err}`);
       return undefined;
     }
   }
