@@ -98,7 +98,7 @@ class FirebaseWrapper {
       // Get information about the notification that was opened
       const notification: Notification = notificationOpen.notification;
       // console.log("notification opened", notification)
-      const data = notification._data["gcm.notification.data"]
+      const data = notification._data["gcm.notification.data"]["pk"]
       store.dispatch(EngineActions.newNotification(data))
       // alert("notification opened")
     });
