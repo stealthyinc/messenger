@@ -36,7 +36,7 @@ RCT_EXPORT_METHOD(signIn:(NSString *)redirectURI appDomain:(NSString *)appDomain
 }
 
 RCT_EXPORT_METHOD(signOut) {
-  [[Blockstack sharedInstance] signOut];
+  [[Blockstack sharedInstance] signOutBlockstackAndGaia];
 }
 
 RCT_EXPORT_METHOD(getUserData:(RCTResponseSenderBlock)completion) {
