@@ -81,6 +81,7 @@ class ReduxNavigation extends React.Component {
             this.ref = undefined;
           }
           this.props.dispatch(EngineActions.initShutdown())
+          // Blockstack signOut occurs in redux after the engine has emitted a shutdown event.
 
           const TIMEOUT_BEFORE_SHUTDOWN_MS = 11 * 1000;
           utils.resolveAfterMilliseconds(TIMEOUT_BEFORE_SHUTDOWN_MS)
