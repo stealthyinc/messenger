@@ -23,7 +23,7 @@ class BlockScreen extends Component {
     const {BlockstackNativeModule} = NativeModules;
     const { publicKey } = this.props
     if (!common.DEV_TESTING) {
-      firebaseInstance.setFirebaseData(common.getSessionRef(publicKey), common.NO_SESSION)
+      firebaseInstance.setFirebaseData(common.getDbSessionPath(publicKey), common.NO_SESSION)
     }
     this.props.initShutdown();
     // Blockstack signOut occurs in redux after the engine has emitted a shutdown event.
@@ -34,7 +34,7 @@ class BlockScreen extends Component {
   _unlockEngine = async () => {
     const { publicKey } = this.props
     if (publicKey) {
-      firebaseInstance.setFirebaseData(common.getSessionRef(publicKey), common.getSessionId())
+      firebaseInstance.setFirebaseData(common.getDbSessionPath(publicKey), common.getSessionId())
       const userData = JSON.parse(await AsyncStorage.getItem('userData'));
       this.setState({spinner: true})
 

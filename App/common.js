@@ -4,14 +4,28 @@ export const NO_SESSION = 'none'
 
 export const DEV_TESTING = false
 
-module.exports.getSessionRef = function(aPublicKey) {
-  return `${module.exports.getRootRef(aPublicKey)}session`
+module.exports.getDbRootPath = function(aPublicKey) {
+  // ud --> user data:
+  const context = (process.env.NODE_ENV !== 'development') ?
+    'ud' : 'development/ud'
+
+  return `/global/${context}/${aPublicKey}`
 };
 
-module.exports.getRootRef = function(aPublicKey) {
-  // ud --> user data:
-  return `/global/${process.env.NODE_ENV}/${aPublicKey}/ud/`
+module.exports.getDbSessionPath = function(aPublicKey) {
+  const rootPath = module.exports.getDbRootPath(aPublicKey)
+  return `${rootPath}/session`
 };
+
+module.exports.getDbDiscoveryPath = function(aPublicKey) {
+  const rootPath = module.exports.getDbRootPath(aPublicKey)
+  return `${rootPath}/discovery`
+}
+
+module.exports.getDbNotificationPath = function(aPublicKey) {
+  const rootPath = module.exports.getDbRootPath(aPublicKey)
+  return `${rootPath}/notifications`
+}
 
 var __sessionId = undefined;
 //

@@ -14,7 +14,7 @@ class FirebaseWrapper {
 
   disableNotifications() {
     this.notification = false
-    this.cleanNotificationListners()
+    this.cleanNotificationListeners()
   }
 
   disableDiscovery() {
@@ -25,7 +25,7 @@ class FirebaseWrapper {
     this.multisession = false
   }
 
-  cleanNotificationListners() {
+  cleanNotificationListeners() {
     this.onTokenRefreshListener();
     this.notificationListener();
     this.notificationOpenedListener();

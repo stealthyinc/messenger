@@ -69,8 +69,8 @@ class ReduxNavigation extends React.Component {
     if (engineShutdown) {
       this._shutdownRequest(publicKey)
     } else if (publicKey && !this.ref) {
-      const sessionRef = common.getRootRef(publicKey)
-      this.ref = firebaseInstance.getFirebaseRef(sessionRef);
+      const sessionPath = common.getDbRootPath(publicKey)
+      this.ref = firebaseInstance.getFirebaseRef(sessionPath);
       this.ref.on('child_changed', (childSnapshot, prevChildKey, publicKey) => {
         this.shutDownSignOut = false
 
@@ -116,7 +116,7 @@ class ReduxNavigation extends React.Component {
     const {BlockstackNativeModule} = NativeModules;
     this.props.dispatch(EngineActions.clearUserData(publicKey));
     if (!common.DEV_TESTING) {
-      firebaseInstance.setFirebaseData(common.getSessionRef(publicKey), common.NO_SESSION)
+      firebaseInstance.setFirebaseData(common.getDbSessionPath(publicKey), common.NO_SESSION)
     }
     await AsyncStorage.clear();
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' })

@@ -11,6 +11,7 @@ import CustomView from './chat/CustomView';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
+const common = require('./../common.js');
 const utils = require('./../Engine/misc/utils.js');
 
 const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js');
@@ -66,8 +67,8 @@ class ChatScreen extends Component {
       activeContact = contactMgr.getActiveContact();
     }
     const { publicKey } = activeContact
-    let path = `/global/${process.env.NODE_ENV}/${publicKey}/notifications/`
-    firebaseInstance.getFirebaseRef(`${path}/token`).once('value')
+    const notificationPath = common.getDbNotificationPath(publicKey)
+    firebaseInstance.getFirebaseRef(`${notificationPath}/token`).once('value')
     .then((snapshot) => {
       if (snapshot.val()) {
         this.state.token = snapshot.val()

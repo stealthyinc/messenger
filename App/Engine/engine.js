@@ -24,8 +24,11 @@ const constants = require('./misc/constants.js');
 const statusIndicators = constants.statusIndicators;
 
 const { ContactManager } = require('./messaging/contactManager.js');
+
 import getQueryString from './misc/getQueryString';
 const { Timer } = require('./misc/timer.js');
+const { Discovery } = require('./misc/discovery.js')
+
 const common = require('./../common.js');
 
 import chatIcon from './images/blue256.png';
@@ -95,6 +98,7 @@ export class MessagingEngine extends EventEmitter {
     this.discoveryPath = discoveryPath;
     this.sessionId = sessionId;
     this.isMobile = isMobile;
+    this.discovery = undefined;
 
     this.settings = {}
     this.contactMgr = undefined;
@@ -161,6 +165,7 @@ export class MessagingEngine extends EventEmitter {
     }
 
     this.userId = userId;
+    this.discovery = new Discovery(this.userId, this.publicKey)
 
     this.myTimer.logEvent('Enter componentDidMountWork')
 
@@ -338,7 +343,7 @@ export class MessagingEngine extends EventEmitter {
     // Considerations:
     //   - TODO: throw if no firebase
     //   - TODO: what to save on loss of session lock key
-    const ref = firebase.database().ref(common.getSessionRef(this.publicKey))
+    const ref = firebase.database().ref(common.getDbSessionPath(this.publicKey))
     ref.once('value')
     .then((snapshot) => {
       if (!snapshot.exists() || snapshot.val() === common.NO_SESSION) {
@@ -876,39 +881,35 @@ export class MessagingEngine extends EventEmitter {
     this.updateMessages(activeContactId);
   }
 
-  handleOutgoingMessage = (text) => {
-    const outgoingUserId = (this.contactMgr.getActiveContact()) ?
-      this.contactMgr.getActiveContact().id : undefined;
+  handleOutgoingMessage = async (text) => {
+    if (!this.contactMgr.getActiveContact()) {
+      return
+    }
 
-    this.anonalytics.aeMessageSent();
+    const outgoingUserId = this.contactMgr.getActiveContact().id
+    let outgoingPublicKey = this.contactMgr.getPublicKey(outgoingUserId)
+
+    if (!outgoingPublicKey) {
+      try {
+        outgoingPublicKey = await this._fetchPublicKey(outgoingUserId)
+        if (!outgoingPublicKey) {
+          throw `Public key is undefined for ${outgoingUserId}.`
+        }
+        this.logger(`Fetched publicKey for ${outgoingUserId}.`);
+      } catch (err) {
+        console.log(`ERROR(engine.js::handleOutgoingMessage): unable to fetch public key. ${err}`)
+        return
+      }
+
+      this.contactMgr.setPublicKey(outgoingUserId, outgoingPublicKey);
+    }
+
     const chatMsg = new ChatMessage();
     chatMsg.init(
-      this.userId,
-      outgoingUserId,
-      this._getNewMessageId(),
-      text,
-      Date.now());
-
-    const outgoingPublicKey = this.contactMgr.getPublicKey(outgoingUserId);
-
-    if (outgoingPublicKey) {
-      this._sendOutgoingMessageOffline(chatMsg);
-    } else {
-      this._fetchPublicKey(outgoingUserId)
-      .then((publicKey) => {
-        if (publicKey) {
-          this.logger(`Fetched publicKey for ${outgoingUserId}.`);
-
-          this._sendOutgoingMessageOffline(chatMsg);
-
-          this.contactMgr.setPublicKey(outgoingUserId, publicKey);
-          this._writeContactList(this.contactMgr.getAllContacts());
-          this.updateContactMgr();
-        } else {
-          this.logger(`Unable to fetch publicKey for ${outgoingUserId}. Cannot write response.`);
-        }
-      });
-    }
+      this.userId, outgoingUserId, this._getNewMessageId(), text, Date.now());
+    this._sendOutgoingMessageOffline(chatMsg);
+    this.anonalytics.aeMessageSent();
+    this.discovery.inviteContact(outgoingPublicKey);
 
     this.conversations.addMessage(chatMsg);
     this._writeConversations();
@@ -916,8 +917,8 @@ export class MessagingEngine extends EventEmitter {
     this.contactMgr.moveContactToTop(outgoingUserId);
     this.contactMgr.setSummary(outgoingUserId, chatMsg.content);
     this._writeContactList(this.contactMgr.getAllContacts());
-    this.updateContactMgr();
 
+    this.updateContactMgr();
     this.updateMessages(outgoingUserId);
   }
 

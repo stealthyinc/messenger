@@ -29,7 +29,7 @@ class AuthLoadingScreen extends React.Component {
     else {
       const publicKey = userData['appPublicKey']
       this.props.setPublicKey(publicKey)
-      const ref = firebaseInstance.getFirebaseRef(common.getSessionRef(publicKey));
+      const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(publicKey));
       await ref.once('value')
       .then((snapshot) => {
         if (snapshot.exists() && (!common.DEV_TESTING || snapshot.val() === common.getSessionId())) {

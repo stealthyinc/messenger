@@ -46,7 +46,7 @@ class ProfileScreen extends React.Component {
     const {BlockstackNativeModule} = NativeModules;
     const { publicKey } = this.props
     if (!common.DEV_TESTING) {
-      firebaseInstance.setFirebaseData(common.getSessionRef(publicKey), common.NO_SESSION)
+      firebaseInstance.setFirebaseData(common.getDbSessionPath(publicKey), common.NO_SESSION)
     }
     this.props.initShutdown();
     // Blockstack signOut occurs in redux after the engine has emitted a shutdown event.
