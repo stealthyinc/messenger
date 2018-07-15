@@ -3,10 +3,12 @@ import React from 'react';
 import {
   Modal,
   StyleSheet,
+  TouchableHighlight,
   TouchableOpacity,
   View,
   ViewPropTypes,
   Text,
+  WebView
 } from 'react-native';
 
 import CameraRollPicker from 'react-native-camera-roll-picker';
@@ -18,6 +20,7 @@ export default class CustomActions extends React.Component {
     this._images = [];
     this.state = {
       modalVisible: false,
+      modalUrl: ''
     };
     this.onActionsPress = this.onActionsPress.bind(this);
     this.selectImages = this.selectImages.bind(this);
@@ -44,23 +47,19 @@ export default class CustomActions extends React.Component {
     },
     (buttonIndex) => {
       switch (buttonIndex) {
-        // case 0:
-        //   this.setModalVisible(false);
-        //   break;
-        // case 1:
-        //   navigator.geolocation.getCurrentPosition(
-        //     (position) => {
-        //       this.props.onSend({
-        //         location: {
-        //           latitude: position.coords.latitude,
-        //           longitude: position.coords.longitude,
-        //         },
-        //       });
-        //     },
-        //     (error) => alert(error.message),
-        //     {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
-        //   );
-        //   break;
+        case 0:
+          this.setModalVisible(true);
+          this.setState({modalUrl: 'https://app.graphitedocs.com/'})
+          break;
+        case 1:
+          this.setModalVisible(true);
+          this.setState({modalUrl: 'https://blockusign.co/'})
+          break;
+        case 2:
+          this.setModalVisible(false);
+          // this.setModalVisible(true);
+          // this.setState({modalUrl: 'http://www.travelstack.club/'})
+          // break;
         default:
           this.setModalVisible(false);
       }
@@ -147,11 +146,16 @@ export default class CustomActions extends React.Component {
             this.setModalVisible(false);
           }}
         >
-          <CameraRollPicker
-            maximum={10}
-            imagesPerRow={4}
-            callback={this.selectImages}
-            selected={[]}
+          <TouchableHighlight
+            style={{marginTop: 50, marginLeft: 10}}
+            onPress={() => {
+              this.setModalVisible(false);
+            }}>
+            <Text style={{color: '#037aff', fontSize: 20}}>Done</Text>
+          </TouchableHighlight>
+          <WebView
+            style={{marginTop: 10}}
+            source={{uri: this.state.modalUrl}}
           />
         </Modal>
         {this.renderIcon()}
