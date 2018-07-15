@@ -69,7 +69,7 @@ class ReduxNavigation extends React.Component {
     if (engineShutdown) {
       this._shutdownRequest(publicKey)
     } else if (publicKey && !this.ref) {
-      const sessionPath = common.getDbRootPath(publicKey)
+      const sessionPath = common.getDbSessionPath(publicKey)
       this.ref = firebaseInstance.getFirebaseRef(sessionPath);
       this.ref.on('child_changed', (childSnapshot, prevChildKey, publicKey) => {
         this.shutDownSignOut = false
