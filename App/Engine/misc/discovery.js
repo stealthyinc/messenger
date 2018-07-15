@@ -8,6 +8,22 @@ class Discovery {
     this.publicKey = aPublicKey
   }
 
+  monitorInvitations() {
+    if (!this.publicKey) {
+      throw('ERROR(discovery.js::monitorInvitations): public key undefined.')
+    }
+
+    const discoveryPath = `${common.getDbDiscoveryPath(this.publicKey)}`
+    const discoveryRef = firebaseInstance.getFirebaseRef(discoveryPath)
+
+    discoveryRef.on('child_added')
+    .then(snapshot => {
+      if (snapshot && snapshot.val()) {
+        console.log(`discovery.js::monitorInvitations: ${snapshot.val()}`)
+      }
+    })
+  }
+
   // Updates the shared discovery structure with an invite if needed.
   // Shared discovery structure:
   //   ud/<their pk>/discovery/<our pk>

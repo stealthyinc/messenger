@@ -283,14 +283,15 @@ export class MessagingEngine extends EventEmitter {
       //                  a conversations ref in offlineMsgSvc
       this.offlineMsgSvc.setConversationManager(this.conversations);
 
-      const activeContact = this.contactMgr.getActiveContact();
-      const activeContactId = activeContact.id;
+      const activeContactId = this.contactMgr.getActiveContact() ?
+        this.contactMgr.getActiveContact().id : undefined;
 
-      const seenMessages = this.markReceivedMessagesSeen(activeContactId);
-      this.sendMessageReceipts(seenMessages);
+      if (activeContactId) {
+        const seenMessages = this.markReceivedMessagesSeen(activeContactId);
+        this.sendMessageReceipts(seenMessages);
+      }
 
       // TODO: send these as a packet to the other user.
-
       this.offlineMsgSvc.startRecvService();
 
       // Update the summarys for all contacts. Redux makes it so that you have to
@@ -326,8 +327,13 @@ export class MessagingEngine extends EventEmitter {
         }
       }
 
-      this.updateMessages(activeContactId);
+      if (activeContactId) {
+        this.updateMessages(activeContactId);
+      }
+
       this.updateContactMgr();
+
+      this.discovery.monitorInvitations()
 
       this.emit('me-initialized', true);
     })
