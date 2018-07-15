@@ -1,6 +1,7 @@
 import firebase from 'react-native-firebase';
 import type { Notification, NotificationOpen } from 'react-native-firebase';
 import { AsyncStorage, PushNotificationIOS } from 'react-native'
+import EngineActions from '../Redux/EngineRedux'
 
 class FirebaseWrapper {
   constructor() {
@@ -98,7 +99,7 @@ class FirebaseWrapper {
       // Get information about the notification that was opened
       const notification: Notification = notificationOpen.notification;
       // console.log("notification opened", notification)
-      const data = notification._data["gcm.notification.data"]["pk"]
+      const data = notification._data["pk"]
       store.dispatch(EngineActions.newNotification(data))
       // alert("notification opened")
     });
