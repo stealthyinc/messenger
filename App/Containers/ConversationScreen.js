@@ -12,6 +12,7 @@ import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 import defaultProfile from '../Images/defaultProfile.png'
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
+const common = require('./../common.js');
 
 const styles = StyleSheet.create({
   container: {
@@ -50,8 +51,8 @@ class ConversationScreen extends React.Component {
   }
   async componentWillMount() {
     const { userData, token, publicKey } = this.props
-    let path = `/global/${process.env.NODE_ENV}/${publicKey}/notifications/`
-    firebaseInstance.setFirebaseData(path, {token})
+    const notificationPath = common.getDbNotificationPath(publicKey)
+    firebaseInstance.setFirebaseData(notificationPath, {token})
     this.props.navigation.setParams({ navigation: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
   }
   componentWillReceiveProps(nextProps) {
