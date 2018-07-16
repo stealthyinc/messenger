@@ -5,6 +5,20 @@ const statusIndicators = constants.statusIndicators;
 const SUMMARY_LEN = 27;
 const LEAN_PLUGIN = false;
 
+// The format of the elements in contactArr (TODO: a class or something appropriate)
+// {
+//   description: "I eat cheetos...",
+//   id: "pbj.id",
+//   image: "https://gaia/blockstck.org/hub/...",
+//   publicKey: "023...",
+//   status: "grey", (statisIndicators.<somevalue>)
+//   summary: "Confirm", (the last message from them)
+//   time: "", (deprecated--heartbeat last seen statement)
+//   timeMs: "", (deprecated--heartbeat last seen ms)
+//   title: "Prabhaav Bhardwaj",
+//   unread: 0
+// }
+
 // This class is written in such a way that new objects are allocated instead of
 // re-using / connecting existing objects (b/c we wouldn't want an activeContact
 // that is not contained in the contactArr).
@@ -169,6 +183,8 @@ class ContactManager {
   }
 
   getDropDownContacts = () => {
+    // This probably needs an update method (i.e. if a contact is added through
+    // discovery after dropDownContacts is initialized).
     return this.dropDownContacts;
   }
 
@@ -210,6 +226,10 @@ class ContactManager {
       }
     }
     return false;
+  }
+
+  isExistingContactId = (aContactId) => {
+    return (this.getContact(aContactId) !== undefined)
   }
 
   addNewContact = (aContact, id, publicKey, makeActiveContact = true) => {

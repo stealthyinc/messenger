@@ -30,6 +30,9 @@ const { Discovery } = require('./misc/discovery.js')
 
 const common = require('./../common.js');
 
+import API from './../Services/Api'
+const api = API.create()
+
 import chatIcon from './images/blue256.png';
 
 // TODO: refactor to relay.js
@@ -322,10 +325,57 @@ export class MessagingEngine extends EventEmitter {
 
       this.discovery = new Discovery(this.userId, this.publicKey, this.privateKey)
       this.discovery.on('new-invitation', (theirPublicKey, theirUserId) => {
-        console.log(`INFO(engine.js): discovery event "new-invitation" from ${theirUserId}`)
+        // TODO: make this a function and put it somewhere appropriate
+        // TODO: merge this with code in Block Contact Search (the part that builds up the
+        //       contact by parsing the query result)
+        if (!this.contactMgr.isExistingContactId(theirUserId)) {
+          console.log(`INFO(engine.js): discovery event "new-invitation" from ${theirUserId}`)
+          const profileEndpointQuery = utils.removeIdTld(theirUserId)
+          api.getUserProfile(profileEndpointQuery)
+          .then((queryResult) => {
+            if (queryResult &&
+                'data' in queryResult &&
+                profileEndpointQuery in queryResult['data'] &&
+                'profile' in queryResult['data'][profileEndpointQuery]) {
+              const profile = queryResult['data'][profileEndpointQuery]['profile']
+
+              const description = ('description' in profile) ?
+                                  profile['description'] : ''
+
+              const imageURL = ('image' in profile &&
+                                profile['image'][0] &&
+                                'contentUrl' in profile['image'][0] &&
+                                'name' in profile['image'][0] &&
+                                profile['image'][0]['name'] == 'avatar') ?
+                               profile['image'][0]['contentUrl'] : undefined
+
+              const title = ('name' in profile) ? profile['name'] : ''
+
+              const contact = {
+                description,
+                id: theirUserId,
+                image: imageURL,
+                publicKey: theirPublicKey,
+                status: statusIndicators.offline,
+                summary: '',
+                time: '',
+                timeMs: '',
+                title,
+                unread: 0
+              }
+
+              this.handleContactAdd(contact)
+            }
+          })
+          .catch((err) => {
+            console.log(`ERROR(engine.js): handling discovery new-invitation. ${err}`)
+          })
+
+        }
         // TODO: fetch the contact's profile, populate the contact manager, send a signal
         //       to the UX, delete the firebase entry.
       })
+
       this.discovery.monitorInvitations()
 
       this.emit('me-initialized', true);
@@ -617,57 +667,55 @@ export class MessagingEngine extends EventEmitter {
   // ////////////////////////////////////////////////////////////////////////////
   //
   handleSearchSelect(contact) {
-    let selectedUserId = contact.id;
-    // Workaround for missing TLD on contact ids
-    if (!selectedUserId.endsWith('.id')) {
-      selectedUserId += '.id';
-    }
-    if (!this.contactMgr) {
+    if (!contact || !contact.id || !this.contactMgr) {
+      console.log('ERROR(engine.js::handleSearchSelect): contact or contactMgr undefined.')
       return;
     }
 
-    const existingUserIds = this.contactMgr.getContactIds();
-
     let selfAddCheck = false;
-    if (process.env.NODE_ENV === 'production' && selectedUserId !== 'alexc.id') {
-      selfAddCheck = (selectedUserId === this.userId);
+    if (process.env.NODE_ENV === 'production' &&
+        (contact.id !== 'alexc.id' ||
+         contact.id !== 'alex.stealthy.id' ||
+         contact.id !== 'relay.id')
+        ) {
+      selfAddCheck = (contact.id === this.userId);
     }
-    if (existingUserIds.includes(selectedUserId) || selfAddCheck) {
+    if (this.contactMgr.isExistingContactId(contact.id) || selfAddCheck) {
       this.contactMgr.setActiveContact(contact);
       this.updateContactMgr();
       this.closeContactSearch();
     } else {
-      this.handleContactAdd(contact, selectedUserId);
+      this.handleContactAdd(contact);
     }
     this.emit('me-search-select-done', true);
   }
 
-  handleContactAdd(contact, id, status = undefined) {
-    if (this.anonalytics)
+  async handleContactAdd(contact) {
+    if (this.anonalytics) {
       this.anonalytics.aeContactAdded();
+    }
 
-    this._fetchPublicKey(id)
-    .then((publicKey) => {
-      if (publicKey) {
-        this.logger(`Adding contact ${id}. Read public key: ${publicKey}`);
-      } else {
-        this.logger(`Adding contact ${id}. UNABLE TO READ PUBLIC KEY`);
+    let publicKey = contact.publicKey
+    if (!publicKey) {
+      try {
+        publicKey = await this._fetchPublicKey(contact.id)
+        this.logger(`Adding contact ${contact.id}. Read public key: ${publicKey}`);
+      } catch(err) {
+        this.logger(`Adding contact ${contact.id}. UNABLE TO READ PUBLIC KEY`);
       }
+    }
 
-      this.contactMgr.addNewContact(contact, id, publicKey);
+    this.contactMgr.addNewContact(contact, contact.id, publicKey);
+    this._writeContactList(this.contactMgr.getContacts());
 
-      this._writeContactList(this.contactMgr.getContacts());
+    this.conversations.createConversation(contact.id);
+    this._writeConversations();
 
-      this.conversations.createConversation(id);
-      this._writeConversations();
+    this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
 
-
-      this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
-
-      this.updateContactMgr();
-      this.updateMessages(id);
-      this.closeContactSearch();
-    });
+    this.updateContactMgr();
+    this.updateMessages(contact.id);
+    this.closeContactSearch();
   }
 
   handleDeleteContact = (e, { contact }) => {
