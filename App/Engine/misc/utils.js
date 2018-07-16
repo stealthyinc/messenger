@@ -129,7 +129,7 @@ async function iosDecryptECIES(aKey, theCipherObject) {
 }
 
 module.exports.encrypt = async function(aKey, theContent) {
-  console.log(`Encrypting with key ${aKey}:\t${theContent}\n`)
+  // console.log(`Encrypting with key ${aKey}:\t${theContent}\n`)
   if (module.exports.is_iOS()) {
     return iosEncryptECIES(aKey, theContent)
   } else {
@@ -138,7 +138,7 @@ module.exports.encrypt = async function(aKey, theContent) {
 }
 
 module.exports.decrypt = async function(aKey, theCipherObject) {
-  console.log(`Decrypting with key ${aKey}:\t${JSON.stringify(theCipherObject)}\n`)
+  // console.log(`Decrypting with key ${aKey}:\t${JSON.stringify(theCipherObject)}\n`)
   if (module.exports.is_iOS()) {
     return iosDecryptECIES(aKey, theCipherObject)
   } else {

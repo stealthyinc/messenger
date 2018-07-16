@@ -51,8 +51,8 @@ let STEALTHY_PAGE = 'LOCALHOST';
 const WORKAROUND__DISABLE_REFLECTED_PACKET = true;
 //
 // Logging Scopes
-const LOG_GAIAIO = true;
-const LOG_OFFLINEMESSAGING = true;
+const LOG_GAIAIO = false;
+const LOG_OFFLINEMESSAGING = false;
 //
 const stealthyTestIds = [
   'pbj.id',
