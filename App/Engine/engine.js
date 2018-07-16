@@ -1,6 +1,5 @@
 const platform = require('platform');
-// const firebase = require('firebase');
-import firebase from 'react-native-firebase';
+const { firebaseInstance } = require('./firebaseWrapper.js')
 
 const EventEmitter = require('EventEmitter');
 import EngineActions from '../Redux/EngineRedux'
@@ -86,7 +85,6 @@ export class MessagingEngine extends EventEmitter {
               publicKey,
               plugIn,
               avatarUrl,
-              discoveryPath,
               sessionId,
               isMobile=false) {
     super();
@@ -95,7 +93,6 @@ export class MessagingEngine extends EventEmitter {
     this.publicKey = publicKey;
     this.plugIn = plugIn;
     this.avatarUrl = avatarUrl;
-    this.discoveryPath = discoveryPath;
     this.sessionId = sessionId;
     this.isMobile = isMobile;
     this.discovery = undefined;
@@ -161,22 +158,12 @@ export class MessagingEngine extends EventEmitter {
 
   componentDidMountWork = (initWithFetchedData, userId) => {
     if (initWithFetchedData || !userId) {
-      return;
+      return
     }
-
-    this.userId = userId;
-    this.discovery = new Discovery(this.userId, this.publicKey)
-
     this.myTimer.logEvent('Enter componentDidMountWork')
 
-    if (!firebase.auth().currentUser) {
-      firebase.auth().signInAnonymously()
-      .then(() => {
-        this._configureSessionManagement();
-      });
-    } else {
-      this._configureSessionManagement();
-    }
+    this.userId = userId;
+    this._configureSessionManagement()
   }
 
   // Don't muck with this--it affects the WebPack HMR I believe (multiple timers
@@ -333,6 +320,12 @@ export class MessagingEngine extends EventEmitter {
 
       this.updateContactMgr();
 
+      this.discovery = new Discovery(this.userId, this.publicKey, this.privateKey)
+      this.discovery.on('new-invitation', (theirPublicKey, theirUserId) => {
+        console.log(`INFO(engine.js): discovery event "new-invitation" from ${theirUserId}`)
+        // TODO: fetch the contact's profile, populate the contact manager, send a signal
+        //       to the UX, delete the firebase entry.
+      })
       this.discovery.monitorInvitations()
 
       this.emit('me-initialized', true);
@@ -346,10 +339,7 @@ export class MessagingEngine extends EventEmitter {
 
   _configureSessionManagement() {
     // Get the firebase session lock key (assume that it's set to us, throw if it's none).
-    // Considerations:
-    //   - TODO: throw if no firebase
-    //   - TODO: what to save on loss of session lock key
-    const ref = firebase.database().ref(common.getDbSessionPath(this.publicKey))
+    const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(this.publicKey))
     ref.once('value')
     .then((snapshot) => {
       if (!snapshot.exists() || snapshot.val() === common.NO_SESSION) {
@@ -365,7 +355,7 @@ export class MessagingEngine extends EventEmitter {
   _configureIO() {
     this.io = (ENABLE_GAIA) ?
       new GaiaIO(this.logger, LOG_GAIAIO) :
-      new FirebaseIO(this.logger, firebase, STEALTHY_PAGE, LOG_GAIAIO);
+      new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO);
 
     this._fetchUserSettings();
   }
@@ -420,7 +410,6 @@ export class MessagingEngine extends EventEmitter {
 
     if (this.anonalytics === undefined) {
       this.anonalytics = new Anonalytics(this.userId);
-      // this.anonalytics.setDatabase(firebase);
     }
 
     this.anonalytics.aeLogin();
@@ -509,27 +498,6 @@ export class MessagingEngine extends EventEmitter {
     if (discovery) {
       this.emit('me-add-discovery-contact', cleanId, path);
     }
-  }
-
-  writeContactDiscovery(contactId, publicKey, development=false) {
-    const id = this.userId.substring(0, this.userId.indexOf('.id'));
-    const cid = contactId.substring(0, contactId.indexOf('.id'));
-    const cleanContactId = cid.replace(/\./g, '_');
-    const cleanId = id.replace(/\./g, '_');
-    let path = `/global/discovery/`;
-    if (development) {
-      path += `development/${cleanContactId}`
-    }
-    else {
-      path += `${cleanContactId}`;
-    }
-    const ref = firebase.database().ref(`${path}/${cleanId}`);
-    ref.once('value')
-    .then((snapshot) => {
-      if (!snapshot.val()) {
-        ref.set({ status: 'pending' });
-      }
-    });
   }
 
   //
@@ -699,12 +667,6 @@ export class MessagingEngine extends EventEmitter {
       this.updateContactMgr();
       this.updateMessages(id);
       this.closeContactSearch();
-
-      if (status) {
-        const key = id.substring(0, id.indexOf('.id')).replace(/\./g, '_');
-        const fbPath = utils.cleanPathForFirebase(`${this.discoveryPath}/${key}`);
-        firebase.database().ref(fbPath).remove();
-      }
     });
   }
 
@@ -724,12 +686,6 @@ export class MessagingEngine extends EventEmitter {
     if (activeUser) {
       const activeUserId = activeUser.id;
       this.contactMgr.clearUnread(activeUserId);
-    }
-
-    if (this.settings.discovery) {
-      const key = contact.id.substring(0, contact.id.indexOf('.id')).replace(/\./g, '_');
-      const fbPath = utils.cleanPathForFirebase(`${this.discoveryPath}/${key}`);
-      firebase.database().ref(fbPath).remove();
     }
 
     this.updateContactMgr();

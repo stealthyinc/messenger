@@ -1,27 +1,62 @@
+const EventEmitter = require('EventEmitter');
 const utils = require('./utils.js');
 const { firebaseInstance } = require('./../firebaseWrapper.js')
 const common = require('./../../common.js');
 
-class Discovery {
-  constructor(aUserId, aPublicKey) {
+class Discovery extends EventEmitter {
+  constructor(aUserId, aPublicKey, aPrivateKey) {
+    if (!aUserId || !aPublicKey || !aPrivateKey) {
+      throw('ERROR(discovery.js): Unable to create object from provided arguments.')
+    }
+
+    super()
+
     this.myUserId = aUserId
     this.publicKey = aPublicKey
+    this.privateKey = aPrivateKey
+  }
+
+  // TODO: create a class from EventEmitter that defines this method so we don't
+  //       copy-pasta it everywhere.
+  //
+  // Convert node 'on' method to react 'addListener' method for RN EventEmitter
+  on = (eventTypeStr, listenerFn, context) => {
+    this.addListener(eventTypeStr, listenerFn, context);
+  }
+
+  async _handleInvitation(snapshot) {
+    if (snapshot && snapshot.val()) {
+      const theirPublicKey = snapshot.key
+      try {
+        const stringifiedCipherObj = snapshot.val()
+        const cipherObj = JSON.parse(stringifiedCipherObj)
+        const theirUserId = await utils.decrypt(this.privateKey, cipherObj, true)
+        this.emit('new-invitation', theirPublicKey, theirUserId)
+      } catch (err) {
+        console.log(`ERROR(discovery.js::_handleInvitation): ${err}`)
+      }
+    }
+  }
+
+  async clearInvitation(theirPublicKey) {
+    if (!theirPublicKey) {
+      throw(`ERROR(discovery.js::clearInvitation): theirPublicKey unspecified.`)
+    }
+
+    try {
+      const discoveryPath = `${common.getDbDiscoveryPath(this.publicKey)}/${theirPublicKey}`
+      const discoveryRef = firebaseInstance.getFirebaseRef(discoveryPath)
+      const result = await discoveryRef.remove()
+    } catch (err) {
+      console.log(`ERROR(discovery.js::clearInvitation): ${err}`)
+    }
   }
 
   monitorInvitations() {
-    if (!this.publicKey) {
-      throw('ERROR(discovery.js::monitorInvitations): public key undefined.')
-    }
-
     const discoveryPath = `${common.getDbDiscoveryPath(this.publicKey)}`
     const discoveryRef = firebaseInstance.getFirebaseRef(discoveryPath)
 
-    discoveryRef.on('child_added')
-    .then(snapshot => {
-      if (snapshot && snapshot.val()) {
-        console.log(`discovery.js::monitorInvitations: ${snapshot.val()}`)
-      }
-    })
+    discoveryRef.on('child_added', (snapshot) => this._handleInvitation(snapshot))
   }
 
   // Updates the shared discovery structure with an invite if needed.
@@ -42,19 +77,16 @@ class Discovery {
       const discoveryPath = `${common.getDbDiscoveryPath(theirPublicKey)}/${this.publicKey}`
       const discoveryRef = firebaseInstance.getFirebaseRef(discoveryPath)
 
+      // If there is no existing invitation, then invite the specified contact:
       const snapshot = await discoveryRef.once('value')
-      if (snapshot && snapshot.val()) {
-        return
+      if (!snapshot || !snapshot.val()) {
+        const encUserId = await utils.encrypt(theirPublicKey, this.myUserId)
+        const encUserIdStr = JSON.stringify(encUserId)
+        const result = await discoveryRef.set(encUserIdStr)
       }
-
-      const encUserId = await utils.encrypt(theirPublicKey, this.myUserId)
-      const encUserIdStr = JSON.stringify(encUserId)
-      const result = await discoveryRef.set(encUserIdStr)
     } catch (err) {
       console.log(`ERROR(discovery.js::inviteContact): ${err}`)
     }
-
-    return
   }
 }
 

@@ -36,7 +36,6 @@ const createEngine = (userData) => {
                               userData['appPublicKey'],   // publicKey
                               false,                      // plugIn
                               userData['profileURL'],     // avatarUrl
-                              '',                         // discoveryPath
                               common.getSessionId(),      // sessionId
                               true,                       // isMobile
                             )

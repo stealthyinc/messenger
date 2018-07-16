@@ -1,15 +1,15 @@
 const BaseIO = require('./baseIO.js');
 const utils = require('./../misc/utils.js')
+const { firebaseInstance } = require('./../firebaseWrapper.js')
 
 const ROOT = '/global/gaia';
 const APP_NAME = 'stealthy.im';
 
 module.exports = class FirebaseIO extends BaseIO {
-  constructor(logger, firebaseInst, pathURL, logOutput = false) {
+  constructor(logger, pathURL, logOutput = false) {
     super();
     this.logger = logger;
     this.logOutput = logOutput;
-    this.firebaseInst = firebaseInst;
     this.pathURL = pathURL;
   }
 
@@ -60,8 +60,9 @@ module.exports = class FirebaseIO extends BaseIO {
     const cleanPath = utils.cleanPathForFirebase(filePath);
     this.log(`Writing data to: ${cleanPath}`);
     try {
-      const res = this.firebaseInst.database().ref(cleanPath).set(data);
-      return res;
+      // TODO: set returns a promise--need to make this await and _write async
+      //       or use a .catch
+      return this.firebaseInstance.getFirebaseRef(cleanPath).set(data)
     } catch (err) {
       let errMsg = `ERROR: firebaseIO::_write ${err}`;
       if (process.env.NODE_ENV === 'production') {
@@ -74,7 +75,7 @@ module.exports = class FirebaseIO extends BaseIO {
 
   _read(filePath) {
     const cleanPath = utils.cleanPathForFirebase(filePath);
-    const targetRef = this.firebaseInst.database().ref(cleanPath);
+    const targetRef = this.firebaseInstance.getFirebaseRef(cleanPath);
 
     return targetRef.once('value')
     .then((snapshot) => {
@@ -90,6 +91,6 @@ module.exports = class FirebaseIO extends BaseIO {
   _delete(filePath) {
     const cleanPath = utils.cleanPathForFirebase(filePath);
     this.log(`Deleting ${cleanPath}`);
-    return this.firebaseInst.database().ref(cleanPath).remove();
+    return this.firebaseInstance.getFirebaseRef(cleanPath).remove();
   }
 };
