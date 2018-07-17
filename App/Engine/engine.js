@@ -412,7 +412,7 @@ export class MessagingEngine extends EventEmitter {
     this.myTimer.logEvent('Enter _fetchDataAndCompleteInit')
 
     if (this.anonalytics === undefined) {
-      this.anonalytics = new Anonalytics(this.userId);
+      this.anonalytics = new Anonalytics(this.publicKey);
     }
 
     this.anonalytics.aeLogin();
