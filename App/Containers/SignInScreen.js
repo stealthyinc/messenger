@@ -152,10 +152,12 @@ class SignInScreen extends React.Component {
               AsyncStorage.setItem('userData', JSON.stringify(this.userData));
               const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(publicKey));
               await ref.once('value')
-              .then((snapshot) => {
+              .then(async (snapshot) => {
                 if (!snapshot.exists() || snapshot.val() === 'none') {
                   ref.set(common.getSessionId());
                   this.props.setUserData(this.userData)
+                  const token = await AsyncStorage.getItem('token')
+                  this.props.setToken(token)
                   this.props.navigation.navigate('App');
                 }
                 else {
@@ -194,6 +196,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     setUserData: (userData) => dispatch(EngineActions.setUserData(userData)),
     setPublicKey: (publicKey) => dispatch(EngineActions.setPublicKey(publicKey)),
+    setToken: (token) => dispatch(EngineActions.setToken(token)),
   }
 }
 
