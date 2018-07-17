@@ -478,7 +478,8 @@ export class MessagingEngine extends EventEmitter {
   // ////////////////////////////////////////////////////////////////////////////
   //
   handleShutDownRequest() {
-    this.offAll()
+    // TODO: clean this up and fix it (crashes rigth now with intermediat value is not a function)
+    // this.offAll()
 
     this.offlineMsgSvc.skipSendService();
     this.offlineMsgSvc.stopSendService();
