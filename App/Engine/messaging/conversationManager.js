@@ -361,7 +361,7 @@ class ConversationManager {
   //         - etc.
   getSpecificMessages(aUserId, aMsgIdList) {
     if (!(aUserId in this.conversations)) {
-      this.logger(`ERROR(ConversationManager::getMessages): Messages for ${aUserId} unavailable.`);
+      this.logger(`ERROR(ConversationManager::getSpecificMessages): Messages for ${aUserId} unavailable.`);
     }
     const bundle = this._getLastBundle(aUserId);
     if (bundle) {

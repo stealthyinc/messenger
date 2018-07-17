@@ -1199,27 +1199,28 @@ export class MessagingEngine extends EventEmitter {
     }
 
     const selectedUserId = contact.id;
+    if (this.contactMgr.isExistingContactId(selectedUserId)) {
+      // TODO: need to send a packet back indicating messages seen.
+      //       need offline solution to this too.
+      // Mark sent messages as seen.
+      // const chatMessages = this.conversations.getMessages(selectedUserId);
+      // for (const chatMsg of chatMessages) {
+      //   if (chatMsg.sent) {
+      //     chatMsg.seen = true;
+      //   }
+      // }
 
-    // TODO: need to send a packet back indicating messages seen.
-    //       need offline solution to this too.
-    // Mark sent messages as seen.
-    // const chatMessages = this.conversations.getMessages(selectedUserId);
-    // for (const chatMsg of chatMessages) {
-    //   if (chatMsg.sent) {
-    //     chatMsg.seen = true;
-    //   }
-    // }
+      // TODO: predicate this by checking if unread is already zero ...
+      this.contactMgr.setActiveContact(contact);
+      // ACTODO: this method makes shit break...............
+      this.contactMgr.clearUnread(selectedUserId);
 
-    // TODO: predicate this by checking if unread is already zero ...
-    this.contactMgr.setActiveContact(contact);
-    // ACTODO: this method makes shit break...............
-    this.contactMgr.clearUnread(selectedUserId);
+      const seenMessages = this.markReceivedMessagesSeen(selectedUserId);
+      this.sendMessageReceipts(seenMessages);
 
-    const seenMessages = this.markReceivedMessagesSeen(selectedUserId);
-    this.sendMessageReceipts(seenMessages);
-
-    this.updateContactMgr();
-    this.updateMessages(selectedUserId);
+      this.updateContactMgr();
+      this.updateMessages(selectedUserId);
+    }
     this.closeContactSearch();
   }
 

@@ -72,7 +72,7 @@ class BlockContactSearch extends Component {
       title: name
     }
     this.props.addNewContact(contact)
-    this.props.setActiveContact(contact.id);
+    this.props.setActiveContact(contact);
   }
   createListItem(payload) {
     return (payload && payload.results) ? payload.results.map((item, i) => (
