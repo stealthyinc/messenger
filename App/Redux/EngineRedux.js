@@ -28,7 +28,8 @@ const { Types, Creators } = createActions({
   setCurrentPlatform: ['currentPlatform'],
   initShutdown: [''],
   newNotification: ['senderInfo'],
-  setBearerToken: ['bearerToken']
+  setBearerToken: ['bearerToken'],
+  setSession: ['session'],
 })
 
 export const EngineTypes = Types
@@ -53,6 +54,7 @@ export const INITIAL_STATE = Immutable({
   lockEngine: false,
   publicKey: '',
   bearerToken: '',
+  session: '',
 })
 
 /* ------------- Selectors ------------- */
@@ -72,6 +74,7 @@ export const EngineSelectors = {
   getPublicKey: state => state.engine.publicKey,
   getEngineShutdown: state => state.engine.engineShutdown,
   getBearerToken: state => state.engine.bearerToken,
+  getSession: state => state.engine.session,
 }
 
 /* ------------- Reducers ------------- */
@@ -134,9 +137,14 @@ export const setToken = (state, { token }) => {
   return state.merge({ token })
 }
 
-// set token
+// set bearer token
 export const setBearerToken = (state, { bearerToken }) => {
   return state.merge({ bearerToken })
+}
+
+// set session
+export const setSession = (state, { session }) => {
+  return state.merge({ session })
 }
 
 // read user settings from engine

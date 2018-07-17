@@ -36,6 +36,7 @@ class AuthLoadingScreen extends React.Component {
           this.setupVars(userData)
         }
         else {
+          this.props.setSession(snapshot.val())
           this.props.navigation.navigate('Block');
         }
       })
@@ -81,6 +82,7 @@ const mapDispatchToProps = (dispatch) => {
     setPublicKey: (publicKey) => dispatch(EngineActions.setPublicKey(publicKey)),
     setUserProfile: (userProfile) => dispatch(EngineActions.setUserProfile(userProfile)),
     setToken: (token) => dispatch(EngineActions.setToken(token)),
+    setSession: (session) => dispatch(EngineActions.setSession(session)),
   }
 }
 
