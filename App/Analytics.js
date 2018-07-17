@@ -2,8 +2,8 @@ import { Analytics } from 'aws-amplify';
 const MAX_QUEUE = 100;
 
 class Anonalytics {
-  constructor(aUserId = undefined) {
-    this.userId = aUserId;
+  constructor(publicKey = undefined) {
+    this.publicKey = publicKey;
     if (process.env.NODE_ENV === 'production') {
       Analytics.enable();
     }
@@ -130,7 +130,7 @@ class Anonalytics {
   //
 
   _storeEvent(anEventName, aString = undefined) {
-    if (anEventName && this.userId) {
+    if (anEventName && this.publicKey) {
       const eventTimeMs = Date.now();
       const AWS_LIMIT = 1000;
       const d = new Date();
@@ -139,10 +139,10 @@ class Anonalytics {
         let awsCleanString = (aString.length >= AWS_LIMIT) ?
           aString.substring(0, AWS_LIMIT -2) :
           aString;
-        Analytics.record({name: anEventName, attributes: {data: awsCleanString, id: this.userId, dateStamp}});
+        Analytics.record({name: anEventName, attributes: {data: awsCleanString, id: this.publicKey, dateStamp}});
       }
       else {
-        Analytics.record({name: anEventName, attributes: {id: this.userId, dateStamp}});
+        Analytics.record({name: anEventName, attributes: {id: this.publicKey, dateStamp}});
       }
     }
   }
