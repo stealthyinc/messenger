@@ -461,6 +461,46 @@ class ContactManager {
     return '';
   }
 
+  static buildContactFromQueryResult(aQueryResult, profileQuery, theirPublicKey) {
+    let contact = undefined
+
+    if (queryResult &&
+        'data' in queryResult &&
+        profileQuery in queryResult['data']) {
+
+      const {profile, fullyQualifiedName} = queryResult['data'][profileQuery]
+
+      if (profile && fullyQualifiedName) {
+        const description = ('description' in profile) ?
+                            profile['description'] : ''
+
+        const imageURL = ('image' in profile &&
+                          profile['image'][0] &&
+                          'contentUrl' in profile['image'][0] &&
+                          'name' in profile['image'][0] &&
+                          profile['image'][0]['name'] == 'avatar') ?
+                         profile['image'][0]['contentUrl'] : undefined
+
+        const title = ('name' in profile) ? profile['name'] : ''
+
+        contact = {
+          description,
+          id: fullyQualifiedName,
+          image: imageURL,
+          publicKey: theirPublicKey,
+          status: statusIndicators.offline,
+          summary: '',
+          time: '',
+          timeMs: '',
+          title,
+          unread: 0
+        }
+      }
+    }
+
+    return contact
+  }
+
 }
 
 module.exports = { ContactManager };

@@ -324,57 +324,9 @@ export class MessagingEngine extends EventEmitter {
       this.updateContactMgr();
 
       this.discovery = new Discovery(this.userId, this.publicKey, this.privateKey)
-      this.discovery.on('new-invitation', (theirPublicKey, theirUserId) => {
-        // TODO: make this a function and put it somewhere appropriate
-        // TODO: merge this with code in Block Contact Search (the part that builds up the
-        //       contact by parsing the query result)
-        if (!this.contactMgr.isExistingContactId(theirUserId)) {
-          console.log(`INFO(engine.js): discovery event "new-invitation" from ${theirUserId}`)
-          const profileEndpointQuery = utils.removeIdTld(theirUserId)
-          api.getUserProfile(profileEndpointQuery)
-          .then((queryResult) => {
-            if (queryResult &&
-                'data' in queryResult &&
-                profileEndpointQuery in queryResult['data'] &&
-                'profile' in queryResult['data'][profileEndpointQuery]) {
-              const profile = queryResult['data'][profileEndpointQuery]['profile']
-
-              const description = ('description' in profile) ?
-                                  profile['description'] : ''
-
-              const imageURL = ('image' in profile &&
-                                profile['image'][0] &&
-                                'contentUrl' in profile['image'][0] &&
-                                'name' in profile['image'][0] &&
-                                profile['image'][0]['name'] == 'avatar') ?
-                               profile['image'][0]['contentUrl'] : undefined
-
-              const title = ('name' in profile) ? profile['name'] : ''
-
-              const contact = {
-                description,
-                id: theirUserId,
-                image: imageURL,
-                publicKey: theirPublicKey,
-                status: statusIndicators.offline,
-                summary: '',
-                time: '',
-                timeMs: '',
-                title,
-                unread: 0
-              }
-
-              this.handleContactAdd(contact)
-            }
-          })
-          .catch((err) => {
-            console.log(`ERROR(engine.js): handling discovery new-invitation. ${err}`)
-          })
-
-        }
-        // TODO: fetch the contact's profile, populate the contact manager, send a signal
-        //       to the UX, delete the firebase entry.
-      })
+      this.discovery.on('new-invitation',
+                        (theirPublicKey, theirUserId) =>
+                          this.handleContactInvitation(theirPublicKey, theirUserId))
 
       this.discovery.monitorInvitations()
 
@@ -688,6 +640,27 @@ export class MessagingEngine extends EventEmitter {
       this.handleContactAdd(contact);
     }
     this.emit('me-search-select-done', true);
+  }
+
+  handleContactInvitation(theirPublicKey, theirUserId) {
+    // TODO: merge this with code in Block Contact Search (the part that builds up the
+    //       contact by parsing the query result)
+    if (!this.contactMgr.isExistingContactId(theirUserId)) {
+      console.log(`INFO(engine.js): discovery event "new-invitation" from ${theirUserId}`)
+      const profileQuery = utils.removeIdTld(theirUserId)
+      api.getUserProfile(profileQuery)
+      .then((queryResult) => {
+
+        const contact = ContactManager.buildContactFromQueryResult(
+          queryResult, profileQuery, theirPublicKey)
+        if (contact) {
+          this.handleContactAdd(contact)
+        }
+      })
+      .catch((err) => {
+        console.log(`ERROR(engine.js): handling discovery new-invitation. ${err}`)
+      })
+    }
   }
 
   async handleContactAdd(contact) {
