@@ -461,16 +461,17 @@ class ContactManager {
     return '';
   }
 
-  static buildContactFromQueryResult(aQueryResult, profileQuery, theirPublicKey) {
+  static buildContactFromQueryResult(aQueryResult, profileQuery, theirUserId, theirPublicKey) {
     let contact = undefined
 
-    if (queryResult &&
-        'data' in queryResult &&
-        profileQuery in queryResult['data']) {
+    if (aQueryResult &&
+        'data' in aQueryResult &&
+        profileQuery in aQueryResult['data']) {
 
-      const {profile, fullyQualifiedName} = queryResult['data'][profileQuery]
+      // Oddly, fullyQualifiedName doesn't always appear in the data that is returned.
+      const {profile} = aQueryResult['data'][profileQuery]
 
-      if (profile && fullyQualifiedName) {
+      if (profile && theirUserId) {
         const description = ('description' in profile) ?
                             profile['description'] : ''
 
@@ -485,7 +486,7 @@ class ContactManager {
 
         contact = {
           description,
-          id: fullyQualifiedName,
+          id: theirUserId,
           image: imageURL,
           publicKey: theirPublicKey,
           status: statusIndicators.offline,

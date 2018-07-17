@@ -55,7 +55,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
           ("data" in queryResult) &&
           ("results" in queryResult["data"])) {
         for (const result of queryResult["data"]["results"]) {
-          if ((!"fullyQualifiedName" in result) ||
+          if (!("fullyQualifiedName" in result) ||
               (result["fullyQualifiedName"] !== username)) {
             continue
           }

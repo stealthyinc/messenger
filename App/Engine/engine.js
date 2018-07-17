@@ -57,19 +57,6 @@ const WORKAROUND__DISABLE_REFLECTED_PACKET = true;
 const LOG_GAIAIO = false;
 const LOG_OFFLINEMESSAGING = false;
 //
-const stealthyTestIds = [
-  'pbj.id',
-  'alexc.id',
-  'relay.id',
-  'stealthy.id',
-  'braphaav.personal.id',
-  'amplifier.steatlhy.id',
-  'channel.stealthy.id',
-  'echo.stealthy.id',
-  'megaphone.stealthy.id',
-  'relay.steatlhy.id',
-  'repeater.stealthy.id',
-]
 
 // TODO: need a better way to indicate an ID is a relay:
 //       * subdomain reg:  e.g. blockstack.relay.id   (relay.id being the subdoain)
@@ -112,11 +99,39 @@ export class MessagingEngine extends EventEmitter {
     this.io = undefined;
     this.shuttingDown = false;
     this.anonalytics = undefined;
+
+    this.listeners = {}
   }
 
   // Convert node 'on' method to react 'addListener' method for RN EventEmitter
   on = (eventTypeStr, listenerFn, context) => {
-    this.addListener(eventTypeStr, listenerFn, context);
+    const listener = this.addListener(eventTypeStr, listenerFn, context);
+
+    // manage the listeners
+    if (!(eventTypeStr in this.listeners)) {
+      this.listeners[eventTypeStr] = []
+    }
+    this.listeners[eventTypeStr].push(listener)
+  }
+
+  off = (eventTypeStr) => {
+    if (eventTypeStr in this.listeners) {
+      for (const listener of this.listeners[eventTypeStr]) {
+        listener.remove()
+      }
+
+      delete this.listeners[eventTypeStr]
+    }
+  }
+
+  offAll = () => {
+    for (const listenerArr of this.listeners) {
+      for (const listener of listenerArr) {
+        listener.remove()
+      }
+    }
+
+    this.listeners = {}
   }
 
   log = (display, ...args) => {
@@ -167,24 +182,6 @@ export class MessagingEngine extends EventEmitter {
 
     this.userId = userId;
     this._configureSessionManagement()
-  }
-
-  // Don't muck with this--it affects the WebPack HMR I believe (multiple timers
-  // objects etc. if this is not here):
-  componentWillUnmountWork() {
-    this.logger('componentWillUnmountWork:');
-    this.shuttingDown = true;
-
-    this.offlineMsgSvc.stopSendService();
-    this.offlineMsgSvc.stopRecvService();
-
-    // Don't put anything below here in this fn--it's not guaranteed to be run
-    // due to some issue tbd.
-    // ------------------------------------------------------------------------
-
-    // let deleteResolves = Promise.all(deletionPromises);
-
-    // In UI make sure initWithFetchedData state becomes false.
   }
 
   //
@@ -323,12 +320,16 @@ export class MessagingEngine extends EventEmitter {
 
       this.updateContactMgr();
 
-      this.discovery = new Discovery(this.userId, this.publicKey, this.privateKey)
-      this.discovery.on('new-invitation',
-                        (theirPublicKey, theirUserId) =>
-                          this.handleContactInvitation(theirPublicKey, theirUserId))
+      if (this.settings.discovery) {
+        this.discovery = new Discovery(this.userId, this.publicKey, this.privateKey)
+      }
+      if (this.discovery) {
+        this.discovery.on('new-invitation',
+                          (theirPublicKey, theirUserId) =>
+                            this.handleContactInvitation(theirPublicKey, theirUserId))
 
-      this.discovery.monitorInvitations()
+        this.discovery.monitorInvitations()
+      }
 
       this.emit('me-initialized', true);
     })
@@ -371,7 +372,7 @@ export class MessagingEngine extends EventEmitter {
         utils.decryptObj(this.privateKey, settingsData, ENCRYPT_SETTINGS)
         .then(settingsData => {
           this.settings = settingsData
-          this.initSettings();
+          this.emit('me-update-settings', this.settings);
           this._fetchDataAndCompleteInit();
         })
         .catch(err => {
@@ -394,14 +395,14 @@ export class MessagingEngine extends EventEmitter {
           this.emit('me-handle-intro-open');
         }
 
-        this.initSettings();
+        this.emit('me-update-settings', this.settings);
         this._fetchDataAndCompleteInit();
       }
     })
     .catch((error) => {
       // TODO: Prabhaav--shouldn't this set the default settings from above?
       this.logger('Error', error);
-      this.initSettings();
+      this.emit('me-update-settings', this.settings);
       this._fetchDataAndCompleteInit();
       this.logger('ERROR: Reading settings.');
     });
@@ -471,43 +472,14 @@ export class MessagingEngine extends EventEmitter {
     });
   }
 
-  // TODO: rename this to something appropriate (i.e. update settings or
-  //       something sensible for our api)
-  initSettings() {
-    this.emit('me-update-settings', this.settings);
-
-    // TODO: refactor and cleanup alg. to work with failed discovery.
-    if (process.env.NODE_ENV === 'production') {
-      this.readContactDiscovery(this.settings.discovery);
-    }
-    else {
-      if (stealthyTestIds.indexOf(this.userId) > -1) {
-        this.readContactDiscovery(this.settings.discovery, true);
-      }
-    }
-  }
-
-  readContactDiscovery(discovery, development=false) {
-    const id = this.userId.substring(0, this.userId.indexOf('.id'));
-    const cleanId = id.replace(/_/g, '\.');
-    let path = `/global/discovery/`;
-    if (development) {
-      path += `development/${cleanId}`
-    }
-    else {
-      path += `${cleanId}`
-    }
-    if (discovery) {
-      this.emit('me-add-discovery-contact', cleanId, path);
-    }
-  }
-
   //
   //  Generic
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   //
   handleShutDownRequest() {
+    this.offAll()
+
     this.offlineMsgSvc.skipSendService();
     this.offlineMsgSvc.stopSendService();
     this.offlineMsgSvc.pauseRecvService();
@@ -652,7 +624,7 @@ export class MessagingEngine extends EventEmitter {
       .then((queryResult) => {
 
         const contact = ContactManager.buildContactFromQueryResult(
-          queryResult, profileQuery, theirPublicKey)
+          queryResult, profileQuery, theirUserId, theirPublicKey)
         if (contact) {
           this.handleContactAdd(contact)
         }
@@ -692,6 +664,10 @@ export class MessagingEngine extends EventEmitter {
   }
 
   handleDeleteContact = (e, { contact }) => {
+    if (this.discovery) {
+      this.discovery.clearInvitation(contact.publicKey)
+    }
+
     this.contactMgr.deleteContact(contact);
 
     this._writeContactList(this.contactMgr.getAllContacts());
@@ -724,13 +700,27 @@ export class MessagingEngine extends EventEmitter {
       this.settings.search = !this.settings.search;
       this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`);
     } else if (name === 'discovery') {
-      this.readContactDiscovery(!this.settings.discovery);
       this.settings.discovery = !this.settings.discovery;
       this.anonalytics.aeSettings(`discovery:${this.settings.discovery}`);
       if (this.settings.discovery) {
-        if (process.env.NODE_ENV === 'production' || stealthyTestIds.indexOf(this.userId) > -1) {
-          this.readContactDiscovery(this.settings.discovery);
+        if (!this.discovery) {
+          this.discovery = new Discovery(this.userId, this.publicKey, this.privateKey)
+
+          this.discovery.on('new-invitation',
+                            (theirPublicKey, theirUserId) =>
+                              this.handleContactInvitation(theirPublicKey, theirUserId))
+
+          this.discovery.monitorInvitations()
         }
+      } else {
+        // TODO: discussion w/ PBJ about whether we should completely clear
+        //       all invitations in the user's firebase.
+        //       If we want to do this, call this.discovery.clearDiscoveryDb()
+        //
+        this.discovery.off('new-invitation')
+        this.discovery.stop()
+        this.discovery.clearDiscoveryDb()
+        this.discovery = undefined
       }
     } // webrtc, heartbeat is ignored
 
@@ -892,7 +882,9 @@ export class MessagingEngine extends EventEmitter {
       this.userId, outgoingUserId, this._getNewMessageId(), text, Date.now());
     this._sendOutgoingMessageOffline(chatMsg);
     this.anonalytics.aeMessageSent();
-    this.discovery.inviteContact(outgoingPublicKey);
+    if (this.discovery) {
+      this.discovery.inviteContact(outgoingPublicKey);
+    }
 
     this.conversations.addMessage(chatMsg);
     this._writeConversations();

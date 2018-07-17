@@ -14,6 +14,11 @@ class Discovery extends EventEmitter {
     this.myUserId = aUserId
     this.publicKey = aPublicKey
     this.privateKey = aPrivateKey
+    this.development = (process.env.NODE_ENV === 'development')
+
+    this.fbListenerFn = undefined
+
+    this.listeners = {}
   }
 
   // TODO: create a class from EventEmitter that defines this method so we don't
@@ -21,8 +26,45 @@ class Discovery extends EventEmitter {
   //
   // Convert node 'on' method to react 'addListener' method for RN EventEmitter
   on = (eventTypeStr, listenerFn, context) => {
-    this.addListener(eventTypeStr, listenerFn, context);
+    const listener = this.addListener(eventTypeStr, listenerFn, context);
+
+    // manage the listeners
+    if (!(eventTypeStr in this.listeners)) {
+      this.listeners[eventTypeStr] = []
+    }
+    this.listeners[eventTypeStr].push(listener)
   }
+
+  off = (eventTypeStr) => {
+    if (eventTypeStr in this.listeners) {
+      for (const listener of this.listeners[eventTypeStr]) {
+        listener.remove()
+      }
+
+      delete this.listeners[eventTypeStr]
+    }
+  }
+
+  offAll = () => {
+    for (const listenerArr of this.listeners) {
+      for (const listener of listenerArr) {
+        listener.remove()
+      }
+    }
+
+    this.listeners = {}
+  }
+
+  stop() {
+    if (this.fbListenerFn) {
+      const discoveryPath = `${common.getDbDiscoveryPath(this.publicKey)}`
+      const discoveryRef = firebaseInstance.getFirebaseRef(discoveryPath)
+      discoveryRef.off('child_added', this.fbListenerFn)
+    }
+
+    this.fbListenerFn = undefined
+  }
+
 
   async _handleInvitation(snapshot) {
     if (snapshot && snapshot.val()) {
@@ -52,11 +94,21 @@ class Discovery extends EventEmitter {
     }
   }
 
+  async clearDiscoveryDb() {
+    try {
+      const discoveryPath = common.getDbDiscoveryPath(this.publicKey)
+      const discoveryRef = firebaseInstance.getFirebaseRef(discoveryPath)
+      const result = await discoveryRef.remove()
+    } catch (err) {
+      console.log(`ERROR(discovery.js::clearDiscoveryDb): ${err}`)
+    }
+  }
+
   monitorInvitations() {
     const discoveryPath = `${common.getDbDiscoveryPath(this.publicKey)}`
     const discoveryRef = firebaseInstance.getFirebaseRef(discoveryPath)
 
-    discoveryRef.on('child_added', (snapshot) => this._handleInvitation(snapshot))
+    this.fbListenerFn = discoveryRef.on('child_added', (snapshot) => this._handleInvitation(snapshot))
   }
 
   // Updates the shared discovery structure with an invite if needed.
