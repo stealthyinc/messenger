@@ -48,30 +48,31 @@ class BlockContactSearch extends Component {
     }
   }
   parseContact(item) {
-    let userImage = 'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
     const { profile, username, fullyQualifiedName } = item
+
     const { contactMgr } = this.props
-    const found = contactMgr.getContact(fullyQualifiedName)
-    if (found) {
+    if (contactMgr.isExistingContactId(fullyQualifiedName)) {
       this.props.navigation.goBack()
       this.props.navigation.navigate('ChatRoom')
     }
+
+    // TODO: look at merging this with code that handles engine query to bs endpoint
+    //       (api.getUserProfile call results)
     const { image, name, description } = profile
-    if (image && image.length) {
-      userImage = image[0].contentUrl
-    }
-    let fullName = username
-    if (name)
-      fullName = name
-    const cleanItem = {
+    const userImage = (image && image[0] &&
+                       'contentUrl' in image[0]) ?
+                      image[0]['contentUrl'] :
+                      'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
+
+    const contact = {
       description,
-      id: username,
+      id: fullyQualifiedName,
       image: userImage,
       key: Date.now(),
       title: name
     }
-    this.props.addNewContact(cleanItem)
-    this.props.setActiveContact(fullyQualifiedName);
+    this.props.addNewContact(contact)
+    this.props.setActiveContact(contact);
   }
   createListItem(payload) {
     return (payload && payload.results) ? payload.results.map((item, i) => (

@@ -30,6 +30,9 @@ const { Discovery } = require('./misc/discovery.js')
 
 const common = require('./../common.js');
 
+import API from './../Services/Api'
+const api = API.create()
+
 import chatIcon from './images/blue256.png';
 
 // TODO: refactor to relay.js
@@ -321,11 +324,10 @@ export class MessagingEngine extends EventEmitter {
       this.updateContactMgr();
 
       this.discovery = new Discovery(this.userId, this.publicKey, this.privateKey)
-      this.discovery.on('new-invitation', (theirPublicKey, theirUserId) => {
-        console.log(`INFO(engine.js): discovery event "new-invitation" from ${theirUserId}`)
-        // TODO: fetch the contact's profile, populate the contact manager, send a signal
-        //       to the UX, delete the firebase entry.
-      })
+      this.discovery.on('new-invitation',
+                        (theirPublicKey, theirUserId) =>
+                          this.handleContactInvitation(theirPublicKey, theirUserId))
+
       this.discovery.monitorInvitations()
 
       this.emit('me-initialized', true);
@@ -617,57 +619,76 @@ export class MessagingEngine extends EventEmitter {
   // ////////////////////////////////////////////////////////////////////////////
   //
   handleSearchSelect(contact) {
-    let selectedUserId = contact.id;
-    // Workaround for missing TLD on contact ids
-    if (!selectedUserId.endsWith('.id')) {
-      selectedUserId += '.id';
-    }
-    if (!this.contactMgr) {
+    if (!contact || !contact.id || !this.contactMgr) {
+      console.log('ERROR(engine.js::handleSearchSelect): contact or contactMgr undefined.')
       return;
     }
 
-    const existingUserIds = this.contactMgr.getContactIds();
-
     let selfAddCheck = false;
-    if (process.env.NODE_ENV === 'production' && selectedUserId !== 'alexc.id') {
-      selfAddCheck = (selectedUserId === this.userId);
+    if (process.env.NODE_ENV === 'production' &&
+        (contact.id !== 'alexc.id' ||
+         contact.id !== 'alex.stealthy.id' ||
+         contact.id !== 'relay.id')
+        ) {
+      selfAddCheck = (contact.id === this.userId);
     }
-    if (existingUserIds.includes(selectedUserId) || selfAddCheck) {
+    if (this.contactMgr.isExistingContactId(contact.id) || selfAddCheck) {
       this.contactMgr.setActiveContact(contact);
       this.updateContactMgr();
       this.closeContactSearch();
     } else {
-      this.handleContactAdd(contact, selectedUserId);
+      this.handleContactAdd(contact);
     }
     this.emit('me-search-select-done', true);
   }
 
-  handleContactAdd(contact, id, status = undefined) {
-    if (this.anonalytics)
+  handleContactInvitation(theirPublicKey, theirUserId) {
+    // TODO: merge this with code in Block Contact Search (the part that builds up the
+    //       contact by parsing the query result)
+    if (!this.contactMgr.isExistingContactId(theirUserId)) {
+      console.log(`INFO(engine.js): discovery event "new-invitation" from ${theirUserId}`)
+      const profileQuery = utils.removeIdTld(theirUserId)
+      api.getUserProfile(profileQuery)
+      .then((queryResult) => {
+
+        const contact = ContactManager.buildContactFromQueryResult(
+          queryResult, profileQuery, theirPublicKey)
+        if (contact) {
+          this.handleContactAdd(contact)
+        }
+      })
+      .catch((err) => {
+        console.log(`ERROR(engine.js): handling discovery new-invitation. ${err}`)
+      })
+    }
+  }
+
+  async handleContactAdd(contact) {
+    if (this.anonalytics) {
       this.anonalytics.aeContactAdded();
+    }
 
-    this._fetchPublicKey(id)
-    .then((publicKey) => {
-      if (publicKey) {
-        this.logger(`Adding contact ${id}. Read public key: ${publicKey}`);
-      } else {
-        this.logger(`Adding contact ${id}. UNABLE TO READ PUBLIC KEY`);
+    let publicKey = contact.publicKey
+    if (!publicKey) {
+      try {
+        publicKey = await this._fetchPublicKey(contact.id)
+        this.logger(`Adding contact ${contact.id}. Read public key: ${publicKey}`);
+      } catch(err) {
+        this.logger(`Adding contact ${contact.id}. UNABLE TO READ PUBLIC KEY`);
       }
+    }
 
-      this.contactMgr.addNewContact(contact, id, publicKey);
+    this.contactMgr.addNewContact(contact, contact.id, publicKey);
+    this._writeContactList(this.contactMgr.getContacts());
 
-      this._writeContactList(this.contactMgr.getContacts());
+    this.conversations.createConversation(contact.id);
+    this._writeConversations();
 
-      this.conversations.createConversation(id);
-      this._writeConversations();
+    this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
 
-
-      this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
-
-      this.updateContactMgr();
-      this.updateMessages(id);
-      this.closeContactSearch();
-    });
+    this.updateContactMgr();
+    this.updateMessages(contact.id);
+    this.closeContactSearch();
   }
 
   handleDeleteContact = (e, { contact }) => {
@@ -1178,27 +1199,28 @@ export class MessagingEngine extends EventEmitter {
     }
 
     const selectedUserId = contact.id;
+    if (this.contactMgr.isExistingContactId(selectedUserId)) {
+      // TODO: need to send a packet back indicating messages seen.
+      //       need offline solution to this too.
+      // Mark sent messages as seen.
+      // const chatMessages = this.conversations.getMessages(selectedUserId);
+      // for (const chatMsg of chatMessages) {
+      //   if (chatMsg.sent) {
+      //     chatMsg.seen = true;
+      //   }
+      // }
 
-    // TODO: need to send a packet back indicating messages seen.
-    //       need offline solution to this too.
-    // Mark sent messages as seen.
-    // const chatMessages = this.conversations.getMessages(selectedUserId);
-    // for (const chatMsg of chatMessages) {
-    //   if (chatMsg.sent) {
-    //     chatMsg.seen = true;
-    //   }
-    // }
+      // TODO: predicate this by checking if unread is already zero ...
+      this.contactMgr.setActiveContact(contact);
+      // ACTODO: this method makes shit break...............
+      this.contactMgr.clearUnread(selectedUserId);
 
-    // TODO: predicate this by checking if unread is already zero ...
-    this.contactMgr.setActiveContact(contact);
-    // ACTODO: this method makes shit break...............
-    this.contactMgr.clearUnread(selectedUserId);
+      const seenMessages = this.markReceivedMessagesSeen(selectedUserId);
+      this.sendMessageReceipts(seenMessages);
 
-    const seenMessages = this.markReceivedMessagesSeen(selectedUserId);
-    this.sendMessageReceipts(seenMessages);
-
-    this.updateContactMgr();
-    this.updateMessages(selectedUserId);
+      this.updateContactMgr();
+      this.updateMessages(selectedUserId);
+    }
     this.closeContactSearch();
   }
 
