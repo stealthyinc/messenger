@@ -33,7 +33,7 @@ class AuthLoadingScreen extends React.Component {
       await ref.once('value')
       .then((snapshot) => {
         if (snapshot.exists() && (!common.DEV_TESTING || snapshot.val() === common.getSessionId())) {
-          this.setupVars(userData)
+          this.props.screenProps.setupVars(userData)
         }
         else {
           this.props.setSession(snapshot.val())
@@ -42,15 +42,6 @@ class AuthLoadingScreen extends React.Component {
       })
     }
   };
-
-  setupVars = async (userData) => {
-    this.props.setUserData(userData)
-    const userProfile = JSON.parse(await AsyncStorage.getItem('userProfile'));
-    this.props.setUserProfile(userProfile)
-    const token = await AsyncStorage.getItem('token')
-    this.props.setToken(token)
-    this.props.navigation.navigate('App');
-  }
 
   // Render any loading content that you like here
   render() {
@@ -78,10 +69,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setUserData: (userData) => dispatch(EngineActions.setUserData(userData)),
     setPublicKey: (publicKey) => dispatch(EngineActions.setPublicKey(publicKey)),
-    setUserProfile: (userProfile) => dispatch(EngineActions.setUserProfile(userProfile)),
-    setToken: (token) => dispatch(EngineActions.setToken(token)),
     setSession: (session) => dispatch(EngineActions.setSession(session)),
   }
 }

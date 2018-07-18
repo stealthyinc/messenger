@@ -42,19 +42,6 @@ class ProfileScreen extends React.Component {
     this.setState({isVisible: !this.state.isVisible})
   }
 
-  _signOutAsync = async () => {
-    const {BlockstackNativeModule} = NativeModules;
-    const { publicKey } = this.props
-    if (!common.DEV_TESTING) {
-      firebaseInstance.setFirebaseData(common.getDbSessionPath(publicKey), common.NO_SESSION)
-    }
-    this.props.initShutdown();
-    // Blockstack signOut occurs in redux after the engine has emitted a shutdown event.
-    this.props.clearUserData(publicKey);
-    await AsyncStorage.clear();
-    this.props.navigation.navigate('Auth');
-  };
-
   render() {
     const { userProfile, userData, userSettings } = this.props
     if (!userProfile) {
@@ -146,7 +133,7 @@ class ProfileScreen extends React.Component {
               } />*/}
           </View>
           <Button
-            onPress={this._signOutAsync}
+            onPress={this.props.screenProps.logout}
             icon={{name: 'launch', color: 'white'}}
             buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#037aff'}}
             titleStyle={{ fontSize: 18, fontWeight: "bold"}}

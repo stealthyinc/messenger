@@ -65,10 +65,8 @@ class ReduxNavigation extends React.Component {
     });
   }
   componentWillReceiveProps (nextProps) {
-    const { publicKey, engineShutdown } = nextProps
-    if (engineShutdown) {
-      this._shutdownRequest(publicKey)
-    } else if (publicKey && !this.ref) {
+    const { publicKey } = nextProps
+    if (publicKey && !this.ref) {
       const sessionPath = common.getDbSessionPath(publicKey)
       this.ref = firebaseInstance.getFirebaseRef(sessionPath);
       this.ref.on('child_changed', (childSnapshot, prevChildKey, publicKey) => {
@@ -109,22 +107,38 @@ class ReduxNavigation extends React.Component {
   _shutdownRequest(aPublicKey) {
     if (!this.shutDownSignOut) {
       this.shutDownSignOut = true;
-      this._signOutAsync(aPublicKey)
+      this._signOutAsync(publicKey)
     }
   }
-  _signOutAsync = async (publicKey) => {
+  _setupVars = async (userData) => {
+    this.props.dispatch(EngineActions.setUserData(userData))
+    const userProfile = JSON.parse(await AsyncStorage.getItem('userProfile'));
+    this.props.dispatch(EngineActions.setUserProfile(userProfile))
+    const token = await AsyncStorage.getItem('token')
+    this.props.dispatch(EngineActions.setToken(token))
+    this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'App' })
+  }
+  _signOutAsync = async (aPublicKey) => {
     const {BlockstackNativeModule} = NativeModules;
-    this.props.dispatch(EngineActions.clearUserData(publicKey));
+    // const { publicKey } = this.props
+    const publicKey = (aPublicKey) ? aPublicKey : this.props.publicKey
     if (!common.DEV_TESTING) {
       firebaseInstance.setFirebaseData(common.getDbSessionPath(publicKey), common.NO_SESSION)
     }
+    this.props.dispatch(EngineActions.initShutdown());
+    // Blockstack signOut occurs in redux after the engine has emitted a shutdown event.
+    this.props.dispatch(EngineActions.clearUserData(publicKey));
     await AsyncStorage.clear();
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' })
   };
+
   render () {
     return (
       <Root>
-        <AppNavigation navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root') })} />
+        <AppNavigation 
+          screenProps={{logout: this._signOutAsync, setupVars: (userData) => this._setupVars(userData)}}
+          navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root') })} 
+        />
       </Root>
     )
   }

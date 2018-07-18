@@ -29,18 +29,6 @@ class BlockScreen extends Component {
       spinner: false
     }
   }
-  _signOutAsync = async () => {
-    const {BlockstackNativeModule} = NativeModules;
-    const { publicKey } = this.props
-    if (!common.DEV_TESTING) {
-      firebaseInstance.setFirebaseData(common.getDbSessionPath(publicKey), common.NO_SESSION)
-    }
-    this.props.initShutdown();
-    // Blockstack signOut occurs in redux after the engine has emitted a shutdown event.
-    this.props.clearUserData(publicKey);
-    await AsyncStorage.clear();
-    this.props.navigation.navigate('Auth');
-  };
   _unlockEngine = async () => {
     const { publicKey } = this.props
     if (publicKey) {
@@ -55,24 +43,16 @@ class BlockScreen extends Component {
       utils.resolveAfterMilliseconds(DELAY_BEFORE_START_MS)
       .then(() => {
         this.setState({spinner: false})
-        this.setupVars(userData)
+        this.props.screenProps.setupVars(userData)
       })
       .catch((err) => {
         this.setState({spinner: false})
         console.log(`ERROR(Blockstack.js::_unlockEngine): ${err}`)
-        this.setupVars(userData)
+        this.props.screenProps.setupVars(userData)
       })
     } else {
       this.props.navigation.navigate('Auth');
     }
-  }
-  setupVars = async (userData) => {
-    this.props.setUserData(userData)
-    const userProfile = JSON.parse(await AsyncStorage.getItem('userProfile'));
-    this.props.setUserProfile(userProfile)
-    const token = await AsyncStorage.getItem('token')
-    this.props.setToken(token)
-    this.props.navigation.navigate('App');
   }
   render () {
     const activityIndicator = (this.state.spinner) ?
@@ -129,7 +109,7 @@ class BlockScreen extends Component {
           containerStyle={{ marginTop: 25 }}
         />
         <Button
-          onPress={this._signOutAsync}
+          onPress={this.props.screenProps.logout}
           title="Log Out"
           icon={{name: 'launch', color: 'white'}}
           buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#037aff'}}
@@ -159,11 +139,6 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setUserData: (userData) => dispatch(EngineActions.setUserData(userData)),
-    setUserProfile: (userProfile) => dispatch(EngineActions.setUserProfile(userProfile)),
-    clearUserData: (publicKey) => dispatch(EngineActions.clearUserData(publicKey)),
-    setToken: (token) => dispatch(EngineActions.setToken(token)),
-    initShutdown: () => dispatch(EngineActions.initShutdown()),
   }
 }
 
