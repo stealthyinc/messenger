@@ -1,5 +1,5 @@
 import React from "react";
-import { AppRegistry, Image, Linking, StatusBar, StyleSheet, View } from "react-native";
+import { Image, Linking, StatusBar, StyleSheet, View } from "react-native";
 import { Container } from "native-base";
 import { Avatar, Button, Card, Icon, Text, SocialIcon } from 'react-native-elements'
 import { connect } from 'react-redux'

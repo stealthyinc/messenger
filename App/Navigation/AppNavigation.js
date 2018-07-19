@@ -15,6 +15,7 @@ import ContactScreen from '../Containers/ContactScreen'
 import ChatMenuScreen from '../Containers/ChatMenuScreen'
 import ContactProfile from '../Containers/ContactProfile'
 import BlockContactSearch from '../Containers/BlockContactSearch'
+import Introduction from '../Components/Introduction'
 
 console.disableYellowBox = true;
 
@@ -36,6 +37,7 @@ const PrimaryNav = StackNavigator({
 });
 
 const AuthStack = StackNavigator({
+  Intro: { screen: Introduction },
   SignIn: { screen: SignInScreen }
 });
 

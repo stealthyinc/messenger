@@ -66,6 +66,9 @@ class ReduxNavigation extends React.Component {
   }
   componentWillReceiveProps (nextProps) {
     const { publicKey } = nextProps
+    // if (engineShutdown) {
+    //   this._shutdownRequest(publicKey)
+    // } else if (publicKey && !this.ref) {
     if (publicKey && !this.ref) {
       const sessionPath = common.getDbSessionPath(publicKey)
       this.ref = firebaseInstance.getFirebaseRef(sessionPath);
