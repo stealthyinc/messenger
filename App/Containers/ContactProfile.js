@@ -26,6 +26,7 @@ class ContactProfile extends React.Component {
     const { activeUserProfile, contactMgr } = this.props
     if (!activeUserProfile) return null
     const activeContact = contactMgr.getActiveContact()
+    if (!activeContact) return null
     const { id, title, image, status } = activeContact
     let nTitle = (title) ? title : ''
     const { profile } = activeUserProfile

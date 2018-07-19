@@ -50,9 +50,6 @@ let ENCRYPT_SETTINGS = true;
 // Options include: 'LOCALHOST', 'TEST_STEALTHY', & 'STEALTHY'
 let STEALTHY_PAGE = 'LOCALHOST';
 //
-// Bugs to Fix (temporary workarounds):
-const WORKAROUND__DISABLE_REFLECTED_PACKET = true;
-//
 // Logging Scopes
 const LOG_GAIAIO = false;
 const LOG_OFFLINEMESSAGING = false;

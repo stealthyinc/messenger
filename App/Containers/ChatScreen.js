@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Button, ScrollView, TouchableOpacity, View, Text } from 'react-native'
+import { Button, ScrollView, TouchableOpacity, View, Text, ActivityIndicator } from 'react-native'
 import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -45,11 +45,32 @@ class ChatScreen extends Component {
 
     this._isMounted = false;
     this._isAlright = null;
+    this.activeContact = undefined;
+  }
+
+  configWithActiveContact(anActiveContact) {
+    if (this.activeContact || !anActiveContact) {
+      return
+    }
+
+    this.activeContact = anActiveContact
+
+    const notificationPath = common.getDbNotificationPath(anActiveContact.publicKey)
+    firebaseInstance.getFirebaseRef(`${notificationPath}/token`).once('value')
+    .then((snapshot) => {
+      if (snapshot.val()) {
+        this.state.token = snapshot.val()
+      }
+    });
+
+    const displayname = (anActiveContact.title) ? anActiveContact.title : anActiveContact.id
+    this.props.navigation.setParams({ navigation: this.props.navigation, name: displayname });
   }
 
   componentWillMount() {
     this._isMounted = true;
-    const { contactMgr, userData, userProfile } = this.props
+
+    const { userData, userProfile } = this.props
     const { username } = userData
     const { profile } = userProfile
     const { name, image } = profile
@@ -62,30 +83,36 @@ class ChatScreen extends Component {
       name,
       userImage
     }
-    let activeContact
-    if (contactMgr) {
-      activeContact = contactMgr.getActiveContact();
-    }
-    const { publicKey } = activeContact
-    const notificationPath = common.getDbNotificationPath(publicKey)
-    firebaseInstance.getFirebaseRef(`${notificationPath}/token`).once('value')
-    .then((snapshot) => {
-      if (snapshot.val()) {
-        this.state.token = snapshot.val()
+
+    const { contactMgr } = this.props
+    const activeContact = (contactMgr && contactMgr.getActiveContact()) ?
+      contactMgr.getActiveContact() : undefined
+
+    if (activeContact) {
+      this.configWithActiveContact(activeContact)
+
+      const { messages } = this.props;
+      if (messages) {
+        this.state.messages = this.setupMessages(messages).reverse();
       }
-    });
-    this.state.activeContact = activeContact
-    let displayname = activeContact.id
-    if (activeContact.title)
-      displayname = activeContact.title
-    this.props.navigation.setParams({ navigation: this.props.navigation, name: displayname });
-    const { messages } = this.props;
-    if (messages) {
-      this.state.messages = this.setupMessages(messages).reverse();
     }
   }
 
   componentWillReceiveProps(nextProps) {
+    if (!this.activeContact) {
+      if (nextProps.contactMgr && nextProps.contactMgr.getActiveContact()) {
+        const activeContact = nextProps.contactMgr.getActiveContact()
+        this.configWithActiveContact(activeContact)
+
+        const { messages } = this.nextProps
+        if (messages) {
+          const theMessages = this.setupMessages(messages).reverse();
+          this.setState({messages: theMessages})
+        }
+      }
+      return
+    }
+
     const { messages } = nextProps
     if (this.props.messages && this.props.messages.length !== messages.length) {
       const numNewMsgs = messages.length - this.props.messages.length;
@@ -119,7 +146,7 @@ class ChatScreen extends Component {
 
   setupMessages = (inputMessages) => {
     let messages = []
-    const { description, id } = this.state.activeContact
+    const { description, id } = this.activeContact
     for (const message of inputMessages) {
       const { author, body, time, image, state } = message
       const sent = (state === MESSAGE_STATE.SENT_OFFLINE || state === MESSAGE_STATE.SENT_REALTIME || state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
@@ -274,11 +301,8 @@ class ChatScreen extends Component {
   }
 
   render() {
-    return (
-      <View id='GiftedChatContainer'
-           style={{flex: 1,
-                   backgroundColor: 'white'}}>
-        <GiftedChat
+    const content = this.activeContact ?
+        (<GiftedChat
           messages={this.state.messages}
           onSend={this.onSend}
           loadEarlier={this.state.loadEarlier}
@@ -294,7 +318,17 @@ class ChatScreen extends Component {
           renderSystemMessage={this.renderSystemMessage}
           renderCustomView={this.renderCustomView}
           renderFooter={this.renderFooter}
-        />
+        />)
+      :
+        (<View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
+          <ActivityIndicator />
+        </View>)
+
+    return (
+      <View id='GiftedChatContainer'
+           style={{flex: 1,
+                   backgroundColor: 'white'}}>
+        {content}
       </View>
     );
   }
