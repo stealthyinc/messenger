@@ -57,8 +57,6 @@ class ConversationScreen extends React.Component {
   }
   async componentWillMount() {
     const { userData, token, publicKey } = this.props
-    const notificationPath = common.getDbNotificationPath(publicKey)
-    firebaseInstance.setFirebaseData(notificationPath, {token})
     this.props.navigation.setParams({ navigation: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
   }
   componentWillReceiveProps(nextProps) {
