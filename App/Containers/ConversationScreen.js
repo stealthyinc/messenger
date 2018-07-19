@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux'
-import { AsyncStorage, View, ListView, StyleSheet, TouchableOpacity, NativeModules } from 'react-native';
+import { ActivityIndicator, AsyncStorage, View, ListView, StyleSheet, TouchableOpacity, NativeModules } from 'react-native';
 import TouchableRow from './contacts/Row';
 // import Header from './contacts/Header';
 import Footer from './contacts/Footer';
@@ -25,6 +25,11 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     backgroundColor: '#8E8E8E',
   },
+  horizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10
+  }
 });
 
 class ConversationScreen extends React.Component {
@@ -84,6 +89,11 @@ class ConversationScreen extends React.Component {
   }
   render() {
     const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+    const { contactMgr } = this.props
+    const activeContact = (contactMgr) ? contactMgr.getActiveContact() : undefined
+    if (this.state.listViewData.length === 0 || activeContact) {
+      return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed" /></View>
+    }
     return (
       <Container style={{backgroundColor: 'white'}}>
         <Content>
