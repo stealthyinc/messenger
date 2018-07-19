@@ -225,5 +225,5 @@ export default function* engineSagas(api) {
   yield takeLatest(EngineTypes.SET_USER_DATA, getToken)
   yield takeLatest(EngineTypes.SET_USER_DATA, startEngine)
   yield takeLatest(EngineTypes.SET_USER_DATA, getUserProfile, api)
-  yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, getActiveUserProfile, api)
+  yield takeEvery(EngineTypes.SET_ACTIVE_CONTACT, getActiveUserProfile, api)
 }

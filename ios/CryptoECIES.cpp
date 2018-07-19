@@ -34,7 +34,7 @@ using std::string;
 using namespace CryptoPP;
 
 // Reduce iOS deployment size
-#define DEBUG_PRINT_METHODS true
+#define DEBUG_PRINT_METHODS false
 
 #ifdef DEBUG_PRINT_METHODS
 void printCipherObj(const CipherObject& aCipherObj);
@@ -241,15 +241,15 @@ string CryptoECIES::DecryptECIES(const string& privateKeyHex, const CipherObject
   string expectedMac;
   hexStrToBinStr(cipherObject.mac, expectedMac);
   
-  printBinAsHex("privateKey", privateKey);
-  printBinAsHex("ephemeralPK", ephemeralPK);
-  printBinAsHex("uncoEphemeralPKBin", uncomEphemeralPKBin);
-  printSecByteBlockAsHex("sharedKey", sharedKey);
-  printByteArrAsHex("sharedEncryptionKey", sharedEncryptionKey, 32);
-  printByteArrAsHex("sharedHmacKey", sharedHmacKey, sharedHmacKeyLen);
-  printBinAsHex("macData", macData);
-  printByteArrAsHex("actualMac", actualMac, actualMacSize);
-  printBinAsHex("expectedMac", expectedMac);
+//  printBinAsHex("privateKey", privateKey);
+//  printBinAsHex("ephemeralPK", ephemeralPK);
+//  printBinAsHex("uncoEphemeralPKBin", uncomEphemeralPKBin);
+//  printSecByteBlockAsHex("sharedKey", sharedKey);
+//  printByteArrAsHex("sharedEncryptionKey", sharedEncryptionKey, 32);
+//  printByteArrAsHex("sharedHmacKey", sharedHmacKey, sharedHmacKeyLen);
+//  printBinAsHex("macData", macData);
+//  printByteArrAsHex("actualMac", actualMac, actualMacSize);
+//  printBinAsHex("expectedMac", expectedMac);
   
   if ((expectedMac.size() != actualMacSize) ||
       !VerifyBufsEqual((byte*) &expectedMac[0], actualMac, actualMacSize))
