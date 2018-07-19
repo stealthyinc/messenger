@@ -118,6 +118,7 @@ class ReduxNavigation extends React.Component {
     const userProfile = JSON.parse(await AsyncStorage.getItem('userProfile'));
     this.props.dispatch(EngineActions.setUserProfile(userProfile))
     const token = await AsyncStorage.getItem('token')
+    const { publicKey } =  this.props
     const notificationPath = common.getDbNotificationPath(publicKey)
     firebaseInstance.setFirebaseData(notificationPath, {token})
     this.props.dispatch(EngineActions.setToken(token))
