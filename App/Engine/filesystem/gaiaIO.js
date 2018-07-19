@@ -1,6 +1,12 @@
 const BaseIO = require('./baseIO.js');
 const utils = require('./../misc//utils.js');
 
+// TODO: this code needs a serious cleanup. Issues include:
+//       - inconsistent / improper error handling between sequential and async calls
+//       - error messaging
+//       - return values
+//       - look at async persisting the gaia hubCache
+
 // TODO: need a way of switching putFile/getFile for putRawFile/getRawFile for
 //       different build targets
 import { NativeModules } from 'react-native';
@@ -110,8 +116,7 @@ module.exports = class GaiaIO extends BaseIO {
       return (data ? JSON.parse(data) : undefined)
     })
     .catch((error) => {
-      this.logger(`ERROR(gaiaIO::_readWeb): reading ${filePath} from ${username}'s GAIA.\n${error}`);
-      return;
+      throw `ERROR(gaiaIO::_readWeb): reading ${filePath} from ${username}'s GAIA.\n${error}`
     });
   }
 
@@ -124,8 +129,13 @@ module.exports = class GaiaIO extends BaseIO {
       } else {
         api.getUserGaiaNS(aUserName)
         .then((gaiaHub) => {
-          this.hubCache[aUserName] = gaiaHub
-          resolve(gaiaHub)
+          if (!gaiaHub) {
+            console.log(`ERROR(gaiaIO.js::_getGaiaHubAddrWorkaround): unable to fetch gaia hub for ${aUserName}`)
+            reject(undefined)
+          } else {
+            this.hubCache[aUserName] = gaiaHub
+            resolve(gaiaHub)
+          }
         })
         .catch((error) => {
           console.log(`ERROR(gaiaIO.js::_getGaiaHubAddrWorkaround): ${error}`)
@@ -144,8 +154,7 @@ module.exports = class GaiaIO extends BaseIO {
         throw 'gaiaHubPath undefined'
       }
     } catch (err) {
-      console.log(`ERROR(gaiaIO.js::_read_iOS): ${err}`)
-      return
+      throw `ERROR(gaiaIO.js::_read_iOS): ${err}`
     }
 
     return new Promise((resolve, reject) => {
@@ -168,7 +177,7 @@ module.exports = class GaiaIO extends BaseIO {
       return (utils.is_iOS()) ?
         this._read_iOS(username, filePath) : this._readWeb(username, filePath)
     } catch (err) {
-      this.logger(`ERROR(gaiaIO::_read): unable to read ${username}'s file ${filePath}.\n${err}`);
+      console.log(`ERROR(gaiaIO::_read): unable to read ${username}'s file ${filePath}.\n\t${err}`);
       return undefined;
     }
   }

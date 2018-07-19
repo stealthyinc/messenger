@@ -656,8 +656,14 @@ export class MessagingEngine extends EventEmitter {
 
     this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
 
-    this.updateContactMgr();
+    // IMPORTANT (even for Prabhaav):
+    // - Do not change the order of these updates. The UI depends on
+    //   contact length changed to navigate to the ChatScreen. If you
+    //   update messages last, it navigates to a screen with the wrong
+    //   messages.
     this.updateMessages(contact.id);
+    this.updateContactMgr();
+
     this.closeContactSearch();
   }
 
@@ -1211,7 +1217,7 @@ export class MessagingEngine extends EventEmitter {
       this.updateContactMgr();
       this.updateMessages(selectedUserId);
     }
-    this.closeContactSearch();
+    // this.closeContactSearch();
   }
 
   _sendOutgoingMessageOffline(aChatMsg) {

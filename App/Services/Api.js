@@ -49,20 +49,23 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   const getUserGaiaNS = (username, app = 'https://www_stealthy_im') => {
     // Ensure username doesn't end in tld .id
     const cleanUserName = utils.removeIdTld(username)
+    // console.log(`DEBUG(Api.js::getUserGaiaNS): username=${username}, app=${app}, cleanUserName=${cleanUserName}`)
     return api.get(`/v1/search?query=${cleanUserName}`)
     .then((queryResult) => {
       if (queryResult &&
-          ("data" in queryResult) &&
-          ("results" in queryResult["data"])) {
-        for (const result of queryResult["data"]["results"]) {
-          if (!("fullyQualifiedName" in result) ||
-              (result["fullyQualifiedName"] !== username)) {
+          queryResult.hasOwnProperty('data') &&
+          queryResult['data'] &&      // not enough to see if property is there (on timeout, it is null)
+          queryResult['data'].hasOwnProperty('results')) {
+        for (const result of queryResult['data']['results']) {
+          if (!result ||
+              !result.hasOwnProperty('fullyQualifiedName') ||
+              result['fullyQualifiedName'] !== username) {
             continue
           }
 
-          if (("profile" in result) &&
-              ("apps" in result["profile"]) &&
-              (app in result["profile"]["apps"])) {
+          if (result.hasOwnProperty('profile') &&
+              result['profile'].hasOwnProperty('apps') &&
+              result['profile']['apps'].hasOwnProperty(app)) {
             return result["profile"]["apps"][app]
           }
         }
