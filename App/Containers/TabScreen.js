@@ -17,13 +17,13 @@ export default TabNavigator(
         const { routeName } = navigation.state;
         let iconName;
         if (routeName === 'Messages') {
-          iconName = `ios-chatbubbles${focused ? '' : '-outline'}`;
+          iconName = `ios-chatbubbles`;
         } 
         else if (routeName === 'Wallet') {
           iconName = `ios-cash${focused ? '' : '-outline'}`;
         }
         else if (routeName === 'Profile') {
-          iconName = `ios-contact${focused ? '' : '-outline'}`;
+          iconName = `ios-contact`;
         }
 
         // You can return any component that you like here! We usually use an
@@ -32,7 +32,7 @@ export default TabNavigator(
       },
     }),
     tabBarOptions: {
-      activeTintColor: '#34bbed',
+      activeTintColor: '#037aff',
       inactiveTintColor: 'gray',
     },
     tabBarComponent: TabBarBottom,
