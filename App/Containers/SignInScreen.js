@@ -152,6 +152,8 @@ class SignInScreen extends React.Component {
               AsyncStorage.setItem('userData', JSON.stringify(this.userData));
               const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(publicKey));
               const token = await AsyncStorage.getItem('token')
+              const notificationPath = common.getDbNotificationPath(publicKey)
+              firebaseInstance.setFirebaseData(notificationPath, {token})
               await ref.once('value')
               .then((snapshot) => {
                 if (!snapshot.exists() || snapshot.val() === 'none') {
