@@ -100,19 +100,9 @@ class ChatScreen extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (!this.activeContact) {
-      if (nextProps.contactMgr && nextProps.contactMgr.getActiveContact()) {
-        const activeContact = nextProps.contactMgr.getActiveContact()
-        this.configWithActiveContact(activeContact)
-
-        const { messages } = this.nextProps
-        if (messages) {
-          const theMessages = this.setupMessages(messages).reverse();
-          this.setState({messages: theMessages})
-        }
-      }
       return
     }
-
+    
     const { messages } = nextProps
     if (this.props.messages && this.props.messages.length !== messages.length) {
       const numNewMsgs = messages.length - this.props.messages.length;
