@@ -110,7 +110,7 @@ class ReduxNavigation extends React.Component {
   _shutdownRequest(aPublicKey) {
     if (!this.shutDownSignOut) {
       this.shutDownSignOut = true;
-      this._signOutAsync(publicKey)
+      this._signOutAsync(aPublicKey)
     }
   }
   _setupVars = async (userData) => {
@@ -123,14 +123,15 @@ class ReduxNavigation extends React.Component {
   }
   _signOutAsync = async (aPublicKey) => {
     const {BlockstackNativeModule} = NativeModules;
-    // const { publicKey } = this.props
     const publicKey = (aPublicKey) ? aPublicKey : this.props.publicKey
-    if (!common.DEV_TESTING) {
-      firebaseInstance.setFirebaseData(common.getDbSessionPath(publicKey), common.NO_SESSION)
+    if (publicKey) {
+      if (!common.DEV_TESTING) {
+        firebaseInstance.setFirebaseData(common.getDbSessionPath(publicKey), common.NO_SESSION)
+      }
+      // Blockstack signOut occurs in redux after the engine has emitted a shutdown event.
+      this.props.dispatch(EngineActions.clearUserData(publicKey));
     }
     this.props.dispatch(EngineActions.initShutdown());
-    // Blockstack signOut occurs in redux after the engine has emitted a shutdown event.
-    this.props.dispatch(EngineActions.clearUserData(publicKey));
     await AsyncStorage.clear();
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' })
   };
@@ -138,9 +139,9 @@ class ReduxNavigation extends React.Component {
   render () {
     return (
       <Root>
-        <AppNavigation 
-          screenProps={{logout: this._signOutAsync, setupVars: (userData) => this._setupVars(userData)}}
-          navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root') })} 
+        <AppNavigation
+          screenProps={{logout: () => this._signOutAsync(undefined), setupVars: (userData) => this._setupVars(userData)}}
+          navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root') })}
         />
       </Root>
     )
