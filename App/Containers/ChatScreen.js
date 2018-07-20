@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
-import { Button, ScrollView, TouchableOpacity, View, Text, ActivityIndicator } from 'react-native'
+import { ScrollView, TouchableOpacity, View, Text, ActivityIndicator } from 'react-native'
 import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Button } from 'react-native-elements'
 
 // Styles
 import styles from './Styles/ChatStyle'
@@ -9,7 +10,7 @@ import {GiftedChat, Actions, Bubble, SystemMessage} from 'react-native-gifted-ch
 import CustomActions from './chat/CustomActions';
 import CustomView from './chat/CustomView';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
-
+import Communications from 'react-native-communications';
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 const common = require('./../common.js');
 const utils = require('./../Engine/misc/utils.js');
@@ -291,6 +292,33 @@ class ChatScreen extends Component {
   }
 
   render() {
+    const { publicKey } = this.activeContact
+    if (!publicKey) {
+      const {id} = this.activeContact
+      return (
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
+          <Text style={{fontSize: 18, fontWeight: 'bold'}}>{id} has not used Stealthy yet!</Text>
+          <Text style={{marginTop: 30, marginRight: 5, marginLeft: 5}}>Stealthy uses {id}'s public key to encrypt data</Text>
+          <Text style={{marginTop: 30, marginRight: 5, marginLeft: 5, fontSize: 16}}>Invite {id} to securely chat with you!</Text>
+          <View style={{flexDirection: 'row', marginTop: 20}}>
+            <Button 
+              backgroundColor={'#037aff'}
+              onPress={() => Communications.email([''],null,null,'Add me on Stealthy IM','')}
+              icon={{name: 'email', color: 'white'}}
+              title='Email'
+              raised
+            />
+            <View style={{margin: 10}} />
+            <Button 
+              backgroundColor={'#037aff'}
+              onPress={() => Communications.text('')}
+              icon={{name: 'chat', color: 'white'}}
+              title='Message'
+            />
+          </View>
+        </View>
+      )
+    }
     const content = this.activeContact ?
         (<GiftedChat
           messages={this.state.messages}
@@ -311,7 +339,7 @@ class ChatScreen extends Component {
         />)
       :
         (<View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
-          <ActivityIndicator />
+          <ActivityIndicator size="large" color="#34bbed" />
         </View>)
 
     return (

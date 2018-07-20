@@ -89,7 +89,7 @@ class ConversationScreen extends React.Component {
     const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
     const { contactMgr } = this.props
     const activeContact = (contactMgr) ? contactMgr.getActiveContact() : undefined
-    if (this.state.listViewData.length === 0 || activeContact) {
+    if (!contactMgr || activeContact) {
       return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed" /></View>
     }
     return (

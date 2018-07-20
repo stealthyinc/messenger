@@ -124,7 +124,7 @@ class ReduxNavigation extends React.Component {
         ref.set(common.getSessionId());
         this._setupVars(userData, common.getSessionId())
       }
-      else if (snapshot.exists() && (snapshot.val() === common.getSessionId())) {
+      else if (snapshot.exists() && (!common.DEV_TESTING || snapshot.val() === common.getSessionId())) {
         //authloading screen
         this._setupVars(userData, common.getSessionId())
       }
