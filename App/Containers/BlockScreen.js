@@ -91,7 +91,7 @@ class BlockScreen extends Component {
           />
           <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: 80, marginTop: 5 }}>Unlock Stealthy</Text>
         </View>
-        <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'grey', marginBottom: 80 }}>Session Locked By: {this.props.session}</Text>
+        <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'grey', marginBottom: 80 }}>Session Locked: {this.props.session}</Text>
         {activityIndicator}
         <Button
           onPress={this._unlockEngine}

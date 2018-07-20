@@ -122,11 +122,11 @@ class ReduxNavigation extends React.Component {
       if (!snapshot.exists() || snapshot.val() === 'none') {
         //signin screen
         ref.set(common.getSessionId());
-        this._setupVars(userData)
+        this._setupVars(userData, common.getSessionId())
       }
       else if (snapshot.exists() && (snapshot.val() === common.getSessionId())) {
         //authloading screen
-        this._setupVars(userData)
+        this._setupVars(userData, common.getSessionId())
       }
       else {
         this.props.dispatch(EngineActions.setSession(snapshot.val()))
@@ -134,17 +134,20 @@ class ReduxNavigation extends React.Component {
       }
     })
   }
-  _setupVars = async (userData) => {
+  _setupVars = async (userData, session) => {
+    this.props.dispatch(EngineActions.setSession(session))
     this.props.dispatch(EngineActions.setUserData(userData))
     const userProfile = JSON.parse(await AsyncStorage.getItem('userProfile'));
     if (userProfile) {
       this.props.dispatch(EngineActions.setUserProfile(userProfile))
     }
     const token = await AsyncStorage.getItem('token')
-    const { publicKey } =  this.props
-    const notificationPath = common.getDbNotificationPath(publicKey)
-    firebaseInstance.setFirebaseData(notificationPath, {token})
-    this.props.dispatch(EngineActions.setToken(token))
+    if (token) {
+      const { publicKey } =  this.props
+      const notificationPath = common.getDbNotificationPath(publicKey)
+      firebaseInstance.setFirebaseData(notificationPath, {token})
+      this.props.dispatch(EngineActions.setToken(token))
+    }
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'App' })
   }
   _signOutAsync = async (aPublicKey) => {

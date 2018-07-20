@@ -179,4 +179,5 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_USER_SETTINGS]: setUserSettings,
   [Types.SET_ENGINE_SHUTDOWN]: setEngineShutdown,
   [Types.SET_BEARER_TOKEN]: setBearerToken,
+  [Types.SET_SESSION]: setSession,
 })
