@@ -47,13 +47,13 @@ class FirebaseWrapper {
       // user has permissions
       firebase.messaging().getToken().then(token => {
         AsyncStorage.setItem('token', token);
-        // console.log("token", token)
+        // console.log("firebase token generated", token)
       });
       this.onTokenRefreshListener = firebase.messaging().onTokenRefresh(fcmToken => {
         // Process your token as required
         firebase.messaging().getToken().then(token => {
           AsyncStorage.setItem('token', token);
-          // console.log("token", token)
+          // console.log("firebase token re-generated", token)
         });
       });
       // console.log("user has permissions")
@@ -63,10 +63,15 @@ class FirebaseWrapper {
       try {
         await firebase.messaging().requestPermission();
         // User has authorised
-        console.log("user has authorized")
+        console.log("firebase user has authorized")
+        firebase.messaging().getToken().then(token => {
+          AsyncStorage.setItem('token', token);
+          // console.log("firebase token generated", token)
+        });
       } catch (error) {
         // User has rejected permissions
-        console.log("user has rejected")
+        AsyncStorage.setItem('token', '');
+        // console.log("user has rejected")
       }
     }
   }
