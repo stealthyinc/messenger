@@ -565,8 +565,8 @@ export class MessagingEngine extends EventEmitter {
     if (senderInfo) {
       contactsToCheck = this.contactMgr.getContactsWithMatchingPKMask(senderInfo);
     }
-
-    if (!this.offlineMsgSvc.isReceiving()) {
+    // if don't know the contact don't do anything
+    if (contactsToCheck && !this.offlineMsgSvc.isReceiving()) {
       this.offlineMsgSvc.pauseRecvService();
 
       this.offlineMsgSvc.receiveMessages(contactsToCheck)
