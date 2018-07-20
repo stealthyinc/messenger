@@ -113,10 +113,33 @@ class ReduxNavigation extends React.Component {
       this._signOutAsync(aPublicKey)
     }
   }
+  _authWork = async (userData) => {
+    const publicKey = userData['appPublicKey']
+    this.props.dispatch(EngineActions.setPublicKey(publicKey))
+    const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(publicKey));
+    await ref.once('value')
+    .then((snapshot) => {
+      if (!snapshot.exists() || snapshot.val() === 'none') {
+        //signin screen
+        ref.set(common.getSessionId());
+        this._setupVars(userData)
+      }
+      else if (snapshot.exists() && (snapshot.val() === common.getSessionId())) {
+        //authloading screen
+        this._setupVars(userData)
+      }
+      else {
+        this.props.dispatch(EngineActions.setSession(snapshot.val()))
+        this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Block' })
+      }
+    })
+  }
   _setupVars = async (userData) => {
     this.props.dispatch(EngineActions.setUserData(userData))
     const userProfile = JSON.parse(await AsyncStorage.getItem('userProfile'));
-    this.props.dispatch(EngineActions.setUserProfile(userProfile))
+    if (userProfile) {
+      this.props.dispatch(EngineActions.setUserProfile(userProfile))
+    }
     const token = await AsyncStorage.getItem('token')
     const { publicKey } =  this.props
     const notificationPath = common.getDbNotificationPath(publicKey)
@@ -127,6 +150,7 @@ class ReduxNavigation extends React.Component {
   _signOutAsync = async (aPublicKey) => {
     const {BlockstackNativeModule} = NativeModules;
     const publicKey = (aPublicKey) ? aPublicKey : this.props.publicKey
+    const { token } = this.props
     if (publicKey) {
       if (!common.DEV_TESTING) {
         firebaseInstance.setFirebaseData(common.getDbSessionPath(publicKey), common.NO_SESSION)
@@ -136,6 +160,7 @@ class ReduxNavigation extends React.Component {
     }
     this.props.dispatch(EngineActions.initShutdown());
     await AsyncStorage.clear();
+    AsyncStorage.setItem('token', token);
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' })
   };
 
@@ -143,7 +168,7 @@ class ReduxNavigation extends React.Component {
     return (
       <Root>
         <AppNavigation
-          screenProps={{logout: () => this._signOutAsync(undefined), setupVars: (userData) => this._setupVars(userData)}}
+          screenProps={{logout: () => this._signOutAsync(undefined), authWork: (userData) => this._authWork(userData)}}
           navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root') })}
         />
       </Root>
@@ -156,6 +181,7 @@ const mapStateToProps = (state) => {
     nav: state.nav,
     publicKey: EngineSelectors.getPublicKey(state),
     engineShutdown: EngineSelectors.getEngineShutdown(state),
+    token: EngineSelectors.getToken(state),
   }
 }
 

@@ -43,12 +43,12 @@ class BlockScreen extends Component {
       utils.resolveAfterMilliseconds(DELAY_BEFORE_START_MS)
       .then(() => {
         this.setState({spinner: false})
-        this.props.screenProps.setupVars(userData)
+        this.props.screenProps.authWork(userData)
       })
       .catch((err) => {
         this.setState({spinner: false})
         console.log(`ERROR(Blockstack.js::_unlockEngine): ${err}`)
-        this.props.screenProps.setupVars(userData)
+        this.props.screenProps._authWork(userData)
       })
     } else {
       this.props.navigation.navigate('Auth');

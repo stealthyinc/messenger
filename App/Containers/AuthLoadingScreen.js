@@ -27,19 +27,7 @@ class AuthLoadingScreen extends React.Component {
       this.props.navigation.navigate('Auth');
     }
     else {
-      const publicKey = userData['appPublicKey']
-      this.props.setPublicKey(publicKey)
-      const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(publicKey));
-      await ref.once('value')
-      .then((snapshot) => {
-        if (snapshot.exists() && (!common.DEV_TESTING || snapshot.val() === common.getSessionId())) {
-          this.props.screenProps.setupVars(userData)
-        }
-        else {
-          this.props.setSession(snapshot.val())
-          this.props.navigation.navigate('Block');
-        }
-      })
+      this.props.screenProps.authWork(userData)
     }
   };
 
@@ -69,8 +57,6 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setPublicKey: (publicKey) => dispatch(EngineActions.setPublicKey(publicKey)),
-    setSession: (session) => dispatch(EngineActions.setSession(session)),
   }
 }
 

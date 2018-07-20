@@ -146,27 +146,8 @@ class SignInScreen extends React.Component {
             }
             else {
               userData['appPublicKey'] = publicKey;
-              this.props.setPublicKey(publicKey)
-              this.userData = userData;
-
-              AsyncStorage.setItem('userData', JSON.stringify(this.userData));
-              const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(publicKey));
-              const token = await AsyncStorage.getItem('token')
-              const notificationPath = common.getDbNotificationPath(publicKey)
-              firebaseInstance.setFirebaseData(notificationPath, {token})
-              await ref.once('value')
-              .then((snapshot) => {
-                if (!snapshot.exists() || snapshot.val() === 'none') {
-                  ref.set(common.getSessionId());
-                  this.props.setUserData(this.userData)
-                  this.props.setToken(token)
-                  this.props.navigation.navigate('App');
-                }
-                else {
-                  this.props.navigation.navigate('Block');
-                }
-              })
-              // completion();
+              AsyncStorage.setItem('userData', JSON.stringify(userData));
+              this.props.screenProps.authWork(userData)
             }
         });
       }
@@ -175,7 +156,6 @@ class SignInScreen extends React.Component {
   };
   _signInAsync = async () => {
     const {BlockstackNativeModule} = NativeModules;
-    // const baseUrl = "http://localhost:/3030"
     const baseUrl = "https://www.stealthy.im"
     await BlockstackNativeModule.signIn(`${baseUrl}/redirect.html`, baseUrl, null, (error, events) => {
       if (!error) {
@@ -196,9 +176,6 @@ const styles = StyleSheet.create({
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setUserData: (userData) => dispatch(EngineActions.setUserData(userData)),
-    setPublicKey: (publicKey) => dispatch(EngineActions.setPublicKey(publicKey)),
-    setToken: (token) => dispatch(EngineActions.setToken(token)),
   }
 }
 
