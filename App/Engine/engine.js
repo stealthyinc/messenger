@@ -518,9 +518,13 @@ export class MessagingEngine extends EventEmitter {
       new GaiaIO(this.logger, LOG_GAIAIO) :
       new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO);
 
-    if (process.env.NODE_ENV !== 'production' &&
-        this.userId === 'relay.id') {
-      this._graphiteFileRead()
+    if (process.env.NODE_ENV !== 'production') {
+      if (this.userId === 'relay.id') {
+        this._graphiteFileRead()
+      } else {
+        const simulatedData = this._getSimulatedIntermediateGraphiteData()
+        // TODO: PBJ work with this to display UI
+      }
     }
 
     this._fetchUserSettings();
