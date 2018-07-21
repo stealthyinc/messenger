@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { NativeModules, ScrollView, Text, Image, View } from 'react-native'
 import { DrawerNavigator, StackNavigator, SwitchNavigator } from 'react-navigation';
+import FileDrawer from '../Containers/FileDrawer'
 import { Images } from '../Themes'
 
 // Styles

@@ -4,6 +4,7 @@ import android.app.Application;
 import org.blockstack.android.sdk.*;
 
 import com.facebook.react.ReactApplication;
+import com.wix.interactable.Interactable;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
@@ -38,6 +39,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new Interactable(),
             new VectorIconsPackage(),
             new ReactNativePushNotificationPackage(),
             new ReactNativeConfigPackage(),
