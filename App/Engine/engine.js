@@ -352,10 +352,176 @@ export class MessagingEngine extends EventEmitter {
     })
   }
 
+
+  // relay.id's graphite hub for initital testing / dev work
+  static RELAY_GRAPHITE_HUB = 'https://gaia.blockstack.org/hub/1PeNcCQXdg7t8iNmK7XqGVt8UyEDo4d3mF/'
+
+  _getSimulatedIntermediateGraphiteData() {
+    const simulatedData = {
+      'relay.id-1532144113901' : {
+        title : 'Test Stealthy Integration 2',
+        description : '',
+        author : 'relay.id',
+        decryptable : {
+          user : 'TBD',
+          key : 'Graphite',
+        },
+        fileUrl : 'https://app.graphitedocs.com/shared/docs/relay.id-1532144113901',
+        version : '',
+        appMetadata : {
+          title : 'Test Stealthy Integration 2',
+          id : '1532144113901',
+          updated : '7/21/2018',
+          words : '11',
+          sharedWith : '',
+          singleDocIsPublic : 'true',
+          author : 'relay.id',
+          tags : '',
+          fileType : 'documents',
+        },
+      },
+      'relay.id-1532196940159' : {
+        title : 'Delete Facebook Movement Spreads Worldwide',
+        description : '',
+        author : 'relay.id',
+        decryptable : {
+          user : 'TBD',
+          key : 'Graphite',
+        },
+        fileUrl : 'https://app.graphitedocs.com/shared/docs/relay.id-1532196940159',
+        version : '',
+        appMetadata : {
+          title : 'Delete Facebook Movement Spreads Worldwide',
+          id : '1532196940159',
+          updated : '7/21/2018',
+          words : '23',
+          sharedWith : '',
+          singleDocIsPublic : 'true',
+          author : 'relay.id',
+          tags : '',
+          fileType : 'documents',
+        },
+      },
+      'relay.id-1532197099770' : {
+        title : 'Data Breaches on the Rise Worldwide',
+        description : '',
+        author : 'relay.id',
+        decryptable : {
+          user : 'TBD',
+          key : 'Graphite',
+        },
+        fileUrl : 'https://app.graphitedocs.com/shared/docs/relay.id-1532197099770',
+        version : '',
+        appMetadata : {
+          title : 'Data Breaches on the Rise Worldwide',
+          id : '1532197099770',
+          updated : '7/21/2018',
+          words : '35',
+          sharedWith : '',
+          author : 'relay.id',
+          tags : '',
+          fileType : 'documents',
+        },
+      },
+    }
+
+    return simulatedData
+  }
+
+  _getIndexDataFromGraphite(aGraphiteIndex) {
+    const indexData = {}
+    const RELAY_DOC_BASES = {
+      publicShare: 'https://app.graphitedocs.com/shared/docs/relay.id-',  // append <doc id>
+      privateShare: `${MessagingEngine.RELAY_GRAPHITE_HUB}`, // append <doc id>sharedwith.json
+      originalDoc : `${MessagingEngine.RELAY_GRAPHITE_HUB}/documents/`, // append <doc id>.json
+    }
+
+    if (aGraphiteIndex) {
+      for (const element of aGraphiteIndex) {
+        if (!element ||
+            !element.author ||
+            !element.id ||
+            !element.fileType ||
+            !element.title ) {
+          continue
+        }
+
+        const fileName = `relay.id-${element.id}`
+        const fileData = {
+          title : `${element.title}`,
+          description : '',
+          author : `${element.author}`,
+          decryptable : {
+            user : 'TBD',
+            key : 'Graphite'
+          },
+          fileUrl : `${RELAY_DOC_BASES.publicShare}${element.id}`,
+          version: '',
+          appMetadata: element
+        }
+
+        indexData[fileName] = fileData
+      }
+    }
+
+    return indexData
+  }
+
+  async _graphiteFileRead() {
+      // Psuedocode:
+      //   1. Use profile lookup to get the current user's graphite gaia hub
+      //   2. In that gaia hub, fetch the index file (stealthyIndex.json)
+      //   3. Parse that index to produce a list of file objects with relevant
+      //      metadata.
+
+      // TODO: finish readPartnerAppFile in gaiaIO.js
+
+      const GRAPHITE_INDEX = 'stealthyIndex.json'
+      let recovered = undefined
+      try {
+        const cipherTextObjStr = await this.io.readFileFromHub(GRAPHITE_INDEX, MessagingEngine.RELAY_GRAPHITE_HUB)
+        recovered = await utils.decryptObj(this.privateKey, cipherTextObjStr, true)
+      } catch(error) {
+        throw `_graphiteFileRead: failed read.\n   ${error}`
+      }
+
+      const indexData = this._getIndexDataFromGraphite(recovered)
+      // dump index Data
+      console.log('const indexData = {')
+      for (const fileName in indexData) {
+        if (!fileName || !indexData[fileName]) {
+          continue
+        }
+        const fileData = indexData[fileName]
+        console.log(`  '${fileName}' : {`)
+        console.log(`    title : '${fileData.title}',`)
+        console.log(`    description : '${fileData.description}',`)
+        console.log(`    author : '${fileData.author}',`)
+        console.log(`    decryptable : {`)
+        console.log(`      user : '${fileData.decryptable.user}',`)
+        console.log(`      key : '${fileData.decryptable.key}',`)
+        console.log('    },')
+        console.log(`    fileUrl : '${fileData.fileUrl}',`)
+        console.log(`    version : '${fileData.version}',`)
+        console.log('    appMetadata : {')
+        for (const key in fileData.appMetadata) {
+          console.log(`      ${key} : '${fileData.appMetadata[key]}',`)
+        }
+        console.log('    },')
+        console.log('  },')
+      }
+      console.log('}')
+  }
+
   _configureIO() {
     this.io = (ENABLE_GAIA) ?
       new GaiaIO(this.logger, LOG_GAIAIO) :
       new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO);
+
+    if (process.env.NODE_ENV !== 'production' &&
+        this.userId === 'relay.id') {
+      this._graphiteFileRead()
+    }
 
     this._fetchUserSettings();
   }
@@ -426,7 +592,6 @@ export class MessagingEngine extends EventEmitter {
     let contactArr = [];
     this.io.readLocalFile(this.userId, 'contacts.json')
     .then((contactsData) => {
-      // debugger
       if (contactsData && contactsData !== null) {
         utils.decryptObj(this.privateKey, contactsData, ENCRYPT_CONTACTS)
         .then(contactArr => {
@@ -462,7 +627,6 @@ export class MessagingEngine extends EventEmitter {
       // TODO: probably should error out--possibly warn about data loss. Think
       // about what happens if contacts exist but are added again (bundles probably
       // get wiped out as might the contacts.json.)
-      // debugger
       this.logger('Error', error);
       this._initWithContacts([]);
       this.logger('ERROR: Reading contacts.');
