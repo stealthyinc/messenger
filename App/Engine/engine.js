@@ -565,8 +565,8 @@ export class MessagingEngine extends EventEmitter {
     if (senderInfo) {
       contactsToCheck = this.contactMgr.getContactsWithMatchingPKMask(senderInfo);
     }
-    // if don't know the contact don't do anything
-    if (contactsToCheck && !this.offlineMsgSvc.isReceiving()) {
+
+    if (!this.offlineMsgSvc.isReceiving()) {
       this.offlineMsgSvc.pauseRecvService();
 
       this.offlineMsgSvc.receiveMessages(contactsToCheck)
@@ -624,7 +624,8 @@ export class MessagingEngine extends EventEmitter {
         const contact = ContactManager.buildContactFromQueryResult(
           queryResult, profileQuery, theirUserId, theirPublicKey)
         if (contact) {
-          this.handleContactAdd(contact)
+          const makeActiveContact = false
+          this.handleContactAdd(contact, makeActiveContact)
         }
       })
       .catch((err) => {
@@ -633,7 +634,7 @@ export class MessagingEngine extends EventEmitter {
     }
   }
 
-  async handleContactAdd(contact) {
+  async handleContactAdd(contact, makeActiveContact=true) {
     if (this.anonalytics) {
       this.anonalytics.aeContactAdded();
     }
@@ -648,7 +649,7 @@ export class MessagingEngine extends EventEmitter {
       }
     }
 
-    this.contactMgr.addNewContact(contact, contact.id, publicKey);
+    this.contactMgr.addNewContact(contact, contact.id, publicKey, makeActiveContact);
     this._writeContactList(this.contactMgr.getContacts());
 
     this.conversations.createConversation(contact.id);
