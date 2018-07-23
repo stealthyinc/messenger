@@ -3,16 +3,14 @@ import React from 'react';
 import {
   Modal,
   StyleSheet,
-  TouchableHighlight,
   TouchableOpacity,
   View,
   ViewPropTypes,
   Text,
-  WebView
 } from 'react-native';
 
 import CameraRollPicker from 'react-native-camera-roll-picker';
-// import NavBar, { NavButton, NavButtonText, NavTitle } from 'react-native-nav';
+import NavBar, { NavButton, NavButtonText, NavTitle } from 'react-native-nav';
 
 export default class CustomActions extends React.Component {
   constructor(props) {
@@ -20,7 +18,6 @@ export default class CustomActions extends React.Component {
     this._images = [];
     this.state = {
       modalVisible: false,
-      modalUrl: ''
     };
     this.onActionsPress = this.onActionsPress.bind(this);
     this.selectImages = this.selectImages.bind(this);
@@ -39,7 +36,7 @@ export default class CustomActions extends React.Component {
   }
 
   onActionsPress() {
-    const options = ['Graphite Docs', 'Blockusign PDFs', 'TravelStack Photos', 'Cancel'];
+    const options = ['Choose From Library', 'Send Location', 'Cancel'];
     const cancelButtonIndex = options.length - 1;
     this.context.actionSheet().showActionSheetWithOptions({
       options,
@@ -49,19 +46,22 @@ export default class CustomActions extends React.Component {
       switch (buttonIndex) {
         case 0:
           this.setModalVisible(true);
-          this.setState({modalUrl: 'https://app.graphitedocs.com/'})
           break;
         case 1:
-          this.setModalVisible(true);
-          this.setState({modalUrl: 'https://blockusign.co/'})
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              this.props.onSend({
+                location: {
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                },
+              });
+            },
+            (error) => alert(error.message),
+            {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
+          );
           break;
-        case 2:
-          this.setModalVisible(false);
-          // this.setModalVisible(true);
-          // this.setState({modalUrl: 'http://www.travelstack.club/'})
-          // break;
         default:
-          this.setModalVisible(false);
       }
     });
   }
@@ -70,50 +70,50 @@ export default class CustomActions extends React.Component {
     this.setImages(images);
   }
 
-  // renderNavBar() {
-  //   return (
-  //     <NavBar style={{
-  //       statusBar: {
-  //         backgroundColor: '#FFF',
-  //       },
-  //       navBar: {
-  //         backgroundColor: '#FFF',
-  //       },
-  //     }}>
-  //       <NavButton onPress={() => {
-  //         this.setModalVisible(false);
-  //       }}>
-  //         <NavButtonText style={{
-  //           color: '#000',
-  //         }}>
-  //           {'Cancel'}
-  //         </NavButtonText>
-  //       </NavButton>
-  //       <NavTitle style={{
-  //         color: '#000',
-  //       }}>
-  //         {'Camera Roll'}
-  //       </NavTitle>
-  //       <NavButton onPress={() => {
-  //         this.setModalVisible(false);
+  renderNavBar() {
+    return (
+      <NavBar style={{
+        statusBar: {
+          backgroundColor: '#FFF',
+        },
+        navBar: {
+          backgroundColor: '#FFF',
+        },
+      }}>
+        <NavButton onPress={() => {
+          this.setModalVisible(false);
+        }}>
+          <NavButtonText style={{
+            color: '#000',
+          }}>
+            {'Cancel'}
+          </NavButtonText>
+        </NavButton>
+        <NavTitle style={{
+          color: '#000',
+        }}>
+          {'Camera Roll'}
+        </NavTitle>
+        <NavButton onPress={() => {
+          this.setModalVisible(false);
 
-  //         const images = this.getImages().map((image) => {
-  //           return {
-  //             image: image.uri,
-  //           };
-  //         });
-  //         this.props.onSend(images);
-  //         this.setImages([]);
-  //       }}>
-  //         <NavButtonText style={{
-  //           color: '#000',
-  //         }}>
-  //           {'Send'}
-  //         </NavButtonText>
-  //       </NavButton>
-  //     </NavBar>
-  //   );
-  // }
+          const images = this.getImages().map((image) => {
+            return {
+              image: image.uri,
+            };
+          });
+          this.props.onSend(images);
+          this.setImages([]);
+        }}>
+          <NavButtonText style={{
+            color: '#000',
+          }}>
+            {'Send'}
+          </NavButtonText>
+        </NavButton>
+      </NavBar>
+    );
+  }
 
   renderIcon() {
     if (this.props.icon) {
@@ -146,16 +146,12 @@ export default class CustomActions extends React.Component {
             this.setModalVisible(false);
           }}
         >
-          <TouchableHighlight
-            style={{marginTop: 50, marginLeft: 10}}
-            onPress={() => {
-              this.setModalVisible(false);
-            }}>
-            <Text style={{color: '#037aff', fontSize: 20}}>Done</Text>
-          </TouchableHighlight>
-          <WebView
-            style={{marginTop: 10}}
-            source={{uri: this.state.modalUrl}}
+          {this.renderNavBar()}
+          <CameraRollPicker
+            maximum={10}
+            imagesPerRow={4}
+            callback={this.selectImages}
+            selected={[]}
           />
         </Modal>
         {this.renderIcon()}

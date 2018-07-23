@@ -1,13 +1,14 @@
 import React, { Component } from 'react'
-import { ScrollView, TouchableOpacity, View, Text, ActivityIndicator } from 'react-native'
+import { Image, Modal, Keyboard, StyleSheet, ScrollView, TouchableOpacity, View, Text, ActivityIndicator } from 'react-native'
 import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button } from 'react-native-elements'
 
+import FileDrawer from './FileDrawer'
+
 // Styles
 import styles from './Styles/ChatStyle'
 import {GiftedChat, Actions, Bubble, SystemMessage} from 'react-native-gifted-chat';
-import CustomActions from './chat/CustomActions';
 import CustomView from './chat/CustomView';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import Communications from 'react-native-communications';
@@ -42,6 +43,7 @@ class ChatScreen extends Component {
       activeContact: null,
       token: '',
       publicKey: '',
+      modalVisible: false,
     };
 
     this._isMounted = false;
@@ -218,29 +220,30 @@ class ChatScreen extends Component {
     }
   }
 
+  setModalVisible = (flag) => {
+    console.log("flag", flag)
+    this.setState({modalVisible: flag})
+  }
+
   renderCustomActions = (props) => {
-    if (utils.is_iOS()) {
-      return (
-        <CustomActions
-          {...props}
-        />
-      );
-    }
-    const options = {
-      'Action 1': (props) => {
-        alert('option 1');
-      },
-      'Action 2': (props) => {
-        alert('option 2');
-      },
-      'Cancel': () => {},
-    };
     return (
-      <Actions
-        {...props}
-        options={options}
-      />
-    );
+      <TouchableOpacity
+        style={[styles.chatContainer, this.props.containerStyle]}
+        onPress={() => this.setModalVisible(true)}
+      >
+        <Modal
+          animationType={'fade'}
+          transparent={true}
+          visible={this.state.modalVisible}
+          onRequestClose={() => {
+            this.setModalVisible(false);
+          }}
+        >
+          <FileDrawer close={() => this.setModalVisible(false)} />
+        </Modal>
+        <Ionicons name="ios-attach" size={28} color='#037aff' />
+      </TouchableOpacity>
+    )
   }
 
   renderBubble = (props) => {
@@ -326,11 +329,9 @@ class ChatScreen extends Component {
           loadEarlier={this.state.loadEarlier}
           onLoadEarlier={this.onLoadEarlier}
           isLoadingEarlier={this.state.isLoadingEarlier}
-
           user={{
             _id: this.state.author.username, // sent messages should have same user._id
           }}
-
           renderActions={this.renderCustomActions}
           renderBubble={this.renderBubble}
           renderSystemMessage={this.renderSystemMessage}
