@@ -46,10 +46,58 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   //     before passing it as the query.
   //   - endpoint returns multiple results so we comb through that and find the exact match
   //   - we return the specific user's gaia hub for specified app
-  const getUserGaiaNS = (username, app = 'https://www_stealthy_im') => {
-    // Ensure username doesn't end in tld .id
-    const cleanUserName = utils.removeIdTld(username)
-    // console.log(`DEBUG(Api.js::getUserGaiaNS): username=${username}, app=${app}, cleanUserName=${cleanUserName}`)
+  const getUserGaiaNS = (aUserName, anApp = 'https://www_stealthy_im') => {
+    // TODO: change this over to getProfileFromNameSearch
+    return this.getProfileSearchResults(aUserName, anApp)
+  }
+
+  // getProfileFromNameSearch
+  // Notes:
+  //   - The name search endpoint handles fully qualified user ids so no need to strip the ends off.
+  //   - It returns a data blob containing a link to a user's profile.
+  //   - The link to the user's profile is not cached so it will have up to date
+  //     settings for multi-player
+  //   - The contents of the blob is not consistent. For example, compare the
+  //     "zonefile" property for three different ids: alexc.id, alex.stealthy.id,
+  //     and prabhaav.id.blockstack.  The url is different so you can't rely on
+  //     the "address" field to construct the url from a pattern--you have to parse
+  //     for it.
+  //   - The zonefile URL seems to be consistently delimited with \"
+  //
+  const getProfileFromNameSearch = async (aUserName, anApp = 'https://www_stealthy_im') => {
+    const methodName = 'Api.js::getProfileFromNameSearch'
+
+    let profileData = undefined
+    let nameResult= undefined
+    try {
+      nameResult = api.get(`v1/users/${aUserName}`)
+    } catch (err) {
+      throw `ERROR(${methodName}): error requesting data from name endpoint.\n${err}`
+    }
+
+    let zoneFileUrl = undefined
+    if (!nameResult ||
+        !nameResult.hasOwnProperty('zonefile') || !nameResult['zonefile']) {
+      throw `ERROR(${methodName}): no zonefile data in request returned from name endpoint.`
+    }
+
+    const zonefileUrlMess = nameResult['zonefile']
+    const zoneFileUrlReResult = /\".*\"/.exec(zonefileUrlMess)
+    zoneFileUrl = String(zoneFileUrlReResult).replace(/"/g, '')
+    if (!zoneFileUrl) {
+      throw `ERROR(${methodName}): unable to parse URL from zonefile data.`
+    }
+
+  }
+
+  // Searches for profiles using the profile search endpoint.
+  // IMPORTANT: don't use this for now. It returns cached profile data. That means
+  //            a user who has just made their gaia public (multi-player) will not
+  //            have a visible gaia in the returned result.
+  const getProfileSearchResults(aUserName, anApp = 'https://www_stealthy_im') = {
+    // Ensure aUserName doesn't end in tld .id
+    const cleanUserName = utils.removeIdTld(aUserName)
+    // console.log(`DEBUG(Api.js::getProfileSearchResults): aUserName=${aUserName}, anApp=${anApp}, cleanUserName=${cleanUserName}`)
     return api.get(`/v1/search?query=${cleanUserName}`)
     .then((queryResult) => {
       if (queryResult &&
@@ -59,22 +107,22 @@ const create = (baseURL = 'https://core.blockstack.org') => {
         for (const result of queryResult['data']['results']) {
           if (!result ||
               !result.hasOwnProperty('fullyQualifiedName') ||
-              result['fullyQualifiedName'] !== username) {
+              result['fullyQualifiedName'] !== aUserName) {
             continue
           }
 
           if (result.hasOwnProperty('profile') &&
               result['profile'].hasOwnProperty('apps') &&
-              result['profile']['apps'].hasOwnProperty(app)) {
-            return result["profile"]["apps"][app]
+              result['profile']['apps'].hasOwnProperty(anApp)) {
+            return result["profile"]["apps"][anApp]
           }
         }
       }
-      console.log(`INFO(Api.js::getUserGaiaNS): gaia not found for ${username}`)
+      console.log(`INFO(Api.js::getProfileSearchResults): gaia not found for ${aUserName}`)
       return undefined
     })
     .catch((err) => {
-      console.log(`ERROR(Api.js::getUserGaiaNS): ${err}`)
+      console.log(`ERROR(Api.js::getProfileSearchResults): ${err}`)
       return undefined
     })
   }
