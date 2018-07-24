@@ -790,7 +790,6 @@ export class MessagingEngine extends EventEmitter {
       const profileQuery = utils.removeIdTld(theirUserId)
       api.getUserProfile(profileQuery)
       .then((queryResult) => {
-
         const contact = ContactManager.buildContactFromQueryResult(
           queryResult, profileQuery, theirUserId, theirPublicKey)
         if (contact) {

@@ -18,6 +18,8 @@ const utils = require('./../Engine/misc/utils.js');
 
 const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js');
 
+// import graphiteIcon from '../Images/Graphite.png';
+
 class ChatScreen extends Component {
 
   static navigationOptions = ({ navigation }) => {
@@ -112,9 +114,13 @@ class ChatScreen extends Component {
       const { username, name, userImage } = author
       const start = new Date(Date.now())
       const time = start.toString()
+      // TODO: custom renderer with graphite icon
+      // const graphiteLogo = 'https://image.ibb.co/hde71b/AppIcon.png'
+      const messageContent = `${name} shared "${dappData.title}" with you:\n\n${fileUrl}`
       const fileMessage = [{
         createdAt: time,
-        text: fileUrl,
+        text: messageContent,
+        // image: graphiteIcon,
         user: {
           _id: username,
           name: name,
@@ -334,7 +340,7 @@ class ChatScreen extends Component {
           <Text style={{marginTop: 30, marginRight: 5, marginLeft: 5}}>Stealthy uses {id}'s public key to encrypt data</Text>
           <Text style={{marginTop: 30, marginRight: 5, marginLeft: 5, fontSize: 16}}>Invite {id} to securely chat with you!</Text>
           <View style={{flexDirection: 'row', marginTop: 20}}>
-            <Button 
+            <Button
               backgroundColor={'#037aff'}
               onPress={() => Communications.email([''],null,null,'Add me on Stealthy IM','')}
               icon={{name: 'email', color: 'white'}}
@@ -342,7 +348,7 @@ class ChatScreen extends Component {
               raised
             />
             <View style={{margin: 10}} />
-            <Button 
+            <Button
               backgroundColor={'#037aff'}
               onPress={() => Communications.text('')}
               icon={{name: 'chat', color: 'white'}}
@@ -370,7 +376,7 @@ class ChatScreen extends Component {
           renderInputToolbar={this.renderInputToolbar}
           parsePatterns={(linkStyle) => [
             { type: 'url', style: linkStyle, onPress: this.onPressUrl },
-          ]} 
+          ]}
         />)
       :
         (<View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
