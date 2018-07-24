@@ -46,9 +46,16 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   //     before passing it as the query.
   //   - endpoint returns multiple results so we comb through that and find the exact match
   //   - we return the specific user's gaia hub for specified app
-  const getUserGaiaNS = (aUserName, anApp = 'https://www_stealthy_im') => {
-    // TODO: change this over to getProfileFromNameSearch
-    return this.getProfileSearchResults(aUserName, anApp)
+  const getUserGaiaNS = async (aUserName, anAppUrl = 'https://www.stealthy.im') => {
+    const methodName = 'Api.js::getUserGaiaNS'
+    let profileData = undefined
+    try {
+      profileData = await getProfileFromNameSearch(aUserName, anAppUrl)
+      const appUrl = profileData.apps[anAppUrl]
+      return appUrl
+    } catch(err) {
+      throw `ERROR(${methodName}): failed to get profile data from name search.\n${err}`
+    }
   }
 
   // getProfileFromNameSearch
@@ -62,70 +69,90 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   //     and prabhaav.id.blockstack.  The url is different so you can't rely on
   //     the "address" field to construct the url from a pattern--you have to parse
   //     for it.
-  //   - The zonefile URL seems to be consistently delimited with \"
+  //   - The zonefile URL seems to be consistently delimited with \". However some
+  //     ids, like stealthy.id, return a pile of other strings delimited with \", so
+  //     we include https://gaia in our search.
+  //   - The profile returned by this endpoint is different than the one returned by
+  //     the profile search endpoint. Specifically the app properties use '.' instead
+  //     of '_', i.e. 'www.stealthy.im' instead of 'www_stealthy_im'.
   //
-  const getProfileFromNameSearch = async (aUserName, anApp = 'https://www_stealthy_im') => {
+  const getProfileFromNameSearch = async (aUserName) => {
     const methodName = 'Api.js::getProfileFromNameSearch'
 
-    let profileData = undefined
     let nameResult= undefined
     try {
-      nameResult = api.get(`v1/users/${aUserName}`)
+      nameResult = await api.get(`v1/names/${aUserName}`)
     } catch (err) {
-      throw `ERROR(${methodName}): error requesting data from name endpoint.\n${err}`
+      throw `ERROR(${methodName}): request for data from name endpoint failed.\n${err}`
     }
 
-    let zoneFileUrl = undefined
-    if (!nameResult ||
-        !nameResult.hasOwnProperty('zonefile') || !nameResult['zonefile']) {
-      throw `ERROR(${methodName}): no zonefile data in request returned from name endpoint.`
+    let zonefileUrlMess = undefined
+    try {
+      zonefileUrlMess = nameResult.data.zonefile
+    } catch (err) {
+      throw `ERROR(${methodName}): failed to get zonefile data in request returned from name endpoint.\n${err}`
     }
 
-    const zonefileUrlMess = nameResult['zonefile']
-    const zoneFileUrlReResult = /\".*\"/.exec(zonefileUrlMess)
-    zoneFileUrl = String(zoneFileUrlReResult).replace(/"/g, '')
-    if (!zoneFileUrl) {
-      throw `ERROR(${methodName}): unable to parse URL from zonefile data.`
+    const zoneFileUrlReResult = /\"https:\/\/.*\"/.exec(zonefileUrlMess)
+    let profileUrl = String(zoneFileUrlReResult).replace(/"/g, '')
+    if (!profileUrl) {
+      throw `ERROR(${methodName}): unable to parse profile URL from zonefile data.`
     }
 
+    let profileUrlResult = undefined
+    try {
+      profileUrlResult = await api.get(profileUrl)
+    } catch (err) {
+      throw `ERROR(${methodName}): request for profile data from profile URL (${profileUrl}) failed.\n${err}`
+    }
+
+    let profileData = undefined
+    try {
+      profileData = profileUrlResult.data[0].decodedToken.payload.claim
+    } catch (err) {
+      throw `ERROR(${methodName}): failed to get profile data in request returned from profile URL (${profileUrl}).\n${err}`
+    }
+
+    return profileData
   }
 
+  // DO NOT USE:
   // Searches for profiles using the profile search endpoint.
   // IMPORTANT: don't use this for now. It returns cached profile data. That means
   //            a user who has just made their gaia public (multi-player) will not
   //            have a visible gaia in the returned result.
-  const getProfileSearchResults(aUserName, anApp = 'https://www_stealthy_im') = {
-    // Ensure aUserName doesn't end in tld .id
-    const cleanUserName = utils.removeIdTld(aUserName)
-    // console.log(`DEBUG(Api.js::getProfileSearchResults): aUserName=${aUserName}, anApp=${anApp}, cleanUserName=${cleanUserName}`)
-    return api.get(`/v1/search?query=${cleanUserName}`)
-    .then((queryResult) => {
-      if (queryResult &&
-          queryResult.hasOwnProperty('data') &&
-          queryResult['data'] &&      // not enough to see if property is there (on timeout, it is null)
-          queryResult['data'].hasOwnProperty('results')) {
-        for (const result of queryResult['data']['results']) {
-          if (!result ||
-              !result.hasOwnProperty('fullyQualifiedName') ||
-              result['fullyQualifiedName'] !== aUserName) {
-            continue
-          }
-
-          if (result.hasOwnProperty('profile') &&
-              result['profile'].hasOwnProperty('apps') &&
-              result['profile']['apps'].hasOwnProperty(anApp)) {
-            return result["profile"]["apps"][anApp]
-          }
-        }
-      }
-      console.log(`INFO(Api.js::getProfileSearchResults): gaia not found for ${aUserName}`)
-      return undefined
-    })
-    .catch((err) => {
-      console.log(`ERROR(Api.js::getProfileSearchResults): ${err}`)
-      return undefined
-    })
-  }
+  // const getProfileSearchResults = (aUserName, anApp = 'https://www_stealthy_im') => {
+  //   // Ensure aUserName doesn't end in tld .id
+  //   const cleanUserName = utils.removeIdTld(aUserName)
+  //   // console.log(`DEBUG(Api.js::getProfileSearchResults): aUserName=${aUserName}, anApp=${anApp}, cleanUserName=${cleanUserName}`)
+  //   return api.get(`/v1/search?query=${cleanUserName}`)
+  //   .then((queryResult) => {
+  //     if (queryResult &&
+  //         queryResult.hasOwnProperty('data') &&
+  //         queryResult['data'] &&      // not enough to see if property is there (on timeout, it is null)
+  //         queryResult['data'].hasOwnProperty('results')) {
+  //       for (const result of queryResult['data']['results']) {
+  //         if (!result ||
+  //             !result.hasOwnProperty('fullyQualifiedName') ||
+  //             result['fullyQualifiedName'] !== aUserName) {
+  //           continue
+  //         }
+  //
+  //         if (result.hasOwnProperty('profile') &&
+  //             result['profile'].hasOwnProperty('apps') &&
+  //             result['profile']['apps'].hasOwnProperty(anApp)) {
+  //           return result["profile"]["apps"][anApp]
+  //         }
+  //       }
+  //     }
+  //     console.log(`INFO(Api.js::getProfileSearchResults): gaia not found for ${aUserName}`)
+  //     return undefined
+  //   })
+  //   .catch((err) => {
+  //     console.log(`ERROR(Api.js::getProfileSearchResults): ${err}`)
+  //     return undefined
+  //   })
+  // }
 
   // ------
   // STEP 3
