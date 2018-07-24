@@ -270,6 +270,16 @@ class ContactManager {
     return undefined;
   }
 
+  getContactWithPublicKey = (aPublicKey) => {
+    for (const contact of this.contactArr) {
+      if (contact.publicKey === aPublicKey) {
+        return contact
+      }
+    }
+
+    return undefined
+  }
+
   deleteContact = (aContact) => {
     if (aContact) {
       const thisMemContact = this.getContact(aContact.id);

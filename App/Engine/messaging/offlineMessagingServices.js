@@ -339,7 +339,9 @@ class OfflineMessagingServices extends EventEmitter {
     while (this.enableRecvService) {
       if (!this.skipRecvService) {
         this.log('Offline Messaging Receive Service:');
+        this.receiving = true;
         await this.receiveMessages();
+        this.receiving = false;
       }
 
       const sleepResult = await utils.resolveAfterMilliseconds(RECV_INTERVAL * 1000);
@@ -360,7 +362,6 @@ class OfflineMessagingServices extends EventEmitter {
     }
 
     const isFirebase = this.idxIoInst.isFirebase();
-    this.receiving = true;
     const chatMessagesReadPromises = [];
 
     for (const contact of contacts) {
@@ -410,11 +411,9 @@ class OfflineMessagingServices extends EventEmitter {
         const allMessages = this.rcvdOfflineMsgs.getAllMessages();
         this.emit('new messages', allMessages);
       }
-      this.receiving = false;
       return;
     })
     .catch((err) => {
-      this.receiving = false;
       this.logger(`ERROR: offline messaging services failed to read chat messages. ${err}.`);
       return;
     });

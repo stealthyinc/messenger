@@ -55,28 +55,36 @@ class Discovery extends EventEmitter {
     this.listeners = {}
   }
 
+  _getDiscoveryRootRef() {
+    const discoveryPath = `${common.getDbDiscoveryPath(this.publicKey)}`
+    return firebaseInstance.getFirebaseRef(discoveryPath)
+  }
+
   stop() {
     if (this.fbListenerFn) {
-      const discoveryPath = `${common.getDbDiscoveryPath(this.publicKey)}`
-      const discoveryRef = firebaseInstance.getFirebaseRef(discoveryPath)
-      discoveryRef.off('child_added', this.fbListenerFn)
+      this._getDiscoveryRootRef().off('child_added', this.fbListenerFn)
     }
 
     this.fbListenerFn = undefined
   }
 
 
-  async _handleInvitation(snapshot) {
+  async _handleInvitation(aPublicKey, aStringifiedCipherObj) {
+    // console.log(`DEBUG(discovery.js::_handleInvitation) ${aPublicKey}`)
+    try {
+      const cipherObj = JSON.parse(aStringifiedCipherObj)
+      const theirUserId = await utils.decrypt(this.privateKey, cipherObj, true)
+      this.emit('new-invitation', aPublicKey, theirUserId)
+    } catch (err) {
+      console.log(`ERROR(discovery.js::_handleInvitation): ${err}`)
+    }
+  }
+
+  async _handleInvitationFromSnapshot(snapshot) {
+    // const publicKey = snapshot ? snapshot.key : ''
+    // console.log(`DEBUG(discovery.js::_handleInvitationFromSnapshot): ${publicKey}`)
     if (snapshot && snapshot.val()) {
-      const theirPublicKey = snapshot.key
-      try {
-        const stringifiedCipherObj = snapshot.val()
-        const cipherObj = JSON.parse(stringifiedCipherObj)
-        const theirUserId = await utils.decrypt(this.privateKey, cipherObj, true)
-        this.emit('new-invitation', theirPublicKey, theirUserId)
-      } catch (err) {
-        console.log(`ERROR(discovery.js::_handleInvitation): ${err}`)
-      }
+      this._handleInvitation(snapshot.key, snapshot.val())
     }
   }
 
@@ -96,19 +104,39 @@ class Discovery extends EventEmitter {
 
   async clearDiscoveryDb() {
     try {
-      const discoveryPath = common.getDbDiscoveryPath(this.publicKey)
-      const discoveryRef = firebaseInstance.getFirebaseRef(discoveryPath)
-      const result = await discoveryRef.remove()
+      const result = await this._getDiscoveryRootRef().remove()
     } catch (err) {
       console.log(`ERROR(discovery.js::clearDiscoveryDb): ${err}`)
     }
   }
 
-  monitorInvitations() {
-    const discoveryPath = `${common.getDbDiscoveryPath(this.publicKey)}`
-    const discoveryRef = firebaseInstance.getFirebaseRef(discoveryPath)
+  // This is a faster check for new invitations. It reads the entire discovery
+  // collection and checks to see if we have contacts with the public keys in
+  // the collection. If a new contact is found, we call the _handleInvitation
+  // method.
+  async checkInvitations(aContactMgr) {
+    if (aContactMgr) {
+      let snapshot = undefined
+      try {
+        snapshot = await this._getDiscoveryRootRef().once('value')
+      } catch (err) {
+        throw `ERROR(discovery.js::checkInvitations): failed to read discovery root ref.`
+      }
 
-    this.fbListenerFn = discoveryRef.on('child_added', (snapshot) => this._handleInvitation(snapshot))
+      if (snapshot && snapshot.val()) {
+        const invitationDict = snapshot.val()
+        for (const publicKey in invitationDict) {
+          if (!aContactMgr.getContactWithPublicKey()) {
+            await this._handleInvitation(publicKey, invitationDict[publicKey])
+          }
+        }
+      }
+    }
+  }
+
+  monitorInvitations() {
+    this.fbListenerFn = this._getDiscoveryRootRef().on(
+      'child_added', (snapshot) => this._handleInvitationFromSnapshot(snapshot))
   }
 
   // Updates the shared discovery structure with an invite if needed.

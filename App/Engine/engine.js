@@ -749,6 +749,8 @@ export class MessagingEngine extends EventEmitter {
     } else {
       console.log(`${logPrefix}: offline message service already receiving.`)
     }
+
+    this.discovery.checkInvitations(this.contactMgr)
   }
 
   //
