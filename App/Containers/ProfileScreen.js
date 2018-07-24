@@ -62,14 +62,14 @@ class ProfileScreen extends React.Component {
     }
     return (
       <View style={styles.container}>
-        <Overlay
+        {/*<Overlay
           isVisible={this.state.isVisible}
           windowBackgroundColor="rgba(255, 255, 255, .5)"
           overlayBackgroundColor="white"
           width="auto"
           height="auto"
         >
-        </Overlay>
+        </Overlay>*/}
         <View style={{flex: 10}} />
         <View style={{flex: 60, alignItems: 'center'}}>
           <Avatar
@@ -107,30 +107,6 @@ class ProfileScreen extends React.Component {
                 })
                 this.props.updateUserSettings('notifications')}
               } />
-            {/*<Icon
-              reverse
-              name='heartbeat'
-              type='font-awesome'
-              color={(heartbeat) ? '#037aff' : 'grey'}
-              onPress={() => {
-                Toast.show({
-                  text: (heartbeat) ? 'Heartbeat Setting Disabled!' : 'Heartbeat Setting Enabled!',
-                  duration: 1500
-                })
-                this.props.updateUserSettings('heartbeat')}
-              } />
-            <Icon
-              reverse
-              name='wifi'
-              type='font-awesome'
-              color={(webrtc) ? '#037aff' : 'grey'}
-              onPress={() => {
-                Toast.show({
-                  text: (webrtc) ? 'WebRTC Setting Disabled!' : 'WebRTC Setting Enabled!',
-                  duration: 1500
-                })
-                this.props.updateUserSettings('webrtc')}
-              } />*/}
           </View>
           <Button
             onPress={this.props.screenProps.logout}

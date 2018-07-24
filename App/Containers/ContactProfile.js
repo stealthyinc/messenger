@@ -77,7 +77,7 @@ class ContactProfile extends React.Component {
   renderGraphiteDocs = (dApp, image) => {
     const simulatedData = {
       'relay.id-1532144113901' : {
-        title : 'Test Stealthy Integration 2',
+        title : 'Take the Power Back',
         description : '',
         author : 'relay.id',
         decryptable : {
