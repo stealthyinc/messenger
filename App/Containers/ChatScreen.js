@@ -123,7 +123,7 @@ class ChatScreen extends Component {
         _id: start,
       }]
       this.onSend(fileMessage)
-      this.props.sendDappData({})
+      this.props.sendDappData(null)
     }
     else if (this.props.messages && this.props.messages.length !== messages.length) {
       const numNewMsgs = messages.length - this.props.messages.length;
