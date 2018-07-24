@@ -83,7 +83,7 @@ class ContactProfile extends React.Component {
           user : 'TBD',
           key : 'Graphite',
         },
-        fileUrl : 'https://app.graphitedocs.com/shared/docs/relay.id-1532144113901',
+        fileUrl : 'https://app.graphitedocs.com/shared/docs/graphite.id-1532369712591',
         version : '',
         appMetadata : {
           title : 'Test Stealthy Integration 2',

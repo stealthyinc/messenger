@@ -354,13 +354,13 @@ class ChatScreen extends Component {
     if (sharedUrl) {
       return (
         <View style={{flex: 1}}>
-          <TouchableHighlight
+          <TouchableOpacity
             style={{marginTop: 20, marginLeft: 10}}
             onPress={() => {
               this.setState({sharedUrl: ''});
             }}>
             <Text style={{color: '#037aff', fontSize: 20}}>Done</Text>
-          </TouchableHighlight>
+          </TouchableOpacity>
           <WebView
             source={{uri: this.state.sharedUrl}}
           />
