@@ -105,9 +105,26 @@ class ChatScreen extends Component {
     if (!this.activeContact) {
       return
     }
-    
-    const { messages } = nextProps
-    if (this.props.messages && this.props.messages.length !== messages.length) {
+    const { messages, fileUrl } = nextProps
+    if (fileUrl.length) {
+      const { author } = this.state
+      const { username, name, userImage } = author
+      const start = new Date(Date.now())
+      const time = start.toString()
+      const fileMessage = [{
+        createdAt: time,
+        text: fileUrl,
+        user: {
+          _id: username,
+          name: name,
+          avatar: userImage
+        },
+        _id: start,
+      }]
+      this.onSend(fileMessage)
+      this.props.sendFileUrl('')
+    }
+    else if (this.props.messages && this.props.messages.length !== messages.length) {
       const numNewMsgs = messages.length - this.props.messages.length;
       let newMessages = [];
       for (const idx = messages.length-numNewMsgs; idx < messages.length; idx++) {
@@ -367,6 +384,7 @@ const mapStateToProps = (state) => {
     userProfile: EngineSelectors.getUserProfile(state),
     publicKey: EngineSelectors.getPublicKey(state),
     bearerToken: EngineSelectors.getBearerToken(state),
+    fileUrl: EngineSelectors.getFileUrl(state),
   }
 }
 
@@ -375,6 +393,7 @@ const mapDispatchToProps = (dispatch) => {
     handleOutgoingMessage: (message) => dispatch(EngineActions.setOutgoingMessage(message)),
     sendNotification: (token, publicKey, bearerToken) => dispatch(EngineActions.sendNotification(token, publicKey, bearerToken)),
     handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),
+    sendFileUrl: (fileUrl) => dispatch(EngineActions.sendFileUrl(fileUrl)),
   }
 }
 

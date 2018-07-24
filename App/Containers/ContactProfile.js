@@ -143,7 +143,8 @@ class ContactProfile extends React.Component {
     }
     let cards = []
     for (const item in simulatedData) {
-      const {title, description, author, fileUrl, profile} = simulatedData[item]
+      const data = simulatedData[item]
+      const {title, description, author, fileUrl, profile} = data
       cards.push(
         <ListItem
           key={item}
