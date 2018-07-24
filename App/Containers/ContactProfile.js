@@ -52,7 +52,7 @@ class ContactProfile extends React.Component {
       },
       {
         name: 'Cryptocracy',
-        avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+        avatar_url: 'https://raw.githubusercontent.com/cryptocracy/images/master/512x512.png',
         subtitle: 'Decentralized Voluntary Associations'
       },
     ]
@@ -69,7 +69,8 @@ class ContactProfile extends React.Component {
         )
       })
   }
-  sendFileUrlMessage = (fileUrl) => {
+  sendFileUrlMessage = (fileUrl, dappData) => {
+    this.props.sendDappData(dappData)
     this.props.sendFileUrl(fileUrl)
     this.props.navigation.navigate("DrawerClose")
   }
@@ -152,7 +153,7 @@ class ContactProfile extends React.Component {
           title={title}
           subtitle={author}
           avatar={{uri: image}}
-          onPress={() => this.sendFileUrlMessage(fileUrl)}
+          onPress={() => this.sendFileUrlMessage(fileUrl, data)}
         />
       )
     }
@@ -224,6 +225,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     sendFileUrl: (fileUrl) => dispatch(EngineActions.sendFileUrl(fileUrl)),
+    sendDappData: (dappData) => dispatch(EngineActions.sendDappData(dappData)),
   }
 }
 

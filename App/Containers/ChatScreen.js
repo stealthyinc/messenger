@@ -106,8 +106,8 @@ class ChatScreen extends Component {
     if (!this.activeContact) {
       return
     }
-    const { messages, fileUrl } = nextProps
-    if (fileUrl.length) {
+    const { messages, fileUrl, dappData } = nextProps
+    if (dappData) {
       const { author } = this.state
       const { username, name, userImage } = author
       const start = new Date(Date.now())
@@ -123,7 +123,7 @@ class ChatScreen extends Component {
         _id: start,
       }]
       this.onSend(fileMessage)
-      this.props.sendFileUrl('')
+      this.props.sendDappData({})
     }
     else if (this.props.messages && this.props.messages.length !== messages.length) {
       const numNewMsgs = messages.length - this.props.messages.length;
@@ -319,7 +319,9 @@ class ChatScreen extends Component {
 
   onPressUrl = (url) => {
     console.log('URL', url)
-    this.setState({sharedUrl: url})
+    // this.setState({sharedUrl: url})
+    this.props.sendFileUrl(url)
+    this.props.navigation.navigate('DappScreen')
   }
 
   render() {
@@ -347,23 +349,6 @@ class ChatScreen extends Component {
               title='Message'
             />
           </View>
-        </View>
-      )
-    }
-    const { sharedUrl } = this.state
-    if (sharedUrl) {
-      return (
-        <View style={{flex: 1}}>
-          <TouchableOpacity
-            style={{marginTop: 20, marginLeft: 10}}
-            onPress={() => {
-              this.setState({sharedUrl: ''});
-            }}>
-            <Text style={{color: '#037aff', fontSize: 20}}>Done</Text>
-          </TouchableOpacity>
-          <WebView
-            source={{uri: this.state.sharedUrl}}
-          />
         </View>
       )
     }
@@ -411,6 +396,7 @@ const mapStateToProps = (state) => {
     publicKey: EngineSelectors.getPublicKey(state),
     bearerToken: EngineSelectors.getBearerToken(state),
     fileUrl: EngineSelectors.getFileUrl(state),
+    dappData: EngineSelectors.getDappData(state),
   }
 }
 
@@ -420,6 +406,7 @@ const mapDispatchToProps = (dispatch) => {
     sendNotification: (token, publicKey, bearerToken) => dispatch(EngineActions.sendNotification(token, publicKey, bearerToken)),
     handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),
     sendFileUrl: (fileUrl) => dispatch(EngineActions.sendFileUrl(fileUrl)),
+    sendDappData: (dappData) => dispatch(EngineActions.sendDappData(dappData)),
   }
 }
 

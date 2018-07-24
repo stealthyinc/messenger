@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { NativeModules, ScrollView, Text, Image, View } from 'react-native'
 import { DrawerNavigator, StackNavigator, SwitchNavigator } from 'react-navigation';
+import DappScreen from '../Containers/DappScreen'
 import FileDrawer from '../Containers/FileDrawer'
 import { Images } from '../Themes'
 
@@ -33,6 +34,7 @@ const ChatRoom = DrawerNavigator(
 const PrimaryNav = StackNavigator({
   Tab: { screen: TabScreen },
   ChatRoom,
+  DappScreen: { screen: DappScreen },
   BlockContactSearch: { screen: BlockContactSearch },
   ChatMenu: { screen: ChatMenuScreen },
 });

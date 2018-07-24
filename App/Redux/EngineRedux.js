@@ -30,7 +30,8 @@ const { Types, Creators } = createActions({
   newNotification: ['senderInfo'],
   setBearerToken: ['bearerToken'],
   setSession: ['session'],
-  sendFileUrl: ['fileUrl']
+  sendFileUrl: ['fileUrl'],
+  sendDappData: ['dappData']
 })
 
 export const EngineTypes = Types
@@ -57,6 +58,7 @@ export const INITIAL_STATE = Immutable({
   bearerToken: '',
   session: '',
   fileUrl: '',
+  dappData: null
 })
 
 /* ------------- Selectors ------------- */
@@ -78,6 +80,7 @@ export const EngineSelectors = {
   getBearerToken: state => state.engine.bearerToken,
   getSession: state => state.engine.session,
   getFileUrl: state => state.engine.fileUrl,
+  getDappData: state => state.engine.dappData,
 }
 
 /* ------------- Reducers ------------- */
@@ -169,6 +172,11 @@ export const sendFileUrl = (state, { fileUrl }) => {
   return state.merge({ fileUrl })
 }
 
+// send file data
+export const sendDappData = (state, { dappData }) => {
+  return state.merge({ dappData })
+}
+
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -189,4 +197,5 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_BEARER_TOKEN]: setBearerToken,
   [Types.SET_SESSION]: setSession,
   [Types.SEND_FILE_URL]: sendFileUrl,
+  [Types.SEND_DAPP_DATA]: sendDappData,
 })
