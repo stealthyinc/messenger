@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Image, Modal, Keyboard, StyleSheet, ScrollView, TouchableOpacity, View, Text, ActivityIndicator } from 'react-native'
+import { Image, Modal, Keyboard, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, WebView, View, Text, ActivityIndicator } from 'react-native'
 import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button } from 'react-native-elements'
@@ -44,6 +44,7 @@ class ChatScreen extends Component {
       token: '',
       publicKey: '',
       modalVisible: false,
+      sharedUrl: '',
     };
 
     this._isMounted = false;
@@ -316,6 +317,11 @@ class ChatScreen extends Component {
     return <InputToolbar {...props} containerStyle={{marginBottom: 5, borderTopWidth: 1.5, borderTopColor: '#333'}} />
   }
 
+  onPressUrl = (url) => {
+    console.log('URL', url)
+    this.setState({sharedUrl: url})
+  }
+
   render() {
     const { publicKey } = this.activeContact
     if (!publicKey) {
@@ -344,6 +350,23 @@ class ChatScreen extends Component {
         </View>
       )
     }
+    const { sharedUrl } = this.state
+    if (sharedUrl) {
+      return (
+        <View style={{flex: 1}}>
+          <TouchableHighlight
+            style={{marginTop: 20, marginLeft: 10}}
+            onPress={() => {
+              this.setState({sharedUrl: ''});
+            }}>
+            <Text style={{color: '#037aff', fontSize: 20}}>Done</Text>
+          </TouchableHighlight>
+          <WebView
+            source={{uri: this.state.sharedUrl}}
+          />
+        </View>
+      )
+    }
     const content = this.activeContact ?
         (<GiftedChat
           messages={this.state.messages}
@@ -359,7 +382,10 @@ class ChatScreen extends Component {
           renderSystemMessage={this.renderSystemMessage}
           renderCustomView={this.renderCustomView}
           renderFooter={this.renderFooter}
-          renderInputToolbar={this.renderInputToolbar} 
+          renderInputToolbar={this.renderInputToolbar}
+          parsePatterns={(linkStyle) => [
+            { type: 'url', style: linkStyle, onPress: this.onPressUrl },
+          ]} 
         />)
       :
         (<View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
