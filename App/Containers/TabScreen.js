@@ -2,6 +2,7 @@ import React from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { TabNavigator, TabBarBottom } from 'react-navigation';
 import ConversationScreen from './ConversationScreen'
+import ContactProfile from './ContactProfile'
 import ProfileScreen from './ProfileScreen'
 import WalletScreen from './WalletScreen'
 

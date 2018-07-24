@@ -8,7 +8,7 @@ import FileDrawer from './FileDrawer'
 
 // Styles
 import styles from './Styles/ChatStyle'
-import {GiftedChat, Actions, Bubble, SystemMessage} from 'react-native-gifted-chat';
+import {GiftedChat, Actions, Bubble, SystemMessage, InputToolbar} from 'react-native-gifted-chat';
 import CustomView from './chat/CustomView';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import Communications from 'react-native-communications';
@@ -294,6 +294,11 @@ class ChatScreen extends Component {
     return null;
   }
 
+  renderInputToolbar (props) {
+     //Add the extra styles via containerStyle
+    return <InputToolbar {...props} containerStyle={{marginBottom: 5, borderTopWidth: 1.5, borderTopColor: '#333'}} />
+  }
+
   render() {
     const { publicKey } = this.activeContact
     if (!publicKey) {
@@ -332,11 +337,12 @@ class ChatScreen extends Component {
           user={{
             _id: this.state.author.username, // sent messages should have same user._id
           }}
-          renderActions={this.renderCustomActions}
+          // renderActions={this.renderCustomActions}
           renderBubble={this.renderBubble}
           renderSystemMessage={this.renderSystemMessage}
           renderCustomView={this.renderCustomView}
           renderFooter={this.renderFooter}
+          renderInputToolbar={this.renderInputToolbar} 
         />)
       :
         (<View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
