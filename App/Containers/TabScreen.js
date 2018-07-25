@@ -5,9 +5,11 @@ import ConversationScreen from './ConversationScreen'
 import ContactProfile from './ContactProfile'
 import ProfileScreen from './ProfileScreen'
 import WalletScreen from './WalletScreen'
+import DappStore from './DappStore'
 
 export default TabNavigator(
   {
+    dApps: { screen: DappStore },
     Messages: { screen: ConversationScreen },
     // Wallet: { screen: WalletScreen },
     Profile: { screen: ProfileScreen },
@@ -20,8 +22,11 @@ export default TabNavigator(
         if (routeName === 'Messages') {
           iconName = `ios-chatbubbles`;
         } 
-        else if (routeName === 'Wallet') {
-          iconName = `ios-cash${focused ? '' : '-outline'}`;
+        // else if (routeName === 'Wallet') {
+        //   iconName = `ios-cash${focused ? '' : '-outline'}`;
+        // }
+        else if (routeName === 'dApps') {
+          iconName = `ios-aperture`;
         }
         else if (routeName === 'Profile') {
           iconName = `ios-contact`;

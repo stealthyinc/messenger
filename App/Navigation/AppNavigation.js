@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { NativeModules, ScrollView, Text, Image, View } from 'react-native'
 import { DrawerNavigator, StackNavigator, SwitchNavigator } from 'react-navigation';
-import DappScreen from '../Containers/DappScreen'
 import FileDrawer from '../Containers/FileDrawer'
 import { Images } from '../Themes'
 
@@ -17,6 +16,9 @@ import ContactScreen from '../Containers/ContactScreen'
 import ChatMenuScreen from '../Containers/ChatMenuScreen'
 import ContactProfile from '../Containers/ContactProfile'
 import BlockContactSearch from '../Containers/BlockContactSearch'
+import DappScreen from '../Containers/DappScreen'
+import DappData from '../Containers/DappData'
+import DappStore from '../Containers/DappStore'
 import Introduction from '../Components/Introduction'
 
 console.disableYellowBox = true;
@@ -34,9 +36,11 @@ const ChatRoom = DrawerNavigator(
 const PrimaryNav = StackNavigator({
   Tab: { screen: TabScreen },
   ChatRoom,
-  DappScreen: { screen: DappScreen },
   BlockContactSearch: { screen: BlockContactSearch },
   ChatMenu: { screen: ChatMenuScreen },
+  DappStore: { screen: DappStore },
+  DappData: { screen: DappData },
+  DappScreen: { screen: DappScreen }
 });
 
 const AuthStack = StackNavigator({

@@ -253,19 +253,9 @@ class ChatScreen extends Component {
     return (
       <TouchableOpacity
         style={[styles.chatContainer, this.props.containerStyle]}
-        onPress={() => this.setModalVisible(true)}
+        onPress={() => this.props.navigation.navigate('DappStore')}
       >
-        <Modal
-          animationType={'fade'}
-          transparent={true}
-          visible={this.state.modalVisible}
-          onRequestClose={() => {
-            this.setModalVisible(false);
-          }}
-        >
-          <FileDrawer close={() => this.setModalVisible(false)} />
-        </Modal>
-        <Ionicons name="ios-attach" size={28} color='#037aff' />
+        <Ionicons name="ios-aperture" size={28} color='#037aff' />
       </TouchableOpacity>
     )
   }
@@ -368,7 +358,7 @@ class ChatScreen extends Component {
           user={{
             _id: this.state.author.username, // sent messages should have same user._id
           }}
-          // renderActions={this.renderCustomActions}
+          renderActions={this.renderCustomActions}
           renderBubble={this.renderBubble}
           renderSystemMessage={this.renderSystemMessage}
           renderCustomView={this.renderCustomView}

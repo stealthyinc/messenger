@@ -62,14 +62,6 @@ class ProfileScreen extends React.Component {
     }
     return (
       <View style={styles.container}>
-        {/*<Overlay
-          isVisible={this.state.isVisible}
-          windowBackgroundColor="rgba(255, 255, 255, .5)"
-          overlayBackgroundColor="white"
-          width="auto"
-          height="auto"
-        >
-        </Overlay>*/}
         <View style={{flex: 10}} />
         <View style={{flex: 60, alignItems: 'center'}}>
           <Avatar
