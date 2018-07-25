@@ -66,33 +66,13 @@ class DappStore extends Component {
             <TouchableOpacity disabled={true} style={styles.button} onPress={() => this._onPressButton()}>
               <Image source={chatIcon} style={{opacity: 0.1, width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
-            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>TBD</Text>
+            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}></Text>
           </View>
           <View style={{margin: 10}}>
             <TouchableOpacity disabled={true} style={styles.button} onPress={() => this._onPressButton()}>
               <Image source={chatIcon} style={{opacity: 0.1, width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
-            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>TBD</Text>
-          </View>
-        </View>
-        <View style={{flexDirection: 'row', marginBottom: 5}}>
-          <View style={{margin: 10}}>
-            <TouchableOpacity disabled={true} style={styles.button} onPress={() => this._onPressButton()}>
-              <Image source={chatIcon} style={{opacity: 0.1, width: 80, height: 80, borderRadius: 10}}/>
-            </TouchableOpacity>
-            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>TBD</Text>
-          </View>
-          <View style={{margin: 10}}>
-            <TouchableOpacity disabled={true} style={styles.button} onPress={() => this._onPressButton()}>
-              <Image source={chatIcon} style={{opacity: 0.1, width: 80, height: 80, borderRadius: 10}}/>
-            </TouchableOpacity>
-            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>TBD</Text>
-          </View>
-          <View style={{margin: 10}}>
-            <TouchableOpacity disabled={true} style={styles.button} onPress={() => this._onPressButton()}>
-              <Image source={chatIcon} style={{opacity: 0.1, width: 80, height: 80, borderRadius: 10}}/>
-            </TouchableOpacity>
-            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>TBD</Text>
+            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}></Text>
           </View>
         </View>
         <View style={{flexDirection: 'row', marginBottom: 5}}>
@@ -100,19 +80,39 @@ class DappStore extends Component {
             <TouchableOpacity disabled={true} style={styles.button} onPress={() => this._onPressButton()}>
               <Image source={chatIcon} style={{opacity: 0.1, width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
-            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>TBD</Text>
+            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}></Text>
           </View>
           <View style={{margin: 10}}>
             <TouchableOpacity disabled={true} style={styles.button} onPress={() => this._onPressButton()}>
               <Image source={chatIcon} style={{opacity: 0.1, width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
-            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>TBD</Text>
+            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}></Text>
           </View>
           <View style={{margin: 10}}>
             <TouchableOpacity disabled={true} style={styles.button} onPress={() => this._onPressButton()}>
               <Image source={chatIcon} style={{opacity: 0.1, width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
-            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>TBD</Text>
+            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}></Text>
+          </View>
+        </View>
+        <View style={{flexDirection: 'row', marginBottom: 5}}>
+          <View style={{margin: 10}}>
+            <TouchableOpacity disabled={true} style={styles.button} onPress={() => this._onPressButton()}>
+              <Image source={chatIcon} style={{opacity: 0.1, width: 80, height: 80, borderRadius: 10}}/>
+            </TouchableOpacity>
+            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}></Text>
+          </View>
+          <View style={{margin: 10}}>
+            <TouchableOpacity disabled={true} style={styles.button} onPress={() => this._onPressButton()}>
+              <Image source={chatIcon} style={{opacity: 0.1, width: 80, height: 80, borderRadius: 10}}/>
+            </TouchableOpacity>
+            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}></Text>
+          </View>
+          <View style={{margin: 10}}>
+            <TouchableOpacity disabled={true} style={styles.button} onPress={() => this._onPressButton()}>
+              <Image source={chatIcon} style={{opacity: 0.1, width: 80, height: 80, borderRadius: 10}}/>
+            </TouchableOpacity>
+            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}></Text>
           </View>
         </View>
       </ScrollView>

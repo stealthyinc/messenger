@@ -20,7 +20,7 @@ export default class CustomView extends React.Component {
             style={[styles.mapView, this.props.mapViewStyle]}
             source={{uri: gimage}}
           />
-          <Text style={{fontSize: 16}}>{`"${gtext}"`}</Text>
+          <Text style={{fontSize: 16, fontWeight: 'bold', fontStyle: 'italic', color: '#fff'}}>{`"${gtext}"`}</Text>
         </TouchableOpacity>
       );
     }
