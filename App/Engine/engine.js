@@ -122,9 +122,12 @@ export class MessagingEngine extends EventEmitter {
   }
 
   offAll = () => {
-    for (const listenerArr of this.listeners) {
-      for (const listener of listenerArr) {
-        listener.remove()
+    for (const eventTypeStr in this.listeners) {
+      const eventListenerArr = this.listeners[eventTypeStr]
+      for (const listener of eventListenerArr) {
+        if (listener) {
+          listener.remove()
+        }
       }
     }
 
@@ -643,8 +646,11 @@ export class MessagingEngine extends EventEmitter {
   // ////////////////////////////////////////////////////////////////////////////
   //
   handleShutDownRequest() {
-    // TODO: clean this up and fix it (crashes rigth now with intermediat value is not a function)
-    // this.offAll()
+    try {
+      this.offAll()
+    } catch (err) {
+      // do nothing, just don't prevent the code below from happening
+    }
 
     this.offlineMsgSvc.skipSendService();
     this.offlineMsgSvc.stopSendService();
