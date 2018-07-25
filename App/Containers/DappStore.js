@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { ScrollView, StyleSheet, View, TouchableOpacity, Image } from 'react-native';
-import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import DappActions, { DappSelectors } from '../Redux/DappRedux'
 import { List, ListItem, Text } from 'react-native-elements'
 import { Container, Header, Content, Icon } from 'native-base';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import GraphiteIcon from '../Images/GraphiteIcon.png';
 import CryptoIcon from '../Images/CryptoIcon.png';
@@ -15,19 +16,20 @@ class DappStore extends Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {};
     return {
-      headerTitle: <Text h4 style={{marginLeft: 20, fontWeight: 'bold'}}>dApps</Text>,
+      headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold'}}>dApps</Text>,
       headerBackTitle: 'Back',
-      // headerRight: (
-      //   //params.sendMessage()
-      //   <TouchableOpacity onPress={() => params.navigation.navigate('BlockContactSearch')} style={{marginRight: 10}}>
-      //     <FIcon name="paper-plane" size={28} color='#037aff'/>
-      //   </TouchableOpacity>
-      // ),
+      headerRight: (
+        //params.sendMessage()
+        <TouchableOpacity onPress={() => console.log('search dapps')} style={{marginRight: 10}}>
+          <Ionicons name="ios-add-circle" size={30} color='#037aff'/>
+        </TouchableOpacity>
+      ),
     };
   };
 
   _onPressButton = (url) => {
-    this.props.navigation.navigate('DappData')
+    this.props.setDappUrl(url)
+    this.props.navigation.navigate('DappScreen')
   }
 
   render() {
@@ -144,7 +146,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    sendFileUrl: (fileUrl) => dispatch(EngineActions.sendFileUrl(fileUrl)),
+    setDappUrl: (dappUrl) => dispatch(DappActions.setDappUrl(dappUrl)),
   }
 }
 

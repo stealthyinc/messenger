@@ -11,6 +11,7 @@ import styles from './Styles/ChatStyle'
 import {GiftedChat, Actions, Bubble, SystemMessage, InputToolbar} from 'react-native-gifted-chat';
 import CustomView from './chat/CustomView';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import DappActions, { DappSelectors } from '../Redux/DappRedux'
 import Communications from 'react-native-communications';
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 const common = require('./../common.js');
@@ -29,7 +30,7 @@ class ChatScreen extends Component {
       headerRight: (
         // <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
         <TouchableOpacity onPress={() => params.navigation.navigate("DrawerOpen")} style={{marginRight: 10}}>
-          <Ionicons name="ios-information-circle-outline" size={30} color='#037aff'/>
+          <Ionicons name="ios-contact" size={28} color='#037aff'/>
         </TouchableOpacity>
       ),
     };
@@ -108,7 +109,7 @@ class ChatScreen extends Component {
     if (!this.activeContact) {
       return
     }
-    const { messages, fileUrl, dappData } = nextProps
+    const { messages, dappUrl, dappData } = nextProps
     if (dappData) {
       const { author } = this.state
       const { username, name, userImage } = author
@@ -116,7 +117,7 @@ class ChatScreen extends Component {
       const time = start.toString()
       // TODO: custom renderer with graphite icon
       // const graphiteLogo = 'https://image.ibb.co/hde71b/AppIcon.png'
-      const messageContent = `${name} shared "${dappData.title}" with you:\n\n${fileUrl}`
+      const messageContent = `${name} shared "${dappData.title}" with you:\n\n${dappUrl}`
       const fileMessage = [{
         createdAt: time,
         text: messageContent,
@@ -129,7 +130,7 @@ class ChatScreen extends Component {
         _id: start,
       }]
       this.onSend(fileMessage)
-      this.props.sendDappData(null)
+      this.props.setDappData(null)
     }
     else if (this.props.messages && this.props.messages.length !== messages.length) {
       const numNewMsgs = messages.length - this.props.messages.length;
@@ -253,7 +254,7 @@ class ChatScreen extends Component {
     return (
       <TouchableOpacity
         style={[styles.chatContainer, this.props.containerStyle]}
-        onPress={() => this.props.navigation.navigate('DappStore')}
+        onPress={() => this.props.navigation.navigate('DappData')}
       >
         <Ionicons name="ios-aperture" size={28} color='#037aff' />
       </TouchableOpacity>
@@ -316,7 +317,7 @@ class ChatScreen extends Component {
   onPressUrl = (url) => {
     console.log('URL', url)
     // this.setState({sharedUrl: url})
-    this.props.sendFileUrl(url)
+    this.props.setDappUrl(url)
     this.props.navigation.navigate('DappScreen')
   }
 
@@ -391,8 +392,8 @@ const mapStateToProps = (state) => {
     userProfile: EngineSelectors.getUserProfile(state),
     publicKey: EngineSelectors.getPublicKey(state),
     bearerToken: EngineSelectors.getBearerToken(state),
-    fileUrl: EngineSelectors.getFileUrl(state),
-    dappData: EngineSelectors.getDappData(state),
+    dappUrl: DappSelectors.getDappUrl(state),
+    dappData: DappSelectors.getDappData(state),
   }
 }
 
@@ -401,8 +402,8 @@ const mapDispatchToProps = (dispatch) => {
     handleOutgoingMessage: (message) => dispatch(EngineActions.setOutgoingMessage(message)),
     sendNotification: (token, publicKey, bearerToken) => dispatch(EngineActions.sendNotification(token, publicKey, bearerToken)),
     handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),
-    sendFileUrl: (fileUrl) => dispatch(EngineActions.sendFileUrl(fileUrl)),
-    sendDappData: (dappData) => dispatch(EngineActions.sendDappData(dappData)),
+    setDappUrl: (dappUrl) => dispatch(DappActions.setDappUrl(dappUrl)),
+    setDappData: (dappData) => dispatch(DappActions.setDappData(dappData)),
   }
 }
 

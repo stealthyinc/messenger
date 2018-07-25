@@ -1,9 +1,7 @@
 import React, { Component } from 'react'
 import { ScrollView, Text, WebView } from 'react-native'
 import { connect } from 'react-redux'
-// Add Actions - replace 'Your' with whatever your reducer is called :)
-// import YourActions from '../Redux/YourRedux'
-import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import DappActions, { DappSelectors } from '../Redux/DappRedux'
 
 // Styles
 import styles from './Styles/DappScreenStyle'
@@ -21,13 +19,13 @@ class DappScreen extends Component {
   }
 
   componentWillUnmount() {
-    this.props.sendFileUrl('')
+    this.props.setDappUrl('')
   }
 
   render () {
     return (
       <WebView
-        source={{uri: this.props.fileUrl}}
+        source={{uri: this.props.dappUrl}}
       />
     )
   }
@@ -35,13 +33,13 @@ class DappScreen extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    fileUrl: EngineSelectors.getFileUrl(state),
+    dappUrl: DappSelectors.getDappUrl(state),
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    sendFileUrl: (fileUrl) => dispatch(EngineActions.sendFileUrl(fileUrl)),
+    setDappUrl: (dappUrl) => dispatch(DappActions.setDappUrl(dappUrl)),
   }
 }
 

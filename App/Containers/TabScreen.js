@@ -9,8 +9,8 @@ import DappStore from './DappStore'
 
 export default TabNavigator(
   {
-    dApps: { screen: DappStore },
     Messages: { screen: ConversationScreen },
+    dApps: { screen: DappStore },
     // Wallet: { screen: WalletScreen },
     Profile: { screen: ProfileScreen },
   },

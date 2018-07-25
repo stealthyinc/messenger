@@ -9,6 +9,7 @@ export const reducers = combineReducers({
   nav: require('./NavigationRedux').reducer,
   contact: require('./BlockstackContactsRedux').reducer,
   engine: require('./EngineRedux').reducer,
+  dapp: require('./DappRedux').reducer,
 })
 
 export default () => {

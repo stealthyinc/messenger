@@ -8,7 +8,7 @@ import SectionHeader from './contacts/SectionHeader';
 import { SearchBar, Text } from 'react-native-elements'
 import { Button, Badge, Container, Header, Content, List, ListItem, Left, Body, Right, Item, Icon, Input, Thumbnail, Title } from 'native-base';
 // import Ionicons from 'react-native-vector-icons/Ionicons';
-import FIcon from 'react-native-vector-icons/dist/FontAwesome'
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 import defaultProfile from '../Images/defaultProfile.png'
@@ -41,7 +41,7 @@ class ConversationScreen extends React.Component {
       headerRight: (
         //params.sendMessage()
         <TouchableOpacity onPress={() => params.navigation.navigate('BlockContactSearch')} style={{marginRight: 10}}>
-          <FIcon name="paper-plane" size={28} color='#037aff'/>
+          <Ionicons name="ios-paper-plane" size={30} color='#037aff'/>
         </TouchableOpacity>
       ),
     };

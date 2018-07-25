@@ -20,7 +20,7 @@ class ProfileScreen extends React.Component {
       headerBackTitle: 'Back',
       headerRight: (
         <TouchableOpacity onPress={() => params.showOverlay()} style={{marginRight: 10}}>
-          <Ionicons name="ios-information-circle-outline" size={30} color='#037aff'/>
+          <Ionicons name="ios-information-circle" size={30} color='#037aff'/>
         </TouchableOpacity>
       ),
     };
