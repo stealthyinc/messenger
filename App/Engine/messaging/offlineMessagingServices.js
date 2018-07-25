@@ -1,4 +1,4 @@
-const EventEmitter = require('EventEmitter');
+const { EventEmitterAdapter } = require('./../platform/reactNative/eventEmitterAdapter.js')
 
 const utils = require('./../misc/utils.js');
 const { MESSAGE_STATE } = require('./chatMessage.js');
@@ -110,7 +110,7 @@ class OfflineMessages {
 }
 
 
-class OfflineMessagingServices extends EventEmitter {
+class OfflineMessagingServices extends EventEmitterAdapter {
   constructor(aLogger,
               aUserId,
               anIdxIoInst,
@@ -154,11 +154,6 @@ class OfflineMessagingServices extends EventEmitter {
     this.receiving = false;
 
     this.skipRecvService = false;
-  }
-
-  // Convert node 'on' method to react 'addListener' method for RN EventEmitter
-  on = (eventTypeStr, listenerFn, context) => {
-    this.addListener(eventTypeStr, listenerFn, context);
   }
 
   log(...args) {

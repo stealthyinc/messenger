@@ -1,9 +1,9 @@
-const EventEmitter = require('EventEmitter');
+const { EventEmitterAdapter } = require('./../platform/reactNative/eventEmitterAdapter.js')
 const utils = require('./utils.js');
 const { firebaseInstance } = require('./../firebaseWrapper.js')
 const common = require('./../../common.js');
 
-class Discovery extends EventEmitter {
+class Discovery extends EventEmitterAdapter {
   constructor(aUserId, aPublicKey, aPrivateKey) {
     if (!aUserId || !aPublicKey || !aPrivateKey) {
       throw('ERROR(discovery.js): Unable to create object from provided arguments.')
@@ -17,42 +17,6 @@ class Discovery extends EventEmitter {
     this.development = (process.env.NODE_ENV === 'development')
 
     this.fbListenerFn = undefined
-
-    this.listeners = {}
-  }
-
-  // TODO: create a class from EventEmitter that defines this method so we don't
-  //       copy-pasta it everywhere.
-  //
-  // Convert node 'on' method to react 'addListener' method for RN EventEmitter
-  on = (eventTypeStr, listenerFn, context) => {
-    const listener = this.addListener(eventTypeStr, listenerFn, context);
-
-    // manage the listeners
-    if (!(eventTypeStr in this.listeners)) {
-      this.listeners[eventTypeStr] = []
-    }
-    this.listeners[eventTypeStr].push(listener)
-  }
-
-  off = (eventTypeStr) => {
-    if (eventTypeStr in this.listeners) {
-      for (const listener of this.listeners[eventTypeStr]) {
-        listener.remove()
-      }
-
-      delete this.listeners[eventTypeStr]
-    }
-  }
-
-  offAll = () => {
-    for (const listenerArr of this.listeners) {
-      for (const listener of listenerArr) {
-        listener.remove()
-      }
-    }
-
-    this.listeners = {}
   }
 
   _getDiscoveryRootRef() {

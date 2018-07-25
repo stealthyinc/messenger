@@ -1,7 +1,7 @@
 const platform = require('platform');
 const { firebaseInstance } = require('./firebaseWrapper.js')
 
-const EventEmitter = require('EventEmitter');
+const { EventEmitterAdapter } = require('./platform/reactNative/eventEmitterAdapter.js')
 import EngineActions from '../Redux/EngineRedux'
 
 import { NativeModules } from 'react-native';
@@ -66,7 +66,7 @@ function isRelayId(aUserId) {
 
 
 
-export class MessagingEngine extends EventEmitter {
+export class MessagingEngine extends EventEmitterAdapter {
   constructor(logger,
               privateKey,
               publicKey,
@@ -96,42 +96,6 @@ export class MessagingEngine extends EventEmitter {
     this.io = undefined;
     this.shuttingDown = false;
     this.anonalytics = undefined;
-
-    this.listeners = {}
-  }
-
-  // Convert node 'on' method to react 'addListener' method for RN EventEmitter
-  on = (eventTypeStr, listenerFn, context) => {
-    const listener = this.addListener(eventTypeStr, listenerFn, context);
-
-    // manage the listeners
-    if (!(eventTypeStr in this.listeners)) {
-      this.listeners[eventTypeStr] = []
-    }
-    this.listeners[eventTypeStr].push(listener)
-  }
-
-  off = (eventTypeStr) => {
-    if (eventTypeStr in this.listeners) {
-      for (const listener of this.listeners[eventTypeStr]) {
-        listener.remove()
-      }
-
-      delete this.listeners[eventTypeStr]
-    }
-  }
-
-  offAll = () => {
-    for (const eventTypeStr in this.listeners) {
-      const eventListenerArr = this.listeners[eventTypeStr]
-      for (const listener of eventListenerArr) {
-        if (listener) {
-          listener.remove()
-        }
-      }
-    }
-
-    this.listeners = {}
   }
 
   log = (display, ...args) => {
@@ -648,6 +612,8 @@ export class MessagingEngine extends EventEmitter {
   handleShutDownRequest() {
     try {
       this.offAll()
+      this.offlineMsgSvc.offAll()
+      this.discovery.offAll()
     } catch (err) {
       // do nothing, just don't prevent the code below from happening
     }
