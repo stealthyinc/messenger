@@ -1,42 +1,26 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {
+  Text,
+  Image,
   Linking,
   Platform,
   StyleSheet,
-  TouchableOpacity,
   ViewPropTypes,
+  TouchableOpacity,
 } from 'react-native';
-// import MapView from 'react-native-maps';
 
 export default class CustomView extends React.Component {
   render() {
-    if (this.props.currentMessage.location) {
+    const {url, gimage, gtext, onPress} = this.props.currentMessage
+    if (url && gimage) {
       return (
-        <TouchableOpacity style={[styles.container, this.props.containerStyle]} onPress={() => {
-          const url = Platform.select({
-            ios: `http://maps.apple.com/?ll=${this.props.currentMessage.location.latitude},${this.props.currentMessage.location.longitude}`,
-            android: `http://maps.google.com/?q=${this.props.currentMessage.location.latitude},${this.props.currentMessage.location.longitude}`
-          });
-          Linking.canOpenURL(url).then(supported => {
-            if (supported) {
-              return Linking.openURL(url);
-            }
-          }).catch(err => {
-            console.error('An error occurred', err);
-          });
-        }}>
-          {/*<MapView
+        <TouchableOpacity style={[styles.container, this.props.containerStyle]} onPress={() => onPress(url)}>
+          <Image
             style={[styles.mapView, this.props.mapViewStyle]}
-            region={{
-              latitude: this.props.currentMessage.location.latitude,
-              longitude: this.props.currentMessage.location.longitude,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
-            }}
-            scrollEnabled={false}
-            zoomEnabled={false}
-          />*/}
+            source={{uri: gimage}}
+          />
+          <Text style={{fontSize: 16}}>{`"${gtext}"`}</Text>
         </TouchableOpacity>
       );
     }
@@ -50,8 +34,8 @@ const styles = StyleSheet.create({
   mapView: {
     width: 150,
     height: 100,
-    borderRadius: 13,
-    margin: 3,
+    borderRadius: 10,
+    margin: 5,
   },
 });
 

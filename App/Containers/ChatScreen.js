@@ -115,13 +115,16 @@ class ChatScreen extends Component {
       const { username, name, userImage } = author
       const start = new Date(Date.now())
       const time = start.toString()
+      const {title} = dappData
       // TODO: custom renderer with graphite icon
-      // const graphiteLogo = 'https://image.ibb.co/hde71b/AppIcon.png'
-      const messageContent = `${name} shared "${dappData.title}" with you:\n\n${dappUrl}`
+      const graphiteLogo = 'https://image.ibb.co/hde71b/AppIcon.png'
+      // const messageContent = `${name} shared "${dappData.title}" with you:\n\n${dappUrl}`
       const fileMessage = [{
         createdAt: time,
-        text: messageContent,
-        // image: graphiteIcon,
+        gtext: title,
+        gimage: graphiteLogo,
+        url: dappUrl,
+        onPress: this.onPressUrl,
         user: {
           _id: username,
           name: name,
@@ -315,8 +318,6 @@ class ChatScreen extends Component {
   }
 
   onPressUrl = (url) => {
-    console.log('URL', url)
-    // this.setState({sharedUrl: url})
     this.props.setDappUrl(url)
     this.props.navigation.navigate('DappScreen')
   }
