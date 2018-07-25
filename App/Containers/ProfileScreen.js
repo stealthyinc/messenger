@@ -73,7 +73,7 @@ class ProfileScreen extends React.Component {
         <View style={{flex: 10}} />
         <View style={{flex: 60, alignItems: 'center'}}>
           <Avatar
-            size="xlarge"
+            xlarge
             rounded
             source={(userImage) ? {uri: userImage} : defaultProfile}
             onPress={() => console.log("Works!")}

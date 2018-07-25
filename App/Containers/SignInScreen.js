@@ -55,7 +55,7 @@ class SignInScreen extends React.Component {
           <Button
             onPress={this._signInAsync}
             title="Blockstack Login"
-            titleStyle={{ fontSize: 16, fontWeight: "bold", color: "#34bbed"}}
+            textStyle={{ fontSize: 16, fontWeight: "bold", color: "#34bbed"}}
             icon={{name: 'input', color: "#34bbed"}}
             buttonStyle={{
               marginLeft: 20,
@@ -80,7 +80,7 @@ class SignInScreen extends React.Component {
         <Button
           onPress={this._signInAsync}
           title="Create Account"
-          titleStyle={{ fontSize: 16, fontWeight: "bold", color: "white"}}
+          textStyle={{ fontSize: 16, fontWeight: "bold", color: "white"}}
           icon={{name: 'create', color: "white"}}
           buttonStyle={{
             backgroundColor: "#34bbed",
@@ -89,13 +89,13 @@ class SignInScreen extends React.Component {
             borderColor: "transparent",
             borderWidth: 0,
             borderRadius: 5,
+            marginTop: 25
           }}
-          containerStyle={{ marginTop: 25 }}
         />
         <Button
           onPress={() => Linking.openURL('https://www.youtube.com/watch?v=wOfkTP8mgE4').catch(err => console.error('An error occurred', err))}
           title="Watch Demo"
-          titleStyle={{ fontSize: 16, fontWeight: "bold", color: "black"}}
+          textStyle={{ fontSize: 16, fontWeight: "bold", color: "black"}}
           icon={{name: 'featured-video', color: "black"}}
           buttonStyle={{
             backgroundColor: "white",
@@ -104,32 +104,9 @@ class SignInScreen extends React.Component {
             borderColor: "black",
             borderWidth: 2,
             borderRadius: 5,
+            marginTop: 25
           }}
-          style={{ marginTop: 25 }}
         />
-        {/*<Button
-          onPress={() => this.setState({isVisible: !this.state.isVisible})}
-          title="Frequent Q's"
-          titleStyle={{ fontSize: 16, fontWeight: "bold", color: "#34bbed"}}
-          icon={{name: 'info-outline', color: "#34bbed"}}
-          buttonStyle={{
-            backgroundColor: "black",
-            width: 180,
-            height: 50,
-            borderColor: "#34bbed",
-            borderWidth: 2,
-            borderRadius: 5,
-          }}
-          style={{ marginTop: 25, marginBottom: 50 }}
-        />
-        <Overlay
-          isVisible={this.state.isVisible}
-          onBackdropPress={() => this.setState({isVisible: !this.state.isVisible})}
-          width="auto"
-          height="auto"
-        >
-          <FAQ />
-        </Overlay>*/}
       </ScrollView>
     );
   }
