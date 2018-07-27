@@ -57,8 +57,8 @@ class DappStore extends Component {
         </View>
         <View style={{flexDirection: 'row', marginBottom: 5}}>
           <View style={{margin: 10}}>
-            <TouchableOpacity disabled={true} style={styles.button} onPress={() => this._onPressButton()}>
-              <Image source={TravelIcon} style={{opacity: 0.5, width: 80, height: 80, borderRadius: 10}}/>
+            <TouchableOpacity style={styles.button} onPress={() => this._onPressButton('https://app.travelstack.club/')}>
+              <Image source={TravelIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Travelstack</Text>
           </View>

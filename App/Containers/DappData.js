@@ -118,6 +118,7 @@ class DappData extends Component {
           key={item}
           roundAvatar
           title={title}
+          disabled
           subtitle={author}
           avatar={{uri: avatar}}
           onPress={() => this.sendDappUrlMessage(fileUrl, data)}
@@ -141,6 +142,7 @@ class DappData extends Component {
         <List>
           <ListItem
             key={1}
+            disabled
             title={'Blockusign'}
             subtitle={'Decentralized Document Signing'}
             avatar={BlockSignIcon}
@@ -151,6 +153,7 @@ class DappData extends Component {
         <Divider style={{ backgroundColor: '#037aff', height: 8 }} /><List>
           <ListItem
             key={1}
+            disabled
             title={'Cryptocracy'}
             subtitle={'Decentralized Voluntary Associations'}
             avatar={CryptoIcon}
