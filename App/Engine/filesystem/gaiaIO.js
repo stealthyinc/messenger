@@ -145,40 +145,45 @@ module.exports = class GaiaIO extends BaseIO {
     })
   }
 
-  async _read_iOS(username, filePath) {
-    // TODO: modify Blockstack -> RCT to use promises instead of completion
-    let gaiaHubPath = undefined
-    try {
-      gaiaHubPath = await this._getGaiaHubAddrWorkaround(username)
-      if (!gaiaHubPath) {
-        throw 'gaiaHubPath undefined'
-      }
-    } catch (err) {
-      throw `ERROR(gaiaIO.js::_read_iOS): ${err}`
-    }
-
+  // _read_iOS Notes:
+  // BlobNotFound results resolve as undefined.
+  // Converts the callback style getRawFile call to promise style.
+  //   - Did not write in async/await style b/c didn't want to mix error
+  //   - paradigms (i.e. try/catch & .catch)
+  //   - TODO: modify Blockstack -> RCT to use promises instead of completion.
+  //
+  _read_iOS(username, filePath) {
     return new Promise((resolve, reject) => {
-      getRawFile(filePath, gaiaHubPath, (error, content) => {
-        if (error) {
-          reject(error);
+      this._getGaiaHubAddrWorkaround(username)
+      .then((gaiaHubPath) => {
+        if (gaiaHubPath) {
+          getRawFile(filePath, gaiaHubPath, (error, content) => {
+            if (!error) {
+              if (!content || content.includes('<Error><Code>BlobNotFound')) {
+                resolve(undefined)
+              } else {
+                resolve(JSON.parse(content))
+              }
+            } else {
+              reject(error)
+            }
+          })
         } else {
-          const result = (!content || content.includes('<Error><Code>BlobNotFound')) ?
-            undefined : JSON.parse(content)
-
-          resolve(result)
+          reject('Unable to get gaia hub path.')
         }
+      })
+      .catch((error) => {
+        reject(error)
       })
     })
   }
 
   _read(username, filePath) {
     this.log(`Reading from ${username}'s GAIA in '${filePath}'`);
-    try {
-      return (utils.is_iOS()) ?
-        this._read_iOS(username, filePath) : this._readWeb(username, filePath)
-    } catch (err) {
-      console.log(`ERROR(gaiaIO::_read): unable to read ${username}'s file ${filePath}.\n\t${err}`);
-      return undefined;
+    if (utils.is_iOS()) {
+      return this._read_iOS(username, filePath)
+    } else {
+      return this._readWeb(username, filePath)
     }
   }
 

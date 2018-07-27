@@ -34,10 +34,8 @@ const createEngine = (userData) => {
                               logger,
                               userData['privateKey'],
                               userData['appPublicKey'],   // publicKey
-                              false,                      // plugIn
                               userData['profileURL'],     // avatarUrl
-                              common.getSessionId(),      // sessionId
-                              true,                       // isMobile
+                              common.getSessionId()       // sessionId
                             )
 }
 

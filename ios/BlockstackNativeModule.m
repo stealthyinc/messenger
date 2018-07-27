@@ -121,14 +121,21 @@ RCT_EXPORT_METHOD(getUserData:(RCTResponseSenderBlock)completion) {
 RCT_EXPORT_METHOD(decryptCryptoppECIES:(NSString*)privateKey cipherObject:(NSDictionary*)cipherObject completion:(RCTResponseSenderBlock)completion)
 {
   CryptoECIESWrapper* wrapper = [[CryptoECIESWrapper alloc] init];
-  NSString* recovered = [wrapper DecryptECIES:privateKey cipherObject:cipherObject];
-  NSLog(@"data = %@", recovered);
-  
+  NSString* recovered = NULL;
   NSError *error = NULL;
-  if (!recovered) {
+  
+  @try {
+    recovered = [wrapper DecryptECIES:privateKey cipherObject:cipherObject];
+  } @catch (NSException *exception) {
     error = [NSError errorWithDomain:@"im.stealthy.www"
                                 code:0
-                            userInfo:@{@"failed to decrypt`": @"Unable to decrypt provided cipher object."}];
+                            userInfo:@{NSLocalizedDescriptionKey: exception.reason}];
+  }
+  
+  if (!recovered && !error) {
+    error = [NSError errorWithDomain:@"im.stealthy.www"
+                                code:0
+                            userInfo:@{NSLocalizedDescriptionKey: @"Unable to decrypt provided cipher object."}];
   }
 
   completion(@[error ? error.localizedDescription : [NSNull null], recovered ? recovered : [NSNull null]]);
@@ -143,7 +150,7 @@ RCT_EXPORT_METHOD(encryptCryptoppECIES:(NSString*)publicKey content:(NSString*)c
   if (!cipherObject) {
     error = [NSError errorWithDomain:@"im.stealthy.www"
                       code:0
-                      userInfo:@{@"failed to encrypt`": @"Unable to encrypt provided content."}];
+                      userInfo:@{NSLocalizedDescriptionKey: @"Unable to encrypt provided content."}];
   }
   
   completion(@[error ? error.localizedDescription : [NSNull null], cipherObject ? cipherObject : [NSNull null]]);

@@ -387,7 +387,6 @@ class ContactManager {
 
   clearUnread = (aContactId) => {
     this._setterWithChecks(aContactId, 'unread', 0);
-    // document.title = "Stealthy | Decentralized Communication"
   }
 
   getAllUnread = () => {
