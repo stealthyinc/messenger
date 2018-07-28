@@ -1,16 +1,30 @@
 import React from "react";
-import { Image, Linking, StatusBar, StyleSheet, View } from "react-native";
+import { Image, Linking, StatusBar, StyleSheet, View, TouchableOpacity } from "react-native";
 import { Container, H1, Header, Content, Card, CardItem, Thumbnail, Text, Button, Icon, Left, Body, Right } from 'native-base';
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import chatIcon from '../Images/blue512.png';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 class ContactProfile extends React.Component {
+  static navigationOptions = ({ navigation }) => {
+    const params = navigation.state.params || {};
+    return {
+      headerLeft: (
+        <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
+          <Ionicons name="ios-arrow-dropleft" size={28} color='#34bbed'/>
+        </TouchableOpacity>
+      )
+    };
+  };
   constructor(props) {
     super(props);
     this.state = {
       dApp: {}
     };
+  }
+  componentWillMount() {
+    this.props.navigation.setParams({ navigation: this.props.navigation });
   }
   getSocial = (profile) => {
     const list = [];

@@ -119,7 +119,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   // Events to listen for:
-  //    me-integration-data <Error> <indexData>
+  //    me-integration-data <appName> <error> <indexData>
 
   // Returns the current integration data for specified appName and issues an
   // me-integration-data event.
@@ -136,10 +136,11 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
     if (!error) {
+      indexData = {}
       indexData[appName] = this.indexIntegrations[appName].getIndexData()
     }
 
-    this.emit('me-integration-data', error, indexData)
+    this.emit('me-integration-data', appName, error, indexData)
   }
 
   // Updates integration data for specified appName and issues an me-integration-data
@@ -159,13 +160,15 @@ export class MessagingEngine extends EventEmitterAdapter {
     if (!error) {
       const integration = this.indexIntegrations[appName]
       try {
-        indexData[appName] = await integration.readIndexData()
+        const result = await integration.readIndexData()
+        indexData = {}
+        indexData[appName] = result
       } catch (integrationError) {
         error = integrationError
       }
     }
 
-    this.emit('me-integration-data', error, indexData)
+    this.emit('me-integration-data', appName, error, indexData)
   }
 
   //

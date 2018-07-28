@@ -6,7 +6,10 @@ import Immutable from 'seamless-immutable'
 const { Types, Creators } = createActions({
   setDapp: '',
   setDappUrl: ['dappUrl'],
-  setDappData: ['dappData']
+  setDappData: ['dappData'],
+  setDappError: ['error'],
+  setDappMessage: ['dappMessage'],
+  refreshIntegrationData: [''],
 })
 
 export const DappTypes = Types
@@ -15,9 +18,11 @@ export default Creators
 /* ------------- Initial State ------------- */
 
 export const INITIAL_STATE = Immutable({
+  error: '',
   dapp: '',
   dappUrl: '',
-  dappData: null
+  dappData: null,
+  dappMessage: null,
 })
 
 /* ------------- Selectors ------------- */
@@ -26,6 +31,8 @@ export const DappSelectors = {
   getDapp: state => state.dapp.dapp,
   getDappUrl: state => state.dapp.dappUrl,
   getDappData: state => state.dapp.dappData,
+  getDappError: state => state.dapp.dappError,
+  getDappMessage: state => state.dapp.dappMessage,
 }
 
 /* ------------- Reducers ------------- */
@@ -41,8 +48,18 @@ export const setDappUrl = (state, { dappUrl }) => {
 }
 
 // send dapp data
-export const setDapaData = (state, { dappData }) => {
+export const setDappData = (state, { dappData }) => {
   return state.merge({ dappData })
+}
+
+// send dapp message
+export const setDappMessage = (state, { dappMessage }) => {
+  return state.merge({ dappMessage })
+}
+
+// send dapp data
+export const setDappError = (state, { error }) => {
+  return state.merge({ error })
 }
 
 /* ------------- Hookup Reducers To Types ------------- */
@@ -50,5 +67,7 @@ export const setDapaData = (state, { dappData }) => {
 export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_DAPP]: setDapp,
   [Types.SET_DAPP_URL]: setDappUrl,
-  [Types.SET_DAPP_DATA]: setDapaData,
+  [Types.SET_DAPP_DATA]: setDappData,
+  [Types.SET_DAPP_ERROR]: setDappError,
+  [Types.SET_DAPP_MESSAGE]: setDappMessage,
 })

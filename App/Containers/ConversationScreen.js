@@ -6,7 +6,7 @@ import TouchableRow from './contacts/Row';
 import Footer from './contacts/Footer';
 import SectionHeader from './contacts/SectionHeader';
 import { SearchBar, Text } from 'react-native-elements'
-import { Button, Badge, Container, Header, Content, List, ListItem, Left, Body, Right, Item, Icon, Input, Thumbnail, Title } from 'native-base';
+import { Button, Badge, Container, Header, Content, List, ListItem, Left, Body, Right, Item, Icon, Input, Thumbnail, Title, Separator } from 'native-base';
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
@@ -100,22 +100,16 @@ class ConversationScreen extends React.Component {
             renderRow={item =>
               <ListItem style={{marginLeft: 5}} avatar onPress={this.contactSelected.bind(this, item.id)}>
                 <Left>
-                  <Thumbnail source={(item.image) ? { uri: item.image } : defaultProfile} />
+                  <Thumbnail square source={(item.image) ? { uri: item.image } : defaultProfile} />
                 </Left>
                 <Body>
                   <Text style={{fontWeight: 'bold', fontSize: 18}}>{(item.title) ? item.title : item.id}</Text>
                   <Text note>{item.summary}</Text>
                 </Body>
                 {(item.unread > 0) ? <Right>
-                  <Text style={{ 
-                    fontWeight: 'bold', 
-                    fontSize: 18, 
-                    borderRadius: 2,
-                    borderWidth: 2,
-                    padding: 3,
-                    borderColor: '#34bbed', 
-                    color: '#34bbed' 
-                  }}>{item.unread}</Text>
+                  <Badge style={{ backgroundColor: '#34bbed' }}>
+                    <Text style={{color: 'white'}}>{item.unread}</Text>
+                  </Badge>
                 </Right> : null}
               </ListItem>}
             renderRightHiddenRow={(data, secId, rowId, rowMap) =>

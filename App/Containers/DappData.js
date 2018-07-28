@@ -19,54 +19,24 @@ class DappData extends Component {
           <Ionicons name="ios-arrow-dropleft" size={28} color='#34bbed'/>
         </TouchableOpacity>
       ),
+      headerRight: (
+        <TouchableOpacity onPress={() => params.refresh()} style={{marginRight: 10}}>
+          <Ionicons name="ios-refresh" size={28} color='#34bbed'/>
+        </TouchableOpacity>
+      ),
     };
   }
   componentWillMount() {
-    this.props.navigation.setParams({ navigation: this.props.navigation });
+    this.props.navigation.setParams({ navigation: this.props.navigation, refresh: this.props.refreshIntegrationData });
   }
-  sendDappUrlMessage = (dappUrl, dappData) => {
+  sendDappUrlMessage = (dappUrl, dappMessage) => {
     if (dappUrl) {
-      this.props.setDappData(dappData)
+      this.props.setDappMessage(dappMessage)
       this.props.setDappUrl(dappUrl)
       this.props.navigation.goBack()
     }
   }
   render () {
-    const graphiteData = {
-      'relay.id-1532144113901' : {
-        title : 'Take the Power Back',
-        description : '',
-        author : 'relay.id',
-        avatar: 'https://gaia.blockstack.org/hub/1CdAz6hrRA2Uf51QAaTZBD1z7xeZfZ1Wiz//avatar-0',
-        decryptable : {
-          user : 'TBD',
-          key : 'Graphite',
-        },
-        fileUrl : 'https://app.graphitedocs.com/shared/docs/graphite.id-1532369712591',
-      },
-      'relay.id-1532196940159' : {
-        title : 'Delete Facebook Movement Spreads Worldwide',
-        description : '',
-        author : 'alexc.id',
-        avatar: 'https://gaia.blockstack.org/hub/1GHZbCnbufz53Skb79FwnwuedW4Hhe2VhR/0/avatar-0',
-        decryptable : {
-          user : 'TBD',
-          key : 'Graphite',
-        },
-        fileUrl : 'https://app.graphitedocs.com/shared/docs/relay.id-1532196940159',
-      },
-      'relay.id-1532197099770' : {
-        title : 'Data Breaches on the Rise Worldwide',
-        description : '',
-        author : 'relay.id',
-        avatar: 'https://gaia.blockstack.org/hub/1CdAz6hrRA2Uf51QAaTZBD1z7xeZfZ1Wiz//avatar-0',
-        decryptable : {
-          user : 'TBD',
-          key : 'Graphite',
-        },
-        fileUrl : 'https://app.graphitedocs.com/shared/docs/relay.id-1532197099770',
-      },
-    }
     const blockusignData = {
       'relay.id-1532144113901' : {
         title : 'Apartment Lease',
@@ -103,6 +73,7 @@ class DappData extends Component {
       },
     }
     let graphiteCards = []
+    const graphiteData = this.props.dappData['Graphite']
     for (const item in graphiteData) {
       const data = graphiteData[item]
       const {title, description, author, fileUrl, profile, avatar} = data
@@ -175,7 +146,9 @@ class DappData extends Component {
 
 const mapStateToProps = (state) => {
   return {
+    dapp: DappSelectors.getDapp(state),
     dappUrl: DappSelectors.getDappUrl(state),
+    dappData: DappSelectors.getDappData(state),
   }
 }
 
@@ -183,6 +156,8 @@ const mapDispatchToProps = (dispatch) => {
   return {
     setDappUrl: (dappUrl) => dispatch(DappActions.setDappUrl(dappUrl)),
     setDappData: (dappData) => dispatch(DappActions.setDappData(dappData)),
+    setDappMessage: (dappMessage) => dispatch(DappActions.setDappMessage(dappMessage)),
+    refreshIntegrationData: () => dispatch(DappActions.refreshIntegrationData())
   }
 }
 
