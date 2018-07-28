@@ -214,8 +214,9 @@ export class MessagingEngine extends EventEmitterAdapter {
       const unreceivedMessages = [];
       for (const message of messages) {
         if (message) {
-          if ((message.type === MESSAGE_TYPE.TEXT) &&
-                     (!this.conversations.hasMessage(message))) {
+          if (((message.type === MESSAGE_TYPE.TEXT) ||
+               (message.type === MESSAGE_TYPE.TEXT_JSON)) &&
+              !this.conversations.hasMessage(message)) {
             unreceivedMessages.push(message);
           } else if (message.type === MESSAGE_TYPE.RECEIPT) {
             this.handleReceipt(message);
@@ -271,7 +272,7 @@ export class MessagingEngine extends EventEmitterAdapter {
         const messages = this.conversations.getMessages(contactId);
 
         const lastMessage = (messages && (messages.length > 0)) ?
-          messages[messages.length - 1].content : '';
+          ChatMessage.getSummary(messages[messages.length - 1]) : '';
         this.contactMgr.setSummary(contactId, lastMessage);
 
         if (contactId !== activeContactId) {
@@ -824,12 +825,11 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     const chatMsg = new ChatMessage();
     if (text) {
-      chatMsg.init(
-        this.userId, outgoingUserId, this._getNewMessageId(), text, Date.now());
+      chatMsg.init(this.userId, outgoingUserId, this._getNewMessageId(), text,
+                   Date.now());
     } else {  // json
-      chatMsg.init(
-        this.userId, outgoingUserId, this._getNewMessageId(), json, Date.now(),
-        undefined, undefined, MESSAGE_TYPE.TEXT_JSON)
+      chatMsg.init(this.userId, outgoingUserId, this._getNewMessageId(), json,
+                   Date.now(), MESSAGE_TYPE.TEXT_JSON)
     }
 
     this._sendOutgoingMessageOffline(chatMsg);
@@ -842,7 +842,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     this._writeConversations();
 
     this.contactMgr.moveContactToTop(outgoingUserId);
-    this.contactMgr.setSummary(outgoingUserId, chatMsg.content);
+    this.contactMgr.setSummary(outgoingUserId, ChatMessage.getSummary(chatMsg));
     this._writeContactList(this.contactMgr.getAllContacts());
 
     this.updateContactMgr();
@@ -1008,7 +1008,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       const isLastOne = (idx == lastMsgIdxStr);
       const isActive = this.contactMgr.isActiveContactId(incomingId);
 
-      this.contactMgr.setSummary(incomingId, message.content);
+      this.contactMgr.setSummary(incomingId, ChatMessage.getSummary(message));
 
       if (isActive) {
         updateActiveMsgs = true;
@@ -1176,6 +1176,7 @@ export class MessagingEngine extends EventEmitterAdapter {
           image: (isMe ? this.avatarUrl : recipientImageUrl),
           author: (isMe ? this.userId : aRecipientId),
           body: chatMessage.content,
+          contentType: ChatMessage.getType(chatMessage),
           delivered: chatMessage.sent,
           seen: chatMessage.seen,
           time: chatMessage.time,

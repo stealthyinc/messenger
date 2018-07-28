@@ -88,6 +88,31 @@ class ChatMessage {
 
     this.msgState = aChatMessage.msgState;
   }
+
+  // Static b/c our code doesn't know if this has been deserialized (JSON.parsed)
+  // and without functions
+  static getSummary(aChatMessage) {
+    if (aChatMessage) {
+      if (aChatMessage.type === MESSAGE_TYPE.TEXT) {
+        return aChatMessage.content
+      } else if (aChatMessage.type === MESSAGE_TYPE.TEXT_JSON) {
+        // TODO: make this more awesome (i.e. 'Ramone shared a Graphite doc.')
+        return 'Shared content.'
+      }
+    }
+
+    return ''
+  }
+
+  static getType(aChatMessage) {
+    for (const key in MESSAGE_TYPE) {
+      if (MESSAGE_TYPE[key] === aChatMessage.type) {
+        return key
+      }
+    }
+
+    return undefined
+  }
 }
 
 module.exports = { MESSAGE_TYPE, MESSAGE_STATE, ChatMessage };
