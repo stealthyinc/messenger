@@ -136,7 +136,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
     if (!error) {
-      indexData = this.indexIntegrations[appName].getIndexData()
+      indexData[appName] = this.indexIntegrations[appName].getIndexData()
     }
 
     this.emit('me-integration-data', error, indexData)
@@ -159,7 +159,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     if (!error) {
       const integration = this.indexIntegrations[appName]
       try {
-        indexData = await integration.readIndexData()
+        indexData[appName] = await integration.readIndexData()
       } catch (integrationError) {
         error = integrationError
       }
@@ -792,9 +792,16 @@ export class MessagingEngine extends EventEmitterAdapter {
   //  Messaging
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
-  handleOutgoingMessage = async (text) => {
+  handleOutgoingMessage = async (text, json=undefined) => {
+    const method = 'engine.js::handleOutgoingMessage'
     if (!this.contactMgr.getActiveContact()) {
       return
+    }
+
+    if (text && json) {
+      throw `ERROR(${method}): both text and json cannot be defined.`
+    } else if (!text && !json) {
+      throw `ERROR(${method}): one of text or json must be defined.`
     }
 
     const outgoingUserId = this.contactMgr.getActiveContact().id
@@ -816,8 +823,15 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
     const chatMsg = new ChatMessage();
-    chatMsg.init(
-      this.userId, outgoingUserId, this._getNewMessageId(), text, Date.now());
+    if (text) {
+      chatMsg.init(
+        this.userId, outgoingUserId, this._getNewMessageId(), text, Date.now());
+    } else {  // json
+      chatMsg.init(
+        this.userId, outgoingUserId, this._getNewMessageId(), json, Date.now(),
+        undefined, undefined, MESSAGE_TYPE.TEXT_JSON)
+    }
+
     this._sendOutgoingMessageOffline(chatMsg);
     this.anonalytics.aeMessageSent();
     if (this.discovery) {
