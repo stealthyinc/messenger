@@ -54,7 +54,7 @@ class SignInScreen extends React.Component {
           <Button
             onPress={this._signInAsync}
             title="Blockstack Login"
-            textStyle={{ fontSize: 16, fontWeight: "bold", color: "#34bbed"}}
+            textStyle={{ fontSize: 18, fontWeight: "900", color: "#34bbed"}}
             icon={{name: 'input', color: "#34bbed"}}
             buttonStyle={{
               marginLeft: 20,
@@ -73,13 +73,13 @@ class SignInScreen extends React.Component {
             source={chatIcon}
             style={{width: 50, height: 50}}
           />
-          <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: 80, marginTop: 5 }}>Say Hi to Stealthy</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: 80, marginTop: 5 }}>Hi Stealthy 👋</Text>
         </View>
-        <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'grey', marginBottom: 80 }}>Secure Decentralized Communication</Text>
+        <Text style={{ fontWeight: 'bold', fontSize: 24, color: 'grey', marginBottom: 80 }}>dApp Communication Protocol</Text>
         <Button
           onPress={this._signInAsync}
           title="Create Account"
-          textStyle={{ fontSize: 16, fontWeight: "bold", color: "white"}}
+          textStyle={{ fontSize: 18, fontWeight: "900", color: "white"}}
           icon={{name: 'create', color: "white"}}
           buttonStyle={{
             backgroundColor: "#34bbed",
@@ -92,9 +92,9 @@ class SignInScreen extends React.Component {
           }}
         />
         <Button
-          onPress={() => Linking.openURL('https://www.youtube.com/watch?v=wOfkTP8mgE4').catch(err => console.error('An error occurred', err))}
+          onPress={() => Linking.openURL('https://www.youtube.com/watch?v=V9-egxTCFFE').catch(err => console.error('An error occurred', err))}
           title="Watch Demo"
-          textStyle={{ fontSize: 16, fontWeight: "bold", color: "black"}}
+          textStyle={{ fontSize: 18, fontWeight: "900", color: "black"}}
           icon={{name: 'featured-video', color: "black"}}
           buttonStyle={{
             backgroundColor: "white",

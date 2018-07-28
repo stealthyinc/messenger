@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
-import { View, ScrollView, Text, WebView } from 'react-native'
+import { View, ScrollView, Text, WebView, TouchableOpacity } from 'react-native'
 import { connect } from 'react-redux'
 // Add Actions - replace 'Your' with whatever your reducer is called :)
 // import YourActions from '../Redux/YourRedux'
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import DappActions, { DappSelectors } from '../Redux/DappRedux'
 import { Divider, List, ListItem } from 'react-native-elements'
 import GraphiteIcon from '../Images/GraphiteIcon.png';
@@ -13,8 +14,15 @@ class DappData extends Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {};
     return {
-      headerBackTitle: 'Back',
+      headerLeft: (
+        <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
+          <Ionicons name="ios-arrow-dropleft" size={28} color='#34bbed'/>
+        </TouchableOpacity>
+      ),
     };
+  }
+  componentWillMount() {
+    this.props.navigation.setParams({ navigation: this.props.navigation });
   }
   sendDappUrlMessage = (dappUrl, dappData) => {
     if (dappUrl) {
@@ -118,6 +126,7 @@ class DappData extends Component {
           key={item}
           roundAvatar
           title={title}
+          disabled
           subtitle={author}
           avatar={{uri: avatar}}
           onPress={() => this.sendDappUrlMessage(fileUrl, data)}
@@ -126,7 +135,7 @@ class DappData extends Component {
     }
     return (
       <View style={{flex: 1, backgroundColor: '#fff'}}>
-        <Divider style={{ backgroundColor: '#037aff', height: 8 }} />
+        <Divider style={{ backgroundColor: '#34bbed', height: 8 }} />
         <List>
           <ListItem
             key={0}
@@ -137,10 +146,11 @@ class DappData extends Component {
           />
           {graphiteCards}
         </List>
-        <Divider style={{ backgroundColor: '#037aff', height: 8 }} />
+        <Divider style={{ backgroundColor: '#34bbed', height: 8 }} />
         <List>
           <ListItem
             key={1}
+            disabled
             title={'Blockusign'}
             subtitle={'Decentralized Document Signing'}
             avatar={BlockSignIcon}
@@ -148,9 +158,10 @@ class DappData extends Component {
           />
           {blockusignCards}
         </List>
-        <Divider style={{ backgroundColor: '#037aff', height: 8 }} /><List>
+        <Divider style={{ backgroundColor: '#34bbed', height: 8 }} /><List>
           <ListItem
             key={1}
+            disabled
             title={'Cryptocracy'}
             subtitle={'Decentralized Voluntary Associations'}
             avatar={CryptoIcon}

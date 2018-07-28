@@ -9,7 +9,7 @@ export default class WalletScreen extends React.Component {
     headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold'}}>Wallet</Text>,
     headerRight: (
       <TouchableOpacity onPress={() => alert('Wallet Info')} style={{marginRight: 10}}> 
-        <Ionicons name="ios-help-circle-outline" size={30} color='#037aff'/>
+        <Ionicons name="ios-help-circle-outline" size={30} color='#34bbed'/>
       </TouchableOpacity>
     ),
   };

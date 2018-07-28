@@ -26,11 +26,16 @@ class ChatScreen extends Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {};
     return {
+      headerLeft: (
+        <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
+          <Ionicons name="ios-arrow-dropleft" size={28} color='#34bbed'/>
+        </TouchableOpacity>
+      ),
       headerTitle: params.name,
       headerRight: (
         // <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
         <TouchableOpacity onPress={() => params.navigation.navigate("DrawerOpen")} style={{marginRight: 10}}>
-          <Ionicons name="ios-contact" size={28} color='#037aff'/>
+          <Ionicons name="ios-contact" size={28} color='#34bbed'/>
         </TouchableOpacity>
       ),
     };
@@ -55,7 +60,7 @@ class ChatScreen extends Component {
     this.activeContact = undefined;
   }
 
-  configWithActiveContact(anActiveContact) {
+  configWithActiveContact = (anActiveContact) => {
     if (this.activeContact || !anActiveContact) {
       return
     }
@@ -259,7 +264,7 @@ class ChatScreen extends Component {
         style={[styles.chatContainer, this.props.containerStyle]}
         onPress={() => this.props.navigation.navigate('DappData')}
       >
-        <Ionicons name="ios-aperture" size={28} color='#037aff' />
+        <Ionicons name="ios-aperture" size={28} color='#34bbed' />
       </TouchableOpacity>
     )
   }
@@ -333,7 +338,7 @@ class ChatScreen extends Component {
           <Text style={{marginTop: 30, marginRight: 5, marginLeft: 5, fontSize: 16}}>Invite {id} to securely chat with you!</Text>
           <View style={{flexDirection: 'row', marginTop: 20}}>
             <Button
-              backgroundColor={'#037aff'}
+              backgroundColor={'#34bbed'}
               onPress={() => Communications.email([''],null,null,'Add me on Stealthy IM','')}
               icon={{name: 'email', color: 'white'}}
               title='Email'
@@ -341,7 +346,7 @@ class ChatScreen extends Component {
             />
             <View style={{margin: 10}} />
             <Button
-              backgroundColor={'#037aff'}
+              backgroundColor={'#34bbed'}
               onPress={() => Communications.text('')}
               icon={{name: 'chat', color: 'white'}}
               title='Message'
@@ -372,7 +377,7 @@ class ChatScreen extends Component {
         />)
       :
         (<View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
-          <ActivityIndicator size="large" color="#34bbed" />
+          <ActivityIndicator size="large" color="#34bbed"/>
         </View>)
 
     return (

@@ -7,6 +7,7 @@ import { Images } from '../Themes'
 // Styles
 import styles from './Styles/NavigationStyles'
 import AuthLoadingScreen from '../Containers/AuthLoadingScreen'
+import DemoScreen from '../Components/DemoScreen'
 import SignInScreen from '../Containers/SignInScreen'
 import TabScreen from '../Containers/TabScreen'
 import BlockScreen from '../Containers/BlockScreen'
@@ -45,7 +46,8 @@ const PrimaryNav = StackNavigator({
 
 const AuthStack = StackNavigator({
   Intro: { screen: Introduction },
-  SignIn: { screen: SignInScreen }
+  SignIn: { screen: SignInScreen },
+  Demo: { screen: DemoScreen }
 });
 
 export default SwitchNavigator(

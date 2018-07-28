@@ -56,7 +56,7 @@ class BlockScreen extends Component {
   }
   render () {
     const activityIndicator = (this.state.spinner) ?
-      (<ActivityIndicator size="large" color="#34bbed" />) : null;
+      (<ActivityIndicator size="large" color="#34bbed"/>) : null;
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <View style={{flexDirection: 'row', marginTop: 40}}>
@@ -112,7 +112,7 @@ class BlockScreen extends Component {
           onPress={this.props.screenProps.logout}
           title="Log Out"
           icon={{name: 'launch', color: 'white'}}
-          buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#037aff'}}
+          buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#34bbed'}}
           titleStyle={{ fontSize: 18, fontWeight: "bold"}}
           containerStyle={{ marginTop: 25 }}
         />

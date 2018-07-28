@@ -41,7 +41,7 @@ class ConversationScreen extends React.Component {
       headerRight: (
         //params.sendMessage()
         <TouchableOpacity onPress={() => params.navigation.navigate('BlockContactSearch')} style={{marginRight: 10}}>
-          <Ionicons name="ios-paper-plane" size={30} color='#037aff'/>
+          <Ionicons name="ios-paper-plane" size={30} color='#34bbed'/>
         </TouchableOpacity>
       ),
     };
@@ -90,7 +90,7 @@ class ConversationScreen extends React.Component {
     const { contactMgr } = this.props
     const activeContact = (contactMgr) ? contactMgr.getActiveContact() : undefined
     if (!contactMgr || activeContact) {
-      return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed" /></View>
+      return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View>
     }
     return (
       <Container style={{backgroundColor: 'white'}}>
@@ -113,8 +113,8 @@ class ConversationScreen extends React.Component {
                     borderRadius: 2,
                     borderWidth: 2,
                     padding: 3,
-                    borderColor: '#037aff', 
-                    color: '#037aff' 
+                    borderColor: '#34bbed', 
+                    color: '#34bbed' 
                   }}>{item.unread}</Text>
                 </Right> : null}
               </ListItem>}

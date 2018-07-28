@@ -20,7 +20,7 @@ class ProfileScreen extends React.Component {
       headerBackTitle: 'Back',
       headerRight: (
         <TouchableOpacity onPress={() => params.showOverlay()} style={{marginRight: 10}}>
-          <Ionicons name="ios-information-circle" size={30} color='#037aff'/>
+          <Ionicons name="ios-information-circle" size={30} color='#34bbed'/>
         </TouchableOpacity>
       ),
     };
@@ -47,7 +47,7 @@ class ProfileScreen extends React.Component {
     if (!userProfile) {
       return (
         <View style={styles.containerEmpty}>
-          <ActivityIndicator />
+          <ActivityIndicator size="large" color="#34bbed"/>
           <StatusBar barStyle="default" />
         </View>
       );
@@ -79,7 +79,7 @@ class ProfileScreen extends React.Component {
               reverse
               name='connectdevelop'
               type='font-awesome'
-              color={(discovery) ? '#037aff' : 'grey'}
+              color={(discovery) ? '#34bbed' : 'grey'}
               onPress={() => {
                 Toast.show({
                   text: (discovery) ? 'Discovery Setting Disabled!' : 'Discovery Setting Enabled!',
@@ -91,7 +91,7 @@ class ProfileScreen extends React.Component {
               reverse
               name='bell'
               type='font-awesome'
-              color={(notifications) ? '#037aff' : 'grey'}
+              color={(notifications) ? '#34bbed' : 'grey'}
               onPress={() => {
                 Toast.show({
                   text: (notifications) ? 'Notifications Setting Disabled!' : 'Notifications Setting Enabled!',
@@ -103,8 +103,8 @@ class ProfileScreen extends React.Component {
           <Button
             onPress={this.props.screenProps.logout}
             icon={{name: 'launch', color: 'white'}}
-            buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#037aff'}}
-            titleStyle={{ fontSize: 18, fontWeight: "bold"}}
+            buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#34bbed'}}
+            textStyle={{ fontSize: 18, fontWeight: "900", color: "white"}}
             title='Log Out'
           />
         </View>
