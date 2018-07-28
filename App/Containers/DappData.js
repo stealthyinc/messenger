@@ -127,7 +127,7 @@ class DappData extends Component {
     }
     return (
       <View style={{flex: 1, backgroundColor: '#fff'}}>
-        <Divider style={{ backgroundColor: '#037aff', height: 8 }} />
+        <Divider style={{ backgroundColor: '#34bbed', height: 8 }} />
         <List>
           <ListItem
             key={0}
@@ -138,7 +138,7 @@ class DappData extends Component {
           />
           {graphiteCards}
         </List>
-        <Divider style={{ backgroundColor: '#037aff', height: 8 }} />
+        <Divider style={{ backgroundColor: '#34bbed', height: 8 }} />
         <List>
           <ListItem
             key={1}
@@ -150,7 +150,7 @@ class DappData extends Component {
           />
           {blockusignCards}
         </List>
-        <Divider style={{ backgroundColor: '#037aff', height: 8 }} /><List>
+        <Divider style={{ backgroundColor: '#34bbed', height: 8 }} /><List>
           <ListItem
             key={1}
             disabled

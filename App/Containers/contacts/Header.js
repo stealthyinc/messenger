@@ -28,7 +28,7 @@ const Header = (props) => (
       onChangeText={(text) => console.log('searching for ', text)}
     />
     <TouchableOpacity onPress={() => props.navigation.navigate('ChatMenu')}> 
-      <Ionicons name="ios-add-circle-outline" size={28} color='#037aff'/>
+      <Ionicons name="ios-add-circle-outline" size={28} color='#34bbed'/>
     </TouchableOpacity>
   </View>
 );

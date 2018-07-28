@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { ScrollView, Text, WebView } from 'react-native'
+import { ActivityIndicator, ScrollView, Text, WebView } from 'react-native'
 import { connect } from 'react-redux'
 import DappActions, { DappSelectors } from '../Redux/DappRedux'
 
@@ -26,6 +26,7 @@ class DappScreen extends Component {
     return (
       <WebView
         source={{uri: this.props.dappUrl}}
+        startInLoadingState={true}
       />
     )
   }
