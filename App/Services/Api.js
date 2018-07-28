@@ -90,6 +90,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
     try {
       zonefileUrlMess = nameResult.data.zonefile
     } catch (err) {
+      console.log('Zonefile not in nameResult')
       throw `ERROR(${methodName}): failed to get zonefile data in request returned from name endpoint.\n${err}`
     }
 

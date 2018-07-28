@@ -26,9 +26,20 @@ module.exports = class GaiaIO extends BaseIO {
 
     utils.throwIfUndef('logger', logger);
 
-    this.hubCache = {};
     this.logger = logger;
     this.logOutput = logOutput;
+
+    // Hub Cache stores hub urls for each user's application. The structure
+    // looks like this:
+    //  {
+    //    pbj.id {
+    //      'https://www.stealthy.im': <url>,
+    //      'https://www.graphitedocs.im' : <url>,
+    //      ...
+    //    },
+    //    ...
+    //  }
+    this.hubCache = {};
   }
 
   log(...args) {
@@ -39,6 +50,30 @@ module.exports = class GaiaIO extends BaseIO {
 
   clearHubCache() {
     this.hubCache = {}
+  }
+
+  setHubCacheEntry(aUserName, anAppUrl, hubUrl) {
+    if (!this.hubCache.hasOwnProperty(aUserName)) {
+      this.hubCache[aUserName] = {}
+    }
+    this.hubCache[aUserName][anAppUrl] = hubUrl
+  }
+
+  getHubCacheEntry(aUserName, anAppUrl) {
+    if (this.hubCache.hasOwnProperty(aUserName)) {
+      const userHubCache = this.hubCache[aUserName]
+      if (userHubCache && userHubCache.hasOwnProperty(anAppUrl)) {
+        return userHubCache[anAppUrl]
+      }
+    }
+    return undefined
+  }
+
+  hasHubCacheEntry(aUserName, anAppUrl) {
+    if (this.getHubCacheEntry(aUserName, anAppUrl)) {
+      return true
+    }
+    return false
   }
 
   // Public:
@@ -120,26 +155,24 @@ module.exports = class GaiaIO extends BaseIO {
     });
   }
 
-  _getGaiaHubAddrWorkaround(aUserName, useCache = true) {
+  _getGaiaHubUrl(aUserName, anAppUrl='https://www.stealthy.im' , useCache=true) {
     return new Promise((resolve, reject) => {
       if (!aUserName) {
-        reject(aUserName)
-      } else if (useCache && (aUserName in this.hubCache)) {
-        resolve(this.hubCache[aUserName])
+        reject('aUserName is not defined')
+      } else if (useCache && this.hasHubCacheEntry(aUserName, anAppUrl)) {
+        resolve(this.getHubCacheEntry(aUserName, anAppUrl))
       } else {
-        api.getUserGaiaNS(aUserName)
-        .then((gaiaHub) => {
-          if (!gaiaHub) {
-            console.log(`ERROR(gaiaIO.js::_getGaiaHubAddrWorkaround): unable to fetch gaia hub for ${aUserName}`)
-            reject(undefined)
+        api.getUserGaiaNS(aUserName, anAppUrl)
+        .then((gaiaHubUrl) => {
+          if (!gaiaHubUrl) {
+            reject(`ERROR(gaiaIO.js::_getGaiaHubUrl): unable to fetch gaia hub for ${aUserName}`)
           } else {
-            this.hubCache[aUserName] = gaiaHub
-            resolve(gaiaHub)
+            this.setHubCacheEntry(aUserName, anAppUrl, gaiaHubUrl)
+            resolve(gaiaHubUrl)
           }
         })
         .catch((error) => {
-          console.log(`ERROR(gaiaIO.js::_getGaiaHubAddrWorkaround): ${error}`)
-          reject(undefined)
+          reject(error)
         })
       }
     })
@@ -154,7 +187,7 @@ module.exports = class GaiaIO extends BaseIO {
   //
   _read_iOS(username, filePath) {
     return new Promise((resolve, reject) => {
-      this._getGaiaHubAddrWorkaround(username)
+      this._getGaiaHubUrl(username)
       .then((gaiaHubPath) => {
         if (gaiaHubPath) {
           getRawFile(filePath, gaiaHubPath, (error, content) => {
@@ -172,8 +205,8 @@ module.exports = class GaiaIO extends BaseIO {
           reject('Unable to get gaia hub path.')
         }
       })
-      .catch((error) => {
-        reject(error)
+      .catch((hubError) => {
+        reject(hubError)
       })
     })
   }
@@ -194,35 +227,67 @@ module.exports = class GaiaIO extends BaseIO {
     return this._write('', filePath, {});
   }
 
+  readPartnerAppFile(aUserName, aFilePath, anAppUrl) {
+    const method = 'gaiaIO.js::readPartnerAppFile'
+    console.log(`DEBUG(${method}): Reading ${aFilePath} from ${aUserName}'s ${anAppUrl} GAIA.`)
 
-  // TODO:
-  // readPartnerAppFile(username, filename, appName) {
-  //
-  // }
-
-  // Quick workaround to test Justin's file format
-  readFileFromHub(aFileName, aHubUrl) {
-    console.log(`DEBUG(gaiaIO.js::readFileFromHub): Reading ${aHubUrl}/${aFileName}.`)
-
-    if (!aFileName || !aHubUrl) {
-      throw `ERROR(gaiaIO.js::readFileFromHub): aFileName or aHubUrl not specified.`
+    if (!aUserName || !aFilePath || !anAppUrl) {
+      throw `ERROR(${method}): aFileName or aHubUrl not specified.`
     }
 
     if (!utils.is_iOS()) {
-      throw `ERROR(gaiaIO.js::readFileFromHub): Non-iOS deployments not yet supported.`
+      throw `ERROR(${method}): Non-iOS deployments not yet supported.`
     }
 
     return new Promise((resolve, reject) => {
-      getRawFile(aFileName, aHubUrl, (error, content) => {
-        if (error) {
-          reject(error);
+      this._getGaiaHubUrl(aUserName, anAppUrl)
+      .then((gaiaHubUrl) => {
+        if (gaiaHubUrl) {
+          getRawFile(aFilePath, gaiaHubUrl, (error, content) => {
+            if (!error) {
+              if (!content || content.includes('<Error><Code>BlobNotFound')) {
+                resolve(undefined)
+              } else {
+                resolve(result)
+              }
+            } else {
+              reject(error);
+            }
+          })
         } else {
-          const result = (!content || content.includes('<Error><Code>BlobNotFound')) ?
-            undefined : content
-
-          resolve(result)
+          reject('Unable to get gaia hub path.')
         }
+      })
+      .catch((error) => {
+        reject(error)
       })
     })
   }
+
+  // // TODO: remove this when readPartnerAppFile above is in service
+  // //
+  // readFileFromHub(aFileName, aHubUrl) {
+  //   console.log(`DEBUG(gaiaIO.js::readFileFromHub): Reading ${aHubUrl}/${aFileName}.`)
+  //
+  //   if (!aFileName || !aHubUrl) {
+  //     throw `ERROR(gaiaIO.js::readFileFromHub): aFileName or aHubUrl not specified.`
+  //   }
+  //
+  //   if (!utils.is_iOS()) {
+  //     throw `ERROR(gaiaIO.js::readFileFromHub): Non-iOS deployments not yet supported.`
+  //   }
+  //
+  //   return new Promise((resolve, reject) => {
+  //     getRawFile(aFileName, aHubUrl, (error, content) => {
+  //       if (error) {
+  //         reject(error);
+  //       } else {
+  //         const result = (!content || content.includes('<Error><Code>BlobNotFound')) ?
+  //           undefined : content
+  //
+  //         resolve(result)
+  //       }
+  //     })
+  //   })
+  // }
 };

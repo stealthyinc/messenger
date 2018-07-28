@@ -25,6 +25,8 @@ const { ContactManager } = require('./messaging/contactManager.js');
 
 const { Discovery } = require('./misc/discovery.js')
 
+const { Graphite } = require('./integrations/graphite.js')
+
 const common = require('./../common.js');
 
 import API from './../Services/Api'
@@ -86,6 +88,8 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.shuttingDown = false;
     this.anonalytics = undefined;
 
+    this.indexIntegrations = {}
+
     // This member determines behavior on read failures (prevents data loss
     // from clobbering write on failure)
     this.newUser = undefined
@@ -122,6 +126,60 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   closeContactSearch() {
     this.emit('me-close-contact-search', true);
+  }
+
+  //
+  // API Integration Interface
+  // ////////////////////////////////////////////////////////////////////////////
+  // ////////////////////////////////////////////////////////////////////////////
+  // Events to listen for:
+  //    me-integration-data <App Name> <Error> <indexData>
+
+  // Returns the current integration data for specified appName and issues an
+  // me-integration-data event.
+  getIntegrationData(appName = 'Graphite') {
+    const method = 'engine.js::getIntegrationData'
+    let error = undefined
+    let indexData = undefined
+
+    if (!appName) {
+      error = `ERROR(${method}): appName is not defined.`
+    } else if (!this.indexIntegrations ||
+               !this.indexIntegrations.hasOwnProperty(appName)) {
+      error = `ERROR(${method}): no integration for ${appName} available.`
+    }
+
+    if (!error) {
+      indexData = this.indexIntegrations[appName]
+    }
+
+    this.emit('me-integration-data', appName, error, indexData)
+  }
+
+  // Updates integration data for specified appName and issues an me-integration-data
+  // event on completion.
+  async refreshIntegrationData(appName = 'Graphite') {
+    const method = 'engine.js::refreshIntegrationData'
+    let error = undefined
+    let indexData = undefined
+
+    if (!appName) {
+      error = `ERROR(${method}): appName is not defined.`
+    } else if (!this.indexIntegrations ||
+               !this.indexIntegrations.hasOwnProperty(appName)) {
+      error = `ERROR(${method}): no integration for ${appName} available.`
+    }
+
+    if (!error) {
+      const integration = this.indexIntegrations[appName]
+      try {
+        indexData = await integration.readIndexData()
+      } catch (integrationError) {
+        error = integrationError
+      }
+    }
+
+    this.emit('me-integration-data', appName, error, indexData)
   }
 
   //
@@ -280,6 +338,12 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.logger('INFO: No contact bundles to load.');
       this.emit('me-initialized', true);
     });
+
+    // Integrations load on start in the background. Might need to queue these and
+    // add a busy/working block to prevent multiple read requests:
+    const graphiteIntegration = new Graphite(this.io, this.userId)
+    this.indexIntegrations['Graphite'] = graphiteIntegration
+    this.refreshIntegrationData('Graphite')
   }
 
   async _configureSessionManagement() {
@@ -305,181 +369,10 @@ export class MessagingEngine extends EventEmitterAdapter {
     await this._configureIO()
   }
 
-
-  // relay.id's graphite hub for initital testing / dev work
-  static RELAY_GRAPHITE_HUB = 'https://gaia.blockstack.org/hub/1PeNcCQXdg7t8iNmK7XqGVt8UyEDo4d3mF/'
-
-  _getSimulatedIntermediateGraphiteData() {
-    const simulatedData = {
-      'relay.id-1532144113901' : {
-        title : 'Test Stealthy Integration 2',
-        description : '',
-        author : 'relay.id',
-        decryptable : {
-          user : 'TBD',
-          key : 'Graphite',
-        },
-        fileUrl : 'https://app.graphitedocs.com/shared/docs/relay.id-1532144113901',
-        version : '',
-        appMetadata : {
-          title : 'Test Stealthy Integration 2',
-          id : '1532144113901',
-          updated : '7/21/2018',
-          words : '11',
-          sharedWith : '',
-          singleDocIsPublic : 'true',
-          author : 'relay.id',
-          tags : '',
-          fileType : 'documents',
-        },
-      },
-      'relay.id-1532196940159' : {
-        title : 'Delete Facebook Movement Spreads Worldwide',
-        description : '',
-        author : 'relay.id',
-        decryptable : {
-          user : 'TBD',
-          key : 'Graphite',
-        },
-        fileUrl : 'https://app.graphitedocs.com/shared/docs/relay.id-1532196940159',
-        version : '',
-        appMetadata : {
-          title : 'Delete Facebook Movement Spreads Worldwide',
-          id : '1532196940159',
-          updated : '7/21/2018',
-          words : '23',
-          sharedWith : '',
-          singleDocIsPublic : 'true',
-          author : 'relay.id',
-          tags : '',
-          fileType : 'documents',
-        },
-      },
-      'relay.id-1532197099770' : {
-        title : 'Data Breaches on the Rise Worldwide',
-        description : '',
-        author : 'relay.id',
-        decryptable : {
-          user : 'TBD',
-          key : 'Graphite',
-        },
-        fileUrl : 'https://app.graphitedocs.com/shared/docs/relay.id-1532197099770',
-        version : '',
-        appMetadata : {
-          title : 'Data Breaches on the Rise Worldwide',
-          id : '1532197099770',
-          updated : '7/21/2018',
-          words : '35',
-          sharedWith : '',
-          author : 'relay.id',
-          tags : '',
-          fileType : 'documents',
-        },
-      },
-    }
-
-    return simulatedData
-  }
-
-  _getIndexDataFromGraphite(aGraphiteIndex) {
-    const indexData = {}
-    const RELAY_DOC_BASES = {
-      publicShare: 'https://app.graphitedocs.com/shared/docs/relay.id-',  // append <doc id>
-      privateShare: `${MessagingEngine.RELAY_GRAPHITE_HUB}`, // append <doc id>sharedwith.json
-      originalDoc : `${MessagingEngine.RELAY_GRAPHITE_HUB}/documents/`, // append <doc id>.json
-    }
-
-    if (aGraphiteIndex) {
-      for (const element of aGraphiteIndex) {
-        if (!element ||
-            !element.author ||
-            !element.id ||
-            !element.fileType ||
-            !element.title ) {
-          continue
-        }
-
-        const fileName = `relay.id-${element.id}`
-        const fileData = {
-          title : `${element.title}`,
-          description : '',
-          author : `${element.author}`,
-          decryptable : {
-            user : 'TBD',
-            key : 'Graphite'
-          },
-          fileUrl : `${RELAY_DOC_BASES.publicShare}${element.id}`,
-          version: '',
-          appMetadata: element
-        }
-
-        indexData[fileName] = fileData
-      }
-    }
-
-    return indexData
-  }
-
-  async _graphiteFileRead() {
-      // Psuedocode:
-      //   1. Use profile lookup to get the current user's graphite gaia hub
-      //   2. In that gaia hub, fetch the index file (stealthyIndex.json)
-      //   3. Parse that index to produce a list of file objects with relevant
-      //      metadata.
-
-      // TODO: finish readPartnerAppFile in gaiaIO.js
-
-      const GRAPHITE_INDEX = 'stealthyIndex.json'
-      let recovered = undefined
-      try {
-        const cipherTextObjStr = await this.io.readFileFromHub(GRAPHITE_INDEX, MessagingEngine.RELAY_GRAPHITE_HUB)
-        recovered = await utils.decryptObj(this.privateKey, cipherTextObjStr, true)
-      } catch(error) {
-        throw `_graphiteFileRead: failed read.\n   ${error}`
-      }
-
-      const indexData = this._getIndexDataFromGraphite(recovered)
-      // // dump index Data
-      // console.log('const indexData = {')
-      // for (const fileName in indexData) {
-      //   if (!fileName || !indexData[fileName]) {
-      //     continue
-      //   }
-      //   const fileData = indexData[fileName]
-      //   console.log(`  '${fileName}' : {`)
-      //   console.log(`    title : '${fileData.title}',`)
-      //   console.log(`    description : '${fileData.description}',`)
-      //   console.log(`    author : '${fileData.author}',`)
-      //   console.log(`    decryptable : {`)
-      //   console.log(`      user : '${fileData.decryptable.user}',`)
-      //   console.log(`      key : '${fileData.decryptable.key}',`)
-      //   console.log('    },')
-      //   console.log(`    fileUrl : '${fileData.fileUrl}',`)
-      //   console.log(`    version : '${fileData.version}',`)
-      //   console.log('    appMetadata : {')
-      //   for (const key in fileData.appMetadata) {
-      //     console.log(`      ${key} : '${fileData.appMetadata[key]}',`)
-      //   }
-      //   console.log('    },')
-      //   console.log('  },')
-      // }
-      // console.log('}')
-  }
-
   async _configureIO() {
     this.io = (ENABLE_GAIA) ?
       new GaiaIO(this.logger, LOG_GAIAIO) :
       new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO);
-
-    // TODO: move this to the right spot based on discussion w/ pbj
-    if (process.env.NODE_ENV !== 'production') {
-      if (this.userId === 'relay.id') {
-        this._graphiteFileRead()
-      } else {
-        const simulatedData = this._getSimulatedIntermediateGraphiteData()
-        // TODO: PBJ work with this to display UI
-      }
-    }
 
     await this._fetchUserSettings();
   }
@@ -489,13 +382,12 @@ export class MessagingEngine extends EventEmitterAdapter {
   //         and all three null/not present, then decide first time user)
   async _fetchUserSettings() {
     const method = 'engine.js::_fetchUserSettings'
-    debugger
     let encSettingsData = undefined
     try {
       encSettingsData = await this.io.readLocalFile(this.userId, 'settings.json')
       // readLocalFile returns undefined on BlobNotFound, so set new user:
       this.newUser = (encSettingsData) ? false : true
-    } catch (err) {
+    } catch (error) {
       // Two scenarios:
       //   1. New user (file never created). (continue with defaults)
       //   2. Legitimate error. (Then Block with throw / screen to user)
@@ -510,14 +402,14 @@ export class MessagingEngine extends EventEmitterAdapter {
       try {
         const existingDataSS = await dbExistingDataPathRef.once('value')
         test1Passed = (existingDataSS && (existingDataSS.val() === 'true'))
-      } catch (test1Err) {
+      } catch (testError1) {
         // Do nothing.
-        console.log(`INFO(${method}): db query failed.\n${test1Err}`)
+        console.log(`INFO(${method}): db query failed.\n${testError1}`)
       }
 
       if (test1Passed) {
-        this.emit('me-fault', err)
-        throw `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${err}`
+        this.emit('me-fault', error)
+        throw `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${error}`
       }
 
       let test2Passed = false
@@ -526,14 +418,14 @@ export class MessagingEngine extends EventEmitterAdapter {
         test2Passed = (pkTxtData !== undefined &&
                        pkTxtData !== null &&
                        pkTxtData !== '')
-      } catch (test2Err) {
+      } catch (testError2) {
         // Do nothing.
-        console.log(`INFO(${method}): public key read failed.\n${test2Err}`)
+        console.log(`INFO(${method}): public key read failed.\n${testError2}`)
       }
 
       if (test2Passed) {
-        this.emit('me-fault', err)
-        throw `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${err}`
+        this.emit('me-fault', error)
+        throw `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${error}`
       }
 
       // If we got here without throwing, it's likely a new user, proceed with
@@ -549,10 +441,10 @@ export class MessagingEngine extends EventEmitterAdapter {
         // Problem if here is likely that another account wrote to the current
         // account's gaia with it's own encryption, resulting in a mac mismatch:
         // TODO: warn user (privacy could be reduced w/ centralized conveniences)
-        this.logger(`ERROR(${method}): using default settings due to decryption error.\n${err}`)
+        // this.logger(`ERROR(${method}): using default settings due to decryption error.\n${err}`)
         // TODO: remove these lines when login error fixed:
         this.emit('me-fault', err)
-        throw(`ERROR(${method}): using default settings due to decryption error.\n${err}`)
+        throw(`ERROR(${method}): unable to read settings due to decryption error.\n${err}`)
       }
     }
 
@@ -560,44 +452,48 @@ export class MessagingEngine extends EventEmitterAdapter {
     await this._fetchDataAndCompleteInit();
   }
 
-  _fetchDataAndCompleteInit() {
-    if (this.anonalytics === undefined) {
+  async _fetchDataAndCompleteInit() {
+    const method = 'engine.js::_fetchDataAndCompleteInit'
+
+    if (!this.anonalytics) {
       this.anonalytics = new Anonalytics(this.publicKey);
     }
-
     this.anonalytics.aeLogin();
     this.anonalytics.aePlatformDescription(platform.description);
-
     // in mobile the app token is undefined (in web it is the value of 'app' in the query string)
     const appToken = undefined
     this.anonalytics.aeLoginContext(utils.getAppContext(appToken));
 
-    this.idxIo = new IndexedIO(this.logger, this.io, this.userId, this.privateKey, this.publicKey, ENCRYPT_INDEXED_IO);
+    this.idxIo = new IndexedIO(this.logger, this.io, this.userId,
+                               this.privateKey, this.publicKey, ENCRYPT_INDEXED_IO);
 
     this.io.writeLocalFile(this.userId, 'pk.txt', this.publicKey);
 
     let contactArr = [];
-    this.io.readLocalFile(this.userId, 'contacts.json')
-    .then((contactsData) => {
-      if (contactsData && contactsData !== null) {
-        utils.decryptObj(this.privateKey, contactsData, ENCRYPT_CONTACTS)
-        .then(contactArr => {
-          this._initWithContacts(contactArr);
-        })
-      } else {
-        this.logger('No data read from contacts file. Initializing with no contacts.');
-        contactArr = [];
-        this._initWithContacts(contactArr);
+    let contactsData = undefined
+    try {
+      contactsData = await this.io.readLocalFile(this.userId, 'contacts.json')
+    } catch (error) {
+      if (!this.newUser) {
+        // In future, we should retry but for now we throw.
+        this.emit('me-fault', error)
+        throw `ERROR(${method}): failure to fetch contacts from GAIA. Try again soon.\n${error}`
       }
-    })
-    .catch((error) => {
-      // TODO: probably should error out--possibly warn about data loss. Think
-      // about what happens if contacts exist but are added again (bundles probably
-      // get wiped out as might the contacts.json.)
-      this.logger('Error', error);
-      this._initWithContacts([]);
-      this.logger('ERROR: Reading contacts.');
-    });
+    }
+
+    if (contactsData) {
+      try {
+        contactArr = await utils.decryptObj(this.privateKey, contactsData, ENCRYPT_CONTACTS)
+      } catch (error) {
+        // TODO: consider giving user option to bypass and:
+        //       - lose data
+        //       - create temporary contacts
+        this.emit('me-fault', error)
+        throw(`ERROR(${method}): unable to load contacts due to decryption error.\n${error}`)
+      }
+    }
+
+    this._initWithContacts(contactArr)
   }
 
   //
