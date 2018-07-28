@@ -12,6 +12,8 @@
 import { eventChannel } from 'redux-saga'
 import { apply, call, fork, put, select, take, takeLatest, takeEvery } from 'redux-saga/effects'
 import EngineActions, { EngineSelectors, EngineTypes } from '../Redux/EngineRedux'
+import DappActions, { DappTypes } from '../Redux/DappRedux'
+
 import {
   AsyncStorage,
 } from 'react-native';
@@ -111,6 +113,29 @@ function* watchShutDownChannel() {
   yield put(EngineActions.setEngineShutdown(engineShutdown))
 }
 
+function* watchIntegrationDataChannel() {
+  const channel = eventChannel(emitter => {
+    EngineInstance.on('me-integration-data', (appName, error, indexData) => {
+      const result = {
+        appName,
+        error,
+        indexData
+      }
+      emitter(result)
+    })
+    return () => {
+      console.log(`Messaging Engine Integration`)
+    }
+  })
+  while (true) {
+    const { appName, error, indexData } = yield take(channel)
+    console.log('**PBJ', appName, error, indexData)
+    yield put(DappActions.setDapp(appName))
+    yield put(DappActions.setDappData(indexData))
+    yield put(DappActions.setDappError(error))
+  }
+}
+
 function* handleShutDownRequest() {
   EngineInstance.handleShutDownRequest();
 }
@@ -168,6 +193,10 @@ function* notificationTasks(action) {
   EngineInstance.handleMobileNotifications(senderInfo)
 }
 
+function* getIntegrationData() {
+  EngineInstance.getIntegrationData()
+}
+
 export function* startEngine (action) {
   const { userData } = action
   EngineInstance = yield call (createEngine, userData)
@@ -179,6 +208,9 @@ export function* startEngine (action) {
   yield fork(watchContactAddedChannel)
   yield fork(watchUserSettingsChannel)
   yield fork(watchShutDownChannel)
+  yield fork(watchShutDownChannel)
+  yield fork(watchIntegrationDataChannel)
+  yield takeLatest(DappTypes.REFRESH_INTEGRATION_DATA, getIntegrationData)
   yield takeLatest(EngineTypes.INIT_SHUTDOWN, handleShutDownRequest)
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
   yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)
@@ -223,5 +255,6 @@ export default function* engineSagas(api) {
   yield takeLatest(EngineTypes.SET_USER_DATA, getToken)
   yield takeLatest(EngineTypes.SET_USER_DATA, startEngine)
   yield takeLatest(EngineTypes.SET_USER_DATA, getUserProfile, api)
+  yield takeLatest(EngineTypes.SET_USER_DATA, getIntegrationData)
   yield takeEvery(EngineTypes.SET_ACTIVE_CONTACT, getActiveUserProfile, api)
 }

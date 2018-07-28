@@ -106,11 +106,13 @@ class BlockContactSearch extends Component {
     return (
       <Container style={{backgroundColor: 'white'}}>
         <SearchBar
+          containerStyle={{backgroundColor: '#D3D3D3'}}
+          inputStyle={{backgroundColor: 'white'}}
           lightTheme
-          round
           cancelButtonTitle='Cancel'
           platform={Platform.OS}
           ref={search => this.search = search}
+          icon={{ type: 'material', name: 'search', size: 24 }}
           searchIcon={{ color: 'white', size: 24 }}
           onChangeText={this.onChangeText}
           clearIcon={null}

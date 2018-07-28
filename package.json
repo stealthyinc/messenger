@@ -55,6 +55,7 @@
     "react-native-swiper": "^1.5.13",
     "react-native-vector-icons": "^4.6.0",
     "react-navigation": "^1.5.11",
+    "react-navigation-fluid-transitions": "^0.2.2",
     "react-navigation-redux-helpers": "^1.0.4",
     "react-redux": "^5.0.6",
     "redux": "^3.7.2",

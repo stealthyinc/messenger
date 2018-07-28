@@ -34,7 +34,7 @@ class ChatScreen extends Component {
       headerTitle: params.name,
       headerRight: (
         // <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
-        <TouchableOpacity onPress={() => params.navigation.navigate("DrawerOpen")} style={{marginRight: 10}}>
+        <TouchableOpacity onPress={() => params.navigation.navigate("ContactProfile")} style={{marginRight: 10}}>
           <Ionicons name="ios-contact" size={28} color='#34bbed'/>
         </TouchableOpacity>
       ),
@@ -114,13 +114,13 @@ class ChatScreen extends Component {
     if (!this.activeContact) {
       return
     }
-    const { messages, dappUrl, dappData } = nextProps
-    if (dappData) {
+    const { messages, dappUrl, dappMessage } = nextProps
+    if (dappMessage) {
       const { author } = this.state
       const { username, name, userImage } = author
       const start = new Date(Date.now())
       const time = start.toString()
-      const {title} = dappData
+      const {title} = dappMessage
       // TODO: custom renderer with graphite icon
       const graphiteLogo = 'https://image.ibb.co/hde71b/AppIcon.png'
       // const messageContent = `${name} shared "${dappData.title}" with you:\n\n${dappUrl}`
@@ -138,7 +138,7 @@ class ChatScreen extends Component {
         _id: start,
       }]
       this.onSend(fileMessage)
-      this.props.setDappData(null)
+      this.props.setDappMessage(null)
     }
     else if (this.props.messages && this.props.messages.length !== messages.length) {
       const numNewMsgs = messages.length - this.props.messages.length;
@@ -399,7 +399,7 @@ const mapStateToProps = (state) => {
     publicKey: EngineSelectors.getPublicKey(state),
     bearerToken: EngineSelectors.getBearerToken(state),
     dappUrl: DappSelectors.getDappUrl(state),
-    dappData: DappSelectors.getDappData(state),
+    dappMessage: DappSelectors.getDappMessage(state),
   }
 }
 
@@ -409,7 +409,7 @@ const mapDispatchToProps = (dispatch) => {
     sendNotification: (token, publicKey, bearerToken) => dispatch(EngineActions.sendNotification(token, publicKey, bearerToken)),
     handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),
     setDappUrl: (dappUrl) => dispatch(DappActions.setDappUrl(dappUrl)),
-    setDappData: (dappData) => dispatch(DappActions.setDappData(dappData)),
+    setDappMessage: (dappMessage) => dispatch(DappActions.setDappMessage(dappMessage)),
   }
 }
 
