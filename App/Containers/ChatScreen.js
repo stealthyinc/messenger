@@ -174,13 +174,30 @@ class ChatScreen extends Component {
     let messages = []
     const { description, id } = this.activeContact
     for (const message of inputMessages) {
-      const { author, body, time, image, state } = message
+      const { author, body, time, image, state, contentType } = message
       const sent = (state === MESSAGE_STATE.SENT_OFFLINE || state === MESSAGE_STATE.SENT_REALTIME || state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
       const received = (state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
+      let gtext, url, gimage, press
+      if (contentType === 'TEXT') {
+        text = body
+        url = ''
+        gimage = ''
+      }
+      else if (contentType === 'TEXT_JSON') {
+        text = undefined
+        gtext = body.text
+        url = body.url
+        gimage = body.image
+        press = true
+      }
       if (author === id) {
         messages.push({
           _id: Math.round(Math.random() * 1000000),
-          text: body,
+          gtext,
+          text,
+          url,
+          onPress: this.onPressUrl,
+          gimage: gimage,
           createdAt: time,
           sent: sent,
           received: received,
@@ -194,7 +211,11 @@ class ChatScreen extends Component {
       else {
         messages.push({
           _id: Math.round(Math.random() * 1000000),
-          text: body,
+          gtext,
+          text,
+          url,
+          onPress: this.onPressUrl,
+          gimage: gimage,
           createdAt: time,
           sent: sent,
           received: received,
@@ -229,13 +250,19 @@ class ChatScreen extends Component {
     }, 1000); // simulating network
   }
 
-  onSend = (messages = []) => {
+  onSend = (messages = [], json) => {
     const { token } = this.state
     const { publicKey, bearerToken } = this.props
     if (token) {
       this.props.sendNotification(token, publicKey, bearerToken)
     }
-    this.props.handleOutgoingMessage(messages[0].text);
+    const {text, image, url} = messages[0]
+    if (image && url) {
+      this.props.handleOutgoingMessage(undefined, messages[0])
+    }
+    else {
+      this.props.handleOutgoingMessage(text, undefined);
+    }
     this.setState((previousState) => {
       return {
         messages: GiftedChat.append(previousState.messages, messages),
@@ -405,7 +432,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    handleOutgoingMessage: (message) => dispatch(EngineActions.setOutgoingMessage(message)),
+    handleOutgoingMessage: (text, json) => dispatch(EngineActions.setOutgoingMessage(text, json)),
     sendNotification: (token, publicKey, bearerToken) => dispatch(EngineActions.sendNotification(token, publicKey, bearerToken)),
     handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),
     setDappUrl: (dappUrl) => dispatch(DappActions.setDappUrl(dappUrl)),

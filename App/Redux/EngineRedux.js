@@ -12,7 +12,7 @@ const { Types, Creators } = createActions({
   setEngineContactMgr: ['contactMgr'],
   setEngineMessages: ['messages'],
   setActiveContact: ['activeContact'],
-  setOutgoingMessage: ['outgoingMessage'],
+  setOutgoingMessage: ['outgoingMessage', 'json'],
   setUserProfile: ['userProfile'],
   setActiveUserProfile: ['activeUserProfile'],
   addNewContact: ['newContact'],

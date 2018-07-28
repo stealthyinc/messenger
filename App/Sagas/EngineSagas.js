@@ -129,7 +129,6 @@ function* watchIntegrationDataChannel() {
   })
   while (true) {
     const { appName, error, indexData } = yield take(channel)
-    console.log('**PBJ', appName, error, indexData)
     yield put(DappActions.setDapp(appName))
     yield put(DappActions.setDappData(indexData))
     yield put(DappActions.setDappError(error))
@@ -146,8 +145,8 @@ function* handleContactClick(action) {
 }
 
 function* handleOutgoingMessage(action) {
-  const { outgoingMessage } = action
-  EngineInstance.handleOutgoingMessage(outgoingMessage)
+  const { outgoingMessage, json } = action
+  EngineInstance.handleOutgoingMessage(outgoingMessage, json)
 }
 
 function* handleSearchSelect(action) {
