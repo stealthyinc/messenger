@@ -100,7 +100,7 @@ CipherObject CryptoECIES::EncryptECIES(const string& publicKey, const string& co
     // ----------------------------------------------------------------------------------
     SecByteBlock sharedKey(domain.AgreedValueLength());
     if (!domain.Agree(sharedKey, eph_prv, (byte*) &pubKeyBinUncomp[0])) {
-      throw("ERROR: Domain does not agree for shared key in encryptor");
+      throw std::runtime_error("ERROR: Domain does not agree for shared key in encryptor");
     }
     //
     //
@@ -140,7 +140,7 @@ CipherObject CryptoECIES::EncryptECIES(const string& publicKey, const string& co
         StringSource aesSS(content, true, new StreamTransformationFilter(aesE, new StringSink(cipher)));
     } catch (const CryptoPP::Exception& e) {
       cerr << "AES Encryption Error: "<< e.what() << endl;
-      throw(e);
+      throw;
     }
     binStrToHexStr(cipher, encObj.cipherText);
     //
@@ -195,7 +195,7 @@ string CryptoECIES::DecryptECIES(const string& privateKeyHex, const CipherObject
   ECDH<ECC_ALGORITHM>::Domain domain(ECC_CURVE);
   SecByteBlock sharedKey(domain.AgreedValueLength());
   if (!domain.Agree(sharedKey, (byte*) &privateKey[0], (byte*) &uncomEphemeralPKBin[0])) {
-    throw("FAIL: DOMAIN DOES NOT AGREE!");
+    throw std::runtime_error("FAIL: DOMAIN DOES NOT AGREE!");
   }
   //
   //
@@ -254,7 +254,7 @@ string CryptoECIES::DecryptECIES(const string& privateKeyHex, const CipherObject
   if ((expectedMac.size() != actualMacSize) ||
       !VerifyBufsEqual((byte*) &expectedMac[0], actualMac, actualMacSize))
   {
-    throw("FAIL: expectedMac is not equal to actualMac");
+    throw std::runtime_error("FAIL: expectedMac is not equal to actualMac");
   }
   //
   //

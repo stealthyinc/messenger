@@ -20,20 +20,15 @@ const GaiaIO = require('./filesystem/gaiaIO.js');
 const { IndexedIO } = require('./filesystem/indexedIO.js');
 
 const constants = require('./misc/constants.js');
-const statusIndicators = constants.statusIndicators;
 
 const { ContactManager } = require('./messaging/contactManager.js');
 
-import getQueryString from './misc/getQueryString';
-const { Timer } = require('./misc/timer.js');
 const { Discovery } = require('./misc/discovery.js')
 
 const common = require('./../common.js');
 
 import API from './../Services/Api'
 const api = API.create()
-
-import chatIcon from './images/blue256.png';
 
 // TODO: refactor to relay.js
 const RELAY_IDS = ['relay.stealthy.id'];
@@ -70,24 +65,18 @@ export class MessagingEngine extends EventEmitterAdapter {
   constructor(logger,
               privateKey,
               publicKey,
-              plugIn,
               avatarUrl,
-              sessionId,
-              isMobile=false) {
+              sessionId) {
     super();
     this.logger = logger;
     this.privateKey = privateKey;
     this.publicKey = publicKey;
-    this.plugIn = plugIn;
     this.avatarUrl = avatarUrl;
     this.sessionId = sessionId;
-    this.isMobile = isMobile;
     this.discovery = undefined;
 
-    this.settings = {}
+    this.settings = constants.defaultSettings
     this.contactMgr = undefined;
-
-    this.myTimer = new Timer('Enter MessagingEngine Ctor');
 
     this.userId = undefined;
 
@@ -96,6 +85,10 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.io = undefined;
     this.shuttingDown = false;
     this.anonalytics = undefined;
+
+    // This member determines behavior on read failures (prevents data loss
+    // from clobbering write on failure)
+    this.newUser = undefined
   }
 
   log = (display, ...args) => {
@@ -113,7 +106,10 @@ export class MessagingEngine extends EventEmitterAdapter {
     // We clone this here so that the GUI actually updates the contacts on
     // state change. (React setState didn't detect changes unless the whole array
     // object changes.)
-    const contactMgr = new ContactManager(!this.isMobile);
+
+    // In mobile we don't force an active contact
+    const forceActiveContact = false
+    const contactMgr = new ContactManager(forceActiveContact);
     contactMgr.clone(this.contactMgr);
 
     this.emit('me-update-contactmgr', contactMgr);
@@ -122,10 +118,6 @@ export class MessagingEngine extends EventEmitterAdapter {
   updateMessages(aContactId) {
     const theMessages = this._getMessageArray(aContactId);
     this.emit('me-update-messages', theMessages);
-  }
-
-  addProfile(aUserId) {
-    this.emit('me-add-profile', aUserId);
   }
 
   closeContactSearch() {
@@ -142,7 +134,6 @@ export class MessagingEngine extends EventEmitterAdapter {
     if (initWithFetchedData || !userId) {
       return
     }
-    this.myTimer.logEvent('Enter componentDidMountWork')
 
     this.userId = userId;
     this._configureSessionManagement()
@@ -154,30 +145,13 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   //
   _initWithContacts(contactArr) {
-    this.myTimer.logEvent('Enter _initWithContacts')
-
-    this.contactMgr = new ContactManager(!this.isMobile);
+    // In mobile we don't force an active contact
+    const forceActiveContact = false
+    this.contactMgr = new ContactManager(forceActiveContact);
     this.contactMgr.initFromStoredArray(contactArr);
     this.contactMgr.setAllContactsStatus();
 
-    // Modify tool for plug-in to only focus on the contact we're workign with.
-    //
-    if (!this.isMobile && this.plugin) {
-      // TODO: fix this when we handle TLDs properly.
-      const length = getQueryString('length');
-      for (let i = 0; i < length; i++) {
-        const str = 'id'+i
-        const recipientId = getQueryString(str)
-        if (this.contactMgr.getContact(recipientId)) {
-          this.contactMgr.setPlugInMode(recipientId);
-          this.contactMgr.setActiveContact(this.contactMgr.getContact(recipientId))
-        } else {
-          this.addProfile(aUserId);
-        }
-      }
-    }
-
-    if (this.isMobile) {
+    if (!forceActiveContact) {
       // No contact is selected initially in mobile, so unset the active contact
       this.contactMgr.setActiveContact(undefined);
     }
@@ -295,6 +269,10 @@ export class MessagingEngine extends EventEmitterAdapter {
         this.discovery.monitorInvitations()
       }
 
+      const dbExistingDataPath = common.getDbExistingDataPath(this.publicKey)
+      const dbExistingDataPathRef = firebaseInstance.getFirebaseRef(dbExistingDataPath)
+      dbExistingDataPathRef.set('true')
+
       this.emit('me-initialized', true);
     })
     .catch((err) => {
@@ -304,19 +282,27 @@ export class MessagingEngine extends EventEmitterAdapter {
     });
   }
 
-  _configureSessionManagement() {
-    // Get the firebase session lock key (assume that it's set to us, throw if it's none).
+  async _configureSessionManagement() {
+    const method = 'engine.js::_configureSessionManagement'
+    // Notes: The session is set in the UI before the engine even loads. It is
+    //        an error / fault if the session is not fetchable or if it is the
+    //        common value for no session (common.NO_SESSION).  Throw to prevent
+    //        the engine froms starting if an error / fault is detected.
+    //
     const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(this.publicKey))
-    ref.once('value')
-    .then((snapshot) => {
-      if (!snapshot.exists() || snapshot.val() === common.NO_SESSION) {
-        throw `ERROR(engine.js::_configureSessionManagement): session is unlocked.`;
-      }
-      this.logger(`INFO(engine.js::_configureSessionManagement): session is locked to ${snapshot.val()}.`);
+    let snapshot = undefined
+    try {
+      snapshot = await ref.once('value')
+    } catch (err) {
+      throw `ERROR(${method}): Unable to access session manager.`
+    }
 
-      this._configureIO();
-      return
-    })
+    if (!snapshot || !snapshot.exists() || (snapshot.val() === common.NO_SESSION)) {
+      throw `ERROR(${method}): Unable to acquire session.`
+    }
+
+    this.logger(`INFO(${method}): session = ${snapshot.val()}.`)
+    await this._configureIO()
   }
 
 
@@ -453,38 +439,39 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
 
       const indexData = this._getIndexDataFromGraphite(recovered)
-      // dump index Data
-      console.log('const indexData = {')
-      for (const fileName in indexData) {
-        if (!fileName || !indexData[fileName]) {
-          continue
-        }
-        const fileData = indexData[fileName]
-        console.log(`  '${fileName}' : {`)
-        console.log(`    title : '${fileData.title}',`)
-        console.log(`    description : '${fileData.description}',`)
-        console.log(`    author : '${fileData.author}',`)
-        console.log(`    decryptable : {`)
-        console.log(`      user : '${fileData.decryptable.user}',`)
-        console.log(`      key : '${fileData.decryptable.key}',`)
-        console.log('    },')
-        console.log(`    fileUrl : '${fileData.fileUrl}',`)
-        console.log(`    version : '${fileData.version}',`)
-        console.log('    appMetadata : {')
-        for (const key in fileData.appMetadata) {
-          console.log(`      ${key} : '${fileData.appMetadata[key]}',`)
-        }
-        console.log('    },')
-        console.log('  },')
-      }
-      console.log('}')
+      // // dump index Data
+      // console.log('const indexData = {')
+      // for (const fileName in indexData) {
+      //   if (!fileName || !indexData[fileName]) {
+      //     continue
+      //   }
+      //   const fileData = indexData[fileName]
+      //   console.log(`  '${fileName}' : {`)
+      //   console.log(`    title : '${fileData.title}',`)
+      //   console.log(`    description : '${fileData.description}',`)
+      //   console.log(`    author : '${fileData.author}',`)
+      //   console.log(`    decryptable : {`)
+      //   console.log(`      user : '${fileData.decryptable.user}',`)
+      //   console.log(`      key : '${fileData.decryptable.key}',`)
+      //   console.log('    },')
+      //   console.log(`    fileUrl : '${fileData.fileUrl}',`)
+      //   console.log(`    version : '${fileData.version}',`)
+      //   console.log('    appMetadata : {')
+      //   for (const key in fileData.appMetadata) {
+      //     console.log(`      ${key} : '${fileData.appMetadata[key]}',`)
+      //   }
+      //   console.log('    },')
+      //   console.log('  },')
+      // }
+      // console.log('}')
   }
 
-  _configureIO() {
+  async _configureIO() {
     this.io = (ENABLE_GAIA) ?
       new GaiaIO(this.logger, LOG_GAIAIO) :
       new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO);
 
+    // TODO: move this to the right spot based on discussion w/ pbj
     if (process.env.NODE_ENV !== 'production') {
       if (this.userId === 'relay.id') {
         this._graphiteFileRead()
@@ -494,57 +481,86 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     }
 
-    this._fetchUserSettings();
+    await this._fetchUserSettings();
   }
 
-  _fetchUserSettings() {
-    this.myTimer.logEvent('Enter _fetchUserSettings')
-
-    this.io.readLocalFile(this.userId, 'settings.json')
-    .then((settingsData) => {
-      if (settingsData && settingsData !== null) {
-        utils.decryptObj(this.privateKey, settingsData, ENCRYPT_SETTINGS)
-        .then(settingsData => {
-          this.settings = settingsData
-          this.emit('me-update-settings', this.settings);
-          this._fetchDataAndCompleteInit();
-        })
-        .catch(err => {
-          console.log(`ERROR reading settings.json: ${err}`)
-        })
-      } else {
-        // THIS HAPPENS FIRST TIME ONLY
-        // centralized discovery on by default
-        this.logger('No data read from settings file. Initializing with default settings.');
-        this.settings = {
-          notifications: true,
-          discovery: true,
-          heartbeat: false,
-          webrtc: false,
-        }
-        if (!this.plugin && !this.isMobile) {
-          this.addProfile('relay.stealthy');
-          this.addProfile('stealthy');
-          // this.handleIntroOpen();
-          this.emit('me-handle-intro-open');
-        }
-
-        this.emit('me-update-settings', this.settings);
-        this._fetchDataAndCompleteInit();
+  // Future: a multiple read of settings.json, contacts.json and pk.txt
+  //         and a majority test to see if first time user (i.e. if not firebase
+  //         and all three null/not present, then decide first time user)
+  async _fetchUserSettings() {
+    const method = 'engine.js::_fetchUserSettings'
+    debugger
+    let encSettingsData = undefined
+    try {
+      encSettingsData = await this.io.readLocalFile(this.userId, 'settings.json')
+      // readLocalFile returns undefined on BlobNotFound, so set new user:
+      this.newUser = (encSettingsData) ? false : true
+    } catch (err) {
+      // Two scenarios:
+      //   1. New user (file never created). (continue with defaults)
+      //   2. Legitimate error. (Then Block with throw / screen to user)
+      //
+      // Test to see if this is an existing user by:
+      //   1. Checking the database to see if they've persisted data.
+      //   2. Failing that, see if they've written a public key.
+      //
+      let test1Passed = false
+      const dbExistingDataPath = common.getDbExistingDataPath(this.publicKey)
+      const dbExistingDataPathRef = firebaseInstance.getFirebaseRef(dbExistingDataPath)
+      try {
+        const existingDataSS = await dbExistingDataPathRef.once('value')
+        test1Passed = (existingDataSS && (existingDataSS.val() === 'true'))
+      } catch (test1Err) {
+        // Do nothing.
+        console.log(`INFO(${method}): db query failed.\n${test1Err}`)
       }
-    })
-    .catch((error) => {
-      // TODO: Prabhaav--shouldn't this set the default settings from above?
-      this.logger('Error', error);
-      this.emit('me-update-settings', this.settings);
-      this._fetchDataAndCompleteInit();
-      this.logger('ERROR: Reading settings.');
-    });
+
+      if (test1Passed) {
+        this.emit('me-fault', err)
+        throw `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${err}`
+      }
+
+      let test2Passed = false
+      try {
+        const pkTxtData = await this._fetchPublicKey(this.userId)
+        test2Passed = (pkTxtData !== undefined &&
+                       pkTxtData !== null &&
+                       pkTxtData !== '')
+      } catch (test2Err) {
+        // Do nothing.
+        console.log(`INFO(${method}): public key read failed.\n${test2Err}`)
+      }
+
+      if (test2Passed) {
+        this.emit('me-fault', err)
+        throw `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${err}`
+      }
+
+      // If we got here without throwing, it's likely a new user, proceed with
+      // default settings.
+      this.newUser = true
+    }
+
+    if (encSettingsData) {
+      try {
+        this.settings = await utils.decryptObj(
+          this.privateKey, encSettingsData, ENCRYPT_SETTINGS)
+      } catch (err) {
+        // Problem if here is likely that another account wrote to the current
+        // account's gaia with it's own encryption, resulting in a mac mismatch:
+        // TODO: warn user (privacy could be reduced w/ centralized conveniences)
+        this.logger(`ERROR(${method}): using default settings due to decryption error.\n${err}`)
+        // TODO: remove these lines when login error fixed:
+        this.emit('me-fault', err)
+        throw(`ERROR(${method}): using default settings due to decryption error.\n${err}`)
+      }
+    }
+
+    this.emit('me-update-settings', this.settings);
+    await this._fetchDataAndCompleteInit();
   }
 
   _fetchDataAndCompleteInit() {
-    this.myTimer.logEvent('Enter _fetchDataAndCompleteInit')
-
     if (this.anonalytics === undefined) {
       this.anonalytics = new Anonalytics(this.publicKey);
     }
@@ -552,9 +568,9 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.anonalytics.aeLogin();
     this.anonalytics.aePlatformDescription(platform.description);
 
-    const appToken = (this.isMobile) ? undefined : getQueryString('app');
-    let context = utils.getAppContext(appToken);
-    this.anonalytics.aeLoginContext(context);
+    // in mobile the app token is undefined (in web it is the value of 'app' in the query string)
+    const appToken = undefined
+    this.anonalytics.aeLoginContext(utils.getAppContext(appToken));
 
     this.idxIo = new IndexedIO(this.logger, this.io, this.userId, this.privateKey, this.publicKey, ENCRYPT_INDEXED_IO);
 
@@ -567,31 +583,11 @@ export class MessagingEngine extends EventEmitterAdapter {
         utils.decryptObj(this.privateKey, contactsData, ENCRYPT_CONTACTS)
         .then(contactArr => {
           this._initWithContacts(contactArr);
-
-          if (!this.isMobile) {
-            // add query contact if there is one
-            const queryContact = getQueryString('add');
-            const existingUserIds = this.contactMgr.getAllContactIds();
-            const checkId = `${queryContact}.id`;
-            if (queryContact && !existingUserIds.includes(checkId)) {
-              this.emit('me-add-query-contact', queryContact);
-            }
-          }
         })
       } else {
         this.logger('No data read from contacts file. Initializing with no contacts.');
         contactArr = [];
         this._initWithContacts(contactArr);
-
-        if (!this.isMobile) {
-          // add query contact if there is one
-          const queryContact = getQueryString('add');
-          const existingUserIds = this.contactMgr.getAllContactIds();
-          const checkId = `${queryContact}.id`;
-          if (queryContact && !existingUserIds.includes(checkId)) {
-            this.emit('me-add-query-contact', queryContact);
-          }
-        }
       }
     })
     .catch((error) => {
@@ -916,42 +912,6 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   //
   // TODO: refactor--this is doing a whole bunch that can be reused/reduced
-
-  // notifyMe TODO: separate out the GUI part of this from the engine (i.e chatIcon)
-  // and put the GUI part in the UI.
-  notifyMe() {
-    // Let's check if the browser supports notifications
-    if (!("Notification" in window)) {
-      alert("This browser does not support desktop notification");
-    }
-
-    // Let's check whether notification permissions have already been granted
-    else if (Notification.permission === "granted") {
-      // If it's okay let's create a notification
-      var options = {
-        body: "New Message",
-        icon: chatIcon
-      };
-      var notification = new Notification("Stealthy", options);
-    }
-
-    // Otherwise, we need to ask the user for permission
-    else if (Notification.permission !== "denied") {
-      Notification.requestPermission((permission) => {
-        // If the user accepts, let's create a notification
-        if (permission === "granted") {
-          var options = {
-            body: "New Message",
-            icon: chatIcon
-          };
-          var notification = new Notification("Stealthy", options);
-        }
-      });
-    }
-
-    // At last, if the user has denied notifications, and you
-    // want to be respectful there is no need to bother them any more.
-  }
 
   // The main benefit of this over handleOutgoingMessage is to send a multitude of
   // the same message with the same time stamp while reducing the number of writes
@@ -1279,11 +1239,6 @@ export class MessagingEngine extends EventEmitterAdapter {
       } else {
         this.contactMgr.incrementUnread(incomingId);
         const count = this.contactMgr.getAllUnread()
-        if (!this.isMobile) {
-          document.title = "(" + count + ") Stealthy | Decentralized Communication"
-          this.notifyMe();  // TODO: PBJ is this non mobile only? (It calls window)
-        }
-
       }
 
       if (isLastOne) {

@@ -5,6 +5,14 @@ export const statusIndicators = {
   offline: 'grey',
 };
 
+export const defaultSettings = {
+  notifications: true,
+  discovery: true,
+  heartbeat: false,
+  webrtc: false
+}
+
+
 export const testContactArr = [
   {
     id: 'poochkin.id',

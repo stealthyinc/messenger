@@ -27,6 +27,11 @@ module.exports.getDbNotificationPath = function(aPublicKey) {
   return `${rootPath}/notifications`
 }
 
+module.exports.getDbExistingDataPath = function(aPublicKey) {
+  const rootPath = module.exports.getDbRootPath(aPublicKey)
+  return `${rootPath}/existingData`
+}
+
 var __sessionId = undefined;
 //
 module.exports.getSessionId = function() {

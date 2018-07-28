@@ -41,7 +41,18 @@
   co.iv = [[mCipherObject objectForKey:@"iv"] cStringUsingEncoding:NSUTF8StringEncoding];
   co.mac = [[mCipherObject objectForKey:@"mac"] cStringUsingEncoding:NSUTF8StringEncoding];
   
-  std::string recovered = CryptoECIES::DecryptECIES([privateKey cStringUsingEncoding:NSUTF8StringEncoding], co);
+  std::string recovered;
+  
+  try {
+    recovered = CryptoECIES::DecryptECIES([privateKey cStringUsingEncoding:NSUTF8StringEncoding], co);
+  } catch (const std::exception& e) {
+    NSString * errMsg = [NSString stringWithCString:e.what() encoding:[NSString defaultCStringEncoding]];
+    NSException * exception = [NSException exceptionWithName:@"Exception" reason:errMsg userInfo:nil];
+    @throw exception;
+  } catch (...) {
+    NSException * exception = [NSException exceptionWithName:@"Exception" reason:@"unknown error occured" userInfo:nil];
+    @throw exception;
+  }
   
   NSString* result = [[NSString alloc] initWithUTF8String:recovered.c_str()];
   return result;

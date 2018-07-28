@@ -14,7 +14,6 @@ import {
 import { Icon, Button, Overlay, SocialIcon } from 'react-native-elements'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
-const { MessagingEngine } = require('../Engine/engine.js');
 
 const common = require('./../common.js');
 const utils = require('./../Engine/misc/utils.js');
