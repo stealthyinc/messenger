@@ -32,13 +32,10 @@ const common = require('./../common.js');
 import API from './../Services/Api'
 const api = API.create()
 
-// TODO: refactor to relay.js
-const RELAY_IDS = ['relay.stealthy.id'];
 //
 const ENCRYPT_INDEXED_IO = true;
 //
 const ENABLE_RECEIPTS = true;
-const ENABLE_RELAY = true;
 let ENABLE_GAIA = true;
 let ENCRYPT_MESSAGES = true;
 let ENCRYPT_CONTACTS = true;
@@ -51,17 +48,6 @@ let STEALTHY_PAGE = 'LOCALHOST';
 const LOG_GAIAIO = false;
 const LOG_OFFLINEMESSAGING = false;
 //
-
-// TODO: need a better way to indicate an ID is a relay:
-//       * subdomain reg:  e.g. blockstack.relay.id   (relay.id being the subdoain)
-//       * something we burn into the blockchain for a given id with a date.
-//              e.g.:   pbj.id.relay_04_12_2018, pbj.id.norelay_05_12_2018
-//
-function isRelayId(aUserId) {
-  return utils.isDef(aUserId) && RELAY_IDS.includes(aUserId);
-}
-
-
 
 export class MessagingEngine extends EventEmitterAdapter {
   constructor(logger,
@@ -806,56 +792,6 @@ export class MessagingEngine extends EventEmitterAdapter {
   //  Messaging
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
-  //
-  // TODO: refactor--this is doing a whole bunch that can be reused/reduced
-
-  // The main benefit of this over handleOutgoingMessage is to send a multitude of
-  // the same message with the same time stamp while reducing the number of writes
-  // to the conversations and contacts files.
-  //
-  handleOutgoingRelayMessage(theRecipients, aChatMsgTemplate) {
-    for (const outgoingUserId of theRecipients) {
-      const chatMsg = new ChatMessage();
-      chatMsg.clone(aChatMsgTemplate);
-      chatMsg.to = outgoingUserId;
-      this.anonalytics.aeMessageSent();
-
-      const outgoingPublicKey = this.contactMgr.getPublicKey(outgoingUserId);
-      if (outgoingPublicKey) {
-        this._sendOutgoingMessageOffline(chatMsg);
-      } else {
-        this._fetchPublicKey(outgoingUserId)
-        .then((publicKey) => {
-          if (publicKey) {
-            this.contactMgr.setPublicKey(outgoingUserId, publicKey);
-            this._writeContactList(this.contactMgr.getAllContacts());
-            this.updateContactMgr();
-
-            this.logger(`Fetched publicKey for ${outgoingUserId}.`);
-
-            this._sendOutgoingMessageOffline(chatMsg);
-          } else {
-            this.logger(`Unable to fetch publicKey for ${outgoingUserId}. Cannot write response.`);
-          }
-        });
-      }
-
-      this.conversations.addMessage(chatMsg);
-    }
-
-    this._writeConversations();
-
-    for (const outgoingUserId of theRecipients) {
-      this.contactMgr.setSummary(outgoingUserId, chatMsgTemplate.content);
-    }
-    this._writeContactList(this.contactMgr.getAllContacts());
-    this.updateContactMgr();
-
-    const activeContactId = this.contactMgr.getActiveContact() ?
-      this.contactMgr.getActiveContact().id : undefined;
-    this.updateMessages(activeContactId);
-  }
-
   handleOutgoingMessage = async (text) => {
     if (!this.contactMgr.getActiveContact()) {
       return
@@ -1037,76 +973,9 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
   }
 
-  sendRelayMessage(aChatMsg) {
-    // Thoughts:
-    //   * Autodiscovery is how people add to a relay.
-    //     - if no autodiscovery for a user, consider the subscribe <id> command
-    //       from a friend?
-    //
-    if (ENABLE_RELAY && isRelayId(aChatMsg.to)) {
-      const msgContent = aChatMsg.content;
-      if (msgContent === 'Relay: List Members') {
-        const contactIds = this.contactMgr.getContactIds();
-        let commandResponseMsg = `${this.userId} members: `;
-
-        const length = contactIds.length;
-        const lastContactIdx = length - 1;
-        for (let idx = 0; idx < length; idx++) {
-          const contactId = contactIds[idx];
-          commandResponseMsg += `${contactId}`;
-          if (idx !== lastContactIdx) {
-            commandResponseMsg += ', ';
-          }
-        }
-
-        const chatMsgTemplate = new ChatMessage();
-        chatMsgTemplate.init(
-          this.userId,
-          undefined,
-          this._getNewMessageId(),
-          commandResponseMsg,
-          Date.now());
-
-        const commandDestinationIds = [ aChatMsg.from ]
-
-        this.handleOutgoingRelayMessage(commandDestinationIds, chatMsgTemplate);
-
-      } else if (msgContent === 'Relay: Unsubscribe') {
-        // TODO: Send a confirmation message that we are unsubscribed.
-      } else if (msgContent === 'Relay: Help') {
-        // TODO: List the help commands.
-      } else {
-        // Relay:
-        // Send the incoming message to all users except the sender.
-        //
-        const relayedMessage = `${aChatMsg.from} says:  ${aChatMsg.content}`;
-
-        const chatMsgTemplate = new ChatMessage();
-        chatMsgTemplate.init(
-          this.userId,
-          undefined,
-          this._getNewMessageId(),
-          relayedMessage,
-          Date.now());
-
-        const contactIds = this.contactMgr.getContactIds();
-        const contactIdsMinusSender = contactIds.filter((contactId) => {
-            return contactId !== aChatMsg.from;
-          });
-
-        // TODO: switch this back to contactIdsMinusSender (the immediate line below
-        //       is only for debugging).
-        // this.handleOutgoingRelayMessage(contactIds, chatMsgTemplate);
-        this.handleOutgoingRelayMessage(contactIdsMinusSender, chatMsgTemplate);
-      }
-    }
-  }
-
   addIncomingMessage(messages) {
     for (const message of messages) {
       this.conversations.addMessage(message);
-
-      this.sendRelayMessage(message);
     }
     this._writeConversations();
   }

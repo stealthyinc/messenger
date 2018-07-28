@@ -8,6 +8,7 @@ const MESSAGE_TYPE = {
   DATA: 2,
   RECEIPT: 3,
   SCREEN_SHARE_SDP: 4,
+  TEXT_JSON: 5,
 };
 
 // RECEIVED is not used in the UI, but is used by the core to perform message
