@@ -90,7 +90,7 @@ class ConversationScreen extends React.Component {
     const { contactMgr } = this.props
     const activeContact = (contactMgr) ? contactMgr.getActiveContact() : undefined
     if (!contactMgr || activeContact) {
-      return <View style={[styles.container, styles.horizontal]}><ActivityIndicator /></View>
+      return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View>
     }
     return (
       <Container style={{backgroundColor: 'white'}}>

@@ -26,6 +26,11 @@ class ChatScreen extends Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {};
     return {
+      headerLeft: (
+        <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
+          <Ionicons name="ios-arrow-dropleft" size={28} color='#34bbed'/>
+        </TouchableOpacity>
+      ),
       headerTitle: params.name,
       headerRight: (
         // <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
@@ -55,7 +60,7 @@ class ChatScreen extends Component {
     this.activeContact = undefined;
   }
 
-  configWithActiveContact(anActiveContact) {
+  configWithActiveContact = (anActiveContact) => {
     if (this.activeContact || !anActiveContact) {
       return
     }
@@ -372,7 +377,7 @@ class ChatScreen extends Component {
         />)
       :
         (<View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
-          <ActivityIndicator />
+          <ActivityIndicator size="large" color="#34bbed"/>
         </View>)
 
     return (

@@ -47,7 +47,7 @@ class ProfileScreen extends React.Component {
     if (!userProfile) {
       return (
         <View style={styles.containerEmpty}>
-          <ActivityIndicator />
+          <ActivityIndicator size="large" color="#34bbed"/>
           <StatusBar barStyle="default" />
         </View>
       );

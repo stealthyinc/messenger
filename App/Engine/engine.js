@@ -489,7 +489,6 @@ export class MessagingEngine extends EventEmitterAdapter {
   //         and all three null/not present, then decide first time user)
   async _fetchUserSettings() {
     const method = 'engine.js::_fetchUserSettings'
-    debugger
     let encSettingsData = undefined
     try {
       encSettingsData = await this.io.readLocalFile(this.userId, 'settings.json')

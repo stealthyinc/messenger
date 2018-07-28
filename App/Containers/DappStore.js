@@ -38,7 +38,7 @@ class DappStore extends Component {
       <ScrollView contentContainerStyle={styles.container}>
         <View style={{flexDirection: 'row', marginTop: 10, marginBottom: 5}}>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={styles.button} onPress={(url) => this._onPressButton('https://app.graphitedocs.com/')}>
+            <TouchableOpacity style={styles.button} onPress={(url) => this._onPressButton('https://www.graphitedocs.com/about')}>
               <Image source={GraphiteIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Graphite Docs</Text>
@@ -58,7 +58,7 @@ class DappStore extends Component {
         </View>
         <View style={{flexDirection: 'row', marginBottom: 5}}>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={styles.button} onPress={() => this._onPressButton('https://app.travelstack.club/')}>
+            <TouchableOpacity style={styles.button} onPress={() => this._onPressButton('https://www.travelstack.club/')}>
               <Image source={TravelIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Travelstack</Text>

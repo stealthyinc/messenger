@@ -83,7 +83,7 @@ class BlockContactSearch extends Component {
           <Text note>{item.profile.description ? item.profile.description : null}</Text>
         </Body>
       </ListItem>
-    )) : (this.state.showLoading) ? <View style={[styles.container, styles.horizontal]}><ActivityIndicator /></View> : null
+    )) : (this.state.showLoading) ? <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View> : null
   }
   onChangeText = (text) => {
     const timeout = (text.length < 3) ? 1000 : 500

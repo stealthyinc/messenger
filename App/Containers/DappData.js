@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
-import { View, ScrollView, Text, WebView } from 'react-native'
+import { View, ScrollView, Text, WebView, TouchableOpacity } from 'react-native'
 import { connect } from 'react-redux'
 // Add Actions - replace 'Your' with whatever your reducer is called :)
 // import YourActions from '../Redux/YourRedux'
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import DappActions, { DappSelectors } from '../Redux/DappRedux'
 import { Divider, List, ListItem } from 'react-native-elements'
 import GraphiteIcon from '../Images/GraphiteIcon.png';
@@ -13,8 +14,15 @@ class DappData extends Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {};
     return {
-      headerBackTitle: 'Back',
+      headerLeft: (
+        <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
+          <Ionicons name="ios-arrow-dropleft" size={28} color='#34bbed'/>
+        </TouchableOpacity>
+      ),
     };
+  }
+  componentWillMount() {
+    this.props.navigation.setParams({ navigation: this.props.navigation });
   }
   sendDappUrlMessage = (dappUrl, dappData) => {
     if (dappUrl) {
