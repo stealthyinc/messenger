@@ -119,7 +119,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   // Events to listen for:
-  //    me-integration-data <App Name> <Error> <indexData>
+  //    me-integration-data <Error> <indexData>
 
   // Returns the current integration data for specified appName and issues an
   // me-integration-data event.
@@ -136,10 +136,10 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
     if (!error) {
-      indexData = this.indexIntegrations[appName]
+      indexData = this.indexIntegrations[appName].getIndexData()
     }
 
-    this.emit('me-integration-data', appName, error, indexData)
+    this.emit('me-integration-data', error, indexData)
   }
 
   // Updates integration data for specified appName and issues an me-integration-data
@@ -165,7 +165,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     }
 
-    this.emit('me-integration-data', appName, error, indexData)
+    this.emit('me-integration-data', error, indexData)
   }
 
   //
