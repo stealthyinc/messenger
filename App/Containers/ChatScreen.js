@@ -185,9 +185,9 @@ class ChatScreen extends Component {
       }
       else if (contentType === 'TEXT_JSON') {
         text = undefined
-        gtext = body.text
+        gtext = body.gtext
         url = body.url
-        gimage = body.image
+        gimage = body.gimage
         press = true
       }
       if (author === id) {
@@ -256,8 +256,8 @@ class ChatScreen extends Component {
     if (token) {
       this.props.sendNotification(token, publicKey, bearerToken)
     }
-    const {text, image, url} = messages[0]
-    if (image && url) {
+    const {text, gimage, url} = messages[0]
+    if (gimage && url) {
       this.props.handleOutgoingMessage(undefined, messages[0])
     }
     else {
