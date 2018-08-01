@@ -331,7 +331,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     // Integrations load on start in the background. Might need to queue these and
     // add a busy/working block to prevent multiple read requests:
-    const graphiteIntegration = new Graphite(this.io, this.userId)
+    const graphiteIntegration = new Graphite(this.io, this.userId, this.privateKey)
     this.indexIntegrations['Graphite'] = graphiteIntegration
     this.refreshIntegrationData('Graphite')
   }

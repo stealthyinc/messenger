@@ -20,7 +20,7 @@ target 'stealthy' do
 
   #pod 'react-native-maps', :path => '../node_modules/react-native-maps'
 
-  pod 'Interactable', :path => '../node_modules/react-native-interactable'
+  #pod 'Interactable', :path => '../node_modules/react-native-interactable'
 
   post_install do |installer|
     installer.pods_project.targets.each do |target|
