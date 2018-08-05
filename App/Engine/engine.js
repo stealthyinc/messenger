@@ -191,19 +191,18 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   //
-  _initWithContacts(contactArr) {
+  async _initWithContacts(contactArr) {
     // In mobile we don't force an active contact
     const forceActiveContact = false
     this.contactMgr = new ContactManager(forceActiveContact);
     this.contactMgr.initFromStoredArray(contactArr);
     this.contactMgr.setAllContactsStatus();
-
     if (!forceActiveContact) {
       // No contact is selected initially in mobile, so unset the active contact
       this.contactMgr.setActiveContact(undefined);
     }
-
     this.updateContactMgr();
+
 
     this.offlineMsgSvc =
       new OfflineMessagingServices(this.logger,
@@ -227,7 +226,7 @@ export class MessagingEngine extends EventEmitterAdapter {
         }
       }
 
-      this.addIncomingMessage(unreceivedMessages);
+      this.addIncomingMessages(unreceivedMessages);
       this.updateContactOrderAndStatus(unreceivedMessages);
       this.sendMessageReceipts(unreceivedMessages);
     });
@@ -239,95 +238,112 @@ export class MessagingEngine extends EventEmitterAdapter {
       // a bundle write to store the change.
       this._writeConversations();
 
-      const ac = this.contactMgr.getActiveContact();
-      if (ac) {
-        this.updateMessages(ac.id);
+      if (this.contactMgr.getActiveContact()) {
+        this.updateMessages(this.contactMgr.getActiveContact().id)
       }
     });
+
 
     // Lots of possiblities here (i.e. lazy load etc.)
-    this.conversations = new ConversationManager(
-      this.logger, this.userId, this.idxIo);
+    this.conversations = new ConversationManager(this.logger, this.userId, this.idxIo);
 
-    this.conversations.loadContactBundles(this.contactMgr.getContactIds())
-    .then(() => {
-      // TODO TODO TODO:  change this to be an emitter that sends the ids of sent
-      //                  messages back to the engine so we don't have to make
-      //                  a conversations ref in offlineMsgSvc
-      this.offlineMsgSvc.setConversationManager(this.conversations);
-
-      const activeContactId = this.contactMgr.getActiveContact() ?
-        this.contactMgr.getActiveContact().id : undefined;
-
-      if (activeContactId) {
-        const seenMessages = this.markReceivedMessagesSeen(activeContactId);
-        this.sendMessageReceipts(seenMessages);
-      }
-
-      // TODO: send these as a packet to the other user.
-      this.offlineMsgSvc.startRecvService();
-
-      // Update the summarys for all contacts. Redux makes it so that you have to
-      // use a setter to fix this issue (setting the object property directly
-      // doesn't work b/c it's read only).
-      //   TODO: clean this up into method(s) on conversations and contactMgr (AC)
-      for (const contactId of this.contactMgr.getContactIds()) {
-        const messages = this.conversations.getMessages(contactId);
-
-        const lastMessage = (messages && (messages.length > 0)) ?
-          ChatMessage.getSummary(messages[messages.length - 1]) : '';
-        this.contactMgr.setSummary(contactId, lastMessage);
-
-        if (contactId !== activeContactId) {
-          let count = 0;
-          for (const message of messages) {
-            // Skip messages we wrote--we only count the ones we receive (
-            // unless they are in the special case where we sent them to
-            // ourselves).
-            if (!(message.to === message.from) &&
-                (this.userId === message.from)) {
-              continue;
-            }
-
-            if (!message.seen) {
-              count++;
-            }
-            if (count === 99) {
-              break;
-            }
+    try {
+      await this.conversations.loadContactBundles(this.contactMgr.getContactIds())
+    } catch (error1) {
+      // TODO: look at some alternatives to this heavy handed approach:
+      //   1. retry the load
+      //   2. mark the contact as unloaded to be retried later
+      //        - add a refresh / load cycle to the engine
+      //
+      // For now we do an inelegant reload attempt befor fail.
+      // TODO: a more elegant retry mechanism--see notes for _writeConversations
+      //
+      if (!this.newUser) {
+        try {
+          await this.conversations.loadContactBundles(this.contactMgr.getContactIds())
+        } catch (error2) {
+          try {
+            await this.conversations.loadContactBundles(this.contactMgr.getContactIds())
+          } catch (error3) {
+            const errMsg = `ERROR(${method}): failure to fetch contacts from GAIA. Try again soon.\n${error3}`
+            this.emit('me-fault', errMsg)
+            throw errMsg
           }
-          this.contactMgr.setUnread(contactId, count);
         }
       }
+    }
 
-      if (activeContactId) {
-        this.updateMessages(activeContactId);
+    // TODO TODO TODO:  change this to be an emitter that sends the ids of sent
+    //                  messages back to the engine so we don't have to make
+    //                  a conversations ref in offlineMsgSvc
+    this.offlineMsgSvc.setConversationManager(this.conversations);
+
+    let activeContactId = undefined
+    if (this.contactMgr.getActiveContact()) {
+      activeContactId = this.contactMgr.getActiveContact().id
+      const seenMessages = this.markReceivedMessagesSeen(activeContactId);
+      this.sendMessageReceipts(seenMessages);
+    }
+
+    this.offlineMsgSvc.startRecvService();
+
+
+    // Update the summaries for all contacts.
+    //   TODO: clean this up into method(s) on conversations and contactMgr (AC)
+    for (const contactId of this.contactMgr.getContactIds()) {
+      const messages = this.conversations.getMessages(contactId);
+
+      const lastMessage = (messages && (messages.length > 0)) ?
+        ChatMessage.getSummary(messages[messages.length - 1]) : '';
+      this.contactMgr.setSummary(contactId, lastMessage);
+
+      if (contactId !== activeContactId) {
+        let count = 0;
+        for (const message of messages) {
+          // Skip messages we wrote--we only count the ones we receive (
+          // unless they are in the special case where we sent them to
+          // ourselves).
+          if (!(message.to === message.from) &&
+              (this.userId === message.from)) {
+            continue;
+          }
+
+          if (!message.seen) {
+            count++;
+          }
+          if (count === 99) {
+            break;
+          }
+        }
+        this.contactMgr.setUnread(contactId, count);
       }
+    }
 
-      this.updateContactMgr();
+    if (activeContactId) {
+      this.updateMessages(activeContactId);
+    }
+    this.updateContactMgr();
 
-      if (this.settings.discovery) {
-        this.discovery = new Discovery(this.userId, this.publicKey, this.privateKey)
-      }
-      if (this.discovery) {
-        this.discovery.on('new-invitation',
-                          (theirPublicKey, theirUserId) =>
-                            this.handleContactInvitation(theirPublicKey, theirUserId))
 
-        this.discovery.monitorInvitations()
-      }
+    // Setup Discovery services:
+    if (this.settings.discovery) {
+      this.discovery = new Discovery(this.userId, this.publicKey, this.privateKey)
+      this.discovery.on('new-invitation',
+                        (theirPublicKey, theirUserId) =>
+                          this.handleContactInvitation(theirPublicKey, theirUserId))
 
-      const dbExistingDataPath = common.getDbExistingDataPath(this.publicKey)
-      const dbExistingDataPathRef = firebaseInstance.getFirebaseRef(dbExistingDataPath)
-      dbExistingDataPathRef.set('true')
+      this.discovery.monitorInvitations()
+    }
 
-      this.emit('me-initialized', true);
-    })
-    .catch((err) => {
-      this.offlineMsgSvc.startRecvService();
-      this.logger('INFO: No contact bundles to load.');
-      this.emit('me-initialized', true);
-    });
+
+    // Indicate to FB that we've completed init and are no longer a first time user
+    // (used to handle IO errors specially)
+    const dbExistingDataPath = common.getDbExistingDataPath(this.publicKey)
+    const dbExistingDataPathRef = firebaseInstance.getFirebaseRef(dbExistingDataPath)
+    dbExistingDataPathRef.set('true')
+
+    this.emit('me-initialized', true)
+
 
     // Integrations load on start in the background. Might need to queue these and
     // add a busy/working block to prevent multiple read requests:
@@ -398,8 +414,9 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
 
       if (test1Passed) {
-        this.emit('me-fault', error)
-        throw `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${error}`
+        const errMsg = `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${error}`
+        this.emit('me-fault', errMsg)
+        throw errMsg
       }
 
       let test2Passed = false
@@ -414,8 +431,9 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
 
       if (test2Passed) {
-        this.emit('me-fault', error)
-        throw `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${error}`
+        const errMsg = `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${error}`
+        this.emit('me-fault', errMsg)
+        throw errMsg
       }
 
       // If we got here without throwing, it's likely a new user, proceed with
@@ -433,8 +451,9 @@ export class MessagingEngine extends EventEmitterAdapter {
         // TODO: warn user (privacy could be reduced w/ centralized conveniences)
         // this.logger(`ERROR(${method}): using default settings due to decryption error.\n${err}`)
         // TODO: remove these lines when login error fixed:
-        this.emit('me-fault', err)
-        throw(`ERROR(${method}): unable to read settings due to decryption error.\n${err}`)
+        const errMsg = `ERROR(${method}): unable to read settings due to decryption error.\n${err}`
+        this.emit('me-fault', errMsg)
+        throw errMsg
       }
     }
 
@@ -459,15 +478,25 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     this.io.writeLocalFile(this.userId, 'pk.txt', this.publicKey);
 
+    // TODO: A better mechanism for the retry of contacts read
+    //       See notes below for _writeConversations
+    //
     let contactArr = [];
     let contactsData = undefined
     try {
       contactsData = await this.io.readLocalFile(this.userId, 'contacts.json')
-    } catch (error) {
+    } catch (error1) {
       if (!this.newUser) {
-        // In future, we should retry but for now we throw.
-        this.emit('me-fault', error)
-        throw `ERROR(${method}): failure to fetch contacts from GAIA. Try again soon.\n${error}`
+        try {
+          contactsData = await this.io.readLocalFile(this.userId, 'contacts.json')
+        } catch (error2) {
+          try {
+            contactsData = await this.io.readLocalFile(this.userId, 'contacts.json')
+          } catch (error3) {
+            this.emit('me-fault', error3)
+            throw `ERROR(${method}): failure to fetch contacts from GAIA. Try again soon.\n${error3}`
+          }
+        }
       }
     }
 
@@ -855,7 +884,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   // SO MUCH TODO TODO TODO
   //
   // Callers include anywhere messages arrive or change state to read:
-  //    this.addIncomingMessage
+  //    this.addIncomingMessages
   //    initialization method
   //    handleContactClick
   //
@@ -990,7 +1019,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
   }
 
-  addIncomingMessage(messages) {
+  addIncomingMessages(messages) {
     for (const message of messages) {
       this.conversations.addMessage(message);
     }
@@ -1130,16 +1159,34 @@ export class MessagingEngine extends EventEmitterAdapter {
     })
   }
 
+  // TODO: This is a rather awful way to implement an n tries method.
+  //       1. Make a generic retry methodology that lets you specify:
+  //            - number of retries
+  //       2. Think about having a busy mechnanism (i.e. is this op
+  //          already occuring/re-trying).
+  //       3. Add an exponential retry delay + jitter
+  //
   _writeConversations() {
     // TODO:
     // 1. call this less often
     return this.conversations.storeContactBundles()
-    .then(() => {
-      return
-    })
-    .catch((err) => {
-      console.log(`ERROR(engine.js::_writeConversations): ${err}`)
-      return
+    .then(() => { return })
+    .catch((err1) => {
+      // Retry two more times
+      //
+      return this.conversations.storeContactBundles()
+      .then(() => { return })
+      .catch((err2) => {
+        // Retry one more time
+        //
+        return this.conversations.storeContactBundles()
+        .then(() => { return })
+        .catch((err3) => {
+          const errMsg = `ERROR(engine.js::_writeConversations): ${err3}`
+          this.emit('me-fault', errMsg)
+          throw errMsg
+        })
+      })
     })
   }
 
@@ -1198,7 +1245,17 @@ export class MessagingEngine extends EventEmitterAdapter {
   }
 
   _fetchPublicKey(aUserId) {
-    return this.io.readRemoteFile(aUserId, 'pk.txt');
+    // Attempt 3 times, then fail.
+    // TODO: more elegant solution with delay/jitter, n-retries.
+    //       see notes for _writeConversations on the subject
+    //
+    return this.io.readRemoteFile(aUserId, 'pk.txt')
+    .catch((error1 => {
+      return this.io.readRemoteFile(aUserId, 'pk.txt')
+      .catch((error2) => {
+        return this.io.readRemoteFile(aUserId, 'pk.txt')
+      })
+    }))
   }
 
   getAnonalytics() {

@@ -270,8 +270,7 @@ class ConversationManager {
       return
     })
     .catch((err) => {
-      console.log(`ERROR(conversationManager::storeContactBundles): ${err}`)
-      return
+      throw `ERROR(conversationManager::storeContactBundles): ${err}`
     })
   }
 

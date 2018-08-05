@@ -42,50 +42,69 @@ class IndexedIO {
   // Reads a remote index file encrypted for this client's user. Decrypts it
   // and returns the index data.
   //
-  readRemoteIndex(remoteUser, dirPath) {
+  async readRemoteIndex(remoteUser, dirPath) {
+    const method = 'IndexedIO::readRemoteIndex'
     IndexedIO._checkFilePath(dirPath);
 
     const indexFilePath = `${dirPath}/${SHARED_INDEX_NAME}`;
+    let sharedIndexData = undefined
+    try {
+      sharedIndexData = await this.ioInst.readRemoteFile(
+        remoteUser, indexFilePath)
 
-    return this.ioInst.readRemoteFile(remoteUser, indexFilePath)
-    .then((sharedIndexData) => {
-      if (sharedIndexData) {
-        return utils.decryptObj(this.privateKey, sharedIndexData, this.useEncryption);
+      if (!sharedIndexData) {
+        return undefined
       }
-      return sharedIndexData;
-    })
-    .catch((err) => {
-      this.logger(`ERROR(IndexedIO::readRemoteIndex): ${err}.`);
-      return undefined;
-    });
+    } catch (error) {
+      throw utils.fmtErrorStr(`failed to read ${indexFilePath}.`, method, error)
+    }
+
+    try {
+      return await utils.decryptObj(
+        this.privateKey, sharedIndexData, this.useEncryption)
+    } catch (error) {
+      throw utils.fmtErrorStr(`failed to decrypt ${indexFilePath}.\n`,
+        method, error)
+    }
   }
 
   // Reads a local index file encrypted for this client's user. Decrypts it
   // and returns the index data.
   //
-  readLocalIndex(dirPath) {
+  async readLocalIndex(dirPath) {
+    const method = 'IndexedIO::readLocalIndex'
     IndexedIO._checkFilePath(dirPath);
 
     const indexFilePath = `${dirPath}/${INDEX_NAME}`;
+    let indexData = undefined
+    try {
+      indexData = await this.ioInst.readLocalFile(this.userId, indexFilePath)
 
-    return this.ioInst.readLocalFile(this.userId, indexFilePath)
-    .then((indexData) => {
-      if (indexData) {
-        return utils.decryptObj(this.privateKey, indexData, this.useEncryption);
+      if (!indexData) {
+        return undefined
       }
-      return indexData;
-    })
-    .catch((err) => {
-      this.logger(`ERROR(IndexedIO::readLocalIndex): ${err}.`);
-      return undefined;
-    });
+    } catch (error) {
+      throw utils.fmtErrorStr(`unable to read index ${indexFilePath}.`,
+        method, error)
+    }
+
+    try {
+      return await utils.decryptObj(
+        this.privateKey, indexData, this.useEncryption)
+    } catch (error) {
+      throw utils.fmtErrorStr(`unable to decrypt ${indexFilePath}.`,
+        method, error)
+    }
   }
 
   // Writes the index file encrypted for the current user. Optionally,
   // if someonesPubKey is defined, a second file is written, encrypted for the
   // owner of the someonesPubKey.
   //
-  writeLocalIndex(dirPath, indexData, someonesPubKey = undefined) {
+  // TODO: similar to seqWriteLocalIndex. Compare and look to refactor.
+  //
+  async writeLocalIndex(dirPath, indexData, someonesPubKey = undefined) {
+    const method = 'IndexedIO::writeLocalIndex'
     IndexedIO._checkFilePath(dirPath);
 
     const time = Date.now();
@@ -93,35 +112,57 @@ class IndexedIO {
 
     const indexFilePath = IndexedIO._getIndexPath(dirPath);
 
-    return utils.encryptObj(this.publicKey, indexData, this.useEncryption)
-    .then(writeData => {
-      const writePromises = [];
-      writePromises.push(this.ioInst.writeLocalFile(this.userId, indexFilePath, writeData));
-      if (someonesPubKey) {
-        writePromises.push(this._writeSharedIndex(dirPath, indexData, someonesPubKey));
-      }
-      // IndexedIO._logIndex(this.logger, indexData);
-      return Promise.all(writePromises);
-    })
+    let writeData = undefined
+    try {
+      writeData = await utils.encryptObj(this.publicKey, indexData, this.useEncryption)
+    } catch (error) {
+      throw utils.fmtErrorStr(`encrypting data to write index in ${dirPath}`,
+        method, error)
+    }
+
+    const writePromises = []
+    writePromises.push(this.ioInst.writeLocalFile(this.userId, indexFilePath, writeData))
+    if (someonesPubKey) {
+      writePromises.push(this._writeSharedIndex(dirPath, indexData, someonesPubKey))
+    }
+
+    // TODO: do a better job of handling specific failure messaging (Promise all
+    //       does a first to fail strategy)
+    try {
+      await Promise.all(writePromises)
+    } catch (error) {
+      throw utils.fmtErrorStr(`writing index file(s).`, method, error)
+    }
   }
 
   // Private -- don't call this outside of this class.
   //
-  _writeSharedIndex(dirPath, indexData, someonesPubKey) {
+  async _writeSharedIndex(dirPath, indexData, someonesPubKey) {
+    const method = 'IndexedIO::_writeSharedIndex'
     const sharedIndexFilePath = IndexedIO._getSharedIndexPath(dirPath);
 
-    return utils.encryptObj(someonesPubKey, indexData, this.useEncryption)
-    .then(sharedWriteData => {
-      return this.ioInst.writeLocalFile(this.userId, sharedIndexFilePath, sharedWriteData);
-    })
+    let sharedIndexData = undefined
+    try {
+      sharedIndexData = await utils.encryptObj(someonesPubKey, indexData, this.useEncryption)
+    } catch (error) {
+      throw utils.fmtErrorStr(`encrypting data to write to shared index ${sharedIndexFilePath}.`,
+        method, error)
+    }
+
+    try {
+      await this.ioInst.writeLocalFile(this.userId, sharedIndexFilePath, sharedIndexData)
+    } catch (error) {
+      throw utils.fmtErrorStr(`writing shared index ${sharedIndexFilePath}.`,
+        method, error)
+    }
   }
 
   static _logIndex(logger, indexData) {
     logger('Index Data:');
     logger('---------------------------------------------------------');
     logger('  active:');
-    for (const actvFileName in indexData.active) {
-      logger(`    ${actvFileName}: ${indexData.active[actvFileName].time}`);
+    for (const activeFileName in indexData.active) {
+      logger(`    ${activeFileName}: ${indexData.active[activeFileName].time}`);
     }
     logger('  deleted:');
     for (const delFileName in indexData.deleted) {
@@ -145,38 +186,49 @@ class IndexedIO {
   // user, and the shared index file in filePath, encrypted to be readable by
   // the someone that owns someonesPubKey.
   //
-  writeLocalFile(filePath, data, someonesPubKey = undefined) {
+  // TODO: this is now very similar to seqWriteLocalFile, consider merging them
+  //       with a param to control delay.
+  async writeLocalFile(filePath, data, someonesPubKey = undefined) {
+    const method = 'IndexedIO::writeLocalFile'
     IndexedIO._checkFilePath(filePath);
 
     const path = IndexedIO._pathMinusTail(filePath);
     const fileName = this._pathTail(filePath);
     const time = Date.now();
 
-    return this.readLocalIndex(path)
-    .then((indexData) => {
-      const sanoIndexData = IndexedIO._sanitizeIndexData(indexData);
-      if (fileName in sanoIndexData.deleted) {
-        delete sanoIndexData.deleted[fileName];
-      }
-      sanoIndexData.active[fileName] = { time };
+    let indexData = undefined
+    try {
+      indexData = await this.readLocalIndex(path)
+    } catch (error) {
+      throw utils.fmtErrorStr(`unable to read index ${path}.`, method, error)
+    }
 
-      const encKey = (someonesPubKey) || this.publicKey;
-      return utils.encryptObj(encKey, data, this.useEncryption)
-      .then(encData => {
-        return this.writeLocalIndex(path, sanoIndexData, someonesPubKey)
-        .then(() => {
-          return this.ioInst.writeLocalFile(this.userId, filePath, encData)
-        })
-        .catch((err) => {
-          this.logger(`ERROR(IndexedIO::writeLocalFile) writing index: ${err}.`);
-          return undefined;
-        });
-      })
-    })
-    .catch((err) => {
-      this.logger(`ERROR(IndexedIO::writeLocalFile) fetching index: ${err}.`);
-      return undefined;
-    });
+    const sanoIndexData = IndexedIO._sanitizeIndexData(indexData);
+    if (fileName in sanoIndexData.deleted) {
+      delete sanoIndexData.deleted[fileName];
+    }
+    sanoIndexData.active[fileName] = { time };
+
+    const encKey = (someonesPubKey) || this.publicKey;
+    let encData = undefined
+    try {
+      encData = await utils.encryptObj(encKey, data, this.useEncryption)
+    } catch (error) {
+      throw utils.fmtErrorStr(`encrypting data for file ${filePath}.`,
+        method, error)
+    }
+
+    try {
+      await this.writeLocalIndex(path, sanoIndexData, someonesPubKey)
+    } catch(error) {
+      throw utils.fmtErrorStr(`saving modified index ${path}.`, method, error)
+    }
+
+    try {
+      await this.ioInst.writeLocalFile(this.userId, filePath, encData)
+    } catch(error) {
+      throw utils.fmtErrorStr(`writing file ${filePath}.`, method, error)
+    }
   }
 
   // seqWriteLocalIndex:
@@ -187,17 +239,36 @@ class IndexedIO {
   //     actually related to settling time and availablility of the index being
   //     written.
   async seqWriteLocalIndex(dirPath, indexData, someonesPubKey = undefined) {
+    const method = 'IndexedIO::seqWriteLocalIndex'
     IndexedIO._checkFilePath(dirPath);
 
     const time = Date.now();
     indexData.time = time;
 
     const indexFilePath = IndexedIO._getIndexPath(dirPath);
-    const writeData = await utils.encryptObj(this.publicKey, indexData, this.useEncryption)
-    await this.ioInst.writeLocalFile(this.userId, indexFilePath, writeData);
+
+    let writeData = undefined
+    try {
+      writeData = await utils.encryptObj(this.publicKey, indexData, this.useEncryption)
+    } catch (error) {
+      throw utils.fmtErrorStr(`failed to encrypt data for index ${indexFilePath}.`,
+        method, error)
+    }
+
+    try {
+      await this.ioInst.writeLocalFile(this.userId, indexFilePath, writeData)
+    } catch (error) {
+      throw utils.fmtErrorStr(`failed to write index ${indexFilePath}.`,
+        method, error)
+    }
 
     if (someonesPubKey) {
-      await this._writeSharedIndex(dirPath, indexData, someonesPubKey);
+      try {
+        await this._writeSharedIndex(dirPath, indexData, someonesPubKey);
+      } catch (error) {
+        throw utils.fmtErrorStr(`failed to write shared index to dir ${dirPath}.`,
+          method, error)
+      }
     }
 
     // IndexedIO._logIndex(this.logger, indexData);
@@ -250,6 +321,7 @@ class IndexedIO {
   // in limited testing with messages being dropped.
   //
   async seqWriteLocalFile(filePath, data, someonesPubKey = undefined) {
+    const method = 'IndexedIO::seqWriteLocalFile'
     IndexedIO._checkFilePath(filePath);
 
     const path = IndexedIO._pathMinusTail(filePath);
@@ -259,9 +331,9 @@ class IndexedIO {
     let indexData = undefined;
     try {
       indexData = await this.readLocalIndex(path);
-    } catch (err) {
-      this.logger(`ERROR(IndexedIO::seqWriteLocalFile) fetching index file trying to write ${filePath}.\n${err}`);
-      return undefined;
+    } catch (error) {
+      throw utils.fmtErrorStr(`fetching index file trying to write ${filePath}`,
+        method, error)
     }
 
     const sanoIndexData = IndexedIO._sanitizeIndexData(indexData);
@@ -270,21 +342,26 @@ class IndexedIO {
     }
     sanoIndexData.active[fileName] = { time };
 
-    const encKey = (someonesPubKey) || this.publicKey;
-    const encData = await utils.encryptObj(encKey, data, this.useEncryption)
-
     try {
       await this.seqWriteLocalIndex(path, sanoIndexData, someonesPubKey);
-    } catch (err) {
-      this.logger(`ERROR(IndexedIO::seqWriteLocalFile) writing index file for ${filePath}.\n${err}`);
-      return undefined;
+    } catch (error) {
+      throw utils.fmtErrorStr(`writing index file for ${filePath}.`,
+        method, error)
+    }
+
+    let encData = undefined
+    const encKey = (someonesPubKey) || this.publicKey;
+    try {
+      encData = await utils.encryptObj(encKey, data, this.useEncryption)
+    } catch (error) {
+      throw utils.fmtErrorStr(`encrypting data to write to ${path}.`,
+        method, error)
     }
 
     try {
       await this.ioInst.writeLocalFile(this.userId, filePath, encData);
-    } catch (err) {
-      this.logger(`ERROR(IndexedIO::seqWriteLocalFile) writing file ${filePath}.\n${err}`);
-      return undefined;
+    } catch (error) {
+      throw utils.fmtErrorStr(`writing file ${filePath}.`, method, error)
     }
 
     if (ENABLE_SEQ_WR_RD_DLY) {
@@ -292,131 +369,175 @@ class IndexedIO {
     }
   }
 
-  deleteLocalDir(dirPath, someonesPubKey = undefined) {
+  // TODO: deleteLocalDir, deleteLocalFiles, and deleteLocalFile all use the
+  //       same basic mechanism. Refactor to one method.
+  //
+  // TODO: may need to rate limit (20/s or 200/s) for gaia (the promise all)
+  async deleteLocalDir(dirPath, someonesPubKey = undefined) {
+    const method = 'IndexedIO::deleteLocalDir'
     IndexedIO._checkFilePath(dirPath);
 
     const time = Date.now();
 
-    return this.readLocalIndex(dirPath)
-    .then((indexData) => {
-      const deleteFilePromises = [];
-      const sanoIndexData = IndexedIO._sanitizeIndexData(indexData);
-      for (const fileName in sanoIndexData.active) {
+    let indexData = undefined
+    try {
+      indexData = await this.readLocalIndex(dirPath)
+    } catch (error) {
+      throw utils.fmtErrorStr(`unable to read index ${filePath}`, method, error)
+    }
+
+    const deleteFilePromises = [];
+    const sanoIndexData = IndexedIO._sanitizeIndexData(indexData);
+    for (const fileName in sanoIndexData.active) {
+      delete sanoIndexData.active[fileName];
+      sanoIndexData.deleted[fileName] = { time };
+      const filePath = `${dirPath}/${fileName}`;
+      deleteFilePromises.push(this.ioInst.deleteLocalFile(this.userId, filePath));
+    }
+
+    // Write the updated index first, then delete the files.
+    try {
+      await this.writeLocalIndex(dirPath, sanoIndexData, someonesPubKey)
+    } catch (error) {
+      throw utils.fmtErrorStr(`saving modified index ${dirPath}`, method, error)
+    }
+
+    // TODO: clean this up to catch the specific error, but allow other deletion
+    //       promises to proceed (Promise.all is first fail).
+    try {
+      const results = await Promise.all(deleteFilePromises)
+    } catch (error) {
+      throw utils.fmtErrorStr(`deleting file(s).`, method, error)
+    }
+  }
+
+  // TODO: may need to rate limit (20/s or 200/s) for gaia (the promise all)
+  async deleteLocalFiles(dirPath, fileList, someonesPubKey) {
+    const method = 'IndexedIO::deleteLocalFiles'
+    IndexedIO._checkFilePath(dirPath);
+
+    const time = Date.now();
+
+    let indexData = undefined
+    try {
+      indexData = await this.readLocalIndex(dirPath)
+    } catch (error) {
+      throw utils.fmtErrorStr(`unable to read index ${dirPath}.`, method, error)
+    }
+
+    const deleteFilePromises = [];
+    const sanoIndexData = IndexedIO._sanitizeIndexData(indexData);
+    for (const fileName in sanoIndexData.active) {
+      if (fileList.includes(fileName)) {
         delete sanoIndexData.active[fileName];
         sanoIndexData.deleted[fileName] = { time };
         const filePath = `${dirPath}/${fileName}`;
         deleteFilePromises.push(this.ioInst.deleteLocalFile(this.userId, filePath));
       }
+    }
 
-      return Promise.all(deleteFilePromises)
-      .then((results) => this.writeLocalIndex(dirPath, sanoIndexData, someonesPubKey))
-      .catch((err) => {
-        this.logger(`ERROR(IndexedIO::deleteLocalDir) deleting files: ${err}.`);
-        return undefined;
-      });
-    })
-    .catch((err) => {
-      this.logger(`ERROR(IndexedIO::deleteLocalDir) fetching index: ${err}.`);
-      return undefined;
-    });
+    // Write the updated index first, then delete the files.
+    try {
+      await this.writeLocalIndex(dirPath, sanoIndexData, someonesPubKey)
+    } catch (error) {
+      throw utils.fmtErrorStr(`saving modified index ${dirPath}.`, method, error)
+    }
+
+    // TODO: clean this up to catch the specific error, but allow other deletion
+    //       promises to proceed (Promise.all is first fail).
+    try {
+      const results = await Promise.all(deleteFilePromises)
+    } catch (error) {
+      throw utils.fmtErrorStr(`deleting file(s).`, method, error)
+    }
   }
 
-  deleteLocalFiles(dirPath, fileList, someonesPubKey) {
-    IndexedIO._checkFilePath(dirPath);
-
-    const time = Date.now();
-
-    return this.readLocalIndex(dirPath)
-    .then((indexData) => {
-      const deleteFilePromises = [];
-      const sanoIndexData = IndexedIO._sanitizeIndexData(indexData);
-      for (const fileName in sanoIndexData.active) {
-        if (!fileList.includes(fileName)) {
-          continue;
-        }
-
-        delete sanoIndexData.active[fileName];
-        sanoIndexData.deleted[fileName] = { time };
-        const filePath = `${dirPath}/${fileName}`;
-        deleteFilePromises.push(this.ioInst.deleteLocalFile(this.userId, filePath));
-      }
-
-      return Promise.all(deleteFilePromises)
-      .then((results) => this.writeLocalIndex(dirPath, sanoIndexData, someonesPubKey))
-      .catch((err) => {
-        this.logger(`ERROR(IndexedIO::deleteLocalFiles) deleting files: ${err}.`);
-        return undefined;
-      });
-    })
-    .catch((err) => {
-      this.logger(`ERROR(IndexedIO::deleteLocalFiles) fetching index: ${err}.`);
-      return undefined;
-    });
-  }
-
-  deleteLocalFile(filePath, someonesPubKey = undefined) {
+  async deleteLocalFile(filePath, someonesPubKey = undefined) {
+    const method = 'IndexedIO::deleteLocalDir'
     IndexedIO._checkFilePath(filePath);
 
     const path = IndexedIO._pathMinusTail(filePath);
     const fileName = this._pathTail(filePath);
     const time = Date.now();
 
-    return this.readLocalIndex(path)
-    .then((indexData) => {
-      const sanoIndexData = IndexedIO._sanitizeIndexData(indexData);
-      if (fileName in sanoIndexData.active) {
-        delete sanoIndexData.active[fileName];
-      }
-      sanoIndexData.deleted[fileName] = { time };
+    let indexData = undefined
+    try {
+      indexData = await this.readLocalIndex(path)
+    } catch (error) {
+      throw utils.fmtErrorStr(`unable to read index file ${path}.`,
+        method, error)
+    }
 
-      return this.writeLocalIndex(path, sanoIndexData, someonesPubKey)
-      .then(() => this.ioInst.deleteLocalFile(this.userId, filePath))
-      .catch((err) => {
-        this.logger(`ERROR(IndexedIO::deleteLocalFile) writing index: ${err}.`);
-        return undefined;
-      });
-    })
-    .catch((err) => {
-      this.logger(`ERROR(IndexedIO::deleteLocalFile) fetching index: ${err}.`);
-      return undefined;
-    });
+    const sanoIndexData = IndexedIO._sanitizeIndexData(indexData);
+    if (fileName in sanoIndexData.active) {
+      delete sanoIndexData.active[fileName];
+    }
+    sanoIndexData.deleted[fileName] = { time };
+
+    try {
+      await this.writeLocalIndex(path, sanoIndexData, someonesPubKey)
+    } catch (error) {
+      throw utils.fmtErrorStr(`failed to write index file ${path}.`,
+        method, error)
+    }
+
+    try {
+      await this.ioInst.deleteLocalFile(this.userId, filePath)
+    } catch (error) {
+      throw utils.fmtErrorStr(`unable to delete file ${filePath}.`,
+        method, error)
+    }
   }
 
   // TODO: handle encryption in these:
   //
   // Public Non-Indexed IO Methods (essentially pass-thru methods):
   //
-  readLocalFile(filePath) {
-    IndexedIO._checkFilePath(filePath);
-    return this.ioInst.readLocalFile(this.userId, filePath)
-    .then((data) => {
-      if ((data === undefined) || (data === null)) {
-        return data;
+  async readLocalFile(filePath) {
+    const method = 'IndexedIO::readLocalFile'
+    IndexedIO._checkFilePath(filePath)
+
+    let data = undefined
+    try {
+      data = await this.ioInst.readLocalFile(this.userId, filePath)
+
+      // TODO: should we add: '|| utils.isEmptyObj(data)' here?
+      if (!data) {
+        return undefined
       }
-      return utils.decryptObj(this.privateKey, data, this.useEncryption);
-    })
-    .catch((err) => {
-      this.logger(`ERROR(IndexedIO::readLocalFile): ${err}.`);
-      return undefined;
-    });
+    } catch (error) {
+      throw utils.fmtErrorStr(`unable to read ${filePath}.`, method, error)
+    }
+
+    try {
+      return await utils.decryptObj(this.privateKey, data, this.useEncryption)
+    } catch (error) {
+      throw utils.fmtErrorStr(`unable to decrypt data from ${filePath}.`,
+        method, error)
+    }
   }
 
-  readRemoteFile(remoteUser, filePath) {
+  async readRemoteFile(remoteUser, filePath) {
+    const method = 'IndexedIO::readRemoteFile'
     IndexedIO._checkFilePath(filePath);
-    return this.ioInst.readRemoteFile(remoteUser, filePath)
-    .then((data) => {
-      if ((data === undefined) || (data === null)) {
-        return data;
+
+    let data = undefined
+    try {
+      data = await this.ioInst.readRemoteFile(remoteUser, filePath)
+      if (!data || utils.isEmptyObj(data)) {
+        return undefined
       }
-      if (utils.isEmptyObj(data)) {
-        return undefined;
-      }
-      return utils.decryptObj(this.privateKey, data, this.useEncryption);
-    })
-    .catch((err) => {
-      this.logger(`ERROR(IndexedIO::readRemoteFile): ${err}.`);
-      return undefined;
-    });
+    } catch (error) {
+      throw utils.fmtErrorStr(`failed to read ${filePath} from ${remoteUser}.`,
+        method, error)
+    }
+
+    try {
+      return await utils.decryptObj(this.privateKey, data, this.useEncryption);
+    } catch (error) {
+      throw utils.fmtErrorStr(`failed to decrypt ${filePath} from ${remoteUser}.`,
+        method, error)
+    }
   }
 
   static _getIndexPath(aDir) {
@@ -435,24 +556,30 @@ class IndexedIO {
   //   - we don't support absolute paths from root
   //
   static _checkFilePath(aFilePath) {
+    const method = 'IndexedIO::_checkFilePath'
     if (aFilePath.startsWith('/')) {
-      throw `ERROR: Unsupported file path specified: ${filePath}. Paths cannot be specified from root.`;
+      throw utils.fmtErrorStr(`Unsupported file path specified: ${filePath}. Paths cannot be specified from root.`,
+        method)
     }
 
     if (aFilePath.endsWith('/')) {
-      throw `ERROR: Unsupported file path specified: ${filePath}. Trailing "/" not supported.`;
+      throw utils.fmtErrorStr(`Unsupported file path specified: ${filePath}. Trailing "/" not supported.`,
+        method)
     }
 
     if (aFilePath.includes('..')) {
-      throw `ERROR: Unsupported file path specified: ${filePath}. ".." is not supported.`;
+      throw utils.fmtErrorStr(`Unsupported file path specified: ${filePath}. ".." is not supported.`,
+        method);
     }
 
     if (aFilePath.includes('./')) {
-      throw `ERROR: Unsupported file path specified: ${filePath}. "./" is not supported.`;
+      throw utils.fmtErrorStr(`Unsupported file path specified: ${filePath}. "./" is not supported.`,
+        method)
     }
 
     if (aFilePath.includes('~')) {
-      throw `ERROR: Unsupported file path specified: ${filePath}. "~" is not supported.`;
+      throw utils.fmtErrorStr(`Unsupported file path specified: ${filePath}. "~" is not supported.`,
+        method)
     }
   }
 
@@ -468,6 +595,10 @@ class IndexedIO {
     return retValue;
   }
 
+  // TODO:
+  //   - is this needed?
+  //   - is there a better way to shim this based on plaf?
+  //
   // https://stackoverflow.com/questions/31712808/how-to-force-javascript-to-deep-copy-a-string
   static stringCopyForChrome(aString) {
     return (` ${aString}`).slice(1);
@@ -482,6 +613,7 @@ class IndexedIO {
   }
 
   static _sanitizeIndexData(theIndexData) {
+    const method = 'IndexedIO::_sanitizeIndexData'
     if ((theIndexData === undefined) || (theIndexData === null)) {
       theIndexData = {};
     }
@@ -492,7 +624,8 @@ class IndexedIO {
       theIndexData.active = {};
     }
     if (theIndexData.hasOwnProperty('cipherText')) {
-      throw 'ERROR: index data is unexpectedly still encrypted!';
+      throw utils.fmtErrorStr('index data is unexpectedly still encrypted!',
+        method)
     }
     return theIndexData;
   }

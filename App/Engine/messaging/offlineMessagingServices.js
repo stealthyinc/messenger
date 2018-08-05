@@ -370,6 +370,8 @@ class OfflineMessagingServices extends EventEmitterAdapter {
         this.log(`   Finished reading remote index of ${contactId} (${offlineDirPath}).`);
       } catch (err) {
         // Suppress 404 for users who haven't written a sharedIndex yet.
+        // Also suppress errors here as they do not effect stored data (i.e. a
+        // subsequent read will pick up where this failure occurred)
       }
 
       if (indexData && indexData.active) {

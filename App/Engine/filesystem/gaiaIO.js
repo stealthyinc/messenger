@@ -263,31 +263,4 @@ module.exports = class GaiaIO extends BaseIO {
       })
     })
   }
-
-  // // TODO: remove this when readPartnerAppFile above is in service
-  // //
-  // readFileFromHub(aFileName, aHubUrl) {
-  //   console.log(`DEBUG(gaiaIO.js::readFileFromHub): Reading ${aHubUrl}/${aFileName}.`)
-  //
-  //   if (!aFileName || !aHubUrl) {
-  //     throw `ERROR(gaiaIO.js::readFileFromHub): aFileName or aHubUrl not specified.`
-  //   }
-  //
-  //   if (!utils.is_iOS()) {
-  //     throw `ERROR(gaiaIO.js::readFileFromHub): Non-iOS deployments not yet supported.`
-  //   }
-  //
-  //   return new Promise((resolve, reject) => {
-  //     getRawFile(aFileName, aHubUrl, (error, content) => {
-  //       if (error) {
-  //         reject(error);
-  //       } else {
-  //         const result = (!content || content.includes('<Error><Code>BlobNotFound')) ?
-  //           undefined : content
-  //
-  //         resolve(result)
-  //       }
-  //     })
-  //   })
-  // }
 };

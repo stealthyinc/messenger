@@ -3,6 +3,19 @@ import Secrets from 'react-native-config'
 
 import {NativeModules, Platform} from 'react-native';
 
+module.exports.fmtErrorStr = function(anErrDescription,
+                           aMethodName=undefined,
+                           aCaughtErrDescription=undefined) {
+  let description = (anErrDescription) ? anErrDescription : ''
+  let method = (aMethodName) ? `(${aMethodName})` : ''
+  let caughtDescription = (aCaughtErrDescription) ? aCaughtErrDescription : ''
+
+  let errorString = `ERROR${method}: ${description}\n`
+  if (caughtDescription) {
+    errorString += caughtDescription
+  }
+}
+
 // Determines if a js object is empty.
 //
 //   from: https://stackoverflow.com/questions/679915/how-do-i-test-for-an-empty-javascript-object
