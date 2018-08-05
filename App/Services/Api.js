@@ -52,6 +52,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
     try {
       profileData = await getProfileFromNameSearch(aUserName, anAppUrl)
       const appUrl = profileData.apps[anAppUrl]
+      console.log(`DEBUG(api.js::getUserGaiaNS): gaia app bucket = ${appUrl}`)
       return appUrl
     } catch(err) {
       throw `ERROR(${methodName}): failed to get profile data from name search.\n${err}`

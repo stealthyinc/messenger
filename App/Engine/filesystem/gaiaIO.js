@@ -248,7 +248,7 @@ module.exports = class GaiaIO extends BaseIO {
               if (!content || content.includes('<Error><Code>BlobNotFound')) {
                 resolve(undefined)
               } else {
-                resolve(result)
+                resolve(content)
               }
             } else {
               reject(error);

@@ -1,10 +1,12 @@
+const utils = require('./../misc/utils.js')
+
 // TODO: remove two constants etc. below when working in real world (along with commented out
 //       read from hub at bottom of gaiaIO.js)
 //
 // relay.id's graphite hub for initital testing / dev work (weird netlify link--don't delete until
 // condition described above working)
 const RELAY_GRAPHITE_HUB = 'https://gaia.blockstack.org/hub/1PeNcCQXdg7t8iNmK7XqGVt8UyEDo4d3mF/'
-const SIMULATE_DATA = true
+const SIMULATE_DATA = false
 // publicShare is what we're currently using for demos. This will change when we
 // start encrypting.
 const RELAY_DOC_BASES = {
@@ -13,14 +15,21 @@ const RELAY_DOC_BASES = {
   originalDoc : `${RELAY_GRAPHITE_HUB}/documents/`, // append <doc id>.json
 }
 
+const USE_PRODUCTION_URL = false
+const GRAPHITE_URL = (USE_PRODUCTION_URL) ?
+   'https://app.graphitedocs.com' : 'https://serene-hamilton-56e88e.netlify.com'
 
-const GRAPHITE_URL = 'https://app.graphitedocs.com'
+function getFileUrl(aFileName) {
+  return `${GRAPHITE_URL}/shared/docs/${aFileName}`
+}
 
+// TODO: move things around so privateKey is not needed here or is appropriate (#demoware)
 class Graphite {
-  constructor(ioClassInst, localUserId) {
+  constructor(ioClassInst, localUserId, privateKey) {
     this.io = ioClassInst
     this.userId = localUserId
     this.indexData = undefined
+    this.privateKey = privateKey
   }
 
   getIndexData() {
@@ -36,7 +45,7 @@ class Graphite {
         const graphiteIndex = await this._readIndexFile()
         this.indexData = this._getDataFromGraphiteIndex(graphiteIndex)
       } catch (error) {
-        throw(`ERROR(graphite.js::refreshIndexData): unable to refresh index data from index file.\n${error}`)
+        throw(`ERROR(graphite.js::readIndexData): unable to refresh index data from index file.\n${error}`)
       }
     }
 
@@ -125,7 +134,10 @@ class Graphite {
             element.fileType &&
             element.title ) {
 
-          const fileName = `relay.id-${element.id}`
+          // const fileName = `relay.id-${element.id}`
+          const fileName = `${this.userId}-${element.id}`
+          const fileUrl = getFileUrl(fileName)
+
           const fileData = {
             title : `${element.title}`,
             description : '',
@@ -134,7 +146,8 @@ class Graphite {
               user : 'TBD',
               key : 'Graphite'
             },
-            fileUrl : `${RELAY_DOC_BASES.publicShare}${element.id}`,
+            fileUrl : fileUrl,
+            // fileUrl : `${RELAY_DOC_BASES.publicShare}${element.id}`,
             version: '',
             appMetadata: element
           }
@@ -165,11 +178,15 @@ class Graphite {
 
     let recovered = undefined
     try {
+      console.log('1')
       recovered = await utils.decryptObj(this.privateKey, cipherTextObjStr, true)
+      console.log('2')
     } catch(error) {
+      console.log('3')
       throw `ERROR(${method}): failed to decrypt ${indexFileName}.\n${error}`
     }
 
+    console.log('4')
     return recovered
   }
 
