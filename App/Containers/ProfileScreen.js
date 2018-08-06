@@ -139,10 +139,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    handleOutgoingMessage: (message) => dispatch(EngineActions.setOutgoingMessage(message)),
     updateUserSettings: (radio) => dispatch(EngineActions.updateUserSettings(radio)),
-    clearUserData: (publicKey) => dispatch(EngineActions.clearUserData(publicKey)),
-    initShutdown: () => dispatch(EngineActions.initShutdown()),
   }
 }
 

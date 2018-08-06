@@ -83,8 +83,19 @@ const create = (baseURL = 'https://core.blockstack.org') => {
     let nameResult= undefined
     try {
       nameResult = await api.get(`v1/names/${aUserName}`)
-    } catch (err) {
-      throw `ERROR(${methodName}): request for data from name endpoint failed.\n${err}`
+    } catch (err1) {
+      // Three attempts.
+      // TODO: something more elegant, see comments in engine.js for
+      //       _writeConversations.
+      try {
+        nameResult = await api.get(`v1/names/${aUserName}`)
+      } catch (err2) {
+        try {
+          nameResult = await api.get(`v1/names/${aUserName}`)
+        } catch (err3) {
+          throw `ERROR(${methodName}): request for data from name endpoint failed.\n${err3}`
+        }
+      }
     }
 
     let zonefileUrlMess = undefined
@@ -104,8 +115,19 @@ const create = (baseURL = 'https://core.blockstack.org') => {
     let profileUrlResult = undefined
     try {
       profileUrlResult = await api.get(profileUrl)
-    } catch (err) {
-      throw `ERROR(${methodName}): request for profile data from profile URL (${profileUrl}) failed.\n${err}`
+    } catch (err1) {
+      // Three attempts.
+      // TODO: something more elegant, see comments in engine.js for
+      //       _writeConversations.
+      try {
+        profileUrlResult = await api.get(profileUrl)
+      } catch (err2) {
+        try {
+          profileUrlResult = await api.get(profileUrl)
+        } catch (err3) {
+          throw `ERROR(${methodName}): request for profile data from profile URL (${profileUrl}) failed.\n${err3}`
+        }
+      }
     }
 
     let profileData = undefined

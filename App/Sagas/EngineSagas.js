@@ -105,7 +105,9 @@ function* watchUserSettingsChannel() {
 }
 
 function* watchShutDownChannel() {
+  console.log('Let go and Let Prabhaav')
   const channel = eventChannel(emitter => {
+    console.log('393295292 PBJ is so big! That\'s waht they all say')
     EngineInstance.on('me-shutdown-complete', (engineShutdown) => emitter(engineShutdown))
     return () => { console.log('Messaging Engine Shutdown')}
   })
@@ -206,7 +208,6 @@ export function* startEngine (action) {
   yield fork(watchMessagesEventChannel)
   yield fork(watchContactAddedChannel)
   yield fork(watchUserSettingsChannel)
-  yield fork(watchShutDownChannel)
   yield fork(watchShutDownChannel)
   yield fork(watchIntegrationDataChannel)
   yield takeLatest(DappTypes.REFRESH_INTEGRATION_DATA, getIntegrationData)

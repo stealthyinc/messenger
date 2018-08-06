@@ -17,6 +17,7 @@ class ReduxNavigation extends React.Component {
     this.state = {
       fbListner: false
     }
+    this.publicKey = undefined
     this.ref = undefined
     this.shutDownSignOut = false;
   }
@@ -64,59 +65,37 @@ class ReduxNavigation extends React.Component {
       }
     });
   }
-  componentWillReceiveProps (nextProps) {
-    const { publicKey } = nextProps
-    // if (engineShutdown) {
-    //   this._shutdownRequest(publicKey)
-    // } else if (publicKey && !this.ref) {
-    if (publicKey && !this.ref) {
-      const sessionPath = common.getDbSessionPath(publicKey)
-      this.ref = firebaseInstance.getFirebaseRef(sessionPath);
-      this.ref.on('child_changed', (childSnapshot, prevChildKey, publicKey) => {
-        this.shutDownSignOut = false
 
+  componentWillReceiveProps (nextProps) {
+    if (nextProps.engineShutdown) {
+      // #FearThis  - Changes can result in loss of time, efficiency, users &
+      //              data.
+      this.___finishLogOutSequence()
+    } else if (this.publicKey && !this.ref) {
+      // Set up a listener for an event from the database to handle us
+      // loosing a lock on this session:
+      const sessionPath = common.getDbSessionPath(this.publicKey)
+      this.ref = firebaseInstance.getFirebaseRef(sessionPath);
+      this.ref.on('child_changed', (childSnapshot, prevChildKey) => {
+        this.shutDownSignOut = false
         const session = childSnapshot.val()
         if (session !== common.getSessionId()) {
-          if (this.ref) {
-            this.ref.off();
-            this.ref = undefined;
-          }
-          this.props.dispatch(EngineActions.initShutdown())
-          // Blockstack signOut occurs in redux after the engine has emitted a shutdown event.
-
-          const TIMEOUT_BEFORE_SHUTDOWN_MS = 11 * 1000;
-          utils.resolveAfterMilliseconds(TIMEOUT_BEFORE_SHUTDOWN_MS)
-          .then(() => {
-            if (!this.shutDownSignOut) {
-              console.log('INFO(ReduxNavigation:componentWillReceiveProps): timed out waiting for engine shutdown.')
-              this._shutdownRequest(publicKey)
-            }
-          })
-          .catch((err) => {
-            console.log(`ERROR(ReduxNavigation:componentWillReceiveProps): error during timeout wait for engine shutdown.\n${err}\n`)
-            if (!this.shutDownSignOut) {
-              this._shutdownRequest(publicKey)
-            }
-          });
+          this.___startLogOutSequence()
         }
       });
     }
   }
+
   componentWillUnmount () {
     if (!utils.is_iOS()) {
       BackHandler.removeEventListener('hardwareBackPress')
     }
   }
-  _shutdownRequest(aPublicKey) {
-    if (!this.shutDownSignOut) {
-      this.shutDownSignOut = true;
-      this._signOutAsync(aPublicKey)
-    }
-  }
+
   _authWork = async (userData) => {
-    const publicKey = userData['appPublicKey']
-    this.props.dispatch(EngineActions.setPublicKey(publicKey))
-    const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(publicKey));
+    this.publicKey = userData['appPublicKey']
+    this.props.dispatch(EngineActions.setPublicKey(this.publicKey))
+    const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(this.publicKey));
     await ref.once('value')
     .then((snapshot) => {
       if (!snapshot.exists() || snapshot.val() === 'none') {
@@ -149,28 +128,81 @@ class ReduxNavigation extends React.Component {
     this.props.dispatch(EngineActions.setToken(token))
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'App' })
   }
-  _signOutAsync = async (aPublicKey) => {
-    const {BlockstackNativeModule} = NativeModules;
-    const publicKey = (aPublicKey) ? aPublicKey : this.props.publicKey
-    const { token } = this.props
-    if (publicKey) {
-      if (!common.DEV_TESTING) {
-        firebaseInstance.setFirebaseData(common.getDbSessionPath(publicKey), common.NO_SESSION)
-      }
-      // Blockstack signOut occurs in redux after the engine has emitted a shutdown event.
-      this.props.dispatch(EngineActions.clearUserData(publicKey));
+
+////////////////////////////////////////////////////////////////////////////////
+//  Begin #FearThis: - Changes can result in loss of time, efficiency, users, &
+//                     data.
+//
+//  Logout/shutdown involves shutting down the engine and waiting for that to
+//  complete before signing out of blockstack / other operations (otherwise the
+//  iOS code will crash causing problems).
+//
+//  The logout sequence can be triggered by a database event indicating that
+//  we've lost session lock or from a user clicking on the log out button. The
+//  next step is to request the engine shutdown and then wait for the
+//  'engineShutDown' to come through props or a time-out to occur. After this
+//  has occured, we then do UI cleanup and clearing of user data / async storage
+//  before signing out of blockstack.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+  ___startLogOutSequence = async () => {
+    const method = 'ReduxNavigation::___startLogOutSequence'
+    if (this.ref) {
+      this.ref.off();
+      this.ref = undefined;
     }
-    this.props.dispatch(EngineActions.initShutdown());
-    await AsyncStorage.clear();
-    AsyncStorage.setItem('token', token);
-    this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' })
-  };
+    this.props.dispatch(EngineActions.initShutdown())
+
+    const TIMEOUT_BEFORE_SHUTDOWN_MS = 6 * 1000;
+    try {
+      await utils.resolveAfterMilliseconds(TIMEOUT_BEFORE_SHUTDOWN_MS)
+    } catch (error) {
+      console.log(`ERROR(${method}): error during wait for engine shutdown.\n${error}`)
+    } finally {
+      console.log(`INFO(${method}): timed out waiting for engine shutdown.`)
+
+      // Only call ___finishLogOutSequence once (it may have been called before the
+      // timer above resolves):
+      if (!this.shutDownSignOut) {
+        this.___finishLogOutSequence()
+      }
+    }
+  }
+
+  ___finishLogOutSequence = async () => {
+    if (!this.shutDownSignOut) {
+      this.shutDownSignOut = true;
+
+      if (this.publicKey) {
+        if (!common.DEV_TESTING) {
+          firebaseInstance.setFirebaseData(common.getDbSessionPath(this.publicKey), common.NO_SESSION)
+        }
+        this.props.dispatch(EngineActions.clearUserData(this.publicKey));
+      }
+
+      await AsyncStorage.clear();
+      const { token } = this.props
+      AsyncStorage.setItem('token', token);
+
+      const {BlockstackNativeModule} = NativeModules;
+      await BlockstackNativeModule.signOut()
+      this.publicKey = undefined
+
+      this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' })
+    }
+  }
+
+////////////////////////////////////////////////////////////////////////////////
+//  End #FearThis
+////////////////////////////////////////////////////////////////////////////////
+
 
   render () {
     return (
       <Root>
         <AppNavigation
-          screenProps={{logout: () => this._signOutAsync(undefined), authWork: (userData) => this._authWork(userData)}}
+          screenProps={{logout: () => this.___startLogOutSequence(), authWork: (userData) => this._authWork(userData)}}
           navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root') })}
         />
       </Root>
