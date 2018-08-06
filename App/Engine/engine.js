@@ -520,14 +520,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   //
-  handleShutDownRequest() {
-    try {
-      this.offAll()
-      this.offlineMsgSvc.offAll()
-      this.discovery.offAll()
-    } catch (err) {
-      // do nothing, just don't prevent the code below from happening
-    }
+  handleShutDownRequest = () => {
 
     this.offlineMsgSvc.skipSendService();
     this.offlineMsgSvc.stopSendService();
@@ -560,13 +553,20 @@ export class MessagingEngine extends EventEmitterAdapter {
         return undefined;
       })
     )
-
+    
     Promise.all(promises)
     .then(() => {
+      this.emit('me-shutdown-complete', true)
+      try {
+        this.offAll()
+        this.offlineMsgSvc.offAll()
+        this.discovery.offAll()
+      } catch (err) {
+        // do nothing, just don't prevent the code below from happening
+      }
       this.offlineMsgSvc = undefined
 
       this.logger('INFO:(engine.js::handleShutDownRequest): engine shutdown successful.')
-      this.emit('me-shutdown-complete', true)
       return
     })
     .catch((err) => {

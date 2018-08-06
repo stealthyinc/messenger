@@ -38,33 +38,33 @@ class DappStore extends Component {
       <ScrollView contentContainerStyle={styles.container}>
         <View style={{flexDirection: 'row', marginTop: 10, marginBottom: 5}}>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={styles.button} onPress={(url) => this._onPressButton('https://www.graphitedocs.com/about')}>
+            <TouchableOpacity style={styles.button} onPress={(url) => this._onPressButton('https://serene-hamilton-56e88e.netlify.com')}>
               <Image source={GraphiteIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Graphite Docs</Text>
           </View>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={styles.button} onPress={(url) => this._onPressButton('https://blockusign.co/')}>
-              <Image source={BlockSignIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
-            </TouchableOpacity>
-            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Blockusign</Text>
-          </View>
-          <View style={{margin: 10}}>
-            <TouchableOpacity style={styles.button} onPress={() => this._onPressButton('https://cryptocracy.io/')}>
-              <Image source={CryptoIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
-            </TouchableOpacity>
-            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Cryptocracy</Text>
-          </View>
-        </View>
-        <View style={{flexDirection: 'row', marginBottom: 5}}>
-          <View style={{margin: 10}}>
-            <TouchableOpacity style={styles.button} onPress={() => this._onPressButton('https://www.travelstack.club/')}>
+            <TouchableOpacity style={styles.button} onPress={() => this._onPressButton('https://app.travelstack.club')}>
               <Image source={TravelIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Travelstack</Text>
           </View>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={styles.button} onPress={() => this._onPressButton('https://www.healthhere.com/')}>
+            <TouchableOpacity style={styles.button} onPress={(url) => this._onPressButton('https://blockusign.co')}>
+              <Image source={BlockSignIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
+            </TouchableOpacity>
+            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Blockusign</Text>
+          </View>
+        </View>
+        <View style={{flexDirection: 'row', marginBottom: 5}}>
+          <View style={{margin: 10}}>
+            <TouchableOpacity style={styles.button} onPress={() => this._onPressButton('https://cryptocracy.io')}>
+              <Image source={CryptoIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
+            </TouchableOpacity>
+            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Cryptocracy</Text>
+          </View>
+          <View style={{margin: 10}}>
+            <TouchableOpacity style={styles.button} onPress={() => this._onPressButton('https://www.healthhere.com')}>
               <Image source={healthHere} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Clinic Q</Text>

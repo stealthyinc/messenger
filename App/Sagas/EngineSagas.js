@@ -105,14 +105,16 @@ function* watchUserSettingsChannel() {
 }
 
 function* watchShutDownChannel() {
-  console.log('Let go and Let Prabhaav')
   const channel = eventChannel(emitter => {
-    console.log('393295292 PBJ is so big! That\'s waht they all say')
     EngineInstance.on('me-shutdown-complete', (engineShutdown) => emitter(engineShutdown))
-    return () => { console.log('Messaging Engine Shutdown')}
+    return () => {
+      console.log('Messaging Engine Shutdown')
+    }
   })
-  const engineShutdown = yield take(channel)
-  yield put(EngineActions.setEngineShutdown(engineShutdown))
+  while (true) {
+    const engineShutdown = yield take(channel)
+    yield put(EngineActions.setEngineShutdown(engineShutdown))
+  }
 }
 
 function* watchIntegrationDataChannel() {
