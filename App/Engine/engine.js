@@ -520,7 +520,15 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   //
-  handleShutDownRequest = () => {
+  handleShutDownRequest = async () => {
+    try {
+      // Don't disable emit/listeners for the engine yet (we need to emit one
+      // last event).
+      this.offlineMsgSvc.offAll()
+      this.discovery.offAll()
+    } catch (err) {
+      // do nothing, just don't prevent the code below from happening
+    }
 
     this.offlineMsgSvc.skipSendService();
     this.offlineMsgSvc.stopSendService();
@@ -553,27 +561,22 @@ export class MessagingEngine extends EventEmitterAdapter {
         return undefined;
       })
     )
-    
-    Promise.all(promises)
-    .then(() => {
-      this.emit('me-shutdown-complete', true)
-      try {
-        this.offAll()
-        this.offlineMsgSvc.offAll()
-        this.discovery.offAll()
-      } catch (err) {
-        // do nothing, just don't prevent the code below from happening
-      }
-      this.offlineMsgSvc = undefined
 
+    try {
+      await Promise.all(promises)
       this.logger('INFO:(engine.js::handleShutDownRequest): engine shutdown successful.')
-      return
-    })
-    .catch((err) => {
-      console.log(`ERROR(engine.js::handleShutDownRequest): ${err}`)
+    } catch (error) {
+      console.log(`ERROR(engine.js::handleShutDownRequest): ${error}`)
+    } finally {
+      this.offlineMsgSvc = undefined
       this.emit('me-shutdown-complete', true)
-      return
-    })
+    }
+
+    // This code has to be last or at least after we emit 'me-shutdown-complete'.
+    try {
+      this.offAll()
+    } catch (err) {
+    }
   }
 
   //
