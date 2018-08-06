@@ -71,18 +71,6 @@ class ReduxNavigation extends React.Component {
       // #FearThis  - Changes can result in loss of time, efficiency, users &
       //              data.
       this.___finishLogOutSequence()
-    } else if (this.publicKey && !this.ref) {
-      // Set up a listener for an event from the database to handle us
-      // loosing a lock on this session:
-      const sessionPath = common.getDbSessionPath(this.publicKey)
-      this.ref = firebaseInstance.getFirebaseRef(sessionPath);
-      this.ref.on('child_changed', (childSnapshot, prevChildKey) => {
-        this.shutDownSignOut = false
-        const session = childSnapshot.val()
-        if (session !== common.getSessionId()) {
-          this.___startLogOutSequence()
-        }
-      });
     }
   }
 
@@ -93,6 +81,17 @@ class ReduxNavigation extends React.Component {
   }
 
   _authWork = async (userData) => {
+    // This variable controls whether or not you are presented with a page
+    // if another session ID is in the database. If you are developing and
+    // constantly killing and restarting the App, it makes sense to set the
+    // logic below so that this is true. For production, it should be false.
+    //
+    // When you change code pertaining to the session listener, you should
+    // set this var to false and test by changing the session id in the database.
+    //
+    const SKIP_SESSION_BLOCK_PAGE_FOR_DEV = (process.env.NODE_ENV !== 'production')
+
+    this.shutDownSignOut = false
     this.publicKey = userData['appPublicKey']
     this.props.dispatch(EngineActions.setPublicKey(this.publicKey))
     const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(this.publicKey));
@@ -102,14 +101,21 @@ class ReduxNavigation extends React.Component {
         //signin screen
         ref.set(common.getSessionId());
         this._setupVars(userData, common.getSessionId())
+        this.___installSessionLossListener();
       }
-      else if (snapshot.exists() && (!common.DEV_TESTING || snapshot.val() === common.getSessionId())) {
+      else if (snapshot.exists() && (snapshot.val() === common.getSessionId())) {
         //authloading screen
         this._setupVars(userData, common.getSessionId())
-      }
-      else {
-        this.props.dispatch(EngineActions.setSession(snapshot.val()))
-        this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Block' })
+        this.___installSessionLossListener();
+      } else {
+        if (SKIP_SESSION_BLOCK_PAGE_FOR_DEV) {
+          ref.set(common.getSessionId());
+          this._setupVars(userData, common.getSessionId())
+          this.___installSessionLossListener();
+        } else {
+          this.props.dispatch(EngineActions.setSession(snapshot.val()))
+          this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Block' })
+        }
       }
     })
   }
@@ -175,9 +181,7 @@ class ReduxNavigation extends React.Component {
       this.shutDownSignOut = true;
 
       if (this.publicKey) {
-        if (!common.DEV_TESTING) {
-          firebaseInstance.setFirebaseData(common.getDbSessionPath(this.publicKey), common.NO_SESSION)
-        }
+        firebaseInstance.setFirebaseData(common.getDbSessionPath(this.publicKey), common.NO_SESSION)
         this.props.dispatch(EngineActions.clearUserData(this.publicKey));
       }
 
@@ -190,6 +194,20 @@ class ReduxNavigation extends React.Component {
       this.publicKey = undefined
 
       this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' })
+    }
+  }
+
+  ___installSessionLossListener = () => {
+    if (this.publicKey && !this.ref) {
+      const sessionPath = common.getDbSessionPath(this.publicKey)
+      this.ref = firebaseInstance.getFirebaseRef(sessionPath);
+
+      this.ref.on('value', (childSnapshot) => {
+        const session = childSnapshot.val()
+        if (session !== common.getSessionId()) {
+          this.___startLogOutSequence()
+        }
+      })
     }
   }
 

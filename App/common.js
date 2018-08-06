@@ -2,8 +2,6 @@ import {Platform} from 'react-native';
 
 export const NO_SESSION = 'none'
 
-export const DEV_TESTING = false
-
 module.exports.getDbRootPath = function(aPublicKey) {
   // ud --> user data:
   const context = (process.env.NODE_ENV !== 'development') ?
