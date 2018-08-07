@@ -73,20 +73,31 @@ class DappData extends Component {
       },
     }
     let graphiteCards = []
-    const graphiteData = this.props.dappData['Graphite']
-    for (const item in graphiteData) {
-      const data = graphiteData[item]
-      const {title, description, author, fileUrl, profile, avatar} = data
-      graphiteCards.push(
-        <ListItem
-          key={item}
-          roundAvatar
-          title={title}
-          subtitle={author}
-          avatar={{uri: avatar}}
-          onPress={() => this.sendDappUrlMessage(fileUrl, data)}
-        />
-      )
+//    TODO: check for integrationError
+//    const integrationError = this.props.dappError
+    let graphiteData = undefined
+    try {
+      graphiteData = this.props.dappData['Graphite']
+    } catch (error) {
+      // Suppress--check for defined
+      console.log('INFO(DappData::render): Graphite data undefined.')
+    }
+    if (graphiteData) {
+    // if (graphiteData && !integrationError) {
+      for (const item in graphiteData) {
+        const data = graphiteData[item]
+        const {title, description, author, fileUrl, profile, avatar} = data
+        graphiteCards.push(
+          <ListItem
+            key={item}
+            roundAvatar
+            title={title}
+            subtitle={author}
+            avatar={{uri: avatar}}
+            onPress={() => this.sendDappUrlMessage(fileUrl, data)}
+          />
+        )
+      }
     }
     let blockusignCards = []
     for (const item in blockusignData) {
@@ -148,6 +159,7 @@ const mapStateToProps = (state) => {
   return {
     dapp: DappSelectors.getDapp(state),
     dappUrl: DappSelectors.getDappUrl(state),
+    dappError: DappSelectors.getDappError(state),
     dappData: DappSelectors.getDappData(state),
   }
 }

@@ -165,7 +165,7 @@ module.exports = class GaiaIO extends BaseIO {
         api.getUserGaiaNS(aUserName, anAppUrl)
         .then((gaiaHubUrl) => {
           if (!gaiaHubUrl) {
-            reject(`ERROR(gaiaIO.js::_getGaiaHubUrl): unable to fetch gaia hub for ${aUserName}`)
+            reject(`ERROR(gaiaIO.js::_getGaiaHubUrl): unable to find gaia hub for user:${aUserName}, app:${anAppUrl}`)
           } else {
             this.setHubCacheEntry(aUserName, anAppUrl, gaiaHubUrl)
             resolve(gaiaHubUrl)

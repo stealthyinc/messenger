@@ -42,6 +42,7 @@ class Graphite {
       this.indexData = Graphite._getSimulatedIntermediateGraphiteData()
     } else {
       try {
+        console.log('readIndexData')
         const graphiteIndex = await this._readIndexFile()
         this.indexData = this._getDataFromGraphiteIndex(graphiteIndex)
       } catch (error) {
@@ -178,15 +179,11 @@ class Graphite {
 
     let recovered = undefined
     try {
-      console.log('1')
       recovered = await utils.decryptObj(this.privateKey, cipherTextObjStr, true)
-      console.log('2')
     } catch(error) {
-      console.log('3')
       throw `ERROR(${method}): failed to decrypt ${indexFileName}.\n${error}`
     }
 
-    console.log('4')
     return recovered
   }
 
