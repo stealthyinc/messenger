@@ -148,10 +148,25 @@ class ChatScreen extends Component {
         const msg = messages[idx]
         const { author } = msg
         if (author !== this.state.author.username) {
-          const { body, time, image } = msg
+          const { body, time, image, contentType } = msg
+          let gtext, url, gimage, press
+          if (contentType === 'TEXT') {
+            text = body
+            url = ''
+            gimage = ''
+          }
+          else if (contentType === 'TEXT_JSON') {
+            text = undefined
+            gtext = body.gtext
+            url = body.url
+            gimage = body.gimage
+          }
           const newMessage = {
             _id: Math.round(Math.random() * 1000000),
-            text: body,
+            text,
+            gtext,
+            gimage,
+            url,
             createdAt: time,
             user: {
               _id: author,
@@ -189,7 +204,6 @@ class ChatScreen extends Component {
         gtext = body.gtext
         url = body.url
         gimage = body.gimage
-        press = true
       }
       if (author === id) {
         messages.push({
@@ -197,7 +211,6 @@ class ChatScreen extends Component {
           gtext,
           text,
           url,
-          onPress: this.onPressUrl,
           gimage: gimage,
           createdAt: time,
           sent: sent,
@@ -215,7 +228,6 @@ class ChatScreen extends Component {
           gtext,
           text,
           url,
-          onPress: this.onPressUrl,
           gimage: gimage,
           createdAt: time,
           sent: sent,
@@ -257,11 +269,11 @@ class ChatScreen extends Component {
     if (token) {
       this.props.sendNotification(token, publicKey, bearerToken)
     }
-    const {text, gimage, url} = messages[0]
+    const {text, gtext, gimage, url} = messages[0]
     if (gimage && url) {
       this.props.handleOutgoingMessage(undefined, messages[0])
     }
-    else {
+    else if (text) {
       this.props.handleOutgoingMessage(text, undefined);
     }
     this.setState((previousState) => {
