@@ -148,6 +148,7 @@ const mapStateToProps = (state) => {
   return {
     dapp: DappSelectors.getDapp(state),
     dappUrl: DappSelectors.getDappUrl(state),
+    dappError: DappSelectors.getDappError(state),
     dappData: DappSelectors.getDappData(state),
   }
 }

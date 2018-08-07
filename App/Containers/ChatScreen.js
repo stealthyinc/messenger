@@ -126,10 +126,11 @@ class ChatScreen extends Component {
       // const messageContent = `${name} shared "${dappData.title}" with you:\n\n${dappUrl}`
       const fileMessage = [{
         createdAt: time,
+        text: null,
+        image: null,
         gtext: title,
         gimage: graphiteLogo,
         url: dappUrl,
-        onPress: this.onPressUrl,
         user: {
           _id: username,
           name: name,
@@ -327,6 +328,7 @@ class ChatScreen extends Component {
     return (
       <CustomView
         {...props}
+        onPress={this.onPressUrl}
       />
     );
   }

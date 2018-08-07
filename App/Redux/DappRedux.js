@@ -7,7 +7,7 @@ const { Types, Creators } = createActions({
   setDapp: '',
   setDappUrl: ['dappUrl'],
   setDappData: ['dappData'],
-  setDappError: ['error'],
+  setDappError: ['dappError'],
   setDappMessage: ['dappMessage'],
   refreshIntegrationData: [''],
 })
@@ -18,7 +18,7 @@ export default Creators
 /* ------------- Initial State ------------- */
 
 export const INITIAL_STATE = Immutable({
-  error: '',
+  dappError: '',
   dapp: '',
   dappUrl: '',
   dappData: null,
@@ -58,8 +58,8 @@ export const setDappMessage = (state, { dappMessage }) => {
 }
 
 // send dapp data
-export const setDappError = (state, { error }) => {
-  return state.merge({ error })
+export const setDappError = (state, { dappError }) => {
+  return state.merge({ dappError })
 }
 
 /* ------------- Hookup Reducers To Types ------------- */

@@ -12,7 +12,8 @@ import {
 
 export default class CustomView extends React.Component {
   render() {
-    const {url, gimage, gtext, onPress} = this.props.currentMessage
+    const {url, gimage, gtext} = this.props.currentMessage
+    const {onPress} = this.props
     if (url && gimage) {
       return (
         <TouchableOpacity style={[styles.container, this.props.containerStyle]} onPress={() => onPress(url)}>
@@ -42,11 +43,9 @@ const styles = StyleSheet.create({
 CustomView.defaultProps = {
   currentMessage: {},
   containerStyle: {},
-  mapViewStyle: {},
 };
 
 CustomView.propTypes = {
   currentMessage: PropTypes.object,
   containerStyle: ViewPropTypes.style,
-  mapViewStyle: ViewPropTypes.style,
 };

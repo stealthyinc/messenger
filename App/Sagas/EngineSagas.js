@@ -135,7 +135,7 @@ function* watchIntegrationDataChannel() {
     const { appName, error, indexData } = yield take(channel)
     yield put(DappActions.setDapp(appName))
     yield put(DappActions.setDappData(indexData))
-    yield put(DappActions.setDappError(error))
+    yield put(DappActions.setDappError({dappError: error}))
   }
 }
 
