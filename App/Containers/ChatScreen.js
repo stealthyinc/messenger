@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Image, Modal, Keyboard, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, WebView, View, Text, ActivityIndicator } from 'react-native'
 import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Button } from 'react-native-elements'
+import { Button, Icon } from 'react-native-elements'
 
 import FileDrawer from './FileDrawer'
 
@@ -374,23 +374,31 @@ class ChatScreen extends Component {
       const {id} = this.activeContact
       return (
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
-          <Text style={{fontSize: 18, fontWeight: 'bold'}}>{id} has not used Stealthy yet!</Text>
+          <Text style={{fontSize: 18, fontWeight: 'bold'}}>
+            {id} has not used Stealthy yet!
+          </Text>
           <Text style={{marginTop: 30, marginRight: 5, marginLeft: 5}}>Stealthy uses {id}'s public key to encrypt data</Text>
-          <Text style={{marginTop: 30, marginRight: 5, marginLeft: 5, fontSize: 16}}>Invite {id} to securely chat with you!</Text>
-          <View style={{flexDirection: 'row', marginTop: 20}}>
+          <Text style={{marginTop: 30, marginBottom: 20, marginRight: 5, marginLeft: 5, fontSize: 16}}>Invite {id} to securely chat with you!</Text>
+          <View style={{flexDirection: 'row', margin: 5}}>
+            <Button
+              backgroundColor={'#34bbed'}
+              onPress={() => console.log('refresh')}
+              icon={{name: 'refresh', color: 'white'}}
+              title='Refresh'
+              raised
+            />
+            <Button
+              backgroundColor={'#34bbed'}
+              onPress={() => Communications.text('')}
+              icon={{name: 'chat', color: 'white'}}
+              title='Text'
+            />
             <Button
               backgroundColor={'#34bbed'}
               onPress={() => Communications.email([''],null,null,'Add me on Stealthy IM','')}
               icon={{name: 'email', color: 'white'}}
               title='Email'
               raised
-            />
-            <View style={{margin: 10}} />
-            <Button
-              backgroundColor={'#34bbed'}
-              onPress={() => Communications.text('')}
-              icon={{name: 'chat', color: 'white'}}
-              title='Message'
             />
           </View>
         </View>

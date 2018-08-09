@@ -2,9 +2,10 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Container, Header, Content, List, ListItem, Thumbnail, Text, Body } from 'native-base';
 import { Platform } from 'react-native'
-import { SearchBar } from 'react-native-elements'
+import { Button, SearchBar } from 'react-native-elements'
 import BlockstackContactsActions, { BlockstackContactsSelectors } from '../Redux/BlockstackContactsRedux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import Communications from 'react-native-communications';
 
 import {
   ActivityIndicator,
@@ -49,7 +50,6 @@ class BlockContactSearch extends Component {
   }
   parseContact(item) {
     const { profile, username, fullyQualifiedName } = item
-
     const { contactMgr } = this.props
     if (contactMgr.isExistingContactId(fullyQualifiedName)) {
       this.props.navigation.goBack()
@@ -74,16 +74,52 @@ class BlockContactSearch extends Component {
     this.props.addNewContact(contact)
     this.props.setActiveContact(contact);
   }
-  createListItem(payload) {
-    return (payload && payload.results) ? payload.results.map((item, i) => (
-      <ListItem key={i} onPress={this.parseContact.bind(this, item)}>
-        <Thumbnail square size={80} source={{ uri: (item.profile.image && item.profile.image[0]) ? item.profile.image[0].contentUrl : '' }} />
-        <Body>
-          <Text>{(item.profile.name) ? `${item.profile.name} (${item.username})` : item.username}</Text>
-          <Text note>{item.profile.description ? item.profile.description : null}</Text>
-        </Body>
-      </ListItem>
-    )) : (this.state.showLoading) ? <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View> : null
+  createListItem(contact) {
+    const { payload, error } = contact
+    if (payload && payload.results) {
+      console.log('****', payload.results)
+      if (payload.results.length) {
+        return payload.results.map((item, i) => (
+          <ListItem key={i} onPress={this.parseContact.bind(this, item)}>
+            <Thumbnail square size={80} source={{ uri: (item.profile.image && item.profile.image[0]) ? item.profile.image[0].contentUrl : '' }} />
+            <Body>
+              <Text>{(item.profile.name) ? `${item.profile.name} (${item.username})` : item.username}</Text>
+              <Text note>{item.profile.description ? item.profile.description : null}</Text>
+            </Body>
+          </ListItem>
+        ))
+      }
+      else {
+        return (
+          <ListItem>
+            <Body>
+              <Text>No Profiles Found: Invite via Text/Email</Text>
+              <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 20}}>
+                <Button
+                  backgroundColor={'#34bbed'}
+                  onPress={() => Communications.email([''],null,null,'Add me on Stealthy IM','')}
+                  icon={{name: 'email', color: 'white'}}
+                  title='Email'
+                  raised
+                />
+                <Button
+                  backgroundColor={'#34bbed'}
+                  onPress={() => Communications.text('')}
+                  icon={{name: 'chat', color: 'white'}}
+                  title='Message'
+                />
+              </View>
+            </Body>
+          </ListItem>
+        )
+      }
+    }
+    else if (this.state.showLoading) {
+      return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View>
+    }
+    else {
+      return <ListItem>{null}</ListItem>
+    }
   }
   onChangeText = (text) => {
     const timeout = (text.length < 3) ? 1000 : 500
@@ -93,13 +129,13 @@ class BlockContactSearch extends Component {
         this.setState({showLoading: true})
       }, timeout);
     }
-    else if (text.length === 0) {
-      this.props.request('')
-      this.setState({showLoading: false})
+    else if (text.length < 1) {
+      this.onClear()
     }
   }
   onClear = () => {
     this.props.request('')
+    this.props.clear()
     this.setState({showLoading: false})
   }
   render() {
@@ -115,14 +151,14 @@ class BlockContactSearch extends Component {
           icon={{ type: 'material', name: 'search', size: 24 }}
           searchIcon={{ color: 'white', size: 24 }}
           onChangeText={this.onChangeText}
-          clearIcon={null}
+          clearIcon={'close'}
           onClear={this.onClear}
           onCancel={this.onClear}
           autoCorrect={false}
           autoCapitalize='none'
           placeholder='Search for contacts...' />
         <Content>
-          {this.createListItem(this.props.contact.payload)}
+          {this.createListItem(this.props.contact)}
         </Content>
       </Container>
     );
@@ -140,7 +176,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     request: (data) => dispatch(BlockstackContactsActions.blockstackContactsRequest({data})),
-    clear: () => dispatch(BlockstackContactsActions.blockstackContactsClear()),
+    clear: () => dispatch(BlockstackContactsActions.blockstackContactsFailure()),
     addNewContact: (contact) => dispatch(EngineActions.addNewContact(contact)),
     setContactAdded: (flag) => dispatch(EngineActions.setContactAdded(flag)),
     setActiveContact: (contact) => dispatch(EngineActions.setActiveContact(contact)),

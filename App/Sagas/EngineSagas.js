@@ -41,6 +41,19 @@ const createEngine = (userData) => {
                             )
 }
 
+function* watcheEngineFaultChannel() {
+  const channel = eventChannel(emitter => {
+    EngineInstance.on('me-fault', (engineFault) => emitter(engineFault))
+    return () => {
+      console.log(`Messaging Engine Fucked`)
+    }
+  })
+  while (true) {
+    const engineFault = yield take(channel)
+    yield put(EngineActions.setEngineFaultial(engineFault)) 
+  }
+}
+
 function* watchInitialzedEventChannel() {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-initialized', (engineInit) => emitter(engineInit))
@@ -48,8 +61,10 @@ function* watchInitialzedEventChannel() {
       console.log(`Messaging Engine initialized`)
     }
   })
-  const engineInit = yield take(channel)
-  yield put(EngineActions.setEngineInitial(engineInit))
+  while (true) {
+    const engineInit = yield take(channel)
+    yield put(EngineActions.setEngineInitial(engineInit))
+  }
 }
 
 function* watchContactMgrEventChannel() {
@@ -205,6 +220,7 @@ export function* startEngine (action) {
   EngineInstance = yield call (createEngine, userData)
   const engineInit = yield select(EngineSelectors.getEngineInit)
   EngineInstance.componentDidMountWork(engineInit, userData["username"])
+  yield fork(watcheEngineFaultChannel)
   yield fork(watchInitialzedEventChannel)
   yield fork(watchContactMgrEventChannel)
   yield fork(watchMessagesEventChannel)
@@ -255,7 +271,7 @@ export function * getActiveUserProfile (api, action) {
 
 export default function* engineSagas(api) {
   yield takeLatest(EngineTypes.SET_USER_DATA, getToken)
-  yield takeLatest(EngineTypes.SET_USER_DATA, startEngine)
+  yield takeLatest([EngineTypes.SET_USER_DATA, EngineTypes.RESTART_ENGINE], startEngine)
   yield takeLatest(EngineTypes.SET_USER_DATA, getUserProfile, api)
   yield takeLatest(EngineTypes.SET_USER_DATA, getIntegrationData)
   yield takeEvery(EngineTypes.SET_ACTIVE_CONTACT, getActiveUserProfile, api)

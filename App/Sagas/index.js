@@ -22,7 +22,5 @@ const api = DebugConfig.useFixtures ? FixtureAPI : API.create()
 
 export default function * root () {
   yield fork(engineSagas, api)
-  yield all([
-    takeLatest(BlockstackContactsTypes.BLOCKSTACK_CONTACTS_REQUEST, getBlockstackContacts, api)
-  ])
+  yield takeLatest(BlockstackContactsTypes.BLOCKSTACK_CONTACTS_REQUEST, getBlockstackContacts, api)
 }

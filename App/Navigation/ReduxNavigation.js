@@ -1,10 +1,11 @@
 import React from 'react'
-import { AsyncStorage, BackHandler, NativeModules } from 'react-native'
+import { AsyncStorage, BackHandler, NativeModules, View, Text, Image } from 'react-native'
 import { addNavigationHelpers } from 'react-navigation'
 import { createReduxBoundAddListener } from 'react-navigation-redux-helpers'
 import { connect } from 'react-redux'
 import AppNavigation from './AppNavigation'
 import { Root } from "native-base";
+import { Button } from 'react-native-elements'
 import BackgroundFetch from "react-native-background-fetch";
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 const common = require('./../common.js');
@@ -217,6 +218,29 @@ class ReduxNavigation extends React.Component {
 
 
   render () {
+    if (this.props.engineFault) {
+      // console.log("Engine Fault", this.props.engineFault, this.props.userData)
+      return (
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
+          <Text style={{fontSize: 30, fontWeight: 'bold', marginBottom: 20}}>
+            Stealthy Error
+          </Text>
+          <Image
+            style={{width: 300, height: 300}}
+            source={{uri: 'https://media.giphy.com/media/bi6RQ5x3tqoSI/giphy.gif'}}
+          />
+          <View style={{flexDirection: 'row', marginTop: 20}}>
+            <Button
+              backgroundColor={'#34bbed'}
+              onPress={() => this.props.dispatch(EngineActions.restartEngine(this.props.userData))}
+              icon={{name: 'refresh', color: 'white'}}
+              title='Restart'
+              raised
+            />
+          </View>
+        </View>
+      )
+    }
     return (
       <Root>
         <AppNavigation
@@ -232,7 +256,9 @@ const mapStateToProps = (state) => {
   return {
     nav: state.nav,
     publicKey: EngineSelectors.getPublicKey(state),
+    engineFault: EngineSelectors.getEngineFault(state),
     engineShutdown: EngineSelectors.getEngineShutdown(state),
+    userData: EngineSelectors.getUserData(state),
     token: EngineSelectors.getToken(state),
   }
 }

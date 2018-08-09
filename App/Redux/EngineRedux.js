@@ -30,6 +30,8 @@ const { Types, Creators } = createActions({
   newNotification: ['senderInfo'],
   setBearerToken: ['bearerToken'],
   setSession: ['session'],
+  setEngineFault: ['engineFault'],
+  restartEngine: ['userData'],
 })
 
 export const EngineTypes = Types
@@ -55,6 +57,7 @@ export const INITIAL_STATE = Immutable({
   publicKey: '',
   bearerToken: '',
   session: '',
+  engineFault: '',
 })
 
 /* ------------- Selectors ------------- */
@@ -75,6 +78,7 @@ export const EngineSelectors = {
   getEngineShutdown: state => state.engine.engineShutdown,
   getBearerToken: state => state.engine.bearerToken,
   getSession: state => state.engine.session,
+  getEngineFault: state => state.engine.engineFault,
 }
 
 /* ------------- Reducers ------------- */
@@ -157,6 +161,16 @@ export const setEngineShutdown = (state, { engineShutdown }) => {
   return state.merge({ engineShutdown })
 }
 
+// engine has gone into a bad state
+export const setEngineFault = (state, { engineFault }) => {
+  return state.merge({ engineFault })
+}
+
+// engine has gone into a bad state
+export const restartEngine = (state) => {
+  return state.merge({ engineFault: false })
+}
+
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -176,4 +190,6 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_ENGINE_SHUTDOWN]: setEngineShutdown,
   [Types.SET_BEARER_TOKEN]: setBearerToken,
   [Types.SET_SESSION]: setSession,
+  [Types.SET_ENGINE_FAULT]: setEngineFault,
+  [Types.RESTART_ENGINE]: restartEngine,
 })
