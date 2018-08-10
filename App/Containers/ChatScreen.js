@@ -58,20 +58,28 @@ class ChatScreen extends Component {
     this._isMounted = false;
     this._isAlright = null;
     this.activeContact = undefined;
+    this.publicKey = undefined
   }
 
-  configWithActiveContact = (anActiveContact) => {
-    if (this.activeContact || !anActiveContact) {
+  configWithActiveContact = (anActiveContact, force=false, callSetState=false) => {
+    if ((this.activeContact && !force) || !anActiveContact) {
       return
     }
 
     this.activeContact = anActiveContact
+    this.publicKey = (this.activeContact) ? this.activeContact.publicKey : undefined
 
     const notificationPath = common.getDbNotificationPath(anActiveContact.publicKey)
     firebaseInstance.getFirebaseRef(`${notificationPath}/token`).once('value')
     .then((snapshot) => {
       if (snapshot.val()) {
-        this.state.token = snapshot.val()
+        if (!callSetState) {
+          this.state.token = snapshot.val()
+        } else {
+          this.setState({
+            token: snapshot.val()
+          })
+        }
       }
     });
 
@@ -113,6 +121,16 @@ class ChatScreen extends Component {
   componentWillReceiveProps(nextProps) {
     if (!this.activeContact) {
       return
+    }
+    if (!this.publicKey) {
+      if (nextProps.contactMgr && nextProps.contactMgr.hasPublicKey()) {
+        const activeContact = nextProps.contactMgr.getActiveContact()
+        // Ugly AF configWithActiveContact designed to be called before UI
+        // exists. Modified it to work after UI exists with setState call option.
+        const FORCE = true
+        const CALL_SET_STATE = true
+        this.configWithActiveContact(activeContact, FORCE, CALL_SET_STATE)
+      }
     }
     const { messages, dappUrl, dappMessage } = nextProps
     if (dappMessage) {
@@ -369,8 +387,7 @@ class ChatScreen extends Component {
   }
 
   render() {
-    const { publicKey } = this.activeContact
-    if (!publicKey) {
+    if (!this.publicKey) {
       const {id} = this.activeContact
       return (
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
@@ -382,7 +399,10 @@ class ChatScreen extends Component {
           <View style={{flexDirection: 'row', margin: 5}}>
             <Button
               backgroundColor={'#34bbed'}
-              onPress={() => console.log('refresh')}
+              onPress={() => {
+                console.log('refresh')
+                this.props.updateContactPubKey(id)
+              }}
               icon={{name: 'refresh', color: 'white'}}
               title='Refresh'
               raised
@@ -457,6 +477,7 @@ const mapDispatchToProps = (dispatch) => {
     handleOutgoingMessage: (text, json) => dispatch(EngineActions.setOutgoingMessage(text, json)),
     sendNotification: (token, publicKey, bearerToken) => dispatch(EngineActions.sendNotification(token, publicKey, bearerToken)),
     handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),
+    updateContactPubKey: (aContactId) => dispatch(EngineActions.updateContactPubKey(aContactId)),
     setDappUrl: (dappUrl) => dispatch(DappActions.setDappUrl(dappUrl)),
     setDappMessage: (dappMessage) => dispatch(DappActions.setDappMessage(dappMessage)),
   }

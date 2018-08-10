@@ -50,7 +50,7 @@ function* watcheEngineFaultChannel() {
   })
   while (true) {
     const engineFault = yield take(channel)
-    yield put(EngineActions.setEngineFaultial(engineFault)) 
+    yield put(EngineActions.setEngineFaultial(engineFault))
   }
 }
 
@@ -183,6 +183,10 @@ function* deleteContact(action) {
   EngineInstance.handleDeleteContact(null, { contact: deleteContact })
 }
 
+function* updateContactPubKey(action) {
+  EngineInstance.updateContactPubKey(action.aContactId)
+}
+
 function* getToken() {
   const api = DebugConfig.useFixtures ? FixtureAPI : API.getAccessToken("https://us-central1-coldmessage-ae5bc.cloudfunctions.net/getAccessToken")
   const response = yield call (api.token)
@@ -237,6 +241,7 @@ export function* startEngine (action) {
   yield takeLatest(EngineTypes.UPDATE_USER_SETTINGS, updateUserSettings)
   yield takeLatest(EngineTypes.BACKGROUND_REFRESH, backgroundTasks)
   yield takeLatest(EngineTypes.HANDLE_DELETE_CONTACT, deleteContact)
+  yield takeLatest(EngineTypes.UPDATE_CONTACT_PUB_KEY, updateContactPubKey)
   yield takeEvery(EngineTypes.NEW_NOTIFICATION, notificationTasks)
 }
 

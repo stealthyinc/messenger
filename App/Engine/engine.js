@@ -788,6 +788,33 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.writeSettings(this.settings);
   }
 
+  async updateContactPubKey(aContactId) {
+    const contact = this.contactMgr.getContact(aContactId)
+    if (contact && !this.contactMgr.hasPublicKey(contact)) {
+      let publicKey = undefined
+      try {
+        publicKey = await this._fetchPublicKey(aContactId)
+      } catch (error) {
+        // Suppress
+        return
+      }
+      if (!publicKey) {
+        return
+      }
+
+      this.contactMgr.setPublicKey(aContactId, publicKey)
+      this.updateContactMgr()
+      try {
+        await this._writeContactList(this.contactMgr.getAllContacts())
+      } catch (error) {
+        // Suppress for now
+        // TODO: should this emit me-fault ?
+      }
+    }
+  }
+
+  // TODO: wipe this out of we don't use it anywhere (might be a good idea on
+  //       startup)
   updateContactPubKeys() {
     for (const contact of this.contactMgr.getContacts()) {
       const contactIds = [];
@@ -1144,22 +1171,38 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   //
-  _writeContactList(aContactArr) {
-    return utils.encryptObj(this.publicKey, aContactArr, ENCRYPT_CONTACTS)
-    .then(contactsFileData => {
-      return this.io.writeLocalFile(this.userId, 'contacts.json', contactsFileData)
-      .then(() => {
-        // TODO: get this event out of here--it shouldn't be tied to contact save,
-        //       but rather to the event/code that was started by showAdd.
-        // TODO: is this even needed?
-        this.emit('me-close-add-ui');
-        return
-      })
-      .catch((err) => {
-        console.log(`ERROR(engine.js::_writeContactList): ${err}`)
-        return
-      })
-    })
+  async _writeContactList(aContactArr) {
+    const method = 'MessagingEngine::_writeContactList'
+    let encContactsData = undefined
+    try {
+      encContactsData = await utils.encryptObj(this.publicKey, aContactArr, ENCRYPT_CONTACTS)
+    } catch (error) {
+      throw utils.fmtErrorStr(`failed to encrypt contact list.`, method, error)
+    }
+
+    try {
+      await this.io.writeLocalFile(this.userId, 'contacts.json', encContactsData)
+    } catch (error1) {
+      try {
+        await this.io.writeLocalFile(this.userId, 'contacts.json', encContactsData)
+      } catch (error2) {
+        try {
+          await this.io.writeLocalFile(this.userId, 'contacts.json', encContactsData)
+        } catch (error3) {
+          // We write the contact list quite frequently so it's not clear when
+          // it's important to throw on failure (other than encryption above).
+          // For now we'll suppress it and log it
+          const errStr = utils.fmtErrorStr('failed to write contacts.json', method, error3)
+          console.log(errStr)
+          return
+        }
+      }
+    }
+
+    // TODO: get this event out of here--it shouldn't be tied to contact save,
+    //       but rather to the event/code that was started by showAdd.
+    // TODO: is this even needed?
+    this.emit('me-close-add-ui')
   }
 
   // TODO: This is a rather awful way to implement an n tries method.

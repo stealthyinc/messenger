@@ -130,7 +130,6 @@ class Graphite {
     if (aGraphiteIndex) {
       for (const element of aGraphiteIndex) {
         if (element &&
-            element.author &&
             element.id &&
             element.fileType &&
             element.title ) {
@@ -138,11 +137,12 @@ class Graphite {
           // const fileName = `relay.id-${element.id}`
           const fileName = `${this.userId}-${element.id}`
           const fileUrl = getFileUrl(fileName)
+          const author = element.author ? element.author : ''
 
           const fileData = {
             title : `${element.title}`,
             description : '',
-            author : `${element.author}`,
+            author : `${author}`,
             decryptable : {
               user : 'TBD',
               key : 'Graphite'

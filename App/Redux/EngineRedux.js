@@ -3,7 +3,10 @@ import { NativeModules } from 'react-native'
 import Immutable from 'seamless-immutable'
 
 /* ------------- Types and Action Creators ------------- */
-
+// Implicit Indirection:
+// The name on the left maps to an engine type elsewhere in the code. For instance
+// you will find setOutgoingMessage --> EngineTypes.SET_OUTGOING_MESSAGE.
+//
 const { Types, Creators } = createActions({
   setEngineFailure: null,
   setUserData:['userData'],
@@ -32,6 +35,7 @@ const { Types, Creators } = createActions({
   setSession: ['session'],
   setEngineFault: ['engineFault'],
   restartEngine: ['userData'],
+  updateContactPubKey: ['aContactId'],
 })
 
 export const EngineTypes = Types
