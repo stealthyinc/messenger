@@ -50,7 +50,7 @@ function* watcheEngineFaultChannel() {
   })
   while (true) {
     const engineFault = yield take(channel)
-    yield put(EngineActions.setEngineFaultial(engineFault))
+    yield put(EngineActions.setEngineFault(engineFault))
   }
 }
 
