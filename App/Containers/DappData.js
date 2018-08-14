@@ -7,6 +7,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import DappActions, { DappSelectors } from '../Redux/DappRedux'
 import { Divider, List, ListItem } from 'react-native-elements'
 import GraphiteIcon from '../Images/GraphiteIcon.png';
+import TravelstackIcon from '../Images/TravelIcon.png'
 import BlockSignIcon from '../Images/BlockSignIcon.png';
 import CryptoIcon from '../Images/CryptoIcon.png';
 
@@ -124,6 +125,17 @@ class DappData extends Component {
             title={'Graphite Docs'}
             subtitle={'Decentralized G-Suite'}
             avatar={GraphiteIcon}
+            hideChevron={true}
+          />
+          {graphiteCards}
+        </List>
+        <Divider style={{ backgroundColor: '#34bbed', height: 8 }} />
+        <List>
+          <ListItem
+            key={0}
+            title={'Travelstack'}
+            subtitle={'Decentralized Instagram'}
+            avatar={TravelstackIcon}
             hideChevron={true}
           />
           {graphiteCards}

@@ -26,6 +26,7 @@ const { ContactManager } = require('./messaging/contactManager.js');
 const { Discovery } = require('./misc/discovery.js')
 
 const { Graphite } = require('./integrations/graphite.js')
+const { StealthyIndexReader } = require('./integrations/stealthyIndexReader.js')
 
 const common = require('./../common.js');
 
@@ -349,7 +350,13 @@ export class MessagingEngine extends EventEmitterAdapter {
     // add a busy/working block to prevent multiple read requests:
     const graphiteIntegration = new Graphite(this.io, this.userId, this.privateKey)
     this.indexIntegrations['Graphite'] = graphiteIntegration
+    //
+    const travelStackIntegration = new StealthyIndexReader(
+      this.userId, this.privateKey, this.io, 'https://app.travelstack.club')
+    this.indexIntegrations['Travelstack'] = travelStackIntegration
+    
     this.refreshIntegrationData('Graphite')
+    this.refreshIntegrationData('Travelstack')
   }
 
   async _configureSessionManagement() {
