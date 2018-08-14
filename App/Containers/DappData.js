@@ -206,7 +206,6 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     setDappUrl: (dappUrl) => dispatch(DappActions.setDappUrl(dappUrl)),
-    setDappData: (dappData) => dispatch(DappActions.setDappData(dappData)),
     setDappMessage: (dappMessage) => dispatch(DappActions.setDappMessage(dappMessage)),
     refreshIntegrationData: () => dispatch(DappActions.refreshIntegrationData())
   }

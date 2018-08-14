@@ -6,7 +6,7 @@ import Immutable from 'seamless-immutable'
 const { Types, Creators } = createActions({
   setDapp: '',
   setDappUrl: ['dappUrl'],
-  setDappData: ['dappData'],
+  setDappData: ['dapp', 'data'],
   setDappError: ['dappError'],
   setDappMessage: ['dappMessage'],
   refreshIntegrationData: [''],
@@ -48,8 +48,17 @@ export const setDappUrl = (state, { dappUrl }) => {
 }
 
 // send dapp data
-export const setDappData = (state, { dappData }) => {
-  return state.merge({ dappData })
+export const setDappData = (state, { dapp, data }) => {
+  if (data) {
+    let { dappData } = state
+    if (!dappData)
+      dappData = {}
+    dappData[dapp] = data[dapp]
+    return state.merge({ 
+      dappData
+    })
+  }
+  return state
 }
 
 // send dapp message

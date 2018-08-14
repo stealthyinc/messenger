@@ -148,8 +148,9 @@ function* watchIntegrationDataChannel() {
   })
   while (true) {
     const { appName, error, indexData } = yield take(channel)
+    console.log("8***", appName, indexData)
     yield put(DappActions.setDapp(appName))
-    yield put(DappActions.setDappData(indexData))
+    yield put(DappActions.setDappData(appName, indexData))
     yield put(DappActions.setDappError({dappError: error}))
   }
 }
