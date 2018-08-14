@@ -237,6 +237,13 @@ class ReduxNavigation extends React.Component {
               title='Restart'
               raised
             />
+            <Button
+              backgroundColor={'#34bbed'}
+              onPress={() => this.___startLogOutSequence()}
+              icon={{name: 'close', color: 'white'}}
+              title='Logout'
+              raised
+            />
           </View>
         </View>
       )
