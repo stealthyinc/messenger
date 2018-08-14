@@ -100,6 +100,33 @@ class DappData extends Component {
         )
       }
     }
+
+    let travelstackCards = []
+    let travelstackData = undefined
+    try {
+      travelstackData = this.props.dappData['Travelstack']
+    } catch (error) {
+      console.log('INFO(DappData::render): Travelstack data undefined.')
+    }
+    if (travelstackData) {
+      const urlBase = travelstackData.urlBase
+      for (const item in travelstackData.resources) {
+        const resource = travelstackData.resources[item]
+        const {title, utcTime, relativePath, version} = resource
+        const avatar = `${urlBase}${relativePath}`
+        travelstackCards.push(
+          <ListItem
+            key={item}
+            roundAvatar
+            title={title}
+            subtitle=''
+            avatar={{uri: avatar}}
+            onPress={() => this.sendDappUrlMessage(avatar, resource)}
+          />
+        )
+      }
+    }
+
     let blockusignCards = []
     for (const item in blockusignData) {
       const data = blockusignData[item]
@@ -138,7 +165,7 @@ class DappData extends Component {
             avatar={TravelstackIcon}
             hideChevron={true}
           />
-          {graphiteCards}
+          {travelstackCards}
         </List>
         <Divider style={{ backgroundColor: '#34bbed', height: 8 }} />
         <List>

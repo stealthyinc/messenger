@@ -155,7 +155,7 @@ module.exports = class GaiaIO extends BaseIO {
     });
   }
 
-  _getGaiaHubUrl(aUserName, anAppUrl='https://www.stealthy.im' , useCache=true) {
+  getGaiaHubUrl(aUserName, anAppUrl='https://www.stealthy.im' , useCache=true) {
     return new Promise((resolve, reject) => {
       if (!aUserName) {
         reject('aUserName is not defined')
@@ -165,7 +165,7 @@ module.exports = class GaiaIO extends BaseIO {
         api.getUserGaiaNS(aUserName, anAppUrl)
         .then((gaiaHubUrl) => {
           if (!gaiaHubUrl) {
-            reject(`ERROR(gaiaIO.js::_getGaiaHubUrl): unable to find gaia hub for user:${aUserName}, app:${anAppUrl}`)
+            reject(`ERROR(gaiaIO.js::getGaiaHubUrl): unable to find gaia hub for user:${aUserName}, app:${anAppUrl}`)
           } else {
             this.setHubCacheEntry(aUserName, anAppUrl, gaiaHubUrl)
             resolve(gaiaHubUrl)
@@ -187,7 +187,7 @@ module.exports = class GaiaIO extends BaseIO {
   //
   _read_iOS(username, filePath) {
     return new Promise((resolve, reject) => {
-      this._getGaiaHubUrl(username)
+      this.getGaiaHubUrl(username)
       .then((gaiaHubPath) => {
         if (gaiaHubPath) {
           getRawFile(filePath, gaiaHubPath, (error, content) => {
@@ -240,7 +240,7 @@ module.exports = class GaiaIO extends BaseIO {
     }
 
     return new Promise((resolve, reject) => {
-      this._getGaiaHubUrl(aUserName, anAppUrl)
+      this.getGaiaHubUrl(aUserName, anAppUrl)
       .then((gaiaHubUrl) => {
         if (gaiaHubUrl) {
           getRawFile(aFilePath, gaiaHubUrl, (error, content) => {

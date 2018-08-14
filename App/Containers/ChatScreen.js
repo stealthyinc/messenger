@@ -141,13 +141,17 @@ class ChatScreen extends Component {
       const {title} = dappMessage
       // TODO: custom renderer with graphite icon
       const graphiteLogo = 'https://image.ibb.co/hde71b/AppIcon.png'
+      const travelstackLogo = 'https://app.travelstack.club/icon-192x192.png'
+      const image = (dappUrl.includes('serene-hamilton') ||
+                     dappUrl.includes('graphite')) ?
+                     graphiteLogo : travelstackLogo
       // const messageContent = `${name} shared "${dappData.title}" with you:\n\n${dappUrl}`
       const fileMessage = [{
         createdAt: time,
         text: null,
         image: null,
         gtext: title,
-        gimage: graphiteLogo,
+        gimage: image,
         url: dappUrl,
         user: {
           _id: username,

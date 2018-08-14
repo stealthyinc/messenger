@@ -354,7 +354,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     const travelStackIntegration = new StealthyIndexReader(
       this.userId, this.privateKey, this.io, 'https://app.travelstack.club')
     this.indexIntegrations['Travelstack'] = travelStackIntegration
-    
+
     this.refreshIntegrationData('Graphite')
     this.refreshIntegrationData('Travelstack')
   }

@@ -25,7 +25,9 @@ class StealthyIndexReader {
 
   async readIndexData() {
     try {
-      this.indexData = await this._readIndexFile()
+      const result = await this._readIndexFile()
+      this.indexData = result.indexData
+      await this._addUrlBase()
     } catch (error) {
       throw(`ERROR(StealthyIndex:readIndexData): unable to read index data from index file.\n${error}`)
     }
@@ -62,6 +64,19 @@ class StealthyIndexReader {
     }
 
     return recovered
+  }
+
+  async _addUrlBase() {
+    let urlBase = undefined
+    try {
+      urlBase = await this.ioInst.getGaiaHubUrl(this.userId, this.appUrl)
+    } catch (error) {
+      throw `ERROR(StealthyIndexReader::_addUrlBase) Failed to get GAIA hub URL.`
+    }
+
+    if (urlBase) {
+      this.indexData['urlBase'] = urlBase
+    }
   }
 }
 
