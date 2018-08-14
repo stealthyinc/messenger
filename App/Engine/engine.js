@@ -125,23 +125,23 @@ export class MessagingEngine extends EventEmitterAdapter {
   // Returns the current integration data for specified appName and issues an
   // me-integration-data event.
   getIntegrationData(appName = 'Graphite') {
-    const method = 'engine.js::getIntegrationData'
-    let error = undefined
-    let indexData = undefined
-
-    if (!appName) {
-      error = `ERROR(${method}): appName is not defined.`
-    } else if (!this.indexIntegrations ||
-               !this.indexIntegrations.hasOwnProperty(appName)) {
-      error = `ERROR(${method}): no integration for ${appName} available.`
-    }
-
-    if (!error) {
-      indexData = {}
-      indexData[appName] = this.indexIntegrations[appName].getIndexData()
-    }
-
-    this.emit('me-integration-data', appName, error, indexData)
+    // const method = 'engine.js::getIntegrationData'
+    // let error = undefined
+    // let indexData = undefined
+    //
+    // if (!appName) {
+    //   error = `ERROR(${method}): appName is not defined.`
+    // } else if (!this.indexIntegrations ||
+    //            !this.indexIntegrations.hasOwnProperty(appName)) {
+    //   error = `ERROR(${method}): no integration for ${appName} available.`
+    // }
+    //
+    // if (!error) {
+    //   indexData = {}
+    //   indexData[appName] = this.indexIntegrations[appName].getIndexData()
+    // }
+    //
+    // this.emit('me-integration-data', appName, error, indexData)
   }
 
   // Updates integration data for specified appName and issues an me-integration-data

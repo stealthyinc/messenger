@@ -1,6 +1,8 @@
 import { createReducer, createActions } from 'reduxsauce'
 import Immutable from 'seamless-immutable'
 
+const utils = require('./../Engine/misc/utils.js');
+
 /* ------------- Types and Action Creators ------------- */
 
 const { Types, Creators } = createActions({
@@ -51,11 +53,17 @@ export const setDappUrl = (state, { dappUrl }) => {
 export const setDappData = (state, { dapp, data }) => {
   if (data) {
     let { dappData } = state
-    if (!dappData)
-      dappData = {}
-    dappData[dapp] = data[dapp]
-    return state.merge({ 
-      dappData
+
+    // dappData is immutable, so we deep copy it to append new entries
+    // TODO: PBJ to look into possible optimizations
+    let dappDataCopy = utils.deepCopyObj(dappData)
+    if (!dappDataCopy) {
+      dappDataCopy = {}
+    }
+    dappDataCopy[dapp] = data[dapp]
+
+    return state.merge({
+      dappData: dappDataCopy
     })
   }
   return state
