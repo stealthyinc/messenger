@@ -4,14 +4,16 @@ import { TabNavigator, TabBarBottom } from 'react-navigation';
 import ConversationScreen from './ConversationScreen'
 import ContactProfile from './ContactProfile'
 import ProfileScreen from './ProfileScreen'
-import WalletScreen from './WalletScreen'
+// import WalletScreen from './WalletScreen'
+import DiscoverScreen from './DiscoverScreen'
 import DappStore from './DappStore'
 
 export default TabNavigator(
   {
+    Discover: { screen: DiscoverScreen },
     Messages: { screen: ConversationScreen },
-    dApps: { screen: DappStore },
     // Wallet: { screen: WalletScreen },
+    dApps: { screen: DappStore },
     Profile: { screen: ProfileScreen },
   },
   {
@@ -25,6 +27,9 @@ export default TabNavigator(
         // else if (routeName === 'Wallet') {
         //   iconName = `ios-cash${focused ? '' : '-outline'}`;
         // }
+        else if (routeName === 'Discover') {
+          iconName = `ios-radio`;
+        }
         else if (routeName === 'dApps') {
           iconName = `ios-aperture`;
         }
