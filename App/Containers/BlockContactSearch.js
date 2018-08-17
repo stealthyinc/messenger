@@ -58,11 +58,11 @@ class BlockContactSearch extends Component {
 
     // TODO: look at merging this with code that handles engine query to bs endpoint
     //       (api.getUserProfile call results)
+    // For now, if no avatarUrl, make it undefined (pbj sets an image automatically)
     const { image, name, description } = profile
     const userImage = (image && image[0] &&
                        'contentUrl' in image[0]) ?
-                      image[0]['contentUrl'] :
-                      'https://react.semantic-ui.com/assets/images/wireframe/white-image.png'
+                      image[0]['contentUrl'] : undefined
 
     const contact = {
       description,
@@ -151,7 +151,6 @@ class BlockContactSearch extends Component {
           icon={{ type: 'material', name: 'search', size: 24 }}
           searchIcon={{ color: 'white', size: 24 }}
           onChangeText={this.onChangeText}
-          clearIcon={'close'}
           onClear={this.onClear}
           onCancel={this.onClear}
           autoCorrect={false}
