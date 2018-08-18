@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Animated, Easing, NativeModules, ScrollView, Text, Image, View } from 'react-native'
 import { DrawerNavigator, StackNavigator, SwitchNavigator } from 'react-navigation';
 import DiscoverScreen from '../Containers/DiscoverScreen'
-import FileDrawer from '../Containers/FileDrawer'
+// import FileDrawer from '../Containers/FileDrawer'
 import { Images } from '../Themes'
 
 // Styles

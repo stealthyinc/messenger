@@ -4,8 +4,6 @@ import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button, Icon } from 'react-native-elements'
 
-import FileDrawer from './FileDrawer'
-
 // Styles
 import styles from './Styles/ChatStyle'
 import {GiftedChat, Actions, Bubble, SystemMessage, InputToolbar} from 'react-native-gifted-chat';
