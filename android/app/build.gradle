@@ -101,13 +101,13 @@ def enableSeparateBuildPerCPUArchitecture = false
 def enableProguardInReleaseBuilds = false
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "com.stealthy"
         minSdkVersion 19
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
@@ -162,10 +162,11 @@ dependencies {
 
     implementation project(':react-native-vector-icons')
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "com.android.support:appcompat-v7:26.1.0"
+    implementation "com.android.support:appcompat-v7:27.1.1"
+    implementation "com.android.support:customtabs:27.1.1"
 //    implementation "com.facebook.react:react-native:0.55.4"  // From node_modules
-    implementation 'com.facebook.react:react-native:+'
-    implementation 'com.github.blockstack:blockstack-android:-SNAPSHOT'
+    implementation "com.github.blockstack:blockstack-android:-SNAPSHOT"
+    implementation "com.facebook.react:react-native:+"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }
 
