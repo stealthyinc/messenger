@@ -4,18 +4,10 @@ import android.app.Application;
 import org.blockstack.android.sdk.*;
 
 import com.facebook.react.ReactApplication;
-import com.wix.interactable.Interactable;
 import com.oblador.vectoricons.VectorIconsPackage;
-import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
 import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
-import com.amazonaws.amplify.pushnotification.RNPushNotificationPackage;
 import io.invertase.firebase.RNFirebasePackage;
-import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
-import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
-import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
-import io.invertase.firebase.RNFirebasePackage;
-import com.oblador.vectoricons.VectorIconsPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -39,15 +31,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-            new Interactable(),
-            new VectorIconsPackage(),
-            new ReactNativePushNotificationPackage(),
-            new ReactNativeConfigPackage(),
             new RNBackgroundFetchPackage(),
-            new RNPushNotificationPackage(),
-            new RNFirebasePackage(),
-            new RNBackgroundFetchPackage(),
-            new ReactNativePushNotificationPackage(),
             new ReactNativeConfigPackage(),
             new RNFirebasePackage(),
             new RNFirebaseAuthPackage(),
