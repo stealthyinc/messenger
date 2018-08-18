@@ -38,7 +38,69 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   const getBlockstackContacts = (username) => api.get(`/v1/search?query=${username}`)
 
   // Legacy endpoint profile search: https://core.blockstack.org/#resolver-endpoints-lookup-user
-  const getUserProfile = (username) => api.get(`/v1/users/${username}`)
+  //
+  // This one is cached--commenting it out:
+  //  const getUserProfile = (username) => api.get(`/v1/users/${username}`)
+  //
+  // Replacing it with the method below
+  const getUserProfile = async (aUserName, anAppUrl = 'https://www.stealthy.im') => {
+    const methodName = 'getUserProfile'
+    let profileData = undefined
+    try {
+      let preTranslatedProfileData = await getProfileFromNameSearch(aUserName, anAppUrl)
+      profileData = translateProfileData(aUserName, preTranslatedProfileData)
+    } catch(err) {
+      throw `ERROR(${methodName}): failed to get profile data from name search.\n${err}`
+    }
+    return profileData
+  }
+
+  // The different Blockstack end points return different profile data. We really
+  // need a gasket/shim to isolate us from that and changes, but for now, due to time
+  // constraints I'm translating the profile format to that which all the downstream
+  // code depends upon.
+  //
+  // The Tranlsation
+  // ---------------------------------------------------------------------------
+  // The profile link returned by querying the name endpoint is returned wrapped as follows:
+  // [
+  //   {
+  //     ...,
+  //     "payload": {
+  //       ...,
+  //       "claim": {
+  //         <profile data>
+  //       }
+  //     }
+  //   }
+  // ]
+  //
+  // We need to translate it into this structure, as returned by the .../vw/users/<username> endpoint:
+  // {
+  //   ok: true,
+  //   data: {
+    //   <user id> : {
+    //     ... *,
+    //     "profile": <profile data>
+    //     ... *
+    //   }
+  //   }
+  // }
+  //
+  // * = omitted fields that the downstream code is not using
+  // TODO: unify this with work below and elsewhere
+  const translateProfileData = (aUserId, theProfileData) => {
+    if (aUserId && theProfileData) {
+      let profileTranslation = {
+        ok: true,
+        data: {}
+      }
+      profileTranslation.data[aUserId] = {}
+      profileTranslation.data[aUserId]['profile'] = theProfileData
+      return profileTranslation
+    }
+    return undefined
+  }
 
   // NS (New school) profile search endpoint
   //   - https://core.blockstack.org/#resolver-endpoints-profile-search
