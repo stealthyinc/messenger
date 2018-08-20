@@ -63,6 +63,10 @@ module.exports.is_iOS = function() {
   return Platform.OS === 'ios';
 }
 
+module.exports.isAndroid = function() {
+  return Platform.OS === 'android'
+}
+
 module.exports.getAppContext = function(appToken) {
   let context = 'Stealthy';
 

@@ -133,12 +133,35 @@ class SignInScreen extends React.Component {
   _signInAsync = async () => {
     const {BlockstackNativeModule} = NativeModules;
     const baseUrl = "https://www.stealthy.im"
-    await BlockstackNativeModule.signIn(`${baseUrl}/redirect.html`, baseUrl, null, (error, events) => {
-      if (!error) {
-        this._getUserData()
+
+    if (utils.isAndroid()) {
+      let userData = undefined
+      try {
+        // TODO this might need to become multi-player
+        const config = {
+          appDomain: `${baseUrl}`,
+          scopes:["store_write"]
+        }
+        const sessionResult = await BlockstackNativeModule.createSession(config)
+        console.log(`Created: ${sessionResult['loaded']}`)
+        const result = await BlockstackNativeModule.signIn()
+        userData = {decentralizedID:result["decentralizedID"]}
+        console.log('Signed in!')
+        // TODO: is this userData the same as the content in _getUserData below?
+        //       I bet it's not--also look in that method, we'll need to get the
+        //       app public key if it's not set correctly.
+        //       It would be best if the way we do this is not messy.
+      } catch (error) {
+        console.log(`Error on signin: ${error}`)
       }
-    });
-  };
+    } else if (utils.is_iOS()) {
+      await BlockstackNativeModule.signIn(`${baseUrl}/redirect.html`, baseUrl, null, (error, events) => {
+        if (!error) {
+          this._getUserData()
+        }
+      });
+    }
+  }
 }
 
 const styles = StyleSheet.create({

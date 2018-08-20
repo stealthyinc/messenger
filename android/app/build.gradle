@@ -145,6 +145,10 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-vector-icons')
+    compile project(':react-native-firebase')
+    compile project(':react-native-config')
+    compile project(':react-native-background-fetch')
     implementation project(':react-native-vector-icons')
     implementation project(':react-native-background-fetch')
     implementation project(':react-native-config')
@@ -154,11 +158,13 @@ dependencies {
 //    implementation 'com.google.android.gms:play-services-base:10.2.0'
 //    implementation 'com.google.android.gms:play-services-maps:10.2.0'
     implementation 'com.google.android.gms:play-services-maps:15.0.0'
-    implementation "com.google.android.gms:play-services-base:15.0.0"
-    implementation "com.google.firebase:firebase-core:15.0.2"
-    implementation "com.google.firebase:firebase-auth:15.1.0"
-    implementation "com.google.firebase:firebase-messaging:15.0.2"
-    implementation "com.google.firebase:firebase-database:15.0.0"
+    implementation "com.google.android.gms:play-services-base:15.0.1"
+    implementation "com.google.firebase:firebase-core:16.0.1"
+    implementation "com.google.firebase:firebase-auth:16.0.2"
+    implementation "com.google.firebase:firebase-database:16.0.1"
+    implementation "com.google.firebase:firebase-messaging:17.1.0"
+    implementation 'me.leolin:ShortcutBadger:1.1.21@aar' // <-- Add this line if you wish to use badge on Android
+//    implementation "com.google.firebase:firebase-notifications:15.0.2"
 
     implementation project(':react-native-vector-icons')
     implementation fileTree(dir: "libs", include: ["*.jar"])

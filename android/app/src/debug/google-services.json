@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "574799779014",
+    "firebase_url": "https://coldmessage-ae5bc.firebaseio.com",
+    "project_id": "coldmessage-ae5bc",
+    "storage_bucket": "coldmessage-ae5bc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:574799779014:android:0b96df3dd5b2a237",
+        "android_client_info": {
+          "package_name": "com.stealthy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "574799779014-samljb4gu987s43in048qua36mc4fig6.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "574799779014-samljb4gu987s43in048qua36mc4fig6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjRcQguROafCVSt_cR6aW-f3_yyrvzmwg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
