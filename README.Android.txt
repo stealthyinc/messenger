@@ -5,4 +5,7 @@
         - if you don't do this, it will open to some address that doesn't work in the next step.
 
 3. Press debug play (the play button with the gear) in Android studio after opening the project.
-3. Press Cmd + M to get the react menu in the emmulator and select debug, hot reload, and live reload
+4. Press Cmd + M to get the react menu in the emmulator and select debug, hot reload, and live reload
+
+If you need to paste things into the emulator and the paste operation is doing strange things, use this command:
+        - adb shell input text "<some text>"
