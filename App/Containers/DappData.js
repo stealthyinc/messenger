@@ -110,18 +110,53 @@ class DappData extends Component {
     }
     if (travelstackData) {
       const urlBase = travelstackData.urlBase
-      for (const item in travelstackData.resources) {
-        const resource = travelstackData.resources[item]
+
+      // Combine the post resource and the image resource together for now.
+      // TODO: In the spec. make this a field called 'icon'.
+      //
+      let modTravelstackResources = DappData._getTravelstackDataWithIcons(travelstackData)
+
+      for (const item in modTravelstackResources) {
+        const resource = modTravelstackResources[item]
         const {title, utcTime, relativePath, version} = resource
-        const avatar = `${urlBase}${relativePath}`
+
+        // In StealthyIndex Version 0.1 (and Resource Version 0.0), urlBase
+        // was a string that was the base URL for all resources.
+        // In StealthyIndex Version 0.2 (and Resource Version 0.1), urlBase
+        // is a map:
+        // {
+        //   'image': <url>,
+        //   'browsable': <url2>,
+        //   'other': <url3>
+        // }
+        // In Stealthy Index Verion 0.3 we'll lock the resource and stealthy
+        // index versions together and allow individual resource base urls
+        // which take precedence. This resolving code will need to move to the
+        // stealthy index reader (unify it to preven problems). TODO
+        const resourceType = (resource.version > '0.0') ?
+          resource.resourceType : 'other'
+        if (!resourceType || resourceType !== 'browsable') {
+          continue
+        }
+        const resourceUrlBase = (urlBase.hasOwnProperty(resourceType)) ?
+          urlBase[resourceType] : urlBase
+        if (!resourceUrlBase) {
+          continue
+        }
+
+        const fileUrl = `${resourceUrlBase}${relativePath}`
+        // const avatar = (resourceType !== 'browsable') ?
+        //   {uri: fileUrl} : TravelstackIcon
+        const icon = (resource.hasOwnProperty('icon')) ?
+          resource['icon'] : TravelstackIcon
         travelstackCards.push(
           <ListItem
             key={item}
             roundAvatar
             title={title}
             subtitle=''
-            avatar={{uri: avatar}}
-            onPress={() => this.sendDappUrlMessage(avatar, resource)}
+            avatar={icon}
+            onPress={() => this.sendDappUrlMessage(fileUrl, resource)}
           />
         )
       }
@@ -192,6 +227,50 @@ class DappData extends Component {
       </View>
     )
   }
+
+  // Private:
+  // ---------------------------------------------------------------------------
+  static _getTravelstackDataWithIcons(theTravelstackResources) {
+    // Combine the post resource and the image resource together for now.
+    // TODO: In the spec. make this a field called 'icon'.
+    //
+    const urlBase = theTravelstackResources.urlBase
+
+    let resourcesMod = {}
+    for (const resourceIdx in theTravelstackResources.resources) {
+      const resource = theTravelstackResources.resources[resourceIdx]
+      const {title, utcTime, relativePath, version} = resource
+      const resourceType = (resource.hasOwnProperty('resourceType')) ?
+        resource.resourceType : undefined
+
+      if (!resourcesMod.hasOwnProperty(title)) {
+        resourcesMod[title] = {}
+      }
+
+      if (resourceType === 'image') {
+        const resourceUrlBase = (urlBase.hasOwnProperty(resourceType)) ?
+          urlBase[resourceType] : urlBase
+        if (resourceUrlBase) {
+          resourcesMod[title]['icon'] = `${resourceUrlBase}${relativePath}`
+        }
+      } else {
+        resourcesMod[title]['title'] = title
+        resourcesMod[title]['utcTime'] = utcTime
+        resourcesMod[title]['relativePath'] = relativePath
+        resourcesMod[title]['version'] = version
+        resourcesMod[title]['resourceType'] = resourceType
+      }
+    }
+
+    let resourcesArr = []
+    for (const resourceKey in resourcesMod) {
+      const resource = resourcesMod[resourceKey]
+      resourcesArr.push(resource)
+    }
+
+    return resourcesArr
+  }
+
 }
 
 const mapStateToProps = (state) => {

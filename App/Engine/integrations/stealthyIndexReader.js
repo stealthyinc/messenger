@@ -27,10 +27,24 @@ class StealthyIndexReader {
     try {
       const result = await this._readIndexFile()
       this.indexData = result.indexData
-      await this._addUrlBase()
     } catch (error) {
       throw(`ERROR(StealthyIndex:readIndexData): unable to read index data from index file.\n${error}`)
     }
+
+    let gaiaUrl = undefined
+    try {
+      gaiaUrl = await this.ioInst.getGaiaHubUrl(this.userId, this.appUrl)
+    } catch (error) {
+      // Suppress
+      console.log(`ERROR(StealthyIndexReader::_addUrlBase) Failed to get GAIA hub URL.`)
+    }
+
+    // TODO TODO TODO: This is way too proprietary and needs to be moved into
+    //                 the schema for web devs to set for a particular key.
+    //                 This is specific to TRAVELSTACK !!!!!!!!!!!!!!!!!!
+    this._setUrlBase('image', gaiaUrl)
+    this._setUrlBase('browsable', 'https://app.travelstack.club/')
+    this._setUrlBase('other', gaiaUrl)
 
     return this.indexData
   }
@@ -66,16 +80,13 @@ class StealthyIndexReader {
     return recovered
   }
 
-  async _addUrlBase() {
-    let urlBase = undefined
-    try {
-      urlBase = await this.ioInst.getGaiaHubUrl(this.userId, this.appUrl)
-    } catch (error) {
-      throw `ERROR(StealthyIndexReader::_addUrlBase) Failed to get GAIA hub URL.`
-    }
+  _setUrlBase(aKey, aBaseUrl) {
+    if (aKey && aBaseUrl) {
+      if (!this.indexData.hasOwnProperty('urlBase')) {
+        this.indexData.urlBase = {}
+      }
 
-    if (urlBase) {
-      this.indexData['urlBase'] = urlBase
+      this.indexData.urlBase[aKey] = aBaseUrl
     }
   }
 }
