@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { Provider } from 'react-redux'
 import RootContainer from './RootContainer'
 import createStore from '../Redux'
-import { AppState, AsyncStorage, PushNotificationIOS } from 'react-native'
+import { AppState, AsyncStorage, PushNotificationIOS, Platform } from 'react-native'
 
 import EngineActions from '../Redux/EngineRedux'
 import Amplify, { Analytics } from 'aws-amplify';
@@ -40,12 +40,13 @@ class App extends Component {
   }
   componentWillUnmount() {
     AppState.removeEventListener('change', this._handleAppStateChange);
-    firebaseInstance.cleanListners()
+    firebaseInstance.cleanNotificationListeners()
   }
   _handleAppStateChange = (nextAppState) => {
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
       console.log('App has come to the foreground!')
-      PushNotificationIOS.setApplicationIconBadgeNumber(0)
+      if (Platform.OS === 'ios')
+        PushNotificationIOS.setApplicationIconBadgeNumber(0)
     }
     this.setState({appState: nextAppState});
   }

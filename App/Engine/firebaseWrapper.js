@@ -1,6 +1,6 @@
 import firebase from 'react-native-firebase';
 import type { Notification, NotificationOpen } from 'react-native-firebase';
-import { AsyncStorage, PushNotificationIOS } from 'react-native'
+import { AsyncStorage, PushNotificationIOS, Platform } from 'react-native'
 import EngineActions from '../Redux/EngineRedux'
 
 class FirebaseWrapper {
@@ -91,7 +91,8 @@ class FirebaseWrapper {
       // Process your notification as required
       // ANDROID: Remote notifications do not contain the channel ID. You will have to specify this manually if you'd like to re-display the notification.
       console.log("notification displayed")
-      PushNotificationIOS.setApplicationIconBadgeNumber(1)
+      if (Platform.OS === 'ios')
+        PushNotificationIOS.setApplicationIconBadgeNumber(1)
       // alert("notification displayed")
     });
     this.notificationListener = firebase.notifications().onNotification((notification: Notification) => {

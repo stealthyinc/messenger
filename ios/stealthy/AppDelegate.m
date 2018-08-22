@@ -29,6 +29,8 @@
   
   NSURL *jsCodeLocation;
   
+  //index is for development
+  //main  is for production
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
 //  jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
   

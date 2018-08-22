@@ -140,7 +140,8 @@ class SignInScreen extends React.Component {
         // TODO this might need to become multi-player
         const config = {
           appDomain: `${baseUrl}`,
-          scopes:["store_write"]
+          redirectUrl: `${baseUrl}/redirect.html`,
+          scopes:["store_write", "publish_data"]
         }
         const sessionResult = await BlockstackNativeModule.createSession(config)
         console.log(`Created: ${sessionResult['loaded']}`)
