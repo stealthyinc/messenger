@@ -49,6 +49,8 @@ class MainActivity : ReactActivity() {
                             if (BlockstackNativeModule.currentSignInPromise != null) {
                                 val map = Arguments.createMap()
                                 map.putString("decentralizedID", userData.value!!.decentralizedID)
+                                map.putString("appPrivateKey", userData.value!!.appPrivateKey)
+                                map.putString("profile", userData.value!!.profile.toString())
                                 BlockstackNativeModule.currentSignInPromise!!.resolve(map)
                             }
                         }

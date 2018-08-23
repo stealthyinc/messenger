@@ -140,13 +140,15 @@ class SignInScreen extends React.Component {
         // TODO this might need to become multi-player
         const config = {
           appDomain: `${baseUrl}`,
-          redirectUrl: `${baseUrl}/redirect.html`,
+          redirectUrl: `${baseUrl}/redirectAndroid/index.html`,
           scopes:["store_write", "publish_data"]
         }
         const sessionResult = await BlockstackNativeModule.createSession(config)
         console.log(`Created: ${sessionResult['loaded']}`)
         const result = await BlockstackNativeModule.signIn()
-        userData = {decentralizedID:result["decentralizedID"]}
+        let did = {decentralizedID:result["decentralizedID"]}
+        let privateKey = {appPrivateKey:result["appPrivateKey"]}
+        let profile = {profile:result["profile"]}
         console.log('Signed in!')
         // TODO: is this userData the same as the content in _getUserData below?
         //       I bet it's not--also look in that method, we'll need to get the

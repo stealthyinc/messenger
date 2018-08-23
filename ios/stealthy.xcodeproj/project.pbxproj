@@ -352,6 +352,20 @@
 			remoteGlobalIDString = 835318541D52293F005738CD;
 			remoteInfo = RNBackgroundFetch;
 		};
+		751F44D9212DF17C009F3658 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 346FA43D49D54F0C99600EBB /* ReactNativeSocialShare.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 13B07F961A680F5B00A75B9A;
+			remoteInfo = ReactNativeSocialShare;
+		};
+		751F44DB212DF17C009F3658 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 346FA43D49D54F0C99600EBB /* ReactNativeSocialShare.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 00E356EE1AD99517003FC87E;
+			remoteInfo = ReactNativeSocialShareTests;
+		};
 		757B49262095225200B18E99 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C2B92B492DA14A0DA1A68079 /* RNVectorIcons.xcodeproj */;
@@ -372,13 +386,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 3D05745F1DE6004600184BB4;
 			remoteInfo = "RCTPushNotification-tvOS";
-		};
-		75BABF682103C41C00959131 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 75BABF642103C41C00959131 /* Interactable.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = CC0127971E3ACC3900B23C9F;
-			remoteInfo = Interactable;
 		};
 		75F0E50F20AB424300CB49D4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -441,6 +448,7 @@
 		2D02E4901E0B4A5D006451C7 /* stealthy-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "stealthy-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D16E6891FA4F8E400B85C8A /* libReact.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libReact.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		308C3457DDA847A3A25157EA /* Feather.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Feather.ttf; path = "../node_modules/native-base/Fonts/Feather.ttf"; sourceTree = "<group>"; };
+		346FA43D49D54F0C99600EBB /* ReactNativeSocialShare.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeSocialShare.xcodeproj; path = "../node_modules/react-native-social-share/ReactNativeSocialShare.xcodeproj"; sourceTree = "<group>"; };
 		3E51D955A6484354B8C696C7 /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
 		403D1E0A446C478FB77A85E1 /* MaterialCommunityIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialCommunityIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf"; sourceTree = "<group>"; };
 		501F8F8086C3417DB75C339C /* Ionicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Ionicons.ttf; path = "../node_modules/native-base/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
@@ -474,7 +482,6 @@
 		75A52FB820A930CC00AC6DAD /* BlockstackNativeModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BlockstackNativeModule.m; sourceTree = "<group>"; };
 		75A52FBB20A932D800AC6DAD /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		75A52FFD20A9355900AC6DAD /* stealthy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = stealthy.entitlements; path = stealthy/stealthy.entitlements; sourceTree = "<group>"; };
-		75BABF642103C41C00959131 /* Interactable.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Interactable.xcodeproj; path = "../node_modules/react-native-interactable/lib/ios/Interactable.xcodeproj"; sourceTree = "<group>"; };
 		75C3EB3D20E1B12400F5E81F /* libcryptopp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcryptopp.a; path = "../../../../../usr/local/cryptopp-ios/lib/libcryptopp.a"; sourceTree = "<group>"; };
 		75CB635A5D65494A95309E91 /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
@@ -488,9 +495,11 @@
 		A6EF6B5E2C5A47A091F248F7 /* Roboto.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Roboto.ttf; path = "../node_modules/native-base/Fonts/Roboto.ttf"; sourceTree = "<group>"; };
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 		B53705AE14A347578F21410B /* EvilIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = EvilIcons.ttf; path = "../node_modules/native-base/Fonts/EvilIcons.ttf"; sourceTree = "<group>"; };
+		C08C1682991D4F28B0894384 /* ReactNativeSocialShareTests.xctest */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ReactNativeSocialShareTests.xctest; sourceTree = "<group>"; };
 		C2B92B492DA14A0DA1A68079 /* RNVectorIcons.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNVectorIcons.xcodeproj; path = "../node_modules/react-native-vector-icons/RNVectorIcons.xcodeproj"; sourceTree = "<group>"; };
 		C337D41CF06C4BAF8467175D /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/native-base/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
 		C39ED776E6984F56A59D5DEF /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/native-base/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
+		CFCBCB57A530487EA2FA482A /* ReactNativeSocialShare.app */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ReactNativeSocialShare.app; sourceTree = "<group>"; };
 		D2D4FA5C0EB941D5AFBAACD8 /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = SimpleLineIcons.ttf; path = "../node_modules/native-base/Fonts/SimpleLineIcons.ttf"; sourceTree = "<group>"; };
 		D5C8BA4624DDACA84E596202 /* Pods-stealthyTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-stealthyTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-stealthyTests/Pods-stealthyTests.release.xcconfig"; sourceTree = "<group>"; };
 		D719A13518564780885CF668 /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/native-base/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
@@ -778,9 +787,20 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		751F44D5212DF17C009F3658 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				751F44DA212DF17C009F3658 /* ReactNativeSocialShare.app */,
+				751F44DC212DF17C009F3658 /* ReactNativeSocialShareTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		757B48F42095225200B18E99 /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
+				CFCBCB57A530487EA2FA482A /* ReactNativeSocialShare.app */,
+				C08C1682991D4F28B0894384 /* ReactNativeSocialShareTests.xctest */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -798,14 +818,6 @@
 			children = (
 				75A52FC120A932D800AC6DAD /* libRCTPushNotification.a */,
 				75A52FC320A932D800AC6DAD /* libRCTPushNotification-tvOS.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		75BABF652103C41C00959131 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				75BABF692103C41C00959131 /* libInteractable.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -830,7 +842,6 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				75BABF642103C41C00959131 /* Interactable.xcodeproj */,
 				7502F89020D0C9F000232E72 /* RNBackgroundFetch.xcodeproj */,
 				75A52FBB20A932D800AC6DAD /* RCTPushNotification.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
@@ -847,6 +858,7 @@
 				139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */,
 				C2B92B492DA14A0DA1A68079 /* RNVectorIcons.xcodeproj */,
 				29B796142E6E41EDA79519D7 /* RNFirebase.xcodeproj */,
+				346FA43D49D54F0C99600EBB /* ReactNativeSocialShare.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -1037,10 +1049,6 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 75BABF652103C41C00959131 /* Products */;
-					ProjectRef = 75BABF642103C41C00959131 /* Interactable.xcodeproj */;
-				},
-				{
 					ProductGroup = 00C302A81ABCB8CE00DB3ED1 /* Products */;
 					ProjectRef = 00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */;
 				},
@@ -1091,6 +1099,10 @@
 				{
 					ProductGroup = 146834001AC3E56700842450 /* Products */;
 					ProjectRef = 146833FF1AC3E56700842450 /* React.xcodeproj */;
+				},
+				{
+					ProductGroup = 751F44D5212DF17C009F3658 /* Products */;
+					ProjectRef = 346FA43D49D54F0C99600EBB /* ReactNativeSocialShare.xcodeproj */;
 				},
 				{
 					ProductGroup = 7502F89120D0C9F000232E72 /* Products */;
@@ -1361,6 +1373,20 @@
 			remoteRef = 7502F8BB20D0C9F000232E72 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		751F44DA212DF17C009F3658 /* ReactNativeSocialShare.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = ReactNativeSocialShare.app;
+			remoteRef = 751F44D9212DF17C009F3658 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		751F44DC212DF17C009F3658 /* ReactNativeSocialShareTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = ReactNativeSocialShareTests.xctest;
+			remoteRef = 751F44DB212DF17C009F3658 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		757B49272095225200B18E99 /* libRNVectorIcons.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1380,13 +1406,6 @@
 			fileType = archive.ar;
 			path = "libRCTPushNotification-tvOS.a";
 			remoteRef = 75A52FC220A932D800AC6DAD /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		75BABF692103C41C00959131 /* libInteractable.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libInteractable.a;
-			remoteRef = 75BABF682103C41C00959131 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		75F0E51020AB424300CB49D4 /* libRNFirebase.a */ = {
@@ -1653,12 +1672,15 @@
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/react-native-randombytes",
 					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-social-share/iOS",
 				);
 				INFOPLIST_FILE = stealthyTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -1689,12 +1711,15 @@
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/react-native-randombytes",
 					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-social-share/iOS",
 				);
 				INFOPLIST_FILE = stealthyTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -1739,6 +1764,7 @@
 					"/usr/local/cryptopp-ios/include",
 					"$(SRCROOT)/Firebase",
 					"$(SRCROOT)/Firebase/Headers",
+					"$(SRCROOT)/../node_modules/react-native-social-share/iOS",
 				);
 				INFOPLIST_FILE = stealthy/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -1791,6 +1817,7 @@
 					"/usr/local/cryptopp-ios/include",
 					"$(SRCROOT)/Firebase",
 					"$(SRCROOT)/Firebase/Headers",
+					"$(SRCROOT)/../node_modules/react-native-social-share/iOS",
 				);
 				INFOPLIST_FILE = stealthy/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -1834,11 +1861,14 @@
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/react-native-randombytes",
 					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-social-share/iOS",
 				);
 				INFOPLIST_FILE = "stealthy-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -1877,11 +1907,14 @@
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/react-native-randombytes",
 					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-social-share/iOS",
 				);
 				INFOPLIST_FILE = "stealthy-tvOS/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -1920,11 +1953,14 @@
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/react-native-randombytes",
 					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-social-share/iOS",
 				);
 				INFOPLIST_FILE = "stealthy-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
@@ -1963,11 +1999,14 @@
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/react-native-randombytes",
 					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-social-share/iOS",
 				);
 				INFOPLIST_FILE = "stealthy-tvOSTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
+					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",

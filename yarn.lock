@@ -8278,6 +8278,10 @@ react-native-scrollable-mixin@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/react-native-scrollable-mixin/-/react-native-scrollable-mixin-1.0.1.tgz#34a32167b64248594154fd0d6a8b03f22740548e"
 
+react-native-social-share@^1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/react-native-social-share/-/react-native-social-share-1.6.1.tgz#748a5d48a44893c1c55007275a200d1fb0cd9848"
+
 react-native-swipeout@^2.3.3:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/react-native-swipeout/-/react-native-swipeout-2.3.3.tgz#3b99db845ef75f0bfa467f1d8de0b7f7946326bd"

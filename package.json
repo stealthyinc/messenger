@@ -49,6 +49,7 @@
     "react-native-elements": "^0.19.1",
     "react-native-firebase": "^4.3.8",
     "react-native-gifted-chat": "^0.4.3",
+    "react-native-social-share": "^1.6.1",
     "react-native-swipeout": "^2.3.3",
     "react-native-swiper": "^1.5.13",
     "react-native-vector-icons": "^4.6.0",
