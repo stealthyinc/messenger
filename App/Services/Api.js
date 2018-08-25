@@ -280,6 +280,26 @@ const getAccessToken = (baseURL) => {
   }
 }
 
+const checkAccessToken = (baseURL) => {
+  const api = apisauce.create({
+    // base URL is read from the "constructor"
+    baseURL,
+    // here are some default headers
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Content-Type': 'application/json',
+    },
+    // 10 second timeout...
+    timeout: 10000
+  })
+
+  const access = () => api.get()
+
+  return {
+    access
+  }
+}
+
 // our "constructor"
 const notification = (baseURL, token, pk, bearerToken) => {
   // ------
@@ -369,5 +389,6 @@ const notification = (baseURL, token, pk, bearerToken) => {
 export default {
   create,
   getAccessToken,
+  checkAccessToken,
   notification
 }

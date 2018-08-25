@@ -115,7 +115,7 @@ class ProfileScreen extends React.Component {
                   (results) => {
                     console.log(results);
                   }
-                )} />
+              )} />
           </View>
           <Button
             onPress={this.props.screenProps.logout}
