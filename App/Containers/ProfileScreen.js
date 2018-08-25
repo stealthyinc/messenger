@@ -5,6 +5,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import { Toast } from 'native-base';
+import {
+  shareOnTwitter,
+} from 'react-native-social-share';
 
 const common = require('./../common.js');
 
@@ -100,6 +103,20 @@ class ProfileScreen extends React.Component {
                 })
                 this.props.updateUserSettings('notifications')}
               } />
+              <Icon
+                reverse
+                name='twitter'
+                type='font-awesome'
+                color='#34bbed'
+                onPress={() => 
+                  shareOnTwitter({
+                    'text':'You can securely message me at: pbj.id on @stealthyim!',
+                    // 'link':'https://www.stealthy.im',
+                  },
+                  (results) => {
+                    console.log(results);
+                  }
+                )} />
           </View>
           <Button
             onPress={this.props.screenProps.logout}
