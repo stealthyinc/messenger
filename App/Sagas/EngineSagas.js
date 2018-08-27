@@ -148,7 +148,6 @@ function* watchIntegrationDataChannel() {
   })
   while (true) {
     const { appName, error, indexData } = yield take(channel)
-    console.log("8***", appName, indexData)
     yield put(DappActions.setDapp(appName))
     yield put(DappActions.setDappData(appName, indexData))
     yield put(DappActions.setDappError({dappError: error}))
@@ -188,6 +187,14 @@ function* updateContactPubKey(action) {
   EngineInstance.updateContactPubKey(action.aContactId)
 }
 
+function* handleMobileForeground() {
+  EngineInstance.handleMobileForeground()
+}
+
+function* handleMobileBackground() {
+  EngineInstance.handleMobileBackground()
+}
+
 function* getToken() {
   const api = DebugConfig.useFixtures ? FixtureAPI : API.getAccessToken("https://us-central1-coldmessage-ae5bc.cloudfunctions.net/getAccessToken")
   const response = yield call (api.token)
@@ -220,6 +227,21 @@ function* getIntegrationData() {
   EngineInstance.getIntegrationData()
 }
 
+function* checkToken() {
+  const bearerToken = yield select(EngineSelectors.getBearerToken)
+  const baseUrl = "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + bearerToken
+  const api = DebugConfig.useFixtures ? FixtureAPI : API.checkAccessToken(baseUrl)
+  const response = yield call (api.access)
+  try {
+    if (response.data.error) {
+      yield call (getToken)
+    }
+  }
+  catch (error) {
+    yield call (getToken)
+  }
+}
+
 export function* startEngine (action) {
   const { userData } = action
   EngineInstance = yield call (createEngine, userData)
@@ -243,6 +265,8 @@ export function* startEngine (action) {
   yield takeLatest(EngineTypes.BACKGROUND_REFRESH, backgroundTasks)
   yield takeLatest(EngineTypes.HANDLE_DELETE_CONTACT, deleteContact)
   yield takeLatest(EngineTypes.UPDATE_CONTACT_PUB_KEY, updateContactPubKey)
+  yield takeLatest(EngineTypes.FORE_GROUND, handleMobileForeground)
+  yield takeLatest(EngineTypes.BACK_GROUND, handleMobileBackground)
   yield takeEvery(EngineTypes.NEW_NOTIFICATION, notificationTasks)
 }
 
@@ -277,6 +301,7 @@ export function * getActiveUserProfile (api, action) {
 
 export default function* engineSagas(api) {
   yield takeLatest(EngineTypes.SET_USER_DATA, getToken)
+  yield takeLatest([EngineTypes.FORE_GROUND, EngineTypes.SEND_NOTIFICATION], checkToken)
   yield takeLatest([EngineTypes.SET_USER_DATA, EngineTypes.RESTART_ENGINE], startEngine)
   yield takeLatest(EngineTypes.SET_USER_DATA, getUserProfile, api)
   yield takeLatest(EngineTypes.SET_USER_DATA, getIntegrationData)

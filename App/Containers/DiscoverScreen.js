@@ -12,7 +12,7 @@ class DiscoverScreen extends Component {
   static navigationOptions = {
     headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold'}}>Discover</Text>,
     headerRight: (
-      <TouchableOpacity onPress={() => alert('Wallet Info')} style={{marginRight: 10}}> 
+      <TouchableOpacity onPress={() => console.log('Discover Info')} style={{marginRight: 10}}> 
         <Ionicons name="ios-help-buoy" size={30} color='#34bbed'/>
       </TouchableOpacity>
     ),

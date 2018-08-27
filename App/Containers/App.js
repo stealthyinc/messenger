@@ -45,8 +45,13 @@ class App extends Component {
   _handleAppStateChange = (nextAppState) => {
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
       console.log('App has come to the foreground!')
+      store.dispatch(EngineActions.foreGround())
       if (Platform.OS === 'ios')
         PushNotificationIOS.setApplicationIconBadgeNumber(0)
+    }
+    else if (this.state.appState.match(/active/) && nextAppState === 'inactive') {
+      console.log('App has gone to the background!')
+      store.dispatch(EngineActions.backGround())
     }
     this.setState({appState: nextAppState});
   }

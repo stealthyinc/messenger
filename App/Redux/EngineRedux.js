@@ -36,6 +36,8 @@ const { Types, Creators } = createActions({
   setEngineFault: ['engineFault'],
   restartEngine: ['userData'],
   updateContactPubKey: ['aContactId'],
+  foreGround: [''],
+  backGround: [''],
 })
 
 export const EngineTypes = Types

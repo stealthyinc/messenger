@@ -629,6 +629,13 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   //
+  handleMobileForeground() {
+    console.log('Engine: Foreground')
+  }
+
+  handleMobileBackground() {
+    console.log('Engine: Background')
+  }
   handleMobileBackgroundUpdate() {
     console.log('MessagingEngine::handleMobileBackgroundUpdate:');
 

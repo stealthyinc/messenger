@@ -50,6 +50,8 @@
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
 		7502F8C020D0CA0B00232E72 /* libRNBackgroundFetch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7502F8BC20D0C9F000232E72 /* libRNBackgroundFetch.a */; };
 		7502F8C220D0CA6200232E72 /* TSBackgroundFetch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7502F8C120D0CA6200232E72 /* TSBackgroundFetch.framework */; };
+		751F45252130D958009F3658 /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 751F44F82130D958009F3658 /* Social.framework */; };
+		751F456F2130E4B9009F3658 /* KDSocialShare.m in Sources */ = {isa = PBXBuildFile; fileRef = 751F456E2130E4B9009F3658 /* KDSocialShare.m */; };
 		7526ECD120F7B8F400DA857E /* FirebaseFunctions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7526ECD020F7B8F400DA857E /* FirebaseFunctions.framework */; };
 		754C0C2120D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 754C0BF620D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m */; };
 		7578E71720AA27D600D60C9A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7578E71620AA27D600D60C9A /* GoogleService-Info.plist */; };
@@ -459,6 +461,9 @@
 		71BA2A747FF149DC89CA7CB7 /* EvilIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = EvilIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf"; sourceTree = "<group>"; };
 		7502F89020D0C9F000232E72 /* RNBackgroundFetch.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNBackgroundFetch.xcodeproj; path = "../node_modules/react-native-background-fetch/ios/RNBackgroundFetch.xcodeproj"; sourceTree = "<group>"; };
 		7502F8C120D0CA6200232E72 /* TSBackgroundFetch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TSBackgroundFetch.framework; path = "../node_modules/react-native-background-fetch/ios/RNBackgroundFetch/TSBackgroundFetch.framework"; sourceTree = "<group>"; };
+		751F44F82130D958009F3658 /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
+		751F45412130E4B8009F3658 /* KDSocialShare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KDSocialShare.h; path = "../node_modules/react-native-social-share/iOS/KDSocialShare.h"; sourceTree = "<group>"; };
+		751F456E2130E4B9009F3658 /* KDSocialShare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KDSocialShare.m; path = "../node_modules/react-native-social-share/iOS/KDSocialShare.m"; sourceTree = "<group>"; };
 		7526ECD020F7B8F400DA857E /* FirebaseFunctions.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FirebaseFunctions.framework; sourceTree = "<group>"; };
 		753E71819135E1A15C288F57 /* Pods-stealthy.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-stealthy.release.xcconfig"; path = "Pods/Target Support Files/Pods-stealthy/Pods-stealthy.release.xcconfig"; sourceTree = "<group>"; };
 		754C0BF620D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RNBackgroundFetch+AppDelegate.m"; path = "../node_modules/react-native-background-fetch/ios/RNBackgroundFetch/RNBackgroundFetch+AppDelegate.m"; sourceTree = "<group>"; };
@@ -523,6 +528,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				751F45252130D958009F3658 /* Social.framework in Frameworks */,
 				7502F8C220D0CA6200232E72 /* TSBackgroundFetch.framework in Frameworks */,
 				7502F8C020D0CA0B00232E72 /* libRNBackgroundFetch.a in Frameworks */,
 				75F0E51220AB428000CB49D4 /* libRNFirebase.a in Frameworks */,
@@ -714,6 +720,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				751F44F82130D958009F3658 /* Social.framework */,
 				7502F8C120D0CA6200232E72 /* TSBackgroundFetch.framework */,
 				75C3EB3D20E1B12400F5E81F /* libcryptopp.a */,
 				75A1372220F401A100D89EA6 /* leveldb-library.framework */,
@@ -841,6 +848,8 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				751F45412130E4B8009F3658 /* KDSocialShare.h */,
+				751F456E2130E4B9009F3658 /* KDSocialShare.m */,
 				7502F89020D0C9F000232E72 /* RNBackgroundFetch.xcodeproj */,
 				75A52FBB20A932D800AC6DAD /* RCTPushNotification.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
@@ -1600,6 +1609,7 @@
 				793936F420E2FD5200268769 /* CryptoECIESWrapper.mm in Sources */,
 				793936C820E2DB3400268769 /* CryptoECIES.cpp in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
+				751F456F2130E4B9009F3658 /* KDSocialShare.m in Sources */,
 				75A52FB920A930CC00AC6DAD /* BlockstackNativeModule.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				754C0C2120D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m in Sources */,
