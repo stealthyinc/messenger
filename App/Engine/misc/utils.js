@@ -149,6 +149,13 @@ module.exports.encrypt = async function(aKey, theContent) {
   // console.log(`Encrypting with key ${aKey}:\t${theContent}\n`)
   if (module.exports.is_iOS()) {
     return iosEncryptECIES(aKey, theContent)
+  } else if (module.exports.isAndroid()) {
+    // The encryptContent method calls JSON.stringify on the cipher object, so
+    // we have to undo that to make it compatible with the rest of our code (iOS
+    // and Web).
+    const { BlockstackNativeModule } = NativeModules
+    const stringifiedCipherObj = await BlockstackNativeModule.encryptContent(aKey, theContent)
+    return JSON.parse(stringifiedCipherObj)
   } else {
     return jsEncryptECIES(aKey, theContent)
   }
@@ -158,6 +165,24 @@ module.exports.decrypt = async function(aKey, theCipherObject) {
   // console.log(`Decrypting with key ${aKey}:\t${JSON.stringify(theCipherObject)}\n`)
   if (module.exports.is_iOS()) {
     return iosDecryptECIES(aKey, theCipherObject)
+  } else if (module.exports.isAndroid()) {
+    // The decryptContent method calls JSON.parse on the cipher object (it
+    // assumes it was stringified). To make it compatible with the rest of our
+    // code (iOS and Web), we have to stringify the cipher object here.
+    const { BlockstackNativeModule } = NativeModules
+    const stringifiedCipherObj = JSON.stringify(theCipherObject)
+    const recovered = await BlockstackNativeModule.decryptContent(aKey, stringifiedCipherObj)
+    // The Android decryptContent method runs in a web view inside of the Android
+    // environment and for whatever reason, instead of returing a typical stringified
+    // object like:
+    //   "{"key":"value"}"
+    // it returns one with escape characters and quotes, like:
+    //   "{\"key\":\"value\"}"
+    // which fails because Java is not expecting that. Fix it here with a simple
+    // string replace (but scope it only to \" to prevent destroying intentional
+    // backslashes):
+    const recoveredWorkaround = recovered.replace(/\\"/g, '"')
+    return recoveredWorkaround
   } else {
     return jsDecryptECIES(aKey, theCipherObject)
   }

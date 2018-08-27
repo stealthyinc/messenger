@@ -109,7 +109,8 @@ class SignInScreen extends React.Component {
       </ScrollView>
     );
   }
-  _getUserData = async (completion) => {
+  // iOS specific (possibly works on web too)
+  _getUserData = async () => {
     const {BlockstackNativeModule} = NativeModules;
     BlockstackNativeModule.getUserData((error, userData) => {
       if (error) {
@@ -131,32 +132,42 @@ class SignInScreen extends React.Component {
     return;
   };
   _signInAsync = async () => {
+    const method = 'SignInScreen::_signInAsync'
+
     const {BlockstackNativeModule} = NativeModules;
     const baseUrl = "https://www.stealthy.im"
 
     if (utils.isAndroid()) {
-      let userData = undefined
+      // Need to populate userData as follows:
+      // {
+      //   username: <...>,
+      //   profileURL: <...>,   TODO: AC
+      //   privateKey: <...>,
+      //   appPublicKey: <...>,
+      // }
+      let userData = {}
+
       try {
-        // TODO this might need to become multi-player
-        const config = {
-          appDomain: `${baseUrl}`,
-          redirectUrl: `${baseUrl}/redirectAndroid/index.html`,
-          scopes:["store_write", "publish_data"]
-        }
-        const sessionResult = await BlockstackNativeModule.createSession(config)
-        console.log(`Created: ${sessionResult['loaded']}`)
-        const result = await BlockstackNativeModule.signIn()
-        let did = {decentralizedID:result["decentralizedID"]}
-        let privateKey = {appPrivateKey:result["appPrivateKey"]}
-        let profile = {profile:result["profile"]}
-        console.log('Signed in!')
-        // TODO: is this userData the same as the content in _getUserData below?
-        //       I bet it's not--also look in that method, we'll need to get the
-        //       app public key if it's not set correctly.
-        //       It would be best if the way we do this is not messy.
+        // androidUserData {
+        //   decentralizedID: <...>
+        //   appPrivateKey: <...>
+        // }
+        const androidUserData = await BlockstackNativeModule.signIn()
+        userData.privateKey = androidUserData.appPrivateKey
+        userData.username = androidUserData.username
       } catch (error) {
-        console.log(`Error on signin: ${error}`)
+        throw utils.fmtErrorStr('Failed to sign in to Blockstack.', method, error)
       }
+
+      try {
+        const publicKey = await BlockstackNativeModule.getPublicKeyFromPrivateKey(userData.privateKey)
+        userData.appPublicKey = publicKey
+      } catch (error) {
+        throw utils.fmtErrorStr('Failed to get public key.', method, error)
+      }
+
+      AsyncStorage.setItem('userData', JSON.stringify(userData));
+      this.props.screenProps.authWork(userData)
     } else if (utils.is_iOS()) {
       await BlockstackNativeModule.signIn(`${baseUrl}/redirect.html`, baseUrl, null, (error, events) => {
         if (!error) {

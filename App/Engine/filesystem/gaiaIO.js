@@ -122,7 +122,19 @@ module.exports = class GaiaIO extends BaseIO {
             }
           })
         })
-      } else {
+      } else if (utils.isAndroid()) {
+        const stringifiedData = JSON.stringify(data)
+        // The Blockstack putFile method for Android writes the interpreted string,
+        // not the raw one to the file. For example:
+        //   "{\"key\":\"value\"}"
+        // gets written as:
+        //   "{"key":"value"}"
+        // which fails when you read it back. To fix that we make it so that the
+        // backslashes are included in the write.
+        //
+        const stringifiedDataWorkaround = stringifiedData.replace(/\"/g, '\\"')
+        return BlockstackNativeModule.putFile(filePath, stringifiedDataWorkaround, {encrypt: false})
+      } else {  // Web
         return putFile(filePath, JSON.stringify(data), {encrypt: false})
         .then(() => {
           this.log(`Success writing ${filePath} to ${username}'s GAIA.`);
@@ -215,6 +227,22 @@ module.exports = class GaiaIO extends BaseIO {
     this.log(`Reading from ${username}'s GAIA in '${filePath}'`);
     if (utils.is_iOS()) {
       return this._read_iOS(username, filePath)
+    } else if (utils.isAndroid()) {
+      const options = { username, zoneFileLookupURL: NAME_ENDPOINT, decrypt: false };
+      return BlockstackNativeModule.getFile(filePath, options)
+      .then((data) => {
+        // TODO: do I need to handle empty blob files like iOS?
+        // For some reason Android elected to return a map vs. iOS and Blockstack.js
+        //
+        let result = undefined
+        if (data && data.hasOwnProperty('fileContents')) {
+          result = JSON.parse(data.fileContents)
+        } else if (data && data.hasOwnProperty('fileContentsEncoded')) {
+          // Base 64 encoded
+          result = JSON.parse(data.fileContentsEncoded)
+        }
+        return result
+      })
     } else {
       return this._readWeb(username, filePath)
     }

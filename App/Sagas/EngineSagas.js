@@ -41,7 +41,7 @@ const createEngine = (userData) => {
                             )
 }
 
-function* watcheEngineFaultChannel() {
+function* watchEngineFaultChannel() {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-fault', (engineFault) => emitter(engineFault))
     return () => {
@@ -225,7 +225,7 @@ export function* startEngine (action) {
   EngineInstance = yield call (createEngine, userData)
   const engineInit = yield select(EngineSelectors.getEngineInit)
   EngineInstance.componentDidMountWork(engineInit, userData["username"])
-  yield fork(watcheEngineFaultChannel)
+  yield fork(watchEngineFaultChannel)
   yield fork(watchInitialzedEventChannel)
   yield fork(watchContactMgrEventChannel)
   yield fork(watchMessagesEventChannel)

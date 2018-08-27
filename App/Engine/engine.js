@@ -394,12 +394,49 @@ export class MessagingEngine extends EventEmitterAdapter {
   //         and a majority test to see if first time user (i.e. if not firebase
   //         and all three null/not present, then decide first time user)
   async _fetchUserSettings() {
+    // Begin TODO TODO TODO remove this when everything works in Android
+    // try {
+    //   console.log('before encrypting settings')
+    //   const encSettings = await utils.encryptObj(this.publicKey, this.settings, ENCRYPT_SETTINGS)
+    //   console.log('after encrypting settings')
+    //
+    //   console.log('before writing encrypted settings')
+    //   await this.io.writeLocalFile(this.userId, 'settings.json', encSettings)
+    //   console.log('after writing encrypted settings')
+    // } catch (error) {
+    //   console.log(`error after encrypting or writing encrypted settings.json ${error}`)
+    // }
+    //
+    // let encryptSettingsData = undefined
+    // try {
+    //   console.log('before read settings.json')
+    //   encryptSettingsData = await this.io.readLocalFile(this.userId, 'settings.json')
+    //   console.log('after read settings.json')
+    //
+    //   console.log('before decrypting settings')
+    //   const recovered = await utils.decryptObj(this.privateKey, encryptSettingsData, ENCRYPT_SETTINGS)
+    //   conole.log(`After decryption, recovered: ${recovered}`)
+    //   // readLocalFile returns undefined on BlobNotFound, so set new user:
+    // } catch (error) {
+    //   console.log(`error after read settings.json: ${error}`)
+    // }
+    //
+    //
+    // console.log('exiting _fetchUserSettings')
+    //
+    // return
+    // End TODO TODO TODO remove this when everything works
+
     const method = 'engine.js::_fetchUserSettings'
     let encSettingsData = undefined
     try {
       encSettingsData = await this.io.readLocalFile(this.userId, 'settings.json')
       // readLocalFile returns undefined on BlobNotFound, so set new user:
       this.newUser = (encSettingsData) ? false : true
+
+      // // TODO TODO TODO: REMOVE THIS
+      // this.newUser = true
+      
     } catch (error) {
       // Two scenarios:
       //   1. New user (file never created). (continue with defaults)
@@ -422,26 +459,26 @@ export class MessagingEngine extends EventEmitterAdapter {
 
       if (test1Passed) {
         const errMsg = `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${error}`
-        this.emit('me-fault', errMsg)
-        throw errMsg
+        // this.emit('me-fault', errMsg)
+        // throw errMsg
       }
 
-      let test2Passed = false
-      try {
-        const pkTxtData = await this._fetchPublicKey(this.userId)
-        test2Passed = (pkTxtData !== undefined &&
-                       pkTxtData !== null &&
-                       pkTxtData !== '')
-      } catch (testError2) {
-        // Do nothing.
-        console.log(`INFO(${method}): public key read failed.\n${testError2}`)
-      }
-
-      if (test2Passed) {
-        const errMsg = `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${error}`
-        this.emit('me-fault', errMsg)
-        throw errMsg
-      }
+      // let test2Passed = false
+      // try {
+      //   const pkTxtData = await this._fetchPublicKey(this.userId)
+      //   test2Passed = (pkTxtData !== undefined &&
+      //                  pkTxtData !== null &&
+      //                  pkTxtData !== '')
+      // } catch (testError2) {
+      //   // Do nothing.
+      //   console.log(`INFO(${method}): public key read failed.\n${testError2}`)
+      // }
+      //
+      // if (test2Passed) {
+      //   const errMsg = `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${error}`
+      //   this.emit('me-fault', errMsg)
+      //   throw errMsg
+      // }
 
       // If we got here without throwing, it's likely a new user, proceed with
       // default settings.
@@ -483,7 +520,8 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.idxIo = new IndexedIO(this.logger, this.io, this.userId,
                                this.privateKey, this.publicKey, ENCRYPT_INDEXED_IO);
 
-    this.io.writeLocalFile(this.userId, 'pk.txt', this.publicKey);
+    await this.io.writeLocalFile(this.userId, 'pk.txt', this.publicKey);
+    await this.writeSettings(this.settings)
 
     // TODO: A better mechanism for the retry of contacts read
     //       See notes below for _writeConversations
@@ -1302,10 +1340,13 @@ export class MessagingEngine extends EventEmitterAdapter {
     // TODO: more elegant solution with delay/jitter, n-retries.
     //       see notes for _writeConversations on the subject
     //
+    console.log(`INFO(engine::_fetchPublicKey) 1st attempt.`)
     return this.io.readRemoteFile(aUserId, 'pk.txt')
     .catch((error1 => {
+      console.log(`INFO(engine::_fetchPublicKey) 2nd attempt.\nERROR: ${error1}`)
       return this.io.readRemoteFile(aUserId, 'pk.txt')
       .catch((error2) => {
+        console.log(`INFO(engine::_fetchPublicKey) 3nd attempt.\nERROR: ${error2}`)
         return this.io.readRemoteFile(aUserId, 'pk.txt')
       })
     }))

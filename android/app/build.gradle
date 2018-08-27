@@ -79,9 +79,9 @@ project.ext.react = [
     entryFile: "index.js"
 ]
 
-project.ext.react = [
-  cliPath: "node_modules/haul/bin/cli.js"
-]
+//project.ext.react = [
+//  cliPath: "node_modules/haul/bin/cli.js"
+//]
 
 apply from: "../../node_modules/react-native/react.gradle"
 
@@ -172,7 +172,10 @@ dependencies {
     implementation "com.android.support:appcompat-v7:27.1.1"
     implementation "com.android.support:customtabs:27.1.1"
 //    implementation "com.facebook.react:react-native:0.55.4"  // From node_modules
-    implementation "com.github.blockstack:blockstack-android:-SNAPSHOT"
+// AC's replacement of the blockstack android SDK which exposes getPublicKeyFromPrivate (done
+// via AC's git hub and jitpack.io):
+//    implementation "com.github.blockstack:blockstack-android:-SNAPSHOT"
+    implementation "com.github.AC-FTW:blockstack-android:-SNAPSHOT"
     implementation "com.facebook.react:react-native:+"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }

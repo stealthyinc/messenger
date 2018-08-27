@@ -2,6 +2,7 @@ package com.stealthy.sdk
 
 import android.util.Base64
 import android.util.Log
+import android.widget.Toast
 import com.facebook.react.bridge.*
 import org.blockstack.android.sdk.*
 import java.net.URI
@@ -17,6 +18,20 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
     }
 
     private lateinit var session: BlockstackSession
+
+    // Expose whether or not we need to create a new session (suspect creating sessions when un-needed
+    // is causing reload to fail)
+    @ReactMethod
+    fun hasSession(promise: Promise) {
+        var hasValidSession = false
+        try {
+            hasValidSession = canUseBlockstack()
+        } catch ( t: Throwable ) {
+            // Suppress ite from lateinit on session decl above
+            hasValidSession = false
+        }
+        promise.resolve(hasValidSession)
+    }
 
     @ReactMethod
     fun createSession(configArg: ReadableMap, promise: Promise) {
@@ -81,6 +96,56 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
                    promise.resolve(map)
                }
            }
+        }
+    }
+
+    @ReactMethod
+    fun getPublicKeyFromPrivateKey(aPrivateKey: String, promise: Promise) {
+        if (canUseBlockstack()) {
+            reactApplicationContext.currentActivity!!.runOnUiThread {
+                session.getPublicKeyFromPrivateKey(aPrivateKey) { plainContentResult ->
+                    if (plainContentResult.hasValue) {
+                        val plainContent:String = plainContentResult.value as String
+                        promise.resolve(plainContent)
+                    } else {
+                        promise.reject("0", plainContentResult.error)
+                    }
+                }
+            }
+        }
+    }
+
+    @ReactMethod
+    fun encryptContent(publicKey: String, content: String, promise: Promise) {
+        if (canUseBlockstack()) {
+            reactApplicationContext.currentActivity!!.runOnUiThread {
+                val options = CryptoOptions(publicKey = publicKey)
+                session.encryptContent(content, options) { cipherResult ->
+                    if (cipherResult.hasValue) {
+                        val cipher = cipherResult.value!!
+                        promise.resolve(cipher.json.toString())
+                    } else {
+                        promise.reject("0", cipherResult.error)
+                    }
+                }
+            }
+        }
+    }
+
+    @ReactMethod
+    fun decryptContent(privateKey: String, cipherObjectStr: String, promise: Promise) {
+        if (canUseBlockstack()) {
+            reactApplicationContext.currentActivity!!.runOnUiThread {
+                val options = CryptoOptions(privateKey = privateKey)
+                session.decryptContent(cipherObjectStr, options) { plainContentResult ->
+                    if (plainContentResult.hasValue) {
+                        val plainContent:String = plainContentResult.value as String
+                        promise.resolve(plainContent)
+                    } else {
+                        promise.reject("0", plainContentResult.error)
+                    }
+                }
+            }
         }
     }
 

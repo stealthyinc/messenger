@@ -96,8 +96,11 @@ class ReduxNavigation extends React.Component {
     this.publicKey = userData['appPublicKey']
     this.props.dispatch(EngineActions.setPublicKey(this.publicKey))
     const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(this.publicKey));
-    await ref.once('value')
-    .then((snapshot) => {
+
+    console.log(`INFO(ReduxNavigation::_authWork): reading session.`)
+    return ref.once('value')
+    .then(snapshot => {
+      console.log(`INFO(ReduxNavigation::_authWork): AFTER reading session.`)
       if (!snapshot.exists() || snapshot.val() === 'none') {
         //signin screen
         ref.set(common.getSessionId());
@@ -118,6 +121,11 @@ class ReduxNavigation extends React.Component {
           this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Block' })
         }
       }
+      return
+    })
+    .catch(error => {
+      console.log(`ERROR(ReduxNavigation::_authWork): ${error}`)
+      return
     })
   }
   _setupVars = async (userData, session) => {
