@@ -394,6 +394,9 @@ export class MessagingEngine extends EventEmitterAdapter {
   //         and a majority test to see if first time user (i.e. if not firebase
   //         and all three null/not present, then decide first time user)
   async _fetchUserSettings() {
+    // The commented out code below is the start of test-a-saurus.rex.id.
+    // TODO: refactor it out
+    //
     // Begin TODO TODO TODO remove this when everything works in Android
     //
     // Basic single file to root encrypt decrypt read write test:
@@ -481,6 +484,28 @@ export class MessagingEngine extends EventEmitterAdapter {
     //
     // return
 
+    // remote read test
+    // -------------------------------------------------------------------------
+    // let idxIo = new IndexedIO(this.logger, this.io, this.userId,
+    //                           this.privateKey, this.publicKey, ENCRYPT_INDEXED_IO);
+    // try {
+    //   const dirPath = 'batzdorff.id.blockstack/conversations/offline'
+    //   const readUserId = 'relay.id'
+    //
+    //   console.log('before remote read')
+    //   const sharedIndexRemoteRead = await this.io.readRemoteFile(readUserId, `${dirPath}/sharedIndex.json`)
+    //   console.log('before decrypt ...')
+    //   const recovered = await utils.decryptObj(this.privateKey, sharedIndexRemoteRead, ENCRYPT_SETTINGS)
+    //   console.log('recovered from remote read')
+    //
+    //   // console.log('before shindex read ...')
+    //   // const sharedIndexData = await idxIo.readRemoteIndex(readUserId, dirPath)
+    //   // console.log('we got something!')
+    // } catch (error) {
+    //   console.log('FML! Some things went wrong.')
+    // }
+    //
+    // return
     // End TODO TODO TODO remove this when everything works
 
     const method = 'engine.js::_fetchUserSettings'
@@ -693,7 +718,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     // TODO: - should the service only start on background update and stop when background update done?
     //       - can the service fail if shut down inappropriately (i.e. while waiting on request)?
-    if (!this.offlineMsgSvc.isReceiving()) {
+    if (this && this.offlineMsgSvc && !this.offlineMsgSvc.isReceiving()) {
       this.offlineMsgSvc.pauseRecvService();
 
       this.offlineMsgSvc.receiveMessages()
@@ -704,6 +729,8 @@ export class MessagingEngine extends EventEmitterAdapter {
         console.log(`ERROR:(engine.js::handleMobileBackgroundUpdate): ${err}`);
         this.offlineMsgSvc.resumeRecvService();
       })
+    } else {
+        console.log(`ERROR:(engine.js::handleMobileBackgroundUpdate): unable to call this.offlineMsgSvc.isReceiving()`);
     }
   }
 
@@ -724,7 +751,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       contactsToCheck = this.contactMgr.getContactsWithMatchingPKMask(senderInfo);
     }
 
-    if (!this.offlineMsgSvc.isReceiving()) {
+    if (this && this.offlineMsgSvc && !this.offlineMsgSvc.isReceiving()) {
       this.offlineMsgSvc.pauseRecvService();
 
       this.offlineMsgSvc.receiveMessages(contactsToCheck)
@@ -777,7 +804,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     //       contact by parsing the query result)
     if (!this.contactMgr.isExistingContactId(theirUserId)) {
       console.log(`INFO(engine.js): discovery event "new-invitation" from ${theirUserId}`)
-      const profileQuery = utils.removeIdTld(theirUserId)
+      const profileQuery = theirUserId; // Don't need this since Aaron's fix: utils.removeIdTld(theirUserId)
       api.getUserProfile(profileQuery)
       .then((queryResult) => {
         const contact = ContactManager.buildContactFromQueryResult(

@@ -44,7 +44,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   //
   // Replacing it with the method below
   const getUserProfile = async (aUserName, anAppUrl = 'https://www.stealthy.im') => {
-    const methodName = 'getUserProfile'
+    const methodName = 'Api::getUserProfile'
     let profileData = undefined
     try {
       let preTranslatedProfileData = await getProfileFromNameSearch(aUserName, anAppUrl)
@@ -109,7 +109,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   //   - endpoint returns multiple results so we comb through that and find the exact match
   //   - we return the specific user's gaia hub for specified app
   const getUserGaiaNS = async (aUserName, anAppUrl = 'https://www.stealthy.im') => {
-    const methodName = 'Api.js::getUserGaiaNS'
+    const methodName = 'Api::getUserGaiaNS'
     let profileData = undefined
     try {
       profileData = await getProfileFromNameSearch(aUserName, anAppUrl)

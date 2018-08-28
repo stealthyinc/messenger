@@ -171,7 +171,10 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
     fun getFile(path: String, optionsArg: ReadableMap, promise: Promise) {
         if (canUseBlockstack()) {
             reactApplicationContext.currentActivity!!.runOnUiThread {
-                val options = GetFileOptions(optionsArg.getBoolean("decrypt"))
+                val options = GetFileOptions(decrypt = optionsArg.getBoolean("decrypt"),
+                                             username = optionsArg.getString("username"),
+                                             app = optionsArg.getString("app"),
+                                             zoneFileLookupURL = java.net.URL(optionsArg.getString("zoneFileLookupURL")))
                 session.getFile(path, options) {
                     if (it.hasValue) {
                         val map = Arguments.createMap()

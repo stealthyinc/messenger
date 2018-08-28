@@ -228,7 +228,7 @@ module.exports = class GaiaIO extends BaseIO {
     if (utils.is_iOS()) {
       return this._read_iOS(username, filePath)
     } else if (utils.isAndroid()) {
-      const options = { username, zoneFileLookupURL: NAME_ENDPOINT, decrypt: false };
+      const options = { username, zoneFileLookupURL: NAME_ENDPOINT, decrypt: false, app: 'https://www.stealthy.im' };
       return BlockstackNativeModule.getFile(filePath, options)
       .then((data) => {
         // TODO: do I need to handle empty blob files like iOS?
