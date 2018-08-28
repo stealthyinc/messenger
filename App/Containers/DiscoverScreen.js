@@ -10,12 +10,16 @@ import styles from './Styles/DiscoverScreenStyle'
 
 class DiscoverScreen extends Component {
   static navigationOptions = {
-    headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold'}}>Discover</Text>,
+    headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Discover</Text>,
     headerRight: (
       <TouchableOpacity onPress={() => console.log('Discover Info')} style={{marginRight: 10}}> 
-        <Ionicons name="ios-help-buoy" size={30} color='#34bbed'/>
+        <Ionicons name="ios-help-buoy" size={30} color='white'/>
       </TouchableOpacity>
     ),
+    headerTintColor: 'white',
+    headerStyle: {
+      backgroundColor: '#34bbed'
+    }
   };
   render () {
     return (

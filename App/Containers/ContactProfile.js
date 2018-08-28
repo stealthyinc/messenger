@@ -12,9 +12,13 @@ class ContactProfile extends React.Component {
     return {
       headerLeft: (
         <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
-          <Ionicons name="ios-arrow-dropleft" size={32} color='#34bbed'/>
+          <Ionicons name="ios-arrow-dropleft" size={32} color='white'/>
         </TouchableOpacity>
-      )
+      ),
+      headerTintColor: 'white',
+      headerStyle: {
+        backgroundColor: '#34bbed'
+      }
     };
   };
   constructor(props) {
