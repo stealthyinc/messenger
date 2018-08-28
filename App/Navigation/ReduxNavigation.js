@@ -199,7 +199,13 @@ class ReduxNavigation extends React.Component {
       AsyncStorage.setItem('token', token);
 
       const {BlockstackNativeModule} = NativeModules;
-      await BlockstackNativeModule.signOut()
+      if (utils.is_iOS()) {
+        await BlockstackNativeModule.signOut()
+      } else if (utils.isAndroid()) {
+        await BlockstackNativeModule.signUserOut()
+      } else {
+        // TODO: something on desktop / web / blockstack.js
+      }
       this.publicKey = undefined
 
       this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' })

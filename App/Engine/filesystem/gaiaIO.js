@@ -238,8 +238,17 @@ module.exports = class GaiaIO extends BaseIO {
         if (data && data.hasOwnProperty('fileContents')) {
           result = JSON.parse(data.fileContents)
         } else if (data && data.hasOwnProperty('fileContentsEncoded')) {
+          // Empty files / non-existing files seem to come in to this code path for Android.
+          // Parsing an empty file will result in an error--if we detect an error, then just
+          // return undefined.
+          //
           // Base 64 encoded
-          result = JSON.parse(data.fileContentsEncoded)
+          try {
+            result = JSON.parse(data.fileContentsEncoded)
+          } catch (error) {
+            // Suppress
+            result = undefined
+          }
         }
         return result
       })

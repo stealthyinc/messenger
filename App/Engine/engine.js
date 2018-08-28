@@ -395,6 +395,9 @@ export class MessagingEngine extends EventEmitterAdapter {
   //         and all three null/not present, then decide first time user)
   async _fetchUserSettings() {
     // Begin TODO TODO TODO remove this when everything works in Android
+    //
+    // Basic single file to root encrypt decrypt read write test:
+    // -------------------------------------------------------------------------
     // try {
     //   console.log('before encrypting settings')
     //   const encSettings = await utils.encryptObj(this.publicKey, this.settings, ENCRYPT_SETTINGS)
@@ -425,6 +428,59 @@ export class MessagingEngine extends EventEmitterAdapter {
     // console.log('exiting _fetchUserSettings')
     //
     // return
+    //
+    // indexedIO file test:
+    // -------------------------------------------------------------------------
+    // let idxIo = new IndexedIO(this.logger, this.io, this.userId,
+    //                           this.privateKey, this.publicKey, ENCRYPT_INDEXED_IO);
+    // const testData = {
+    //   paddington: true,
+    //   smurfs: true,
+    //   'he-man': false
+    // }
+    // const dirPath = 'test012345678'
+    // const testPath = `${dirPath}/testData.ejson`
+    // console.log('starting index writeLocalFile test')
+    // try {
+    //   await idxIo.writeLocalFile(testPath, testData)
+    // } catch (error) {
+    //   console.log(`ERROR(engine::_fetchUserSettings): failed writing ${testPath} to ${this.userId}'s gaia.\n${error}`)
+    // }
+    // console.log('done')
+    //
+    // const testPath2 = `${dirPath}/testData2.ejson`
+    // try {
+    //   await idxIo.seqWriteLocalFile(testPath2, testData, this.publicKey)
+    // } catch (error) {
+    //   console.log(`ERROR(engine::_fetchUserSettings): failed writing ${testPath} to ${this.userId}'s gaia.\n${error}`)
+    // }
+    //
+    // try {
+    //   const indexData = await idxIo.readLocalIndex(dirPath)
+    //   const emptyIndexData = await idxIo.readLocalIndex('indexDoesntExist')
+    //
+    //   await idxIo.deleteLocalFile(testPath2, this.publicKey)
+    //   const updatedIndexData = await idxIo.readLocalIndex(dirPath)
+    //
+    //   console.log('before remote index read test')
+    //   const updatedSharedIndexData = await idxIo.readRemoteIndex(this.userId, dirPath)
+    //   console.log('after remote index read test')
+    //
+    //   await idxIo.deleteLocalDir('test012345678', this.publicKey)
+    //   console.log('after deleteLocalDir')
+    //
+    //   const updatedIndexData2 = await idxIo.readLocalIndex(dirPath)
+    //   console.log('after reading updated index')
+    //
+    //   console.log('El Milagro!')
+    // } catch (error) {
+    //   console.log(`ERROR reading and updating indexes.`)
+    // }
+    //
+    // console.log('Done!')
+    //
+    // return
+
     // End TODO TODO TODO remove this when everything works
 
     const method = 'engine.js::_fetchUserSettings'
@@ -433,10 +489,6 @@ export class MessagingEngine extends EventEmitterAdapter {
       encSettingsData = await this.io.readLocalFile(this.userId, 'settings.json')
       // readLocalFile returns undefined on BlobNotFound, so set new user:
       this.newUser = (encSettingsData) ? false : true
-
-      // // TODO TODO TODO: REMOVE THIS
-      // this.newUser = true
-      
     } catch (error) {
       // Two scenarios:
       //   1. New user (file never created). (continue with defaults)
