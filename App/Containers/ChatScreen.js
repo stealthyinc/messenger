@@ -20,22 +20,25 @@ const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js');
 // import graphiteIcon from '../Images/Graphite.png';
 
 class ChatScreen extends Component {
-
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {};
     return {
       headerLeft: (
         <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
-          <Ionicons name="ios-arrow-dropleft" size={32} color='#34bbed'/>
+          <Ionicons name="ios-arrow-dropleft" size={32} color='white'/>
         </TouchableOpacity>
       ),
       headerTitle: params.name,
       headerRight: (
         // <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
         <TouchableOpacity onPress={() => params.navigation.navigate("ContactProfile")} style={{marginRight: 10}}>
-          <Ionicons name="ios-contact" size={28} color='#34bbed'/>
+          <Ionicons name="ios-contact" size={28} color='white'/>
         </TouchableOpacity>
       ),
+      headerTintColor: 'white',
+      headerStyle: {
+        backgroundColor: '#34bbed'
+      }
     };
   };
 

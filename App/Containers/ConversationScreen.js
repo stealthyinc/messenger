@@ -36,14 +36,18 @@ class ConversationScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {};
     return {
-      headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold'}}>Messages</Text>,
+      headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Messages</Text>,
       headerBackTitle: 'Back',
       headerRight: (
         //params.sendMessage()
         <TouchableOpacity onPress={() => params.navigation.navigate('BlockContactSearch')} style={{marginRight: 10}}>
-          <Ionicons name="ios-paper-plane" size={30} color='#34bbed'/>
+          <Ionicons name="ios-paper-plane" size={30} color='white'/>
         </TouchableOpacity>
       ),
+      headerTintColor: 'white',
+      headerStyle: {
+        backgroundColor: '#34bbed'
+      }
     };
   };
   constructor(props) {

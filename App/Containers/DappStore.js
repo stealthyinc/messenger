@@ -19,14 +19,18 @@ class DappStore extends Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {};
     return {
-      headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold'}}>Partners</Text>,
+      headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Partners</Text>,
       headerBackTitle: 'Back',
       headerRight: (
         //params.sendMessage()
         <TouchableOpacity onPress={() => console.log('search dapps')} style={{marginRight: 10}}>
-          <Ionicons name="ios-add-circle" size={30} color='#34bbed'/>
+          <Ionicons name="ios-add-circle" size={30} color='white'/>
         </TouchableOpacity>
       ),
+      headerTintColor: 'white',
+      headerStyle: {
+        backgroundColor: '#34bbed'
+      }
     };
   };
 
