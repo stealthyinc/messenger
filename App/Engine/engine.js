@@ -1,11 +1,27 @@
 const platform = require('platform');
-const { firebaseInstance } = require('./firebaseWrapper.js')
 
-const { EventEmitterAdapter } = require('./platform/reactNative/eventEmitterAdapter.js')
-import EngineActions from '../Redux/EngineRedux'
-
-import { NativeModules } from 'react-native';
-
+// Platform dependent (commented out parts are for other platforms)
+// -----------------------------------------------------------------------------
+// Web/React Server:
+//
+//const firebaseInstance = require('firebase')
+//const { EventEmitterAdapter } = require('./platform/react/eventEmitterAdapter.js')
+//const Anonalytics = require('./platform/no-op/Analytics.js')
+//const { Graphite, StealthyIndexReader } = require('./platform/no-op/Integrations.js')
+//
+// Web/React Client (TODO: one day.)
+// ...
+//
+// Mobile/React Native:
+//
+ const { firebaseInstance } = require('./firebaseWrapper.js')
+ const { EventEmitterAdapter } = require('./platform/reactNative/eventEmitterAdapter.js')
+ const { Anonalytics } = require('../Analytics.js');
+ const { Graphite } = require('./integrations/graphite.js')
+ const { StealthyIndexReader } = require('./integrations/stealthyIndexReader.js')
+//
+// Common:
+//
 const { MESSAGE_TYPE,
         MESSAGE_STATE,
         ChatMessage } = require('./messaging/chatMessage.js');
@@ -13,7 +29,6 @@ const { ConversationManager } = require('./messaging/conversationManager.js');
 const { OfflineMessagingServices } = require('./messaging/offlineMessagingServices.js');
 
 const utils = require('./misc/utils.js');
-const { Anonalytics } = require('../Analytics.js');
 
 const FirebaseIO = require('./filesystem/firebaseIO.js');
 const GaiaIO = require('./filesystem/gaiaIO.js');
@@ -24,9 +39,6 @@ const constants = require('./misc/constants.js');
 const { ContactManager } = require('./messaging/contactManager.js');
 
 const { Discovery } = require('./misc/discovery.js')
-
-const { Graphite } = require('./integrations/graphite.js')
-const { StealthyIndexReader } = require('./integrations/stealthyIndexReader.js')
 
 const common = require('./../common.js');
 
@@ -394,120 +406,6 @@ export class MessagingEngine extends EventEmitterAdapter {
   //         and a majority test to see if first time user (i.e. if not firebase
   //         and all three null/not present, then decide first time user)
   async _fetchUserSettings() {
-    // The commented out code below is the start of test-a-saurus.rex.id.
-    // TODO: refactor it out
-    //
-    // Begin TODO TODO TODO remove this when everything works in Android
-    //
-    // Basic single file to root encrypt decrypt read write test:
-    // -------------------------------------------------------------------------
-    // try {
-    //   console.log('before encrypting settings')
-    //   const encSettings = await utils.encryptObj(this.publicKey, this.settings, ENCRYPT_SETTINGS)
-    //   console.log('after encrypting settings')
-    //
-    //   console.log('before writing encrypted settings')
-    //   await this.io.writeLocalFile(this.userId, 'settings.json', encSettings)
-    //   console.log('after writing encrypted settings')
-    // } catch (error) {
-    //   console.log(`error after encrypting or writing encrypted settings.json ${error}`)
-    // }
-    //
-    // let encryptSettingsData = undefined
-    // try {
-    //   console.log('before read settings.json')
-    //   encryptSettingsData = await this.io.readLocalFile(this.userId, 'settings.json')
-    //   console.log('after read settings.json')
-    //
-    //   console.log('before decrypting settings')
-    //   const recovered = await utils.decryptObj(this.privateKey, encryptSettingsData, ENCRYPT_SETTINGS)
-    //   conole.log(`After decryption, recovered: ${recovered}`)
-    //   // readLocalFile returns undefined on BlobNotFound, so set new user:
-    // } catch (error) {
-    //   console.log(`error after read settings.json: ${error}`)
-    // }
-    //
-    //
-    // console.log('exiting _fetchUserSettings')
-    //
-    // return
-    //
-    // indexedIO file test:
-    // -------------------------------------------------------------------------
-    // let idxIo = new IndexedIO(this.logger, this.io, this.userId,
-    //                           this.privateKey, this.publicKey, ENCRYPT_INDEXED_IO);
-    // const testData = {
-    //   paddington: true,
-    //   smurfs: true,
-    //   'he-man': false
-    // }
-    // const dirPath = 'test012345678'
-    // const testPath = `${dirPath}/testData.ejson`
-    // console.log('starting index writeLocalFile test')
-    // try {
-    //   await idxIo.writeLocalFile(testPath, testData)
-    // } catch (error) {
-    //   console.log(`ERROR(engine::_fetchUserSettings): failed writing ${testPath} to ${this.userId}'s gaia.\n${error}`)
-    // }
-    // console.log('done')
-    //
-    // const testPath2 = `${dirPath}/testData2.ejson`
-    // try {
-    //   await idxIo.seqWriteLocalFile(testPath2, testData, this.publicKey)
-    // } catch (error) {
-    //   console.log(`ERROR(engine::_fetchUserSettings): failed writing ${testPath} to ${this.userId}'s gaia.\n${error}`)
-    // }
-    //
-    // try {
-    //   const indexData = await idxIo.readLocalIndex(dirPath)
-    //   const emptyIndexData = await idxIo.readLocalIndex('indexDoesntExist')
-    //
-    //   await idxIo.deleteLocalFile(testPath2, this.publicKey)
-    //   const updatedIndexData = await idxIo.readLocalIndex(dirPath)
-    //
-    //   console.log('before remote index read test')
-    //   const updatedSharedIndexData = await idxIo.readRemoteIndex(this.userId, dirPath)
-    //   console.log('after remote index read test')
-    //
-    //   await idxIo.deleteLocalDir('test012345678', this.publicKey)
-    //   console.log('after deleteLocalDir')
-    //
-    //   const updatedIndexData2 = await idxIo.readLocalIndex(dirPath)
-    //   console.log('after reading updated index')
-    //
-    //   console.log('El Milagro!')
-    // } catch (error) {
-    //   console.log(`ERROR reading and updating indexes.`)
-    // }
-    //
-    // console.log('Done!')
-    //
-    // return
-
-    // remote read test
-    // -------------------------------------------------------------------------
-    // let idxIo = new IndexedIO(this.logger, this.io, this.userId,
-    //                           this.privateKey, this.publicKey, ENCRYPT_INDEXED_IO);
-    // try {
-    //   const dirPath = 'batzdorff.id.blockstack/conversations/offline'
-    //   const readUserId = 'relay.id'
-    //
-    //   console.log('before remote read')
-    //   const sharedIndexRemoteRead = await this.io.readRemoteFile(readUserId, `${dirPath}/sharedIndex.json`)
-    //   console.log('before decrypt ...')
-    //   const recovered = await utils.decryptObj(this.privateKey, sharedIndexRemoteRead, ENCRYPT_SETTINGS)
-    //   console.log('recovered from remote read')
-    //
-    //   // console.log('before shindex read ...')
-    //   // const sharedIndexData = await idxIo.readRemoteIndex(readUserId, dirPath)
-    //   // console.log('we got something!')
-    // } catch (error) {
-    //   console.log('FML! Some things went wrong.')
-    // }
-    //
-    // return
-    // End TODO TODO TODO remove this when everything works
-
     const method = 'engine.js::_fetchUserSettings'
     let encSettingsData = undefined
     try {
@@ -536,26 +434,26 @@ export class MessagingEngine extends EventEmitterAdapter {
 
       if (test1Passed) {
         const errMsg = `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${error}`
-        // this.emit('me-fault', errMsg)
-        // throw errMsg
+        this.emit('me-fault', errMsg)
+        throw errMsg
       }
 
-      // let test2Passed = false
-      // try {
-      //   const pkTxtData = await this._fetchPublicKey(this.userId)
-      //   test2Passed = (pkTxtData !== undefined &&
-      //                  pkTxtData !== null &&
-      //                  pkTxtData !== '')
-      // } catch (testError2) {
-      //   // Do nothing.
-      //   console.log(`INFO(${method}): public key read failed.\n${testError2}`)
-      // }
-      //
-      // if (test2Passed) {
-      //   const errMsg = `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${error}`
-      //   this.emit('me-fault', errMsg)
-      //   throw errMsg
-      // }
+      let test2Passed = false
+      try {
+        const pkTxtData = await this._fetchPublicKey(this.userId)
+        test2Passed = (pkTxtData !== undefined &&
+                       pkTxtData !== null &&
+                       pkTxtData !== '')
+      } catch (testError2) {
+        // Do nothing.
+        console.log(`INFO(${method}): public key read failed.\n${testError2}`)
+      }
+
+      if (test2Passed) {
+        const errMsg = `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${error}`
+        this.emit('me-fault', errMsg)
+        throw errMsg
+      }
 
       // If we got here without throwing, it's likely a new user, proceed with
       // default settings.
@@ -713,6 +611,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   handleMobileBackground() {
     console.log('Engine: Background')
   }
+
   handleMobileBackgroundUpdate() {
     console.log('MessagingEngine::handleMobileBackgroundUpdate:');
 
@@ -1426,13 +1325,10 @@ export class MessagingEngine extends EventEmitterAdapter {
     // TODO: more elegant solution with delay/jitter, n-retries.
     //       see notes for _writeConversations on the subject
     //
-    console.log(`INFO(engine::_fetchPublicKey) 1st attempt.`)
     return this.io.readRemoteFile(aUserId, 'pk.txt')
     .catch((error1 => {
-      console.log(`INFO(engine::_fetchPublicKey) 2nd attempt.\nERROR: ${error1}`)
       return this.io.readRemoteFile(aUserId, 'pk.txt')
       .catch((error2) => {
-        console.log(`INFO(engine::_fetchPublicKey) 3nd attempt.\nERROR: ${error2}`)
         return this.io.readRemoteFile(aUserId, 'pk.txt')
       })
     }))
