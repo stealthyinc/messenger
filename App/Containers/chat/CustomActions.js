@@ -9,8 +9,8 @@ import {
   Text,
 } from 'react-native';
 
-import CameraRollPicker from 'react-native-camera-roll-picker';
-import NavBar, { NavButton, NavButtonText, NavTitle } from 'react-native-nav';
+// import CameraRollPicker from 'react-native-camera-roll-picker';
+// import NavBar, { NavButton, NavButtonText, NavTitle } from 'react-native-nav';
 
 export default class CustomActions extends React.Component {
   constructor(props) {
@@ -70,7 +70,7 @@ export default class CustomActions extends React.Component {
     this.setImages(images);
   }
 
-  renderNavBar() {
+  {/*renderNavBar() {
     return (
       <NavBar style={{
         statusBar: {
@@ -113,7 +113,7 @@ export default class CustomActions extends React.Component {
         </NavButton>
       </NavBar>
     );
-  }
+  }*/}
 
   renderIcon() {
     if (this.props.icon) {

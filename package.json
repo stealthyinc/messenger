@@ -24,7 +24,6 @@
     "git-hook": "npm run lint -s && npm run test -s"
   },
   "dependencies": {
-    "@okgrow/react-native-copilot": "^2.3.0",
     "apisauce": "^0.14.2",
     "assign-deep": "^0.4.7",
     "aws-amplify": "^0.4.8",
@@ -39,11 +38,8 @@
     "ramda": "^0.25.0",
     "react": "16.3.1",
     "react-native": "^0.55.4",
-    "react-native-animatable": "^1.2.4",
     "react-native-app-intro": "^1.1.5",
     "react-native-background-fetch": "^2.4.3",
-    "react-native-camera-roll-picker": "^1.2.3",
-    "react-native-collapsible": "^0.11.2",
     "react-native-communications": "^2.2.1",
     "react-native-config": "^0.10.0",
     "react-native-elements": "^0.19.1",

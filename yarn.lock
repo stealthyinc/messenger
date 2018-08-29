@@ -523,12 +523,6 @@
     hoist-non-react-statics "^2.2.2"
     prop-types "^15.5.10"
 
-"@okgrow/react-native-copilot@^2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@okgrow/react-native-copilot/-/react-native-copilot-2.3.0.tgz#4c83e5da8e25ec5953cfdc21d76c5ace4fa023c7"
-  dependencies:
-    mitt "^1.1.3"
-
 "@storybook/addon-actions@3.4.3":
   version "3.4.3"
   resolved "https://registry.yarnpkg.com/@storybook/addon-actions/-/addon-actions-3.4.3.tgz#27ac798cb0085c9588c4fd0a1c4cbfa32ce3bd54"
@@ -6632,7 +6626,7 @@ mississippi@^2.0.0:
     stream-each "^1.1.0"
     through2 "^2.0.0"
 
-mitt@^1.1.2, mitt@^1.1.3:
+mitt@^1.1.2:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/mitt/-/mitt-1.1.3.tgz#528c506238a05dce11cd914a741ea2cc332da9b8"
 
@@ -8126,12 +8120,6 @@ react-modal@^3.3.2:
     react-lifecycles-compat "^3.0.0"
     warning "^3.0.0"
 
-react-native-animatable@^1.2.4:
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/react-native-animatable/-/react-native-animatable-1.2.4.tgz#b5fb7657e8f6edadbc26697057a327fb920b3039"
-  dependencies:
-    prop-types "^15.5.10"
-
 react-native-app-intro@^1.1.5:
   version "1.1.5"
   resolved "https://registry.yarnpkg.com/react-native-app-intro/-/react-native-app-intro-1.1.5.tgz#34a2d2265b2d654d31bae743c404856c37448692"
@@ -8146,16 +8134,6 @@ react-native-background-fetch@^2.4.3:
     fast-plist "^0.1.2"
     plist "^2.0.1"
     xcode "^0.9.1"
-
-react-native-camera-roll-picker@^1.2.3:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/react-native-camera-roll-picker/-/react-native-camera-roll-picker-1.2.3.tgz#b117fd3a2b9012dcccee1261a9bc427226b8d6d2"
-
-react-native-collapsible@^0.11.2:
-  version "0.11.3"
-  resolved "https://registry.yarnpkg.com/react-native-collapsible/-/react-native-collapsible-0.11.3.tgz#5974d9b81f29677372340a21675c9e1c363b410e"
-  dependencies:
-    prop-types "^15.5.10"
 
 react-native-communications@2.2.1, react-native-communications@^2.2.1:
   version "2.2.1"

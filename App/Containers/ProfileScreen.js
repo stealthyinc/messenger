@@ -5,9 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import { Toast } from 'native-base';
-import {
-  shareOnTwitter,
-} from 'react-native-social-share';
+import { shareOnTwitter } from 'react-native-social-share';
 
 const common = require('./../common.js');
 

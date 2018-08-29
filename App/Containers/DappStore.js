@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { ScrollView, StyleSheet, View, TouchableOpacity, Image } from 'react-native';
+import { ScrollView, StyleSheet, View, TouchableOpacity, Image, Platform } from 'react-native';
 import DappActions, { DappSelectors } from '../Redux/DappRedux'
 import { List, ListItem, Text } from 'react-native-elements'
 import { Container, Header, Content, Icon } from 'native-base';
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
     borderRadius: 20,
     padding: 10,
-    marginBottom: 20,
+    marginBottom: (Platform.OS === 'ios') ? 20 : 0,
     shadowColor: '#303838',
     shadowOffset: { width: 0, height: 5 },
     shadowRadius: 10,

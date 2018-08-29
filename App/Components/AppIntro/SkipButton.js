@@ -6,6 +6,7 @@ import {
   Animated,
   Platform
 } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export const SkipButton = (Platform.OS === 'ios') ? (({
   styles, onSkipBtnClick, isSkipBtnShow,
@@ -47,9 +48,7 @@ export const SkipButton = (Platform.OS === 'ios') ? (({
       <TouchableOpacity
         style={styles.full}
         onPress={isSkipBtnShow ? () => onSkipBtnClick() : null}>
-        <Text style={[styles.controllText, { color: leftTextColor, marginRight: 40 }]}>
-          {skipBtnLabel}
-        </Text>
+        <Ionicons name="ios-arrow-dropright" size={32} style={{ color: leftTextColor, marginRight: 10 }}/>
       </TouchableOpacity>
     </View>
   )

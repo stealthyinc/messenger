@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { ActivityIndicator, AsyncStorage, View, ListView, StyleSheet, TouchableOpacity, NativeModules } from 'react-native';
 import TouchableRow from './contacts/Row';
 // import Header from './contacts/Header';
+import TwitterShareModal from '../Components/TwitterShareModal'
 import Footer from './contacts/Footer';
 import SectionHeader from './contacts/SectionHeader';
 import { SearchBar, Text } from 'react-native-elements'
@@ -10,6 +11,8 @@ import { Button, Badge, Container, Header, Content, List, ListItem, Left, Body, 
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import TwitterShareActions, { TwitterShareSelectors } from '../Redux/TwitterShareRedux'
+import { shareOnTwitter } from 'react-native-social-share';
 
 import defaultProfile from '../Images/defaultProfile.png'
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
@@ -89,12 +92,28 @@ class ConversationScreen extends React.Component {
     newData.splice(rowId, 1);
     this.setState({ listViewData: newData });
   }
+  sendToTwitter = () => {
+    shareOnTwitter({
+      'text':'You can securely message me at: pbj.id on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im',
+    },
+    (results) => {
+      console.log(results);
+      this.props.acceptShare()
+    })
+  }
   render() {
     const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
-    const { contactMgr } = this.props
+    const { contactMgr, activateShare } = this.props
     const activeContact = (contactMgr) ? contactMgr.getActiveContact() : undefined
     if (!contactMgr || activeContact) {
       return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View>
+    }
+    else if (activateShare) {
+      return (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <TwitterShareModal declineShare={this.props.declineShare} acceptShare={this.sendToTwitter}/>
+        </View>
+      )
     }
     return (
       <Container style={{backgroundColor: 'white'}}>
@@ -135,11 +154,14 @@ const mapStateToProps = (state) => {
     publicKey: EngineSelectors.getPublicKey(state),
     contactMgr: EngineSelectors.getContactMgr(state),
     engineInit: EngineSelectors.getEngineInit(state),
+    activateShare: TwitterShareSelectors.getActivate(state),
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    declineShare: () => dispatch(TwitterShareActions.shareDecline()),
+    acceptShare: () => dispatch(TwitterShareActions.shareSuccess()),
     handleDeleteContact: (contact) => dispatch(EngineActions.handleDeleteContact(contact)),
     handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
   }
