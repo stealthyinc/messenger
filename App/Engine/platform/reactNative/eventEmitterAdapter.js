@@ -13,8 +13,8 @@ export class EventEmitterAdapter extends EventEmitter {
   }
 
   // Convert node 'on' method to react 'addListener' method for RN EventEmitter
-  on = (eventTypeStr, listenerFn, context) => {
-    const listener = this.addListener(eventTypeStr, listenerFn, context);
+  on = (eventTypeStr, listenerFn) => {
+    const listener = this.addListener(eventTypeStr, listenerFn);
 
     // manage the listeners for subsequent off calls
     if (!(eventTypeStr in this.listeners)) {
