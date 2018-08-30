@@ -59,7 +59,7 @@ let STEALTHY_PAGE = 'LOCALHOST';
 //
 // Logging Scopes
 const LOG_GAIAIO = false;
-const LOG_OFFLINEMESSAGING = false;
+const LOG_OFFLINEMESSAGING = true;
 //
 
 export class MessagingEngine extends EventEmitterAdapter {
