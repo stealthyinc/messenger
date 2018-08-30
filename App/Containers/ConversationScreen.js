@@ -91,8 +91,10 @@ class ConversationScreen extends React.Component {
     this.setState({ listViewData: newData });
   }
   sendToTwitter = () => {
+    const { username } = this.props.userData
+    const text = `You can securely message me at: ` + {username} + ` on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im`
     shareOnTwitter({
-      'text':'You can securely message me at: pbj.id on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im',
+      text,
     },
     (results) => {
       console.log(results);
@@ -101,16 +103,14 @@ class ConversationScreen extends React.Component {
   }
   render() {
     const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
-    const { contactMgr, activateShare } = this.props
+    const { contactMgr, activateShare, userData } = this.props
     const activeContact = (contactMgr) ? contactMgr.getActiveContact() : undefined
     if (!contactMgr || activeContact) {
       return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View>
     }
     else if (activateShare) {
       return (
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', alignSelf: 'stretch'}}>
-          <TwitterShareModal shareDecline={this.props.shareDecline} shareSuccess={this.sendToTwitter}/>
-        </View>
+        <TwitterShareModal shareDecline={this.props.shareDecline} shareSuccess={this.sendToTwitter}/>
       )
     }
     return (

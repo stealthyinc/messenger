@@ -8,6 +8,7 @@ import { Button, Icon } from 'react-native-elements'
 import styles from './Styles/ChatStyle'
 import {GiftedChat, Actions, Bubble, SystemMessage, InputToolbar} from 'react-native-gifted-chat';
 import CustomView from './chat/CustomView';
+import TwitterShareActions from '../Redux/TwitterShareRedux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import DappActions, { DappSelectors } from '../Redux/DappRedux'
 import Communications from 'react-native-communications';
@@ -304,6 +305,8 @@ class ChatScreen extends Component {
         messages: GiftedChat.append(previousState.messages, messages),
       };
     });
+    //call twitter share after first send
+    this.props.shareInit()
   }
 
   onReceive = (newMessages) => {
@@ -479,6 +482,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    shareInit: () => dispatch(TwitterShareActions.shareInit()),
     handleOutgoingMessage: (text, json) => dispatch(EngineActions.setOutgoingMessage(text, json)),
     sendNotification: (token, publicKey, bearerToken) => dispatch(EngineActions.sendNotification(token, publicKey, bearerToken)),
     handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),

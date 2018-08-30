@@ -4,8 +4,8 @@ import Immutable from 'seamless-immutable'
 /* ------------- Types and Action Creators ------------- */
 
 const { Types, Creators } = createActions({
-  shareUpdate: ['step'],
-  shareSuccess: [''],
+  shareInit: null,
+  shareSuccess: null,
   shareDecline: null
 })
 
@@ -15,27 +15,23 @@ export default Creators
 /* ------------- Initial State ------------- */
 
 export const INITIAL_STATE = Immutable({
-  step: 0,
   complete: null,
   incomplete: null,
-  activateShare: false,
+  activateShare: null,
 })
 
 /* ------------- Selectors ------------- */
 
 export const TwitterShareSelectors = {
-  getStep: state => state.twitter.step,
   getActivateShare: state => state.twitter.activateShare,
 }
 
 /* ------------- Reducers ------------- */
 
-export const update = (state, { step }) => {
-  if (step > 2) {
-    if (!state.complete && !state.incomplete)
-      state.merge({ step, activateShare: true})
-  }
-  return state.merge({ step })
+export const init = state => {
+  if (!state.complete && !state.incomplete)
+    return state.merge({ activateShare: true})
+  return state
 }
 
 export const success = state => {
@@ -49,7 +45,7 @@ export const decline = state => {
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const reducer = createReducer(INITIAL_STATE, {
-  [Types.SHARE_UPDATE]: update,
+  [Types.SHARE_INIT]: init,
   [Types.SHARE_SUCCESS]: success,
   [Types.SHARE_DECLINE]: decline
 })
