@@ -92,25 +92,31 @@ class ConversationScreen extends React.Component {
   }
   sendToTwitter = () => {
     const { username } = this.props.userData
-    const text = `You can securely message me at: ` + {username} + ` on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im`
+    const text = `You can securely message me at: ` + username + ` on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im`
     shareOnTwitter({
       text,
     },
     (results) => {
       console.log(results);
       this.props.shareSuccess()
+      this.props.updateUserSettings('twitterShare')
     })
   }
   render() {
     const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
-    const { contactMgr, activateShare, userData } = this.props
+    const { contactMgr, activateShare, userData, userSettings } = this.props
     const activeContact = (contactMgr) ? contactMgr.getActiveContact() : undefined
     if (!contactMgr || activeContact) {
       return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View>
     }
-    else if (activateShare) {
+    else if (activateShare && !userSettings.twitterShare) {
       return (
-        <TwitterShareModal shareDecline={this.props.shareDecline} shareSuccess={this.sendToTwitter}/>
+        <TwitterShareModal 
+        shareDecline={() => {
+          this.props.shareDecline
+          this.props.updateUserSettings('twitterShare')
+        }}
+        shareSuccess={this.sendToTwitter}/>
       )
     }
     return (
@@ -152,6 +158,7 @@ const mapStateToProps = (state) => {
     publicKey: EngineSelectors.getPublicKey(state),
     contactMgr: EngineSelectors.getContactMgr(state),
     engineInit: EngineSelectors.getEngineInit(state),
+    userSettings: EngineSelectors.getUserSettings(state),
     activateShare: TwitterShareSelectors.getActivateShare(state),
   }
 }
@@ -162,6 +169,7 @@ const mapDispatchToProps = (dispatch) => {
     shareSuccess: () => dispatch(TwitterShareActions.shareSuccess()),
     handleDeleteContact: (contact) => dispatch(EngineActions.handleDeleteContact(contact)),
     handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
+    updateUserSettings: (radio) => dispatch(EngineActions.updateUserSettings(radio)),
   }
 }
 
