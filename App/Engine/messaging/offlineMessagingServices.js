@@ -384,7 +384,7 @@ class OfflineMessagingServices extends EventEmitterAdapter {
             chatMessagesReadPromises.push(
               this.idxIoInst.readRemoteFile(contactId, chatMsgFilePath)
               .catch(error => {
-                console.log(`INFO(offlineMessagingServices): unable to read ${chatMsgFilePath} from ${contactId}`);
+                console.log(`INFO(offlineMessagingServices): unable to read ${chatMsgFilePath} from ${contactId}.\n  ERROR reported: ${error}`);
                 return undefined
               })
             );

@@ -20,10 +20,19 @@ module.exports.fmtErrorStr = function(anErrDescription,
 //
 //   from: https://stackoverflow.com/questions/679915/how-do-i-test-for-an-empty-javascript-object
 //
+// FML!  Object.keys fails with a TypeError in some environments (notably when
+//       running on Android in production.)
 module.exports.isEmptyObj = function (anObject) {
-  return (Object.keys(anObject).length === 0 &&
-          anObject.constructor === Object);
-};
+  let isEmptyObj = false
+  try {
+    isEmptyObj = (anObject.constructor === Object) &&
+                 (Object.keys(anObject).length === 0)
+  } catch (error) {
+    // Suppress
+  }
+
+  return isEmptyObj
+}
 
 module.exports.throwIfUndef = function (aVarName, aVar) {
   if (aVar === undefined) {
