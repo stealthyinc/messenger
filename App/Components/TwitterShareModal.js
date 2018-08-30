@@ -7,7 +7,7 @@ export default class TwitterShareModal extends Component {
     return (
       <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'white'}} >
         <Text style={{fontSize: 28, fontWeight: 'bold', marginBottom: 20}}>
-          TWEET YOUR STEALTHY ID 🎉
+          TWEET YOUR ID 🎉
         </Text>
         <Image
           style={{width: 300, height: 300}}
