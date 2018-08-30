@@ -9,7 +9,8 @@ export const defaultSettings = {
   notifications: true,
   discovery: true,
   heartbeat: false,
-  webrtc: false
+  webrtc: false,
+  twitterShare: false,
 }
 
 

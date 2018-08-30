@@ -780,7 +780,11 @@ export class MessagingEngine extends EventEmitterAdapter {
   }
 
   handleRadio (e, { name }) {
-    if (name === 'console') {
+    if (name === 'twitterShare') {
+      this.settings.twitterShare = !this.settings.twitterShare;
+      this.anonalytics.aeSettings(`twitterShare:${this.settings.twitterShare}`);
+    }
+    else if (name === 'console') {
       this.settings.console = !this.settings.console;
       this.anonalytics.aeSettings(`console:${this.settings.console}`);
     } else if (name === 'notifications') {

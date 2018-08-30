@@ -65,7 +65,7 @@ class ProfileScreen extends React.Component {
     const fullName = (name) ? name : 'Name Unknown'
     const userImage = (image && image[0] && image[0].contentUrl) ?
       image[0].contentUrl : undefined
-
+    const shareText = 'You can securely message me at: ' + username + ' on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im'
     return (
       <View style={styles.container}>
         <View style={{flex: 10}} />
@@ -112,7 +112,7 @@ class ProfileScreen extends React.Component {
                 color='#34bbed'
                 onPress={() => 
                   shareOnTwitter({
-                    'text':'You can securely message me at: pbj.id on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im',
+                    'text': shareText,
                   },
                   (results) => {
                     console.log(results);

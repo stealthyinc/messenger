@@ -38,41 +38,41 @@ class DappData extends Component {
     }
   }
   render () {
-    const blockusignData = {
-      'relay.id-1532144113901' : {
-        title : 'Apartment Lease',
-        description : '',
-        author : 'pbj.id',
-        avatar: 'https://gaia.blockstack.org/hub/12ELFuCsjCx5zxVDyNxttnYe9VLrRbLuMm/0/avatar-0',
-        decryptable : {
-          user : 'TBD',
-          key : 'Blockusign',
-        },
-        fileUrl : '',
-      },
-      'relay.id-1532196940159' : {
-        title : '401K Plan Restructure',
-        description : '',
-        author : 'alexc.id',
-        avatar: 'https://gaia.blockstack.org/hub/1GHZbCnbufz53Skb79FwnwuedW4Hhe2VhR/0/avatar-0',
-        decryptable : {
-          user : 'TBD',
-          key : 'Blockusign',
-        },
-        fileUrl : '',
-      },
-      'relay.id-1532197099770' : {
-        title : 'Insurance Claim Reiumbursment',
-        description : '',
-        author : 'relay.id',
-        avatar: 'https://gaia.blockstack.org/hub/1CdAz6hrRA2Uf51QAaTZBD1z7xeZfZ1Wiz//avatar-0',
-        decryptable : {
-          user : 'TBD',
-          key : 'Blockusign',
-        },
-        fileUrl : '',
-      },
-    }
+    // const blockusignData = {
+    //   'relay.id-1532144113901' : {
+    //     title : 'Apartment Lease',
+    //     description : '',
+    //     author : 'pbj.id',
+    //     avatar: 'https://gaia.blockstack.org/hub/12ELFuCsjCx5zxVDyNxttnYe9VLrRbLuMm/0/avatar-0',
+    //     decryptable : {
+    //       user : 'TBD',
+    //       key : 'Blockusign',
+    //     },
+    //     fileUrl : '',
+    //   },
+    //   'relay.id-1532196940159' : {
+    //     title : '401K Plan Restructure',
+    //     description : '',
+    //     author : 'alexc.id',
+    //     avatar: 'https://gaia.blockstack.org/hub/1GHZbCnbufz53Skb79FwnwuedW4Hhe2VhR/0/avatar-0',
+    //     decryptable : {
+    //       user : 'TBD',
+    //       key : 'Blockusign',
+    //     },
+    //     fileUrl : '',
+    //   },
+    //   'relay.id-1532197099770' : {
+    //     title : 'Insurance Claim Reiumbursment',
+    //     description : '',
+    //     author : 'relay.id',
+    //     avatar: 'https://gaia.blockstack.org/hub/1CdAz6hrRA2Uf51QAaTZBD1z7xeZfZ1Wiz//avatar-0',
+    //     decryptable : {
+    //       user : 'TBD',
+    //       key : 'Blockusign',
+    //     },
+    //     fileUrl : '',
+    //   },
+    // }
     let graphiteCards = []
 //    TODO: check for integrationError
 //    const integrationError = this.props.dappError
@@ -162,22 +162,22 @@ class DappData extends Component {
       }
     }
 
-    let blockusignCards = []
-    for (const item in blockusignData) {
-      const data = blockusignData[item]
-      const {title, description, author, fileUrl, profile, avatar} = data
-      blockusignCards.push(
-        <ListItem
-          key={item}
-          roundAvatar
-          title={title}
-          disabled
-          subtitle={author}
-          avatar={{uri: avatar}}
-          onPress={() => this.sendDappUrlMessage(fileUrl, data)}
-        />
-      )
-    }
+    // let blockusignCards = []
+    // for (const item in blockusignData) {
+    //   const data = blockusignData[item]
+    //   const {title, description, author, fileUrl, profile, avatar} = data
+    //   blockusignCards.push(
+    //     <ListItem
+    //       key={item}
+    //       roundAvatar
+    //       title={title}
+    //       disabled
+    //       subtitle={author}
+    //       avatar={{uri: avatar}}
+    //       onPress={() => this.sendDappUrlMessage(fileUrl, data)}
+    //     />
+    //   )
+    // }
     return (
       <View style={{flex: 1, backgroundColor: '#fff'}}>
         <Divider style={{ backgroundColor: '#34bbed', height: 8 }} />
@@ -212,7 +212,6 @@ class DappData extends Component {
             avatar={BlockSignIcon}
             hideChevron={true}
           />
-          {blockusignCards}
         </List>
         <Divider style={{ backgroundColor: '#34bbed', height: 8 }} /><List>
           <ListItem
