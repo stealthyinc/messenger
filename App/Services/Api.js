@@ -202,44 +202,6 @@ const create = (baseURL = 'https://core.blockstack.org') => {
     return profileData
   }
 
-  // DO NOT USE:
-  // Searches for profiles using the profile search endpoint.
-  // IMPORTANT: don't use this for now. It returns cached profile data. That means
-  //            a user who has just made their gaia public (multi-player) will not
-  //            have a visible gaia in the returned result.
-  // const getProfileSearchResults = (aUserName, anApp = 'https://www_stealthy_im') => {
-  //   // Ensure aUserName doesn't end in tld .id
-  //   const cleanUserName = utils.removeIdTld(aUserName)
-  //   // console.log(`DEBUG(Api.js::getProfileSearchResults): aUserName=${aUserName}, anApp=${anApp}, cleanUserName=${cleanUserName}`)
-  //   return api.get(`/v1/search?query=${cleanUserName}`)
-  //   .then((queryResult) => {
-  //     if (queryResult &&
-  //         queryResult.hasOwnProperty('data') &&
-  //         queryResult['data'] &&      // not enough to see if property is there (on timeout, it is null)
-  //         queryResult['data'].hasOwnProperty('results')) {
-  //       for (const result of queryResult['data']['results']) {
-  //         if (!result ||
-  //             !result.hasOwnProperty('fullyQualifiedName') ||
-  //             result['fullyQualifiedName'] !== aUserName) {
-  //           continue
-  //         }
-  //
-  //         if (result.hasOwnProperty('profile') &&
-  //             result['profile'].hasOwnProperty('apps') &&
-  //             result['profile']['apps'].hasOwnProperty(anApp)) {
-  //           return result["profile"]["apps"][anApp]
-  //         }
-  //       }
-  //     }
-  //     console.log(`INFO(Api.js::getProfileSearchResults): gaia not found for ${aUserName}`)
-  //     return undefined
-  //   })
-  //   .catch((err) => {
-  //     console.log(`ERROR(Api.js::getProfileSearchResults): ${err}`)
-  //     return undefined
-  //   })
-  // }
-
   // ------
   // STEP 3
   // ------
@@ -257,6 +219,40 @@ const create = (baseURL = 'https://core.blockstack.org') => {
     getBlockstackContacts,
     getUserProfile,
     getUserGaiaNS
+  }
+}
+
+const Gaia = (gaiaHubUrl='https://gaia.blockstack.org') => {
+  const api = apisauce.create({
+    baseURL: gaiaHubUrl,
+    headers: {'Cache-Control': 'no-cache'},
+    timeout: 10000
+  })
+
+  // TODO: exponential back off on retry
+  const getFileMultiPlayer = async (aUrlPath) => {
+    const cleanUrlPath = aUrlPath.replace(`${gaiaHubUrl}/`, '')
+
+    let result = undefined
+    try {
+      result = await api.get(cleanUrlPath)
+    } catch (err1) {
+      try {
+        result = await api.get(cleanUrlPath)
+      } catch (err2) {
+        try {
+          result = await api.get(cleanUrlPath)
+        } catch(err3) {
+          throw `ERROR(Api::gaiaMultiPlayerGetFile::getFileFromUrlPath): get failed from ${gaiaHubUrl}/${aUrlPath}`
+        }
+      }
+    }
+
+    return (result && result.hasOwnProperty('data')) ? result.data : undefined
+  }
+
+  return {
+    getFileMultiPlayer
   }
 }
 
@@ -315,7 +311,7 @@ const notification = (baseURL, token, pk, bearerToken) => {
   //     "title": "New Message",
   //   },
   //   "data": {
-  //    "test": "boobs",
+  //    "test": "blues",
   //   },
   //   "apns": {
   //     "payload": {"aps":{"badge":1,"sound":"default"}},
@@ -388,6 +384,7 @@ const notification = (baseURL, token, pk, bearerToken) => {
 // let's return back our create method as the default.
 export default {
   create,
+  Gaia,
   getAccessToken,
   checkAccessToken,
   notification

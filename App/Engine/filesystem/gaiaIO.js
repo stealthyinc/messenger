@@ -15,6 +15,7 @@ const {getRawFile, putRawFile} = BlockstackNativeModule;
 
 import API from './../../Services/Api'
 const api = API.create()
+const gaia = API.Gaia()
 
 const NAME_ENDPOINT = 'https://core.blockstack.org/v1/names';
 const ENABLE_IOS_LOOKUP_WORKAROUND = true;
@@ -214,11 +215,42 @@ module.exports = class GaiaIO extends BaseIO {
             }
           })
         } else {
-          reject('Unable to get gaia hub path.')
+          reject('ERROR(gaiaIO::_read_iOS): Unable to get gaia hub path.')
         }
       })
       .catch((hubError) => {
-        reject(hubError)
+        reject(`ERROR(gaiaIO::_read_iOS): ${hubError}`)
+      })
+    })
+  }
+
+  // Multi-player read problems on Android when the bundle was on device
+  // necessitated this method which does a simple http get on any user's GAIA.
+  // Caching is used to improve performance by reducing GAIA lookups.
+  // Very similar to _read_iOS above, but without call to native swift getRawFile
+  _readAndroid(username, filePath) {
+    return new Promise((resolve, reject) => {
+      this.getGaiaHubUrl(username)
+      .then((gaiaHubPath) => {
+        if (gaiaHubPath) {
+          const urlPath = `${gaiaHubPath}${filePath}`
+          gaia.getFileMultiPlayer(urlPath)
+          .then((data) => {
+            if (!data || data.includes('<Error><Code>BlobNotFound')) {
+              resolve(undefined)
+            } else {
+              resolve(data)
+            }
+          })
+          .catch((error) => {
+            reject(`ERROR(gaiaIO::_readAndroid): ${error}`)
+          })
+        } else {
+          reject('ERROR(gaiaIO::_readAndroid): Unable to get gaia hub path.')
+        }
+      })
+      .catch((hubError) => {
+        reject(`ERROR(gaiaIO::_readAndroid): ${hubError}`)
       })
     })
   }
@@ -228,30 +260,42 @@ module.exports = class GaiaIO extends BaseIO {
     if (utils.is_iOS()) {
       return this._read_iOS(username, filePath)
     } else if (utils.isAndroid()) {
-      const options = { username, zoneFileLookupURL: NAME_ENDPOINT, decrypt: false, app: 'https://www.stealthy.im' };
-      return BlockstackNativeModule.getFile(filePath, options)
+      return this._readAndroid(username, filePath)
       .then((data) => {
-        // TODO: do I need to handle empty blob files like iOS?
-        // For some reason Android elected to return a map vs. iOS and Blockstack.js
-        //
-        let result = undefined
-        if (data && data.hasOwnProperty('fileContents')) {
-          result = JSON.parse(data.fileContents)
-        } else if (data && data.hasOwnProperty('fileContentsEncoded')) {
-          // Empty files / non-existing files seem to come in to this code path for Android.
-          // Parsing an empty file will result in an error--if we detect an error, then just
-          // return undefined.
-          //
-          // Base 64 encoded
-          try {
-            result = JSON.parse(data.fileContentsEncoded)
-          } catch (error) {
-            // Suppress
-            result = undefined
-          }
-        }
-        return result
+        return data
       })
+
+      // TODO: Keep this. At some point we may use it--we had to ditch it because
+      //       of problems with Blockstack multi-player read when running on Android
+      //       from the device bundle (instead of from the bundle running on the
+      //       developer PC.)
+      //       The reason to keep it is that it highlights some bugs/issues/differences
+      //       in the API behaviors.
+      //
+      // const options = { username, zoneFileLookupURL: NAME_ENDPOINT, decrypt: false, app: 'https://www.stealthy.im' };
+      // return BlockstackNativeModule.getFile(filePath, options)
+      // .then((data) => {
+      //   // TODO: do I need to handle empty blob files like iOS?
+      //   // For some reason Android elected to return a map vs. iOS and Blockstack.js
+      //   //
+      //   let result = undefined
+      //   if (data && data.hasOwnProperty('fileContents')) {
+      //     result = JSON.parse(data.fileContents)
+      //   } else if (data && data.hasOwnProperty('fileContentsEncoded')) {
+      //     // Empty files / non-existing files seem to come in to this code path for Android.
+      //     // Parsing an empty file will result in an error--if we detect an error, then just
+      //     // return undefined.
+      //     //
+      //     // Base 64 encoded
+      //     try {
+      //       result = JSON.parse(data.fileContentsEncoded)
+      //     } catch (error) {
+      //       // Suppress
+      //       result = undefined
+      //     }
+      //   }
+      //   return result
+      // })
     } else {
       return this._readWeb(username, filePath)
     }
