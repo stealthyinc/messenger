@@ -15,22 +15,23 @@ export default Creators
 /* ------------- Initial State ------------- */
 
 export const INITIAL_STATE = Immutable({
-  step: null,
+  step: 0,
   complete: null,
   incomplete: null,
-  activateShare: null,
+  activateShare: false,
 })
 
 /* ------------- Selectors ------------- */
 
 export const TwitterShareSelectors = {
-  getActivate: state => state.activateShare,
+  getStep: state => state.twitter.step,
+  getActivateShare: state => state.twitter.activateShare,
 }
 
 /* ------------- Reducers ------------- */
 
 export const update = (state, { step }) => {
-  if (step > 4) {
+  if (step > 2) {
     if (!state.complete && !state.incomplete)
       state.merge({ step, activateShare: true})
   }

@@ -1,11 +1,12 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Container, Header, Content, List, ListItem, Thumbnail, Text, Body } from 'native-base';
-import { Platform } from 'react-native'
+import { Platform, TouchableOpacity } from 'react-native'
 import { Button, SearchBar } from 'react-native-elements'
 import BlockstackContactsActions, { BlockstackContactsSelectors } from '../Redux/BlockstackContactsRedux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import Communications from 'react-native-communications';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import {
   ActivityIndicator,
@@ -27,6 +28,20 @@ const styles = StyleSheet.create({
 })
 
 class BlockContactSearch extends Component {
+  static navigationOptions = ({ navigation }) => {
+    const params = navigation.state.params || {};
+    return {
+      headerLeft: (
+        <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
+          <Ionicons name="ios-arrow-dropleft" size={32} color='white'/>
+        </TouchableOpacity>
+      ),
+      headerTintColor: 'white',
+      headerStyle: {
+        backgroundColor: '#34bbed'
+      }
+    };
+  };
   constructor (props) {
     super(props)
     this.state = {
@@ -34,6 +49,9 @@ class BlockContactSearch extends Component {
     }
     this.numContacts = (props.contactMgr) ?
       (props.contactMgr.getAllContacts().length) : 0;
+  }
+  componentWillMount() {
+    this.props.navigation.setParams({ navigation: this.props.navigation });
   }
   componentDidMount() {
     this.search.focus()

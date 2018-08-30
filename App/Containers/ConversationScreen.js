@@ -2,13 +2,11 @@ import React from 'react';
 import { connect } from 'react-redux'
 import { ActivityIndicator, AsyncStorage, View, ListView, StyleSheet, TouchableOpacity, NativeModules } from 'react-native';
 import TouchableRow from './contacts/Row';
-// import Header from './contacts/Header';
 import TwitterShareModal from '../Components/TwitterShareModal'
 import Footer from './contacts/Footer';
 import SectionHeader from './contacts/SectionHeader';
 import { SearchBar, Text } from 'react-native-elements'
 import { Button, Badge, Container, Header, Content, List, ListItem, Left, Body, Right, Item, Icon, Input, Thumbnail, Title, Separator } from 'native-base';
-// import Ionicons from 'react-native-vector-icons/Ionicons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import TwitterShareActions, { TwitterShareSelectors } from '../Redux/TwitterShareRedux'
@@ -98,7 +96,7 @@ class ConversationScreen extends React.Component {
     },
     (results) => {
       console.log(results);
-      this.props.acceptShare()
+      this.props.shareSuccess()
     })
   }
   render() {
@@ -110,8 +108,8 @@ class ConversationScreen extends React.Component {
     }
     else if (activateShare) {
       return (
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <TwitterShareModal declineShare={this.props.declineShare} acceptShare={this.sendToTwitter}/>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', alignSelf: 'stretch'}}>
+          <TwitterShareModal shareDecline={this.props.shareDecline} shareSuccess={this.sendToTwitter}/>
         </View>
       )
     }
@@ -154,14 +152,14 @@ const mapStateToProps = (state) => {
     publicKey: EngineSelectors.getPublicKey(state),
     contactMgr: EngineSelectors.getContactMgr(state),
     engineInit: EngineSelectors.getEngineInit(state),
-    activateShare: TwitterShareSelectors.getActivate(state),
+    activateShare: TwitterShareSelectors.getActivateShare(state),
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    declineShare: () => dispatch(TwitterShareActions.shareDecline()),
-    acceptShare: () => dispatch(TwitterShareActions.shareSuccess()),
+    shareDecline: () => dispatch(TwitterShareActions.shareDecline()),
+    shareSuccess: () => dispatch(TwitterShareActions.shareSuccess()),
     handleDeleteContact: (contact) => dispatch(EngineActions.handleDeleteContact(contact)),
     handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
   }

@@ -10,14 +10,14 @@ export default class TwitterShareModal extends Component {
         image={{uri: 'https://media.giphy.com/media/aLdiZJmmx4OVW/giphy.gif'}}>
         <View style={{flexDirection: 'row'}}>
           <Button
-            onPress={() => this.props.acceptShare()}
+            onPress={() => this.props.shareSuccess()}
             icon={{name: 'share'}}
             backgroundColor='#03A9F4'
             textStyle={{fontWeight: 'bold'}}
             buttonStyle={{borderRadius: 0, marginLeft: 0, marginRight: 0, marginBottom: 0}}
             title='SHARE NOW' />
           <Button
-            onPress={() => this.props.declineShare()}
+            onPress={() => this.props.shareDecline()}
             icon={{name: 'cancel'}}
             backgroundColor='red'
             textStyle={{fontWeight: 'bold'}}

@@ -10,7 +10,7 @@ export const reducers = combineReducers({
   contact: require('./BlockstackContactsRedux').reducer,
   engine: require('./EngineRedux').reducer,
   dapp: require('./DappRedux').reducer,
-  twitterShare: require('./TwitterShareRedux').reducer,
+  twitter: require('./TwitterShareRedux').reducer,
 })
 
 export default () => {
