@@ -6,6 +6,7 @@ const { MESSAGE_STATE } = require('./chatMessage.js');
 const ENABLE_SEND_QUEUEING = false;
 const SEND_INTERVAL = 5;
 const RECV_INTERVAL = 5;
+const SHORT_RECV_INTERVAL = 2;
 
 
 const EXT_SEP = '.';
@@ -339,7 +340,11 @@ class OfflineMessagingServices extends EventEmitterAdapter {
         this.receiving = false;
       }
 
-      const sleepResult = await utils.resolveAfterMilliseconds(RECV_INTERVAL * 1000);
+      if (this.contactArr && this.contactArr.length <= 5) {
+        const sleepResult = await utils.resolveAfterMilliseconds(SHORT_RECV_INTERVAL * 1000);
+      } else {
+        const sleepResult = await utils.resolveAfterMilliseconds(RECV_INTERVAL * 1000);
+      }
     }
   }
 
