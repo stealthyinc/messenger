@@ -245,8 +245,8 @@ function* checkToken() {
 export function* startEngine (action) {
   const { userData } = action
   EngineInstance = yield call (createEngine, userData)
-  const engineInit = yield select(EngineSelectors.getEngineInit)
-  EngineInstance.componentDidMountWork(engineInit, userData["username"])
+  // const engineInit = yield select(EngineSelectors.getEngineInit)
+  EngineInstance.componentDidMountWork(false, userData["username"])
   yield fork(watchEngineFaultChannel)
   yield fork(watchInitialzedEventChannel)
   yield fork(watchContactMgrEventChannel)

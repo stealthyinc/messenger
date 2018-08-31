@@ -399,7 +399,104 @@ export class MessagingEngine extends EventEmitterAdapter {
       new GaiaIO(this.logger, LOG_GAIAIO) :
       new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO);
 
+    await this._mobileGaiaTest()
     await this._fetchUserSettings();
+  }
+
+  // Attempts to read a file three times with an exponential delay between
+  // attempts, plus jitter. Thank Jude Nelson for the idea based on the workings
+  // of ethernet.
+  async robustLocalRead(filePath, maxAttempts=3, initialDelayMs=50) {
+    const method = 'channelEngineV2::robustLocalRead'
+
+    let attempt = 0
+    let delayMs = initialDelayMs
+    while (attempt < maxAttempts) {
+      attempt += 1
+      try {
+        return await this.io.readLocalFile(this.userId, filePath)
+      } catch (error) {
+        console.log(`INFO(${method}):\n  - Attempt number ${attempt} failed.\n  - Reason: ${error}.\n`)
+        if (attempt < maxAttempts) {
+          delayMs = delayMs * Math.pow(2, (attempt-1)) + Math.floor(Math.random()*delayMs)
+          console.log(`  - Waiting ${delayMs} milliseconds before next attempt.`)
+          await utils.resolveAfterMilliseconds(delayMs)
+        }
+      }
+    }
+
+    // Throw b/c we never successfully read a value
+    throw `ERROR(${method}): failed to read ${filePath} after ${maxAttempts} attempts.`
+  }
+
+  async robustLocalWrite(filePath, fileContent, maxAttempts=3, initialDelayMs=50) {
+    const method = 'channelEngineV2::robustLocalWrite'
+
+    let attempt = 0
+    let delayMs = initialDelayMs
+    // console.log(`DEBUG(${method}): writing to ${this.userId}/${filePath}.`)
+    while (attempt < maxAttempts) {
+      attempt += 1
+      try {
+        // console.log(`DEBUG(${method}): attempt ${attempt} writing to ${this.userId}/${filePath}.`)
+        return await this.io.writeLocalFile(this.userId, filePath, fileContent)
+      } catch (error) {
+        console.log(`INFO(${method}):\n  - Attempt number ${attempt} failed.\n  - Reason: ${error}.\n`)
+        if (attempt < maxAttempts) {
+          delayMs = delayMs * Math.pow(2, (attempt-1)) + Math.floor(Math.random()*delayMs)
+          console.log(`  - Waiting ${delayMs} milliseconds before next attempt.`)
+          await utils.resolveAfterMilliseconds(delayMs)
+        }
+      }
+    }
+
+    // Throw b/c we never successfully read a value
+    throw `ERROR(${method}): failed to write to ${filePath} after ${maxAttempts} attempts.`
+  }
+
+
+  // Blockstack's mobile offerings create sessions for GAIA that cause a bug when
+  // users sign into one ID, then sign out and sign in to a different ID. Then sign
+  // out and back to the first.  What happens is that GAIA on the second sign in
+  // is writing to the GAIA from the fist sign in--but with the wrong encryption key!
+  // This test prevents that possibility by writing a known value to GAIA and then
+  // reading it back. If the value that is read back either mis-matches or doesn't
+  // exist then we likely have the issue:
+  async _mobileGaiaTest() {
+    const method = 'engine::_mobileGaiaTest'
+
+    const testFilePath = 'mobileGaiaTest.txt'
+    const testValue = `${Date.now()}_${(Math.random()*100000)}`
+    try {
+      // console.log(`DEBUG(${method}): attempting to write ${testValue} to ${testFilePath}.`)
+      await this.robustLocalWrite(testFilePath, testValue)
+      // console.log(`DEBUG(${method}): suceeded writing ${testValue} to ${testFilePath}.`)
+    } catch (error) {
+      const errMsg = `ERROR(${method}): unable to write test file, ${testFilePath}, to ${this.userId}'s GAIA.`
+      // console.log(`${errMsg}`)
+      this.emit('me-fault', errMsg)
+      throw errMsg
+    }
+
+    let recoveredValue = undefined
+    try {
+      // console.log(`DEBUG(${method}): attempting to read ${testValue} from ${testFilePath}.`)
+      recoveredValue = await this.robustLocalRead(testFilePath)
+      // console.log(`DEBUG(${method}):read ${recoveredValue} from ${testFilePath}.`)
+    } catch (error) {
+      const errMsg = `ERROR(${method}): unable to read test file, ${testFilePath}, from ${this.userId}'s GAIA.`
+      // console.log(`${errMsg}`)
+      this.emit('me-fault', errMsg)
+      throw errMsg
+    }
+
+    if (recoveredValue !== testValue) {
+      const errMsg = `ERROR(${method}): mis-matched GAIA for write and read-back of ${testFilePath} for ${this.userId}. Halting to prevent data loss.`
+      // console.log(`${errMsg}`)
+      this.emit('me-fault', errMsg)
+      throw errMsg
+    }
+    console.log(`INFO(${method}): Success. GAIA matches for ${this.userId}.`)
   }
 
   // Future: a multiple read of settings.json, contacts.json and pk.txt
@@ -545,15 +642,26 @@ export class MessagingEngine extends EventEmitterAdapter {
       // Don't disable emit/listeners for the engine yet (we need to emit one
       // last event).
       this.offlineMsgSvc.offAll()
+    } catch (err) {
+      // do nothing, just don't prevent the code below from happening
+    }
+
+    try {
+      // Don't disable emit/listeners for the engine yet (we need to emit one
+      // last event).
       this.discovery.offAll()
     } catch (err) {
       // do nothing, just don't prevent the code below from happening
     }
 
-    this.offlineMsgSvc.skipSendService();
-    this.offlineMsgSvc.stopSendService();
-    this.offlineMsgSvc.pauseRecvService();
-    this.offlineMsgSvc.stopRecvService();
+    try {
+      this.offlineMsgSvc.skipSendService();
+      this.offlineMsgSvc.stopSendService();
+      this.offlineMsgSvc.pauseRecvService();
+      this.offlineMsgSvc.stopRecvService();
+    } catch (err) {
+      // do nothing, just don't prevent the code below from happening
+    }
 
     const promises = []
     promises.push(

@@ -175,12 +175,13 @@ class ReduxNavigation extends React.Component {
     } catch (error) {
       console.log(`ERROR(${method}): error during wait for engine shutdown.\n${error}`)
     } finally {
-      console.log(`INFO(${method}): timed out waiting for engine shutdown.`)
-
       // Only call ___finishLogOutSequence once (it may have been called before the
       // timer above resolves):
       if (!this.shutDownSignOut) {
+        console.log(`INFO(${method}): timed out waiting for engine shutdown. Forcing shut down.`)
         this.___finishLogOutSequence()
+      } else {
+        console.log(`INFO(${method}): Engine shut down successfully before force shut down timer.`)
       }
     }
   }
