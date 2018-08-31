@@ -638,57 +638,69 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   //
   handleShutDownRequest = async () => {
-    try {
-      // Don't disable emit/listeners for the engine yet (we need to emit one
-      // last event).
-      this.offlineMsgSvc.offAll()
-    } catch (err) {
-      // do nothing, just don't prevent the code below from happening
+    if (this.offlineMsgSvc) {
+      try {
+        // Don't disable emit/listeners for the engine yet (we need to emit one
+        // last event).
+        this.offlineMsgSvc.offAll()
+      } catch (err) {
+        // do nothing, just don't prevent the code below from happening
+      }
     }
 
-    try {
-      // Don't disable emit/listeners for the engine yet (we need to emit one
-      // last event).
-      this.discovery.offAll()
-    } catch (err) {
-      // do nothing, just don't prevent the code below from happening
+    if (this.discovery) {
+      try {
+        // Don't disable emit/listeners for the engine yet (we need to emit one
+        // last event).
+        this.discovery.offAll()
+      } catch (err) {
+        // do nothing, just don't prevent the code below from happening
+      }
     }
 
-    try {
-      this.offlineMsgSvc.skipSendService();
-      this.offlineMsgSvc.stopSendService();
-      this.offlineMsgSvc.pauseRecvService();
-      this.offlineMsgSvc.stopRecvService();
-    } catch (err) {
-      // do nothing, just don't prevent the code below from happening
+    if (this.offlineMsgSvc) {
+      try {
+        this.offlineMsgSvc.skipSendService();
+        this.offlineMsgSvc.stopSendService();
+        this.offlineMsgSvc.pauseRecvService();
+        this.offlineMsgSvc.stopRecvService();
+      } catch (err) {
+        // do nothing, just don't prevent the code below from happening
+      }
     }
-
+    
     const promises = []
-    promises.push(
-      this.offlineMsgSvc.sendMessagesToStorage()
-      .catch(err => {
-        console.log(`ERROR(engine.js::handleShutDownRequest): sending messages to storage. ${err}`);
-        return undefined;
-      })
-    );
-    promises.push(
-      this._writeConversations()
-      .catch(err => {
-        console.log(`ERROR(engine.js::handleShutDownRequest): writing conversations. ${err}`);
-        return undefined;
-      })
-    );
+    if (this.offlineMsgSvc) {
+      promises.push(
+        this.offlineMsgSvc.sendMessagesToStorage()
+        .catch(err => {
+          console.log(`ERROR(engine.js::handleShutDownRequest): sending messages to storage. ${err}`);
+          return undefined;
+        })
+      );
+    }
+    if (this.conversations) {
+      promises.push(
+        this._writeConversations()
+        .catch(err => {
+          console.log(`ERROR(engine.js::handleShutDownRequest): writing conversations. ${err}`);
+          return undefined;
+        })
+      );
+    }
     // We stopped doing this after every incoming msg etc. to
     // speed things along, hence write here.
     //   - to avoid the popup, we should have a timer periodically write
     //     all these and use a dirty flag to determine if we even need to do this.
-    promises.push(
-      this._writeContactList(this.contactMgr.getAllContacts())
-      .catch(err => {
-        console.log(`ERROR(engine.js::handleShutDownRequest): writing contact list. ${err}`);
-        return undefined;
-      })
-    )
+    if (this.contactMgr) {
+      promises.push(
+        this._writeContactList(this.contactMgr.getAllContacts())
+        .catch(err => {
+          console.log(`ERROR(engine.js::handleShutDownRequest): writing contact list. ${err}`);
+          return undefined;
+        })
+      )
+    }
 
     try {
       await Promise.all(promises)
