@@ -6,6 +6,7 @@ import {
   Animated,
   Platform
 } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export const DoneButton = (Platform.OS === 'ios') ? (({
   styles, onDoneBtnClick, onNextBtnClick,
@@ -53,9 +54,14 @@ export const DoneButton = (Platform.OS === 'ios') ? (({
       <TouchableOpacity style={styles.full}
         onPress={ isDoneBtnShow ? onDoneBtnClick : onNextBtnClick}
       >
-       <Text style={[styles.nextButtonText, { color: rightTextColor, marginLeft: 40 }]}>
-         {isDoneBtnShow ? doneBtnLabel : nextBtnLabel}
-       </Text>
+       {isDoneBtnShow ? (
+          <Ionicons name="ios-arrow-dropright" size={32} style={{ color: rightTextColor }}/>
+        ) : (
+          <Text style={[styles.nextButtonText, { color: rightTextColor, marginLeft: 40 }]}>
+           {nextBtnLabel}
+          </Text>
+        )
+      }
       </TouchableOpacity>
     </View>
   )

@@ -11,6 +11,7 @@ import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 const common = require('./../common.js');
 const utils = require('./../Engine/misc/utils.js')
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
+import RNExitApp from 'react-native-exit-app';
 
 class ReduxNavigation extends React.Component {
   constructor(props) {
@@ -209,7 +210,10 @@ class ReduxNavigation extends React.Component {
       }
       this.publicKey = undefined
 
-      this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' })
+      if (utils.is_iOS())
+        this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' })
+      else
+        RNExitApp.exitApp();
     }
   }
 
