@@ -4,11 +4,12 @@ import android.app.Application;
 import com.stealthy.sdk.BlockstackPackage;
 
 import com.facebook.react.ReactApplication;
-import com.barefootcoders.android.react.KDSocialShare.KDSocialShare;
 import com.oblador.vectoricons.VectorIconsPackage;
 import io.invertase.firebase.RNFirebasePackage;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
 import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
+import com.barefootcoders.android.react.KDSocialShare.KDSocialShare;
+import com.github.wumke.RNExitApp.RNExitAppPackage;
 import io.invertase.firebase.notifications.RNFirebaseNotificationsPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -33,6 +34,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new RNExitAppPackage(),
             new KDSocialShare(),
             new BlockstackPackage(),
             new RNBackgroundFetchPackage(),

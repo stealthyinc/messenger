@@ -32,14 +32,9 @@ class SignInScreen extends React.Component {
   static navigationOptions = {
     header: null,
   };
-  constructor(props) {
-    super(props)
-    this.state = {
-      spinner: false
-    }
-  }
   render() {
-    const activityIndicator = (this.state.spinner) ? <ActivityIndicator size="large" color="#34bbed"/> : null
+    const activityIndicator = (this.props.spinner) ? <ActivityIndicator size="large" color="#34bbed"/> : null
+    const marginBottom = (this.props.spinner) ? 40 : 80
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <View style={{flexDirection: 'row', marginTop: 40}}>
@@ -58,7 +53,7 @@ class SignInScreen extends React.Component {
             title="Blockstack Login"
             textStyle={{ fontSize: 18, fontWeight: "900", color: "#34bbed"}}
             icon={{name: 'input', color: "#34bbed"}}
-            disabled={this.state.spinner}
+            disabled={this.props.spinner}
             buttonStyle={{
               marginLeft: 20,
               width: 200,
@@ -78,14 +73,14 @@ class SignInScreen extends React.Component {
           />
           <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: 80, marginTop: 5 }}>Hi Stealthy 👋</Text>
         </View>
-        <Text style={{ fontWeight: 'bold', fontSize: 24, color: 'grey', marginBottom: 80 }}>dApp Communication Protocol</Text>
+        <Text style={{ fontWeight: 'bold', fontSize: 24, color: 'grey', marginBottom }}>dApp Communication Protocol</Text>
         {activityIndicator}
         <Button
           onPress={this._signInAsync}
           title="Create Account"
           textStyle={{ fontSize: 18, fontWeight: "900", color: "white"}}
           icon={{name: 'create', color: "white"}}
-          disabled={this.state.spinner}
+          disabled={this.props.spinner}
           buttonStyle={{
             backgroundColor: "#34bbed",
             width: 180,
@@ -99,7 +94,7 @@ class SignInScreen extends React.Component {
         <Button
           onPress={() => Linking.openURL('https://www.youtube.com/watch?v=V9-egxTCFFE').catch(err => console.error('An error occurred', err))}
           title="Watch Demo"
-          disabled={this.state.spinner}
+          disabled={this.props.spinner}
           textStyle={{ fontSize: 18, fontWeight: "900", color: "black"}}
           icon={{name: 'featured-video', color: "black"}}
           buttonStyle={{
@@ -121,13 +116,13 @@ class SignInScreen extends React.Component {
     BlockstackNativeModule.getUserData((error, userData) => {
       if (error) {
         throw(`Failed to get user data.  ${error}`);
-        this.setState({spinner: false})
+        this.props.setSignInPending(false)
       } else {
         BlockstackNativeModule.getPublicKeyFromPrivate(
           userData['privateKey'], async (error, publicKey) => {
             if (error) {
               throw(`Failed to get public key from private. ${error}`);
-              this.setState({spinner: false})
+              this.props.setSignInPending(false)
             }
             else {
               userData['appPublicKey'] = publicKey;
@@ -140,7 +135,7 @@ class SignInScreen extends React.Component {
     return;
   };
   _signInAsync = async () => {
-    this.setState({spinner: true})
+    this.props.setSignInPending(true)
     const method = 'SignInScreen::_signInAsync'
 
     const {BlockstackNativeModule} = NativeModules;
@@ -165,7 +160,7 @@ class SignInScreen extends React.Component {
         userData.privateKey = androidUserData.appPrivateKey
         userData.username = androidUserData.username
       } catch (error) {
-        this.setState({spinner: false})
+        this.props.setSignInPending(false)
         throw utils.fmtErrorStr('Failed to sign in to Blockstack.', method, error)
       }
 
@@ -173,7 +168,7 @@ class SignInScreen extends React.Component {
         const publicKey = await BlockstackNativeModule.getPublicKeyFromPrivateKey(userData.privateKey)
         userData.appPublicKey = publicKey
       } catch (error) {
-        this.setState({spinner: false})
+        this.props.setSignInPending(false)
         throw utils.fmtErrorStr('Failed to get public key.', method, error)
       }
 
@@ -185,7 +180,7 @@ class SignInScreen extends React.Component {
           this._getUserData()
         }
         else {
-          this.setState({spinner: false})
+          this.props.setSignInPending(false)
         }
       });
     }
@@ -201,9 +196,16 @@ const styles = StyleSheet.create({
   },
 });
 
-const mapDispatchToProps = (dispatch) => {
+const mapStateToProps = (state) => {
   return {
+    spinner: EngineSelectors.getSignInPending(state),
   }
 }
 
-export default connect(null, mapDispatchToProps)(SignInScreen)
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setSignInPending: (flag) => dispatch(EngineActions.setSignInPending(flag)),
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(SignInScreen)

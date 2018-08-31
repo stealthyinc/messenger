@@ -4,6 +4,7 @@ import { Text, Divider } from 'react-native-elements'
 import { Container, Header, Content, List, ListItem, Thumbnail, Left, Body, Right, Button } from 'native-base';
 import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 // Styles
 import styles from './Styles/DiscoverScreenStyle'
@@ -12,7 +13,7 @@ class DiscoverScreen extends Component {
   static navigationOptions = {
     headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Discover</Text>,
     headerRight: (
-      <TouchableOpacity onPress={() => console.log('Discover Info')} style={{marginRight: 10}}> 
+      <TouchableOpacity onPress={() => alert('Public chatrooms for various topics')} style={{marginRight: 10}}> 
         <Ionicons name="ios-help-buoy" size={30} color='white'/>
       </TouchableOpacity>
     ),
@@ -21,12 +22,23 @@ class DiscoverScreen extends Component {
       backgroundColor: '#34bbed'
     }
   };
+  roomSelected = (id) => {
+    // const { contactMgr } = this.props
+    // if (contactMgr) {
+    //   //hardcoding relay.id for now
+    //   // const theNextActiveContactId = id;
+    //   const theNextActiveContactId = 'relay.id';
+    //   const theNextActiveContact = contactMgr.getContact(theNextActiveContactId);
+    //   this.props.handleContactClick(theNextActiveContact);
+    // }
+    // this.props.navigation.navigate('ChatRoom')
+  }
   render () {
     return (
       <Container>
         <Content>
           <List>
-            <ListItem thumbnail>
+            <ListItem thumbnail onPress={() => this.roomSelected('#chat.stealthy.id')}>
               <Left>
                 <Thumbnail square source={{ uri: 'https://www.stealthy.im/blue512.png' }} />
               </Left>
@@ -41,7 +53,7 @@ class DiscoverScreen extends Component {
               </Right>
             </ListItem>
             <Divider style={{ backgroundColor: '#34bbed', height: 4 }} />
-            <ListItem thumbnail>
+            <ListItem thumbnail onPress={() => this.roomSelected('#tc.stealthy.id')}>
               <Left>
                 <Thumbnail square source={{ uri: 'https://storage.googleapis.com/proudcity/wwwproudcity/uploads/2016/10/techcrunch.jpg' }} />
               </Left>
@@ -56,7 +68,7 @@ class DiscoverScreen extends Component {
               </Right>
             </ListItem>
             <Divider style={{ backgroundColor: '#34bbed', height: 4 }} />
-            <ListItem thumbnail>
+            <ListItem thumbnail onPress={() => this.roomSelected('#blockchain.stealthy.id')}>
               <Left>
                 <Thumbnail square source={{ uri: 'https://www.connecterra.io/wp-content/uploads/2018/01/blockchain.png' }} />
               </Left>
@@ -71,7 +83,7 @@ class DiscoverScreen extends Component {
               </Right>
             </ListItem>
             <Divider style={{ backgroundColor: '#34bbed', height: 4 }} />
-            <ListItem thumbnail>
+            <ListItem thumbnail onPress={() => this.roomSelected('#tokenomics.stealthy.id')}>
               <Left>
                 <Thumbnail square source={{ uri: 'https://cdn-images-1.medium.com/max/1200/1*rxtmOdJAm4q4QcEPT-3m-g.jpeg' }} />
               </Left>
@@ -86,7 +98,7 @@ class DiscoverScreen extends Component {
               </Right>
             </ListItem>
             <Divider style={{ backgroundColor: '#34bbed', height: 4 }} />
-            <ListItem thumbnail>
+            <ListItem thumbnail onPress={() => this.roomSelected('#decentralization.stealthy.id')}>
               <Left>
                 <Thumbnail square source={{ uri: 'https://techcrunch.com/wp-content/uploads/2017/09/gettyimages-639050350.jpg' }} />
               </Left>
@@ -101,7 +113,7 @@ class DiscoverScreen extends Component {
               </Right>
             </ListItem>
             <Divider style={{ backgroundColor: '#34bbed', height: 4 }} />
-            <ListItem thumbnail>
+            <ListItem thumbnail onPress={() => this.roomSelected('#protocol.stealthy.id')}>
               <Left>
                 <Thumbnail square source={{ uri: 'https://cdn.geekwire.com/wp-content/uploads/2016/07/GraphDB-FA-big-hero.png' }} />
               </Left>
@@ -116,7 +128,7 @@ class DiscoverScreen extends Component {
               </Right>
             </ListItem>
             <Divider style={{ backgroundColor: '#34bbed', height: 4 }} />
-            <ListItem thumbnail>
+            <ListItem thumbnail onPress={() => this.roomSelected('#blockstack.stealthy.id')}>
               <Left>
                 <Thumbnail square source={{ uri: 'https://pbs.twimg.com/profile_images/837047342863888384/FjKeM4Aa_400x400.jpg' }} />
               </Left>
@@ -131,7 +143,7 @@ class DiscoverScreen extends Component {
               </Right>
             </ListItem>
             <Divider style={{ backgroundColor: '#34bbed', height: 4 }} />
-            <ListItem thumbnail>
+            <ListItem thumbnail onPress={() => this.roomSelected('#random.stealthy.id')}>
               <Left>
                 <Thumbnail square source={{ uri: 'https://cdn-images-1.medium.com/max/1600/1*t_G1kZwKv0p2arQCgYG7IQ.gif' }} />
               </Left>
@@ -155,11 +167,13 @@ class DiscoverScreen extends Component {
 
 const mapStateToProps = (state) => {
   return {
+    contactMgr: EngineSelectors.getContactMgr(state),
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
   }
 }
 

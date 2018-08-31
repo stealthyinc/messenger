@@ -57,6 +57,7 @@ class BlockScreen extends Component {
   render () {
     const activityIndicator = (this.state.spinner) ?
       (<ActivityIndicator size="large" color="#34bbed"/>) : null;
+    const marginBottom = (this.props.spinner) ? 40 : 80
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <View style={{flexDirection: 'row', marginTop: 40}}>
@@ -91,7 +92,7 @@ class BlockScreen extends Component {
           />
           <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: 80, marginTop: 5 }}>Unlock Stealthy</Text>
         </View>
-        <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'grey', marginBottom: 80, textAlign: 'center' }}>Locked: {this.props.session}</Text>
+        <Text style={{ fontWeight: 'bold', fontSize: 20, color: 'grey', marginBottom, textAlign: 'center' }}>Locked: {this.props.session}</Text>
         {activityIndicator}
         <Button
           onPress={this._unlockEngine}
@@ -105,16 +106,15 @@ class BlockScreen extends Component {
             borderColor: "transparent",
             borderWidth: 0,
             borderRadius: 5,
+            marginTop: 20
           }}
-          containerStyle={{ marginTop: 25 }}
         />
         <Button
           onPress={this.props.screenProps.logout}
           title="Log Out"
           icon={{name: 'launch', color: 'white'}}
-          buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#34bbed'}}
+          buttonStyle={{marginTop: 10, borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#34bbed'}}
           titleStyle={{ fontSize: 18, fontWeight: "bold"}}
-          containerStyle={{ marginTop: 25 }}
         />
       </ScrollView>
     )

@@ -38,6 +38,7 @@ const { Types, Creators } = createActions({
   updateContactPubKey: ['aContactId'],
   foreGround: [''],
   backGround: [''],
+  setSignInPending: ['flag'],
 })
 
 export const EngineTypes = Types
@@ -64,6 +65,7 @@ export const INITIAL_STATE = Immutable({
   bearerToken: '',
   session: '',
   engineFault: '',
+  signInPending: null,
 })
 
 /* ------------- Selectors ------------- */
@@ -85,6 +87,7 @@ export const EngineSelectors = {
   getBearerToken: state => state.engine.bearerToken,
   getSession: state => state.engine.session,
   getEngineFault: state => state.engine.engineFault,
+  getSignInPending: state => state.engine.signInPending,
 }
 
 /* ------------- Reducers ------------- */
@@ -92,6 +95,11 @@ export const EngineSelectors = {
 // set current platform
 export const setCurrentPlatform = (state, { currentPlatform }) => {
   return state.merge({ currentPlatform })
+}
+
+// set sign in pending flag
+export const setSignInPending = (state, { flag }) => {
+  return state.merge({ signInPending: flag })
 }
 
 // engine failed to start
@@ -183,6 +191,7 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_USER_DATA]: setUserData,
   [Types.SET_PUBLIC_KEY]: setPublicKey,
   [Types.SET_CURRENT_PLATFORM]: setCurrentPlatform,
+  [Types.SET_SIGN_IN_PENDING]: setSignInPending,
   [Types.CLEAR_USER_DATA]: clearUserData,
   [Types.SET_USER_PROFILE]: setUserProfile,
   [Types.SET_ACTIVE_USER_PROFILE]: setActiveUserProfile,

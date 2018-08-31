@@ -48,7 +48,7 @@ export const SkipButton = (Platform.OS === 'ios') ? (({
       <TouchableOpacity
         style={styles.full}
         onPress={isSkipBtnShow ? () => onSkipBtnClick() : null}>
-        <Ionicons name="ios-arrow-dropright" size={32} style={{ color: leftTextColor, marginRight: 10 }}/>
+        <Ionicons name="ios-fastforward" size={32} style={{ color: leftTextColor, marginRight: 10 }}/>
       </TouchableOpacity>
     </View>
   )
