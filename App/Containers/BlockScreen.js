@@ -57,7 +57,7 @@ class BlockScreen extends Component {
   render () {
     const activityIndicator = (this.state.spinner) ?
       (<ActivityIndicator size="large" color="#34bbed"/>) : null;
-    const marginBottom = (this.props.spinner) ? 40 : 80
+    const marginBottom = (this.state.spinner) ? 40 : 80
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <View style={{flexDirection: 'row', marginTop: 40}}>

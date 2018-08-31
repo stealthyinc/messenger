@@ -36,6 +36,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   // way at this level.
   //
   const getBlockstackContacts = (username) => api.get(`/v1/search?query=${username}`)
+  const getBlockstackNames = (username) => getProfileFromNameSearch(username)
 
   // Legacy endpoint profile search: https://core.blockstack.org/#resolver-endpoints-lookup-user
   //
@@ -191,12 +192,13 @@ const create = (baseURL = 'https://core.blockstack.org') => {
         }
       }
     }
-
     let profileData = undefined
-    try {
-      profileData = profileUrlResult.data[0].decodedToken.payload.claim
-    } catch (err) {
-      throw `ERROR(${methodName}): failed to get profile data in request returned from profile URL (${profileUrl}).\n${err}`
+    if (!profileUrlResult.problem) {
+      try {
+        profileData = profileUrlResult.data[0].decodedToken.payload.claim
+      } catch (err) {
+        throw `ERROR(${methodName}): failed to get profile data in request returned from profile URL (${profileUrl}).\n${err}`
+      }
     }
 
     return profileData
@@ -217,6 +219,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   return {
     // a list of the API functions from step 2
     getBlockstackContacts,
+    getBlockstackNames,
     getUserProfile,
     getUserGaiaNS
   }

@@ -24,8 +24,9 @@ export const INITIAL_STATE = Immutable({
 /* ------------- Selectors ------------- */
 
 export const BlockstackContactsSelectors = {
-  getData: state => state.data,
-  getPayload: state => state.payload
+  getData: state => state.contact.data,
+  getError: state => state.contact.error,
+  getPayload: state => state.contact.payload
 }
 
 /* ------------- Reducers ------------- */
@@ -35,9 +36,8 @@ export const request = (state, { data }) =>
   state.merge({ fetching: true, data, payload: null })
 
 // successful api lookup
-export const success = (state, { payload }) => {
-  return state.merge({ fetching: false, error: null, payload })
-}
+export const success = (state, { payload }) =>
+  state.merge({ fetching: false, error: null, payload })
 
 // Something went wrong somewhere.
 export const failure = state =>

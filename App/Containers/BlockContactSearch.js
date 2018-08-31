@@ -93,11 +93,11 @@ class BlockContactSearch extends Component {
     this.props.setActiveContact(contact);
   }
   createListItem(contact) {
-    const { payload, error } = contact
-    if (payload && payload.results) {
-      console.log('****', payload.results)
-      if (payload.results.length) {
-        return payload.results.map((item, i) => (
+    const { payload, error } = this.props
+    if (payload) {
+      // console.log('****', payload)
+      if (payload.length) {
+        return payload.map((item, i) => (
           <ListItem key={i} onPress={this.parseContact.bind(this, item)}>
             <Thumbnail square size={80} source={{ uri: (item.profile.image && item.profile.image[0]) ? item.profile.image[0].contentUrl : '' }} />
             <Body>
@@ -184,7 +184,8 @@ class BlockContactSearch extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    contact: state.contact,
+    payload: BlockstackContactsSelectors.getPayload(state),
+    error: BlockstackContactsSelectors.getError(state),
     contactMgr: EngineSelectors.getContactMgr(state),
     contactAdded: EngineSelectors.getContactAdded(state),
   }

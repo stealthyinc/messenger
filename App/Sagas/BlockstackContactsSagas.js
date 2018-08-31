@@ -19,14 +19,32 @@ export function * getBlockstackContacts (api, action) {
   // get current data from Store
   // const currentData = yield select(BlockstackContactsSelectors.getData)
   // make the call to the api
-  const response = yield call(api.getBlockstackContacts, data.data)
+  const name = data.data
+  const response = yield call(api.getBlockstackContacts, name)
 
-  // success?
-  if (response.ok) {
-    // You might need to change the response here - do this with a 'transform',
-    // located in ../Transforms/. Otherwise, just pass the data back from the api.
-    yield put(BlockstackContactsActions.blockstackContactsSuccess(response.data))
-  } else {
-    yield put(BlockstackContactsActions.blockstackContactsFailure())
+  if (name) {
+    // success?
+    if (response.ok) {
+      // You might need to change the response here - do this with a 'transform',
+      // located in ../Transforms/. Otherwise, just pass the data back from the api.
+      const {results} = response.data
+      if (!results.length) {
+        const namesResponse = yield call (api.getBlockstackNames, name)
+        if (namesResponse) {
+          const item = {
+            profile: namesResponse,
+            fullyQualifiedName: name,
+            username: name
+          }
+          let newResults = [item]
+          yield put(BlockstackContactsActions.blockstackContactsSuccess(newResults))
+        }
+      }
+      else {
+        yield put(BlockstackContactsActions.blockstackContactsSuccess(results))
+      }
+    } else {
+      yield put(BlockstackContactsActions.blockstackContactsFailure())
+    }
   }
 }
