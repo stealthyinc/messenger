@@ -15,7 +15,7 @@ const RELAY_DOC_BASES = {
   originalDoc : `${RELAY_GRAPHITE_HUB}/documents/`, // append <doc id>.json
 }
 
-const USE_PRODUCTION_URL = false
+const USE_PRODUCTION_URL = true
 const GRAPHITE_URL = (USE_PRODUCTION_URL) ?
    'https://app.graphitedocs.com' : 'https://serene-hamilton-56e88e.netlify.com'
 

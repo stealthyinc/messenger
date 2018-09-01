@@ -73,7 +73,7 @@ class SignInScreen extends React.Component {
           />
           <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: 80, marginTop: 5 }}>Hi Stealthy 👋</Text>
         </View>
-        <Text style={{ fontWeight: 'bold', fontSize: 24, color: 'grey', marginBottom }}>dApp Communication Protocol</Text>
+        <Text style={{ fontWeight: 'bold', fontSize: 24, color: 'grey', marginBottom }}>Decentralized Communication</Text>
         {activityIndicator}
         <Button
           onPress={this._signInAsync}

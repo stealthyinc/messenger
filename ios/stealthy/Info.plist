@@ -32,13 +32,13 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>27</string>
+	<string>28</string>
 	<key>FIREBASE_ANALYTICS_COLLECTION_DEACTIVATED</key>
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSApplicationCategoryType</key>
-	<string/>
+	<string></string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>twitter</string>
@@ -57,7 +57,9 @@
 		</dict>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string/>
+	<string>We only use your location when the app is running to help you send a map location to your friends.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We only use your location when the app is running to help you send a map location to your friends.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Entypo.ttf</string>
