@@ -8,22 +8,6 @@ target 'stealthy' do
   # Pods for Stealthy
   pod 'Blockstack', :git => 'https://github.com/AC-FTW/blockstack-ios.git', :branch => 'stealthy_blockstack'
 
-  #pod 'Firebase/Core'
-  #pod 'Firebase/Core', '~> 4.13.0'
-  #pod 'Firebase/Auth'
-  #pod 'Firebase/Database'
-  #pod 'Firebase/Messaging'
-
-  #pod 'react-native-config', :path => '../node_modules/react-native-config'
-
-  #pod 'RNDeviceInfo', :path => '../node_modules/react-native-device-info'
-
-  #pod 'react-native-maps', :path => '../node_modules/react-native-maps'
-
-  #pod 'Interactable', :path => '../node_modules/react-native-interactable'
-
-  pod 'react-native-splash-screen', :path => '../node_modules/react-native-splash-screen'
-
   post_install do |installer|
     installer.pods_project.targets.each do |target|
         target.build_configurations.each do |config|
