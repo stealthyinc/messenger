@@ -49,7 +49,7 @@ const api = API.create()
 const ENCRYPT_INDEXED_IO = true;
 //
 const ENABLE_RECEIPTS = true;
-let ENABLE_GAIA = false;
+let ENABLE_GAIA = true;
 let ENCRYPT_MESSAGES = true;
 let ENCRYPT_CONTACTS = true;
 let ENCRYPT_SETTINGS = true;
@@ -333,7 +333,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
         channelAddresses[contactId] = msgAddress
       }
-      
+
       this.offlineMsgSvc.setChannelAddresses(channelAddresses)
     }
 
