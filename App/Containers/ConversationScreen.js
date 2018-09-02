@@ -11,6 +11,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import TwitterShareActions, { TwitterShareSelectors } from '../Redux/TwitterShareRedux'
 import { shareOnTwitter } from 'react-native-social-share';
+const utils = require('./../Engine/misc/utils.js');
 
 import defaultProfile from '../Images/defaultProfile.png'
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js');

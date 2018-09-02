@@ -6,6 +6,7 @@ import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import { Toast } from 'native-base';
 import { shareOnTwitter } from 'react-native-social-share';
+const utils = require('./../Engine/misc/utils.js');
 
 const common = require('./../common.js');
 
@@ -67,21 +68,37 @@ class ProfileScreen extends React.Component {
     const userImage = (image && image[0] && image[0].contentUrl) ?
       image[0].contentUrl : undefined
     const shareText = 'You can securely message me at: ' + username + ' on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im'
+    const oldPad = utils.is_oldPad()
+    const margin = (oldPad) ? 20 : 30
+    const marginBottom = (oldPad) ? 5 : 15
+    const flex = (oldPad) ? 5 : 10
+    const avatarSize = (oldPad) ? (
+      <Avatar
+        large
+        rounded
+        source={(userImage) ? {uri: userImage} : chatIcon}
+        onPress={() => console.log("Works!")}
+        activeOpacity={(userImage) ? 0.7 : 0.5}
+        containerStyle={{marginBottom: 15}}
+      />
+    ) : (
+      <Avatar
+        xlarge
+        rounded
+        source={(userImage) ? {uri: userImage} : chatIcon}
+        onPress={() => console.log("Works!")}
+        activeOpacity={(userImage) ? 0.7 : 0.5}
+        containerStyle={{marginBottom: 15}}
+      />
+    )
     return (
       <View style={styles.container}>
-        <View style={{flex: 10}} />
+        <View style={{flex: flex}} />
         <View style={{flex: 60, alignItems: 'center'}}>
-          <Avatar
-            xlarge
-            rounded
-            source={(userImage) ? {uri: userImage} : chatIcon}
-            onPress={() => console.log("Works!")}
-            activeOpacity={(userImage) ? 0.7 : 0.5}
-            containerStyle={{marginBottom: 15}}
-          />
-          <Text h4 style={{marginTop: 25, marginBottom: 15}}>{fullName}</Text>
-          <Text h4 style={{marginBottom: 15, fontWeight: 'bold'}}>({username})</Text>
-          <View style={{flexDirection: 'row', margin: 30}}>
+          {avatarSize}
+          <Text h4 style={{marginTop: 25, marginBottom: marginBottom}}>{fullName}</Text>
+          <Text h4 style={{marginBottom: marginBottom, fontWeight: 'bold'}}>({username})</Text>
+          <View style={{flexDirection: 'row', margin: margin}}>
             <Icon
               reverse
               name='connectdevelop'

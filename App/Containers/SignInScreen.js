@@ -34,7 +34,8 @@ class SignInScreen extends React.Component {
   };
   render() {
     const activityIndicator = (this.props.spinner) ? <ActivityIndicator size="large" color="#34bbed"/> : null
-    const marginBottom = (this.props.spinner) ? 40 : 80
+    const oldPad = utils.is_oldPad()
+    const marginBottom = (this.props.spinner) ? 40 : (oldPad) ? 50 : 80
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <View style={{flexDirection: 'row', marginTop: 40}}>
@@ -50,13 +51,13 @@ class SignInScreen extends React.Component {
           />
           <Button
             onPress={this._signInAsync}
-            title="Blockstack Login"
+            title={(oldPad) ? "Login" : "Blockstack Login"}
             textStyle={{ fontSize: 18, fontWeight: "900", color: "#34bbed"}}
             icon={{name: 'input', color: "#34bbed"}}
             disabled={this.props.spinner}
             buttonStyle={{
               marginLeft: 20,
-              width: 200,
+              width: (oldPad) ? 150 : 200,
               height: 50,
               backgroundColor: "white",
               borderColor: "#34bbed",
@@ -66,14 +67,14 @@ class SignInScreen extends React.Component {
             }}
           />
         </View>
-        <View style={{flexDirection: 'row', marginTop: 120}}>
+        <View style={{flexDirection: 'row', marginTop: (oldPad) ? 50 : 120}}>
           <Image
             source={chatIcon}
             style={{width: 50, height: 50}}
           />
-          <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: 80, marginTop: 5 }}>Hi Stealthy 👋</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: (oldPad) ? 50 : 80, marginTop: 5 }}>Hi Stealthy 👋</Text>
         </View>
-        <Text style={{ fontWeight: 'bold', fontSize: 24, color: 'grey', marginBottom }}>Decentralized Communication</Text>
+        <Text style={{ fontWeight: 'bold', fontSize: (oldPad) ? 20 : 24, color: 'grey', marginBottom }}>Decentralized Communication</Text>
         {activityIndicator}
         <Button
           onPress={this._signInAsync}

@@ -8,7 +8,6 @@ import {
   Image,
   StyleSheet,
   Text,
-  Platform,
   View
 } from 'react-native';
 
@@ -16,6 +15,7 @@ import Swiper from 'react-native-swiper';
 import DoneButton from './AppIntro/DoneButton';
 import SkipButton from './AppIntro/SkipButton';
 import RenderDots from './AppIntro/Dots';
+const utils = require('./../Engine/misc/utils.js');
 
 const windowsWidth = Dimensions.get('window').width;
 const windowsHeight = Dimensions.get('window').height;
@@ -235,6 +235,8 @@ export default class Introduction extends Component {
     );
   }
   render(){
+    const oldPad = utils.is_oldPad()
+    const size = (oldPad) ? 100 : 150
     return (
       <Swiper 
         style={styles.wrapper} 
@@ -243,27 +245,27 @@ export default class Introduction extends Component {
         loop={false}
         renderPagination={this.renderPagination}>
         <View style={styles.slide5}>
-          <Image source={dapp} style={{margin: 150, width: 150, height: 150}} />
+          <Image source={dapp} style={{margin: size, width: size, height: size}} />
           <Text style={styles.text}>DApp Integration</Text>
         </View>
         <View style={styles.slide6}>
-          <Image source={bitcoin} style={{margin: 150, width: 150, height: 150}} />
+          <Image source={bitcoin} style={{margin: size, width: size, height: size}} />
           <Text style={styles.text}>Content Monetization</Text>
         </View>
         <View style={styles.slide1}>
-          <Image source={folder} style={{margin: 150, width: 150, height: 150}} />
+          <Image source={folder} style={{margin: size, width: size, height: size}} />
           <Text style={styles.text}>Distributed Storage</Text>
         </View>
         <View style={styles.slide2}>
-          <Image source={blockchain} style={{margin: 150, width: 150, height: 150}} />
+          <Image source={blockchain} style={{margin: size, width: size, height: size}} />
           <Text style={styles.text}>Blockchain Identity</Text>
         </View>
         <View style={styles.slide3}>
-          <Image source={security} style={{margin: 150, width: 150, height: 150}} />
+          <Image source={security} style={{margin: size, width: size, height: size}} />
           <Text style={styles.text}>Decentralized Keys</Text>
         </View>
         <View style={styles.slide4}>
-          <Image source={censor} style={{margin: 150, width: 150, height: 150}} />
+          <Image source={censor} style={{margin: size, width: size, height: size}} />
           <Text style={styles.text}>Censorship Free</Text>
         </View>
       </Swiper>

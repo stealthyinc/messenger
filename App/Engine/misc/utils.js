@@ -1,7 +1,7 @@
 // const Config = require('Config');
 import Secrets from 'react-native-config'
 
-import {NativeModules, Platform} from 'react-native';
+import {NativeModules, Platform, Dimensions} from 'react-native';
 //const Platform = require('platform');
 //
 //const { encryptECIES, decryptECIES } = require('blockstack/lib/encryption');
@@ -71,6 +71,15 @@ module.exports.isObjEncrypted = function(anObj) {
 module.exports.deepCopyObj = function (anObj) {
   return JSON.parse(JSON.stringify(anObj));
 };
+
+module.exports.is_oldPad = function() {
+  const {height, width} = Dimensions.get('window');
+  //bad one
+  //480 320
+  if (Platform.isPad && height === 480)
+    return true
+  return false
+}
 
 module.exports.is_iOS = function() {
   return Platform.OS === 'ios';
