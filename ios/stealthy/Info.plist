@@ -32,7 +32,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>28</string>
+	<string>29</string>
 	<key>FIREBASE_ANALYTICS_COLLECTION_DEACTIVATED</key>
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
@@ -56,9 +56,9 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We only use your location when the app is running to help you send a map location to your friends.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We only use your location when the app is running to help you send a map location to your friends.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We only use your location when the app is running to help you send a map location to your friends.</string>
 	<key>UIAppFonts</key>
 	<array>

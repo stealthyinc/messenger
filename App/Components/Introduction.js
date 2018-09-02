@@ -8,6 +8,7 @@ import {
   Image,
   StyleSheet,
   Text,
+  Platform,
   View
 } from 'react-native';
 

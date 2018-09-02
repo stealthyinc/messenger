@@ -1827,6 +1827,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "stealthy-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = arm64;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -1879,6 +1880,7 @@
 				PRODUCT_NAME = stealthy;
 				SWIFT_OBJC_BRIDGING_HEADER = "stealthy-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
+				TARGETED_DEVICE_FAMILY = 1;
 				VALID_ARCHS = arm64;
 				VERSIONING_SYSTEM = "apple-generic";
 			};

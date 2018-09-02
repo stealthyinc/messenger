@@ -12,6 +12,7 @@ const common = require('./../common.js');
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
 
 import defaultProfile from '../Images/defaultProfile.png'
+import chatIcon from '../Images/blue512.png';
 
 class ProfileScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -62,7 +63,7 @@ class ProfileScreen extends React.Component {
     const { profile } = userProfile
     const { username } = userData
     const { name, image } = profile
-    const fullName = (name) ? name : 'Name Unknown'
+    const fullName = (name) ? name : null
     const userImage = (image && image[0] && image[0].contentUrl) ?
       image[0].contentUrl : undefined
     const shareText = 'You can securely message me at: ' + username + ' on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im'
@@ -73,9 +74,9 @@ class ProfileScreen extends React.Component {
           <Avatar
             xlarge
             rounded
-            source={(userImage) ? {uri: userImage} : defaultProfile}
+            source={(userImage) ? {uri: userImage} : chatIcon}
             onPress={() => console.log("Works!")}
-            activeOpacity={0.7}
+            activeOpacity={(userImage) ? 0.7 : 0.5}
             containerStyle={{marginBottom: 15}}
           />
           <Text h4 style={{marginTop: 25, marginBottom: 15}}>{fullName}</Text>
