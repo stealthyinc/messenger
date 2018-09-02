@@ -47,6 +47,7 @@ class BlockContactSearch extends Component {
     this.state = {
       showLoading: false,
     }
+    this.search = undefined
     this.numContacts = (props.contactMgr) ?
       (props.contactMgr.getAllContacts().length) : 0;
   }
@@ -54,7 +55,7 @@ class BlockContactSearch extends Component {
     this.props.navigation.setParams({ navigation: this.props.navigation });
   }
   componentDidMount() {
-    this.search.focus()
+    this.search.input.focus()
     this.props.request('')
   }
   componentWillReceiveProps(nextProps) {
@@ -140,7 +141,7 @@ class BlockContactSearch extends Component {
     }
   }
   onChangeText = (text) => {
-    const timeout = (text.length < 3) ? 1000 : 500
+    const timeout = (text.length < 3) ? 300 : 200
     if (text.length > 1) {
       setTimeout(() => {
         this.props.request(text)
@@ -153,8 +154,9 @@ class BlockContactSearch extends Component {
   }
   onClear = () => {
     this.props.request('')
-    this.props.clear()
     this.setState({showLoading: false})
+    this.props.clear()
+    this.search.input.clear();
   }
   render() {
     return (
@@ -166,7 +168,7 @@ class BlockContactSearch extends Component {
           cancelButtonTitle='Cancel'
           platform={Platform.OS}
           ref={search => this.search = search}
-          icon={{ type: 'material', name: 'search', size: 24 }}
+          icon={{ type: 'material', name: 'search', size: 28 }}
           searchIcon={{ color: 'white', size: 24 }}
           onChangeText={this.onChangeText}
           onClear={this.onClear}
