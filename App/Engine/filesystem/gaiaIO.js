@@ -79,6 +79,79 @@ module.exports = class GaiaIO extends BaseIO {
 
   // Public:
   //
+
+  // Attempts to read a file three times with an exponential delay between
+  // attempts, plus jitter. Thank Jude Nelson for the idea based on the workings
+  // of ethernet.
+  async robustLocalRead(userId, filePath, maxAttempts=3, initialDelayMs=50) {
+    const method = 'ChannelEngineV2::robustLocalRead'
+
+    let attempt = 0
+    let delayMs = initialDelayMs
+    while (attempt < maxAttempts) {
+      attempt += 1
+      try {
+        return await this.readLocalFile(userId, filePath)
+      } catch (error) {
+        this.log(`INFO(${method}):\n  - Attempt number ${attempt} failed.\n  - Reason: ${error}.\n`)
+        if (attempt < maxAttempts) {
+          delayMs = delayMs * Math.pow(2, (attempt-1)) + Math.floor(Math.random()*delayMs)
+          this.log(`  - Waiting ${delayMs} milliseconds before next attempt.`)
+          await utils.resolveAfterMilliseconds(delayMs)
+        }
+      }
+    }
+
+    // Throw b/c we never successfully read a value
+    throw `ERROR(${method}): failed to read ${filePath} after ${maxAttempts} attempts.`
+  }
+
+  async robustRemoteRead(userId, filePath, maxAttempts=3, initialDelayMs=50) {
+    const method = 'engine::robustRemoteRead'
+
+    let attempt = 0
+    let delayMs = initialDelayMs
+    while (attempt < maxAttempts) {
+      attempt += 1
+      try {
+        return await this.readRemoteFile(userId, filePath)
+      } catch (error) {
+        this.log(`INFO(${method}):\n  - Attempt number ${attempt} failed.\n  - Reason: ${error}.\n`)
+        if (attempt < maxAttempts) {
+          delayMs = delayMs * Math.pow(2, (attempt-1)) + Math.floor(Math.random()*delayMs)
+          this.log(`  - Waiting ${delayMs} milliseconds before next attempt.`)
+          await utils.resolveAfterMilliseconds(delayMs)
+        }
+      }
+    }
+
+    // Throw b/c we never successfully read a value
+    throw `ERROR(${method}): failed to read ${userId}//${filePath} after ${maxAttempts} attempts.`
+  }
+
+  async robustLocalWrite(userId, filePath, fileContent, maxAttempts=3, initialDelayMs=50) {
+    const method = 'ChannelEngineV2::robustLocalWrite'
+
+    let attempt = 0
+    let delayMs = initialDelayMs
+    while (attempt < maxAttempts) {
+      attempt += 1
+      try {
+        return await this.writeLocalFile(userId, filePath, fileContent)
+      } catch (error) {
+        this.log(`INFO(${method}):\n  - Attempt number ${attempt} failed.\n  - Reason: ${error}.\n`)
+        if (attempt < maxAttempts) {
+          delayMs = delayMs * Math.pow(2, (attempt-1)) + Math.floor(Math.random()*delayMs)
+          this.log(`  - Waiting ${delayMs} milliseconds before next attempt.`)
+          await utils.resolveAfterMilliseconds(delayMs)
+        }
+      }
+    }
+
+    // Throw b/c we never successfully read a value
+    throw `ERROR(${method}): failed to write to ${filePath} after ${maxAttempts} attempts.`
+  }
+
   writeLocalFile(localUser, filename, data) {
     utils.throwIfUndef('localUser', localUser);
     utils.throwIfUndef('filenname', filename);

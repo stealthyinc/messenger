@@ -2,6 +2,10 @@
 import Secrets from 'react-native-config'
 
 import {NativeModules, Platform} from 'react-native';
+//const Platform = require('platform');
+//
+//const { encryptECIES, decryptECIES } = require('blockstack/lib/encryption');
+
 
 module.exports.fmtErrorStr = function(anErrDescription,
                            aMethodName=undefined,
@@ -114,7 +118,7 @@ async function jsEncryptECIES(aKey, theContent) {
 //
 async function jsDecryptECIES(aKey, theCipherObject) {
   return new Promise((resolve, reject) => {
-    const recovered = decryptECIES(aKey, theContent);
+    const recovered = decryptECIES(aKey, theCipherObject);
     // Recovering an empty string might be okay since we can encrypt an empty one.
     if (recovered && recovered !== "") {
       resolve(recovered)

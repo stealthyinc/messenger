@@ -341,6 +341,20 @@ class ContactManager {
     return undefined;
   }
 
+  getProtocol = (aContactId) => {
+    if (aContactId) {
+      const contact =
+        ContactManager._getContactForId(aContactId, this.contactArr)
+
+      if (contact &&
+          contact.hasOwnProperty('protocol')) {
+        return contact.protocol
+      }
+    }
+
+    return undefined
+  }
+
   setPublicKey = (aContactId, aPublicKey) => {
     this._setterWithChecks(aContactId, 'publicKey', aPublicKey);
   }
@@ -364,6 +378,11 @@ class ContactManager {
     } else {
       this._setterWithChecks(aContactId, 'timeMs', '');
     }
+  }
+
+  setProtocol = (aContactId, aProtocol) => {
+    const protocol = (aProtocol) ? aProtocol : ''
+    this._setterWithChecks(aContactId, 'protocol', protocol)
   }
 
   incrementUnread = (aContactId) => {

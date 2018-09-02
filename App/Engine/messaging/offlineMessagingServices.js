@@ -3,6 +3,9 @@ const { EventEmitterAdapter } = require('./../platform/reactNative/eventEmitterA
 const utils = require('./../misc/utils.js');
 const { MESSAGE_STATE } = require('./chatMessage.js');
 
+const ENABLE_CHANNELS_V2_0 = true
+const { ChannelServicesV2 } = require('./channelServicesV2.js')
+
 const ENABLE_SEND_QUEUEING = false;
 const SEND_INTERVAL = 5;
 const RECV_INTERVAL = 5;
@@ -115,6 +118,7 @@ class OfflineMessagingServices extends EventEmitterAdapter {
   constructor(aLogger,
               aUserId,
               anIdxIoInst,
+              anIoInst,
               aContactArr,
               logOutput = false) {
     super();
@@ -127,6 +131,7 @@ class OfflineMessagingServices extends EventEmitterAdapter {
     this.logOutput = logOutput;
     this.userId = aUserId;
     this.idxIoInst = anIdxIoInst;
+    this.ioInst = anIoInst
 
     this.skipSend = false;
     this.enableSendService = false;
@@ -155,12 +160,25 @@ class OfflineMessagingServices extends EventEmitterAdapter {
     this.receiving = false;
 
     this.skipRecvService = false;
+
+    this.channelAddresses = {}
   }
 
   log(...args) {
     if (this.logOutput) {
       this.logger(...args);
     }
+  }
+
+  setChannelAddresses(theChannelAddresses) {
+    this.channelAddresses = theChannelAddresses
+  }
+
+  addChannelAddress(aUserId, theChannelAddress) {
+    if (!this.channelAddresses) {
+      this.channelAddresses = {}
+    }
+    this.channelAddresses[aUserId] = theChannelAddress
   }
 
   setContacts(aContactArr) {
@@ -262,6 +280,8 @@ class OfflineMessagingServices extends EventEmitterAdapter {
           messageTuple.chatMsg.msgState = MESSAGE_STATE.SENT_OFFLINE;
           // Can probably move this call out of here and use the emit below
           // to handle it (emit with a collection of message Ids or something).
+          // TODO: move this to whatever handles the emit below (not this directly,
+          //       but conversations and the call--it's ugly that it's in here)
           this.conversations.markConversationModified(messageTuple.chatMsg);
 
           this.log(`   sending message offline to ${messageTuple.chatMsg.to}`);
@@ -270,6 +290,8 @@ class OfflineMessagingServices extends EventEmitterAdapter {
           await this.idxIoInst.seqWriteLocalFile(messageTuple.filePath,
                                               messageTuple.chatMsg,
                                               messageTuple.publicKey);
+
+          this.emit('offline message written', messageTuple)
 
           this.log(`   done sending offline message ${messageTuple.filePath}`);
           count++;
@@ -284,6 +306,10 @@ class OfflineMessagingServices extends EventEmitterAdapter {
         this.log(`   sent ${count} offline messages. Sleeping ${SEND_INTERVAL}s.`);
       }
     } catch(err) {
+      // TODO:
+      //   - emit an error to indicate the message failed to send (i.e an event
+      //     emit with more data)
+      //
       // Catch is here to ensure sending gets set to false when while loop
       // completes or fails.
       console.log(`ERROR: ${err}`);
@@ -365,34 +391,84 @@ class OfflineMessagingServices extends EventEmitterAdapter {
     const chatMessagesReadPromises = [];
 
     for (const contact of contacts) {
-      // Using Contact obj. here for future expansion w.r.t. heartBeat.
-      const contactId = contact.id;
-      const offlineDirPath = `${this.userId}/conversations/offline`;
+      // TODO: refactor proocol constants
+      if (contact.protocol && (contact.protocol  === 'public channel 2.0' )) {
+        if (!ENABLE_CHANNELS_V2_0) {
+          continue
+        }
 
-      let indexData = undefined;
-      try {
-        indexData = await this.idxIoInst.readRemoteIndex(contactId, offlineDirPath);
-        this.log(`   Finished reading remote index of ${contactId} (${offlineDirPath}).`);
-      } catch (err) {
-        // Suppress 404 for users who haven't written a sharedIndex yet.
-        // Also suppress errors here as they do not effect stored data (i.e. a
-        // subsequent read will pick up where this failure occurred)
-      }
+        const contactId = contact.id
 
-      if (indexData && indexData.active) {
-        for (const chatMsgFileName in indexData.active) {
-          const msgIdForFile = OfflineMessagingServices._getNameMinusExtension(chatMsgFileName, isFirebase);
-          if (!this.rcvdOfflineMsgs.hasMessage(contactId, msgIdForFile)) {
-            const chatMsgFilePath = `${offlineDirPath}/${chatMsgFileName}`;
+        let remoteStatusData = undefined
+        try {
+          const stringifiedStatusData =
+            await this.ioInst.robustRemoteRead(contactId, ChannelServicesV2.getStatusFilePath())
+          remoteStatusData = JSON.parse(stringifiedStatusData)
+          if (!remoteStatusData) {
+            continue
+          }
+        } catch (error) {
+          // Suppress
+          // throw `ERROR(${method}): failed to read ${ChannelServicesV2.getStatusFilePath()}.\n${error}`
+          continue
+        }
 
-            // Add the promise with a catch to bypass the fail fast behavior of Promise.all below
-            chatMessagesReadPromises.push(
-              this.idxIoInst.readRemoteFile(contactId, chatMsgFilePath)
-              .catch(error => {
-                console.log(`INFO(offlineMessagingServices): unable to read ${chatMsgFilePath} from ${contactId}.\n  ERROR reported: ${error}`);
-                return undefined
+        // TODO: optimize so we're not creating this every time. First get it working
+        //       though
+        const channelMgr = new ChannelServicesV2()
+        channelMgr.setLastMsgAddress(remoteStatusData)
+        const messageFilePaths = channelMgr.getMsgFilePaths(this.channelAddresses[contactId])
+
+        for (const messageFilePath of messageFilePaths) {
+          console.log(`messageFilePath: ${messageFilePath}`)
+          chatMessagesReadPromises.push(
+            new Promise((resolve, reject) => {
+              this.ioInst.robustRemoteRead(contactId, messageFilePath)
+              .then((data) => {
+                try {
+                  let channelChatMsg = JSON.parse(data)
+                  resolve(channelChatMsg)
+                } catch(error) {
+                  // Suppress
+                }
+                resolve(undefined)
               })
-            );
+              .catch((error) => {
+                resolve(undefined)
+              })
+            })
+          )
+        }
+      } else {
+        // Using Contact obj. here for future expansion w.r.t. heartBeat.
+        const contactId = contact.id;
+        const offlineDirPath = `${this.userId}/conversations/offline`;
+
+        let indexData = undefined;
+        try {
+          indexData = await this.idxIoInst.readRemoteIndex(contactId, offlineDirPath);
+          this.log(`   Finished reading remote index of ${contactId} (${offlineDirPath}).`);
+        } catch (err) {
+          // Suppress 404 for users who haven't written a sharedIndex yet.
+          // Also suppress errors here as they do not effect stored data (i.e. a
+          // subsequent read will pick up where this failure occurred)
+        }
+
+        if (indexData && indexData.active) {
+          for (const chatMsgFileName in indexData.active) {
+            const msgIdForFile = OfflineMessagingServices._getNameMinusExtension(chatMsgFileName, isFirebase);
+            if (!this.rcvdOfflineMsgs.hasMessage(contactId, msgIdForFile)) {
+              const chatMsgFilePath = `${offlineDirPath}/${chatMsgFileName}`;
+
+              // Add the promise with a catch to bypass the fail fast behavior of Promise.all below
+              chatMessagesReadPromises.push(
+                this.idxIoInst.readRemoteFile(contactId, chatMsgFilePath)
+                .catch(error => {
+                  console.log(`INFO(offlineMessagingServices): unable to read ${chatMsgFilePath} from ${contactId}.\n  ERROR reported: ${error}`);
+                  return undefined
+                })
+              );
+            }
           }
         }
       }
@@ -416,7 +492,7 @@ class OfflineMessagingServices extends EventEmitterAdapter {
       return;
     })
     .catch((err) => {
-      this.logger(`ERROR: offline messaging services failed to read chat messages. ${err}.`);
+      this.logger(`ERROR: offline messaging services failed to read chat messages.\n${err}.`);
       return;
     });
   }

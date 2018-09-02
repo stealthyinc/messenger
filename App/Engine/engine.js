@@ -49,7 +49,7 @@ const api = API.create()
 const ENCRYPT_INDEXED_IO = true;
 //
 const ENABLE_RECEIPTS = true;
-let ENABLE_GAIA = true;
+let ENABLE_GAIA = false;
 let ENCRYPT_MESSAGES = true;
 let ENCRYPT_CONTACTS = true;
 let ENCRYPT_SETTINGS = true;
@@ -61,6 +61,9 @@ let STEALTHY_PAGE = 'LOCALHOST';
 const LOG_GAIAIO = false;
 const LOG_OFFLINEMESSAGING = true;
 //
+const ENABLE_CHANNELS_V2_0 = true
+const ENCRYPT_CHANNEL_NOTIFICATIONS = true
+const { ChannelServicesV2 } = require('./messaging/channelServicesV2.js')
 
 export class MessagingEngine extends EventEmitterAdapter {
   constructor(logger,
@@ -221,6 +224,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       new OfflineMessagingServices(this.logger,
                                    this.userId,
                                    this.idxIo,
+                                   this.io,
                                    this.contactMgr.getContacts(),
                                    LOG_OFFLINEMESSAGING);
     this.offlineMsgSvc.startSendService();
@@ -256,6 +260,12 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     });
 
+    if (ENABLE_CHANNELS_V2_0) {
+      this.offlineMsgSvc.on('offline message written', (messageTuple) => {
+        this._sendChannelNotification(messageTuple)
+      })
+    }
+
 
     // Lots of possiblities here (i.e. lazy load etc.)
     this.conversations = new ConversationManager(this.logger, this.userId, this.idxIo);
@@ -284,6 +294,47 @@ export class MessagingEngine extends EventEmitterAdapter {
           }
         }
       }
+    }
+
+    // Get the last messages in any channel bundles and update the offlineMessagingServices
+    // with that data.
+    if (ENABLE_CHANNELS_V2_0) {
+      const channelAddresses = {}
+      for (const contactId of this.contactMgr.getContactIds()) {
+        // TODO: refactor protocol to const string
+        if (!this.contactMgr.getProtocol(contactId) === 'public channel 2.0') {
+          continue
+        }
+
+        let msgAddress = {
+          outerFolderNumber: 0,
+          innerFolderNumber: 0,
+          fileNumber: 0
+        }
+        const messages = this.conversations.getMessages(contactId)
+        if (messages && messages.length > 0) {
+          let compactMsgAddress = undefined
+
+          let msgIdx = messages.length - 1
+          while (msgIdx > 0) {
+            const msg = messages[msgIdx]
+            compactMsgAddress = (msg && msg.channel) ?
+              msg.channel.msgAddress : undefined
+            if (compactMsgAddress) {
+              break
+            }
+            msgIdx--
+          }
+          const tempMsgAddress = ChannelServicesV2.getMsgAddressFromCompact(compactMsgAddress)
+          if (tempMsgAddress) {
+            msgAddress = tempMsgAddress
+          }
+        }
+
+        channelAddresses[contactId] = msgAddress
+      }
+      
+      this.offlineMsgSvc.setChannelAddresses(channelAddresses)
     }
 
     // TODO TODO TODO:  change this to be an emitter that sends the ids of sent
@@ -403,58 +454,6 @@ export class MessagingEngine extends EventEmitterAdapter {
     await this._fetchUserSettings();
   }
 
-  // Attempts to read a file three times with an exponential delay between
-  // attempts, plus jitter. Thank Jude Nelson for the idea based on the workings
-  // of ethernet.
-  async robustLocalRead(filePath, maxAttempts=3, initialDelayMs=50) {
-    const method = 'channelEngineV2::robustLocalRead'
-
-    let attempt = 0
-    let delayMs = initialDelayMs
-    while (attempt < maxAttempts) {
-      attempt += 1
-      try {
-        return await this.io.readLocalFile(this.userId, filePath)
-      } catch (error) {
-        console.log(`INFO(${method}):\n  - Attempt number ${attempt} failed.\n  - Reason: ${error}.\n`)
-        if (attempt < maxAttempts) {
-          delayMs = delayMs * Math.pow(2, (attempt-1)) + Math.floor(Math.random()*delayMs)
-          console.log(`  - Waiting ${delayMs} milliseconds before next attempt.`)
-          await utils.resolveAfterMilliseconds(delayMs)
-        }
-      }
-    }
-
-    // Throw b/c we never successfully read a value
-    throw `ERROR(${method}): failed to read ${filePath} after ${maxAttempts} attempts.`
-  }
-
-  async robustLocalWrite(filePath, fileContent, maxAttempts=3, initialDelayMs=50) {
-    const method = 'channelEngineV2::robustLocalWrite'
-
-    let attempt = 0
-    let delayMs = initialDelayMs
-    // console.log(`DEBUG(${method}): writing to ${this.userId}/${filePath}.`)
-    while (attempt < maxAttempts) {
-      attempt += 1
-      try {
-        // console.log(`DEBUG(${method}): attempt ${attempt} writing to ${this.userId}/${filePath}.`)
-        return await this.io.writeLocalFile(this.userId, filePath, fileContent)
-      } catch (error) {
-        console.log(`INFO(${method}):\n  - Attempt number ${attempt} failed.\n  - Reason: ${error}.\n`)
-        if (attempt < maxAttempts) {
-          delayMs = delayMs * Math.pow(2, (attempt-1)) + Math.floor(Math.random()*delayMs)
-          console.log(`  - Waiting ${delayMs} milliseconds before next attempt.`)
-          await utils.resolveAfterMilliseconds(delayMs)
-        }
-      }
-    }
-
-    // Throw b/c we never successfully read a value
-    throw `ERROR(${method}): failed to write to ${filePath} after ${maxAttempts} attempts.`
-  }
-
-
   // Blockstack's mobile offerings create sessions for GAIA that cause a bug when
   // users sign into one ID, then sign out and sign in to a different ID. Then sign
   // out and back to the first.  What happens is that GAIA on the second sign in
@@ -469,7 +468,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     const testValue = `${Date.now()}_${(Math.random()*100000)}`
     try {
       // console.log(`DEBUG(${method}): attempting to write ${testValue} to ${testFilePath}.`)
-      await this.robustLocalWrite(testFilePath, testValue)
+      await this.io.robustLocalWrite(this.userId, testFilePath, testValue)
       // console.log(`DEBUG(${method}): suceeded writing ${testValue} to ${testFilePath}.`)
     } catch (error) {
       const errMsg = `ERROR(${method}): unable to write test file, ${testFilePath}, to ${this.userId}'s GAIA.`
@@ -481,7 +480,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     let recoveredValue = undefined
     try {
       // console.log(`DEBUG(${method}): attempting to read ${testValue} from ${testFilePath}.`)
-      recoveredValue = await this.robustLocalRead(testFilePath)
+      recoveredValue = await this.io.robustLocalRead(this.userId, testFilePath)
       // console.log(`DEBUG(${method}):read ${recoveredValue} from ${testFilePath}.`)
     } catch (error) {
       const errMsg = `ERROR(${method}): unable to read test file, ${testFilePath}, from ${this.userId}'s GAIA.`
@@ -668,7 +667,7 @@ export class MessagingEngine extends EventEmitterAdapter {
         // do nothing, just don't prevent the code below from happening
       }
     }
-    
+
     const promises = []
     if (this.offlineMsgSvc) {
       promises.push(
@@ -855,6 +854,15 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
     this.contactMgr.addNewContact(contact, contact.id, publicKey, makeActiveContact);
+
+    let protocol = undefined
+    if (ENABLE_CHANNELS_V2_0) {
+      protocol = await this._getProtocol(contact.id)
+      if (protocol) {
+        this.contactMgr.setProtocol(contact.id, protocol)
+      }
+    }
+
     this._writeContactList(this.contactMgr.getContacts());
 
     this.conversations.createConversation(contact.id);
@@ -1094,6 +1102,14 @@ export class MessagingEngine extends EventEmitterAdapter {
     if (theMessages && theMessages.length > 0) {
       for (const message of theMessages) {
         const fromId = message.from;
+
+        // If the message is from a channel, don't send read receipts:
+        // TODO: unify the protocol constant
+        if (this.contactMgr.getProtocol(fromId) === 'public channel 2.0') {
+          continue
+        }
+
+
         if (!(fromId in receipts)) {
           receipts[fromId] = {
             recipient: this.userId,
@@ -1460,5 +1476,48 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   getAnonalytics() {
     return this.anonalytics;
+  }
+
+  // Stealthy Channel 2.0 Work:
+  //////////////////////////////////////////////////////////////////////////////
+
+  async _getProtocol(aUserId) {
+    try {
+      const stringifiedInfo = await this.io.robustRemoteRead(aUserId, 'info.json')
+      const info = JSON.parse(stringifiedInfo)
+      return `${info.protocol} ${info.version.major}.${info.version.minor}`
+    } catch (error) {
+      // Supress: assume user is regular user, return undefined
+    }
+
+    return undefined
+  }
+
+  // aMessageTuple: {filePath, chatMsg, publicKey}
+  async _sendChannelNotification(aMessageTuple) {
+    try {
+      const destinationId = aMessageTuple.chatMsg.to
+
+      // TODO: refactor constants to channel 2.0 ...
+      if ((this.contactMgr.getProtocol(destinationId) === 'public channel 2.0') &&
+          aMessageTuple.filePath && aMessageTuple.publicKey) {
+        const notificationData = {
+          sender: this.userId,
+          messageFilePath: aMessageTuple.filePath
+        }
+
+        const encNotificationData = await utils.encryptObj(
+          aMessageTuple.publicKey, notificationData, ENCRYPT_CHANNEL_NOTIFICATIONS)
+
+        const dbChannelNotificationPath =
+          common.getDbChannelNotificationPath(aMessageTuple.publicKey)
+        const dbChannelNotificationPathRef =
+          firebaseInstance.getFirebaseRef(dbChannelNotificationPath).push()
+        dbChannelNotificationPathRef.set(encNotificationData)
+      }
+    } catch (error) {
+      // Suppress
+      console.log(`ERROR:(engine::_sendChannelNotification): ${error}`)
+    }
   }
 }

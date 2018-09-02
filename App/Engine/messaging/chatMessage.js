@@ -38,6 +38,11 @@ class ChatMessage {
     this.type = undefined;
 
     this.msgState = MESSAGE_STATE.UNDEFINED;
+
+    this.channel = {
+      msgAddress: undefined,
+      from: undefined
+    }
   }
 
   init(
@@ -87,6 +92,15 @@ class ChatMessage {
     this.type = aChatMessage.type;
 
     this.msgState = aChatMessage.msgState;
+
+    try {
+      if (aChatMessage.channel) {
+        this.channel.msgAddress = aChatMessage.channel.msgAddress
+        this.channel.from = aChatMessage.channel.from
+      }
+    } catch (error) {
+      // suppress
+    }
   }
 
   // Static b/c our code doesn't know if this has been deserialized (JSON.parsed)
@@ -112,6 +126,17 @@ class ChatMessage {
     }
 
     return undefined
+  }
+
+  static setChannelData(aChatMsg, msgAddress, from) {
+    if (aChatMsg) {
+      if (!aChatMsg.channel) {
+        aChatMsg.channel = {}
+      }
+
+      aChatMsg.channel.msgAddress = msgAddress
+      aChatMsg.channel.from = from
+    }
   }
 }
 

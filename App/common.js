@@ -30,6 +30,25 @@ module.exports.getDbExistingDataPath = function(aPublicKey) {
   return `${rootPath}/existingData`
 }
 
+module.exports.getDbChannelRootPath = function(aPublicKey,
+                                               aChannelProtocol = 'public_channel_v2_0') {
+  // ud --> user data:
+  const context = (process.env.NODE_ENV !== 'development') ?
+    `${aChannelProtocol}/ud` : `development/${aChannelProtocol}/ud`
+
+  return `/global/${context}/${aPublicKey}`
+}
+
+module.exports.getDbChannelStatusPath = function(aPublicKey) {
+  const rootPath = module.exports.getDbChannelRootPath(aPublicKey)
+  return `${rootPath}/status`
+}
+
+module.exports.getDbChannelNotificationPath = function(aPublicKey) {
+  const rootPath = module.exports.getDbChannelRootPath(aPublicKey)
+  return `${rootPath}/message_notifications`
+}
+
 var __sessionId = undefined;
 //
 module.exports.getSessionId = function() {
