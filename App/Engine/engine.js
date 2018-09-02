@@ -868,6 +868,15 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.conversations.createConversation(contact.id);
     this._writeConversations();
 
+    if (ENABLE_CHANNELS_V2_0) {
+      let msgAddress = {
+        outerFolderNumber: 0,
+        innerFolderNumber: 0,
+        fileNumber: 0
+      }
+      this.offlineMsgSvc.addChannelAddress(contact.id, msgAddress)
+    }
+
     this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
 
     // IMPORTANT (even for Prabhaav):
