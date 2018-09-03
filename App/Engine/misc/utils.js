@@ -76,7 +76,8 @@ module.exports.is_oldPad = function() {
   const {height, width} = Dimensions.get('window');
   //bad one
   //480 320
-  if (Platform.isPad && height === 480)
+  const aspectRatio = height/width;
+  if (aspectRatio<1.6 && height === 480)
     return true
   return false
 }
