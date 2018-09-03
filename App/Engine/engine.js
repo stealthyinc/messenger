@@ -460,42 +460,31 @@ export class MessagingEngine extends EventEmitterAdapter {
   // is writing to the GAIA from the fist sign in--but with the wrong encryption key!
   // This test prevents that possibility by writing a known value to GAIA and then
   // reading it back. If the value that is read back either mis-matches or doesn't
-  // exist then we likely have the issue:
+  // exist then we likely have the issue.
+  //
+  // me-fault reduction effort. We only throw if we successfully write and read
+  // our data back, finding it mismatches. Otherwise we assume things are good to go.
   async _mobileGaiaTest() {
     const method = 'engine::_mobileGaiaTest'
 
     const testFilePath = 'mobileGaiaTest.txt'
     const testValue = `${Date.now()}_${(Math.random()*100000)}`
-    try {
-      // console.log(`DEBUG(${method}): attempting to write ${testValue} to ${testFilePath}.`)
-      await this.io.robustLocalWrite(this.userId, testFilePath, testValue)
-      // console.log(`DEBUG(${method}): suceeded writing ${testValue} to ${testFilePath}.`)
-    } catch (error) {
-      const errMsg = `ERROR(${method}): unable to write test file, ${testFilePath}, to ${this.userId}'s GAIA.`
-      // console.log(`${errMsg}`)
-      this.emit('me-fault', errMsg)
-      throw errMsg
-    }
-
     let recoveredValue = undefined
     try {
-      // console.log(`DEBUG(${method}): attempting to read ${testValue} from ${testFilePath}.`)
+      await this.io.robustLocalWrite(this.userId, testFilePath, testValue)
       recoveredValue = await this.io.robustLocalRead(this.userId, testFilePath)
-      // console.log(`DEBUG(${method}):read ${recoveredValue} from ${testFilePath}.`)
     } catch (error) {
-      const errMsg = `ERROR(${method}): unable to read test file, ${testFilePath}, from ${this.userId}'s GAIA.`
-      // console.log(`${errMsg}`)
-      this.emit('me-fault', errMsg)
-      throw errMsg
+      console.log `WARNING(${method}): unable to read / write test file, ${testFilePath}, to / from ${this.userId}'s GAIA. Skipping test.`
+      return
     }
 
     if (recoveredValue !== testValue) {
-      const errMsg = `ERROR(${method}): mis-matched GAIA for write and read-back of ${testFilePath} for ${this.userId}. Halting to prevent data loss.`
-      // console.log(`${errMsg}`)
-      this.emit('me-fault', errMsg)
+      const errMsg = `ERROR(${method}): mis-matched GAIA for write and read-back of ${testFilePath} for ${this.userId}. Halting to prevent corruption of cloud storage.`
+      const solution = 'It is likely that you have multiple Blockstack user IDs. This problem occurs when logging out and back in with different ideas. A fix is forthcoming. Please close the App and start again.'
+      const noRestartButton = true
+      this.emit('me-fault', errMsg, solution, noRestartButton)
       throw errMsg
     }
-    console.log(`INFO(${method}): Success. GAIA matches for ${this.userId}.`)
   }
 
   // Future: a multiple read of settings.json, contacts.json and pk.txt
@@ -857,7 +846,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     let protocol = undefined
     if (ENABLE_CHANNELS_V2_0) {
-      protocol = await this._getProtocol(contact.id)
+      protocol = await this._fetchProtocol(contact.id)
       if (protocol) {
         this.contactMgr.setProtocol(contact.id, protocol)
       }
@@ -1032,10 +1021,15 @@ export class MessagingEngine extends EventEmitterAdapter {
       return
     }
 
-    if (text && json) {
-      throw `ERROR(${method}): both text and json cannot be defined.`
-    } else if (!text && !json) {
-      throw `ERROR(${method}): one of text or json must be defined.`
+    if ((text && json) || (!text && !json)) {
+      // TODO: we should emit a 'failed to send message' event here that the UI
+      //       etc. can learn from and re-attempt.
+      const errMsg = `ERROR(${method}): One of the arguments text OR json must be defined, not both or neither. Skipping sending of message.`
+      if (process.env.NODE_ENV !== 'production') {
+        throw errMsg
+      }
+      console.log(errMsg)
+      return
     }
 
     const outgoingUserId = this.contactMgr.getActiveContact().id
@@ -1352,32 +1346,36 @@ export class MessagingEngine extends EventEmitterAdapter {
   //
   async _writeContactList(aContactArr) {
     const method = 'MessagingEngine::_writeContactList'
+
+    bool decryptionPassed = false
     let encContactsData = undefined
     try {
       encContactsData = await utils.encryptObj(this.publicKey, aContactArr, ENCRYPT_CONTACTS)
+      // We never want to write a corrupted contacts file, so test decryption here
+      // before writing the data. If it fails, skip writing.
+      //   - TODO: turn this into a method with a number of attempts to get a
+      //           passing value for important data.
+      await utils.decryptObj(this.privateKey, encContactsData, ENCRYPT_CONTACTS)
+      decryptionPassed = true
     } catch (error) {
-      throw utils.fmtErrorStr(`failed to encrypt contact list.`, method, error)
+      const errStr = utils.fmtErrorStr(`failed to encrypt contact list.`, method, error)
+      console.log(errStr)
     }
 
-    try {
-      await this.io.writeLocalFile(this.userId, 'contacts.json', encContactsData)
-    } catch (error1) {
+    if (decryptionPassed) {
       try {
-        await this.io.writeLocalFile(this.userId, 'contacts.json', encContactsData)
-      } catch (error2) {
-        try {
-          await this.io.writeLocalFile(this.userId, 'contacts.json', encContactsData)
-        } catch (error3) {
-          // We write the contact list quite frequently so it's not clear when
-          // it's important to throw on failure (other than encryption above).
-          // For now we'll suppress it and log it
-          const errStr = utils.fmtErrorStr('failed to write contacts.json', method, error3)
-          console.log(errStr)
-          return
-        }
+        await this.io.robustLocalWrite(this.userId, 'contacts.json', encContactsData)
+      } catch (error)) {
+        // We write the contact list quite frequently so it's not clear when
+        // it's important to throw on failure (other than encryption above).
+        // For now we'll suppress it and log it
+        const errStr = utils.fmtErrorStr('failed to write contacts.json', method, error)
+        console.log(errStr)
       }
     }
 
+    // We do this even if write didn't work out b/c we don't want the UX to hang.
+    //
     // TODO: get this event out of here--it shouldn't be tied to contact save,
     //       but rather to the event/code that was started by showAdd.
     // TODO: is this even needed?
@@ -1490,7 +1488,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   // Stealthy Channel 2.0 Work:
   //////////////////////////////////////////////////////////////////////////////
 
-  async _getProtocol(aUserId) {
+  async _fetchProtocol(aUserId) {
     try {
       const stringifiedInfo = await this.io.robustRemoteRead(aUserId, 'info.json')
       const info = JSON.parse(stringifiedInfo)
