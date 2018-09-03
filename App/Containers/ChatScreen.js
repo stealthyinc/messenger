@@ -84,6 +84,7 @@ class ChatScreen extends Component {
         }
       }
     });
+    this.protocol = (this.activeContact) ? (this.activeContact.protocol === "public channel 2.0") : false
 
     const displayname = (anActiveContact.title) ? anActiveContact.title : anActiveContact.id
     this.props.navigation.setParams({ navigation: this.props.navigation, name: displayname });
@@ -230,6 +231,16 @@ class ChatScreen extends Component {
         gimage = body.gimage
       }
       if (author === id) {
+        if (this.protocol) {
+          const newText = text
+          const index = newText.indexOf(': ')
+          author = newText.substring(0, index)
+          if (author) {
+            text = newText.substring(index+2)
+            image = ''
+            name = ''
+          }
+        }
         messages.push({
           _id: Math.round(Math.random() * 1000000),
           gtext,
@@ -311,6 +322,18 @@ class ChatScreen extends Component {
 
   onReceive = (newMessages) => {
     if (newMessages.length > 0) {
+      //hack to show the generated id instead of stealthy all the time
+      if (this.protocol) {
+        let {text, user} = newMessages[0]
+        const index = text.indexOf(': ')
+        const newId = text.substring(0, index)
+        const newText = text.substring(index+2)
+        user.avatar = ''
+        user.name = newId
+        user._id = newId
+        newMessages[0].user = user
+        newMessages[0].text = newText
+      }
       this.setState((previousState) => {
         return {
           messages: GiftedChat.append(previousState.messages, newMessages),
