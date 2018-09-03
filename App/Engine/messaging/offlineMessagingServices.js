@@ -337,7 +337,7 @@ class OfflineMessagingServices extends EventEmitterAdapter {
     this.enableSendService = false;
   }
 
-  isReceiving() {
+  isReceiving = () => {
     return this.receiving;
   }
 
