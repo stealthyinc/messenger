@@ -1,5 +1,5 @@
 import React from 'react'
-import { AsyncStorage, BackHandler, NativeModules, View, Text, Image } from 'react-native'
+import { AsyncStorage, BackHandler, NativeModules, View, Text, Image, Platform, PushNotificationIOS } from 'react-native'
 import { addNavigationHelpers } from 'react-navigation'
 import { createReduxBoundAddListener } from 'react-navigation-redux-helpers'
 import { connect } from 'react-redux'
@@ -48,6 +48,10 @@ class ReduxNavigation extends React.Component {
       // or assign battery-blame for consuming too much background-time
       this.props.dispatch(EngineActions.backgroundRefresh())
       BackgroundFetch.finish(BackgroundFetch.FETCH_RESULT_NEW_DATA);
+      if (Platform.OS === 'ios') {
+        const number = this.props.contactMgr.getAllUnread()
+        PushNotificationIOS.setApplicationIconBadgeNumber(number)
+      }
     }, (error) => {
       console.log("[js] RNBackgroundFetch failed to start");
     });
@@ -281,6 +285,7 @@ class ReduxNavigation extends React.Component {
 const mapStateToProps = (state) => {
   return {
     nav: state.nav,
+    contactMgr: EngineSelectors.getContactMgr(state),
     publicKey: EngineSelectors.getPublicKey(state),
     engineFault: EngineSelectors.getEngineFault(state),
     engineShutdown: EngineSelectors.getEngineShutdown(state),

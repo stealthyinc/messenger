@@ -348,14 +348,14 @@ class ChatScreen extends Component {
   }
 
   renderCustomActions = (props) => {
-    return (
+    return (!this.protocol) ? (
       <TouchableOpacity
         style={[styles.chatContainer, this.props.containerStyle]}
         onPress={() => this.props.navigation.navigate('DappData')}
       >
         <Ionicons name="ios-aperture" size={28} color='#34bbed' />
       </TouchableOpacity>
-    )
+    ) : null
   }
 
   renderBubble = (props) => {
