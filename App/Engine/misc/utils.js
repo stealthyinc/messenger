@@ -247,6 +247,28 @@ module.exports.decryptObj = async function (aKey, aStringifiedCipherObj, enable=
   }
 };
 
+// module.exports.safeEncrypt = async function (aPrivateKey, aPublicKey, theContent) {
+//
+// }
+//
+// module.exports.safeEncryptObj = async function (aPrivateKey, aPublicKey, anObject, enable=undefined, maxAttempts=2) {
+//   module.exports.throwIfUndef('enable', enable)
+//
+//   if (enable) {
+//     let decryptable = false
+//     let attempt = 0
+//
+//     while (!decryptable && (attempt < maxAttempts))
+//     try {
+//
+//     } catch (error) {
+//
+//     }
+//   } else {
+//     return anObject
+//   }
+// }
+
 function _throwIfKeyUndefined(aKey, aMethodName) {
   if (!aKey) {
     throw (`ERROR: In call to ${aMethodName}, aKey is not defined.`);

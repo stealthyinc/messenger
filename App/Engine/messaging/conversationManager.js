@@ -147,14 +147,21 @@ class ConversationManager {
     this.idxIoInst = anIdxIoInst;
   }
 
-  // Returns a promise that resolves to a bundle
-  _loadContactBundle(aContactId) {
+  // TODO: this is ugly AF competition code.
+  //       - change to use a better mechanism than indexed IO
+  //       - retry read mechanism
+  //
+  // Always resolve to a usable bundle, even if we can't read the actual bundle:
+  //   - temp tradeoff, usability for data loss
+  async _loadContactBundle(aContactId) {
     const isFirebase = this.idxIoInst.isFirebase();
     const extension = isFirebase ? '_b' : '.b';
     const indexFilePath = `${aContactId}/conversations/bundles`;
 
-    return this.idxIoInst.readLocalIndex(indexFilePath)
-    .then((indexData) => {
+    try{
+      // TODO: more robust index data read (multi-attempt)
+      const indexData = await this.idxIoInst.readLocalIndex(indexFilePath)
+
       if ((indexData === null) || (indexData === undefined)) {
         // Two scenarios--contact existed but we've migrated to this data structure.
         // Read has failed.
@@ -162,8 +169,9 @@ class ConversationManager {
         //             contact.
         return this.addConversation(aContactId);
       }
-        // Examine the index for active files.
-        // See if any are bundles.
+
+      // Examine the index for active files.
+      // See if any are bundles.
       if (indexData.active) {
         const fileNames = Object.keys(indexData.active);
         const bundleFiles = [];
@@ -187,20 +195,21 @@ class ConversationManager {
         const lastFile = bundleFiles[bundleFiles.length - 1];
         const bundleFilePath = `${indexFilePath}/${lastFile}`;
 
-        return this.idxIoInst.readLocalFile(bundleFilePath)
-            .then((bundleData) => {
-              if (!(aContactId in this.conversations)) {
-                this.conversations[aContactId] = [];
-              }
-              const bundle = new Bundle(aContactId, -1);
-              bundle.inflate(bundleData);
-              return bundle;
-            });
+        const bundleData = await this.idxIoInst.readLocalFile(bundleFilePath)
+        if (!(aContactId in this.conversations)) {
+          this.conversations[aContactId] = [];
+        }
+
+        const bundle = new Bundle(aContactId, -1);
+        bundle.inflate(bundleData);
+        return bundle;
       }
-          // Assumption: user never had bundle file written. Add them as a
-          //             new contact.
-      return this.addConversation(aContactId);
-    });
+      // Assumption: user never had bundle file written. Add them as a
+      //             new contact.
+      return this.addConversation(aContactId)
+    } catch (error) {
+      return this.addConversation(aContactId)
+    }
   }
 
   // TODO: -refactor.
@@ -222,7 +231,8 @@ class ConversationManager {
     .then((bundles) => {
       for (const bundle of bundles) {
         if (!bundle) {
-          throw ('ERROR(ConversationManager::loadContactBundles): bundle undefined.');
+          console.log('WARNING(ConversationManager::loadContactBundles): bundle undefined.')
+          continue
         }
 
         const contactId = bundle.userId;

@@ -199,7 +199,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
     this.userId = userId;
-    this._configureSessionManagement()
+    this._configureIO()
   }
 
   //
@@ -271,30 +271,13 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     // Lots of possiblities here (i.e. lazy load etc.)
     this.conversations = new ConversationManager(this.logger, this.userId, this.idxIo);
-
-    try {
-      await this.conversations.loadContactBundles(this.contactMgr.getContactIds())
-    } catch (error1) {
-      // TODO: look at some alternatives to this heavy handed approach:
-      //   1. retry the load
-      //   2. mark the contact as unloaded to be retried later
-      //        - add a refresh / load cycle to the engine
-      //
-      // For now we do an inelegant reload attempt befor fail.
-      // TODO: a more elegant retry mechanism--see notes for _writeConversations
-      //
-      if (!this.newUser) {
-        try {
-          await this.conversations.loadContactBundles(this.contactMgr.getContactIds())
-        } catch (error2) {
-          try {
-            await this.conversations.loadContactBundles(this.contactMgr.getContactIds())
-          } catch (error3) {
-            const errMsg = `ERROR(${method}): failure to fetch contacts from GAIA. Try again soon.\n${error3}`
-            this.emit('me-fault', errMsg)
-            throw errMsg
-          }
-        }
+    if (!this.newUser) {
+      try {
+        await this.conversations.loadContactBundles(this.contactMgr.getContactIds())
+      } catch (error) {
+        // suppress
+        //   TODO: pull from async storage on fail
+        console.log(`WARNING(${method}): failed to load contact bundles, proceeding anyway.`)
       }
     }
 
@@ -433,29 +416,6 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.refreshIntegrationData('Travelstack')
   }
 
-  async _configureSessionManagement() {
-    const method = 'engine.js::_configureSessionManagement'
-    // Notes: The session is set in the UI before the engine even loads. It is
-    //        an error / fault if the session is not fetchable or if it is the
-    //        common value for no session (common.NO_SESSION).  Throw to prevent
-    //        the engine froms starting if an error / fault is detected.
-    //
-    const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(this.publicKey))
-    let snapshot = undefined
-    try {
-      snapshot = await ref.once('value')
-    } catch (err) {
-      throw `ERROR(${method}): Unable to access session manager.`
-    }
-
-    if (!snapshot || !snapshot.exists() || (snapshot.val() === common.NO_SESSION)) {
-      throw `ERROR(${method}): Unable to acquire session.`
-    }
-
-    this.logger(`INFO(${method}): session = ${snapshot.val()}.`)
-    await this._configureIO()
-  }
-
   async _configureIO() {
     this.io = (ENABLE_GAIA) ?
       new GaiaIO(this.logger, LOG_GAIAIO) :
@@ -505,7 +465,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     const method = 'engine.js::_fetchUserSettings'
     let encSettingsData = undefined
     try {
-      encSettingsData = await this.io.readLocalFile(this.userId, 'settings.json')
+      encSettingsData = await this.io.robustLocalRead(this.userId, 'settings.json')
       // readLocalFile returns undefined on BlobNotFound, so set new user:
       this.newUser = (encSettingsData) ? false : true
     } catch (error) {
@@ -528,12 +488,6 @@ export class MessagingEngine extends EventEmitterAdapter {
         console.log(`INFO(${method}): db query failed.\n${testError1}`)
       }
 
-      if (test1Passed) {
-        const errMsg = `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${error}`
-        this.emit('me-fault', errMsg)
-        throw errMsg
-      }
-
       let test2Passed = false
       try {
         const pkTxtData = await this._fetchPublicKey(this.userId)
@@ -545,15 +499,9 @@ export class MessagingEngine extends EventEmitterAdapter {
         console.log(`INFO(${method}): public key read failed.\n${testError2}`)
       }
 
-      if (test2Passed) {
-        const errMsg = `ERROR(${method}): failure to fetch user settings from GAIA. Try again soon.\n${error}`
-        this.emit('me-fault', errMsg)
-        throw errMsg
-      }
-
       // If we got here without throwing, it's likely a new user, proceed with
       // default settings.
-      this.newUser = true
+      this.newUser = !test1Passed && !test2Passed
     }
 
     if (encSettingsData) {
@@ -566,9 +514,9 @@ export class MessagingEngine extends EventEmitterAdapter {
         // TODO: warn user (privacy could be reduced w/ centralized conveniences)
         // this.logger(`ERROR(${method}): using default settings due to decryption error.\n${err}`)
         // TODO: remove these lines when login error fixed:
-        const errMsg = `ERROR(${method}): unable to read settings due to decryption error.\n${err}`
-        this.emit('me-fault', errMsg)
-        throw errMsg
+        // Proceed with default settings after printing warning
+        const errMsg = `WARNING(${method}): unable to decrypt stored settings.\n${err}`
+        console.log(errMsg)
       }
     }
 
@@ -594,37 +542,29 @@ export class MessagingEngine extends EventEmitterAdapter {
     await this.io.writeLocalFile(this.userId, 'pk.txt', this.publicKey);
     await this.writeSettings(this.settings)
 
-    // TODO: A better mechanism for the retry of contacts read
-    //       See notes below for _writeConversations
-    //
     let contactArr = [];
     let contactsData = undefined
     try {
-      contactsData = await this.io.readLocalFile(this.userId, 'contacts.json')
-    } catch (error1) {
-      if (!this.newUser) {
-        try {
-          contactsData = await this.io.readLocalFile(this.userId, 'contacts.json')
-        } catch (error2) {
-          try {
-            contactsData = await this.io.readLocalFile(this.userId, 'contacts.json')
-          } catch (error3) {
-            this.emit('me-fault', error3)
-            throw `ERROR(${method}): failure to fetch contacts from GAIA. Try again soon.\n${error3}`
-          }
-        }
-      }
+      const maxAttempts = 5
+      contactsData = await this.io.robustLocalRead(this.userId, 'contacts.json', maxAttempts)
+    } catch(error) {
+      // TODO:
+      //   - safe encrypt thie contacts data
+      //   - refactor to critical load function that:
+      //       - does robust read
+      //       - pulls from async storage on fail
+      const errMsg = `WARNING(${method}): failure to fetch contacts from GAIA.\n${error}`
+      console.log(errMsg)
     }
 
     if (contactsData) {
       try {
         contactArr = await utils.decryptObj(this.privateKey, contactsData, ENCRYPT_CONTACTS)
       } catch (error) {
-        // TODO: consider giving user option to bypass and:
-        //       - lose data
-        //       - create temporary contacts
-        this.emit('me-fault', error)
-        throw(`ERROR(${method}): unable to load contacts due to decryption error.\n${error}`)
+        // TODO:
+        //   - see above about safe encryption and n-mod redudancy
+        const errMsg = `WARNING(${method}): unable to load contacts due to decryption error. Starting with empty contacts list.\n${error}`
+        console.log(errMsg)
       }
     }
 
@@ -984,44 +924,6 @@ export class MessagingEngine extends EventEmitterAdapter {
         // Suppress for now
         // TODO: should this emit me-fault ?
       }
-    }
-  }
-
-  // TODO: wipe this out of we don't use it anywhere (might be a good idea on
-  //       startup)
-  updateContactPubKeys() {
-    for (const contact of this.contactMgr.getContacts()) {
-      const contactIds = [];
-      const fetchPromises = [];
-      if (!this.contactMgr.hasPublicKey(contact)) {
-        contactIds.push(contact.id);
-        fetchPromises.push(this._fetchPublicKey(contact.id));
-      }
-      Promise.all(fetchPromises)
-      .then((arrPks) => {
-        if (arrPks &&
-            (arrPks.length > 0) &&
-            (arrPks.length === contactIds.length)) {
-          let needsUpdate = false;
-
-          for (let index = 0; index < arrPks.length; index++) {
-            const contactId = contactIds[index];
-            const pk = arrPks[index];
-            if (pk) {
-              needsUpdate = true;
-              this.contactMgr.setPublicKey(contactId, pk);
-            }
-          }
-
-          if (needsUpdate) {
-            this.updateContactMgr();
-            this._writeContactList(this.contactMgr.getAllContacts());
-          }
-        }
-      })
-      .catch((err) => {
-        // ignore ...
-      });
     }
   }
 
@@ -1396,47 +1298,31 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.emit('me-close-add-ui')
   }
 
-  // TODO: This is a rather awful way to implement an n tries method.
-  //       1. Make a generic retry methodology that lets you specify:
-  //            - number of retries
-  //       2. Think about having a busy mechnanism (i.e. is this op
-  //          already occuring/re-trying).
-  //       3. Add an exponential retry delay + jitter
-  //
-  _writeConversations() {
-    // TODO:
-    // 1. call this less often
-    return this.conversations.storeContactBundles()
-    .then(() => { return })
-    .catch((err1) => {
-      // Retry two more times
-      //
-      return this.conversations.storeContactBundles()
-      .then(() => { return })
-      .catch((err2) => {
-        // Retry one more time
-        //
-        return this.conversations.storeContactBundles()
-        .then(() => { return })
-        .catch((err3) => {
-          const errMsg = `ERROR(engine.js::_writeConversations): ${err3}`
-          this.emit('me-fault', errMsg)
-          throw errMsg
-        })
-      })
-    })
+  async _writeConversations() {
+    const method = 'engine::_writeConversations'
+
+    try {
+      await this.conversations.storeContactBundles()
+    } catch (error) {
+      const errMsg = `WARNING(${method}): failure storing contact bundles.\n${error}`
+      console.log(errMsg)
+    }
   }
 
-  writeSettings(theSettings) {
-    if (theSettings === {} || theSettings === undefined) {
-      theSettings = {
-        time: Date.now()
-      };
+  async writeSettings(theSettings) {
+    const method = 'engine::writeSettings'
+
+    if (!theSettings || (theSettings === {})) {
+      theSettings = { time: Date.now() }
     }
-    utils.encryptObj(this.publicKey, theSettings, ENCRYPT_SETTINGS)
-    .then(settingsData => {
-      this.io.writeLocalFile(this.userId, 'settings.json', settingsData);
-    })
+
+    try {
+      let encSettingsData = await utils.encryptObj(this.publicKey, theSettings, ENCRYPT_SETTINGS)
+      await this.io.robustLocalWrite(this.userId, 'settings.json', encSettingsData)
+    } catch (error) {
+      const errMsg = `WARNING(${method}): failure storing settings.\n${error}`
+      console.log(errMsg)
+    }
   }
 
 
@@ -1481,18 +1367,8 @@ export class MessagingEngine extends EventEmitterAdapter {
     return Date.now();
   }
 
-  _fetchPublicKey(aUserId) {
-    // Attempt 3 times, then fail.
-    // TODO: more elegant solution with delay/jitter, n-retries.
-    //       see notes for _writeConversations on the subject
-    //
-    return this.io.readRemoteFile(aUserId, 'pk.txt')
-    .catch((error1 => {
-      return this.io.readRemoteFile(aUserId, 'pk.txt')
-      .catch((error2) => {
-        return this.io.readRemoteFile(aUserId, 'pk.txt')
-      })
-    }))
+  async _fetchPublicKey(aUserId) {
+    return this.io.robustRemoteRead(aUserId, 'pk.txt')
   }
 
   getAnonalytics() {
