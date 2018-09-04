@@ -208,6 +208,8 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   //
   async _initWithContacts(contactArr) {
+    const method = 'engine::_initWithContacts'
+
     // In mobile we don't force an active contact
     const forceActiveContact = false
     this.contactMgr = new ContactManager(forceActiveContact);
@@ -400,12 +402,21 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
 
+    // Add the default channels if we are a first time user
+    //  - TODO: mechanism to tie this into settings or firebase (i.e. added
+    //          channels once)  This would catch folks like Justin.
+    if (ENABLE_CHANNELS_V2_0 && this.newUser) {
+      await this._addDefaultChannels()
+    }
+
+
     // Indicate to FB that we've completed init and are no longer a first time user
     // (used to handle IO errors specially)
     const dbExistingDataPath = common.getDbExistingDataPath(this.publicKey)
     const dbExistingDataPathRef = firebaseInstance.getFirebaseRef(dbExistingDataPath)
     dbExistingDataPathRef.set('true')
 
+    console.log(`INFO(${method}): engine initialized. Emitting me-initialized event.`)
     this.emit('me-initialized', true)
 
 
@@ -806,24 +817,27 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.emit('me-search-select-done', true);
   }
 
-  handleContactInvitation(theirPublicKey, theirUserId) {
+  async handleContactInvitation(theirPublicKey, theirUserId) {
+    const method = 'engine::handleContactInvitation'
+
+    if (this.contactMgr.isExistingContactId(theirUserId)) {
+      return
+    }
+
+    console.log(`INFO(${method}): discovery event "new-invitation" from ${theirUserId}`)
     // TODO: merge this with code in Block Contact Search (the part that builds up the
     //       contact by parsing the query result)
-    if (!this.contactMgr.isExistingContactId(theirUserId)) {
-      console.log(`INFO(engine.js): discovery event "new-invitation" from ${theirUserId}`)
-      const profileQuery = theirUserId; // Don't need this since Aaron's fix: utils.removeIdTld(theirUserId)
-      api.getUserProfile(profileQuery)
-      .then((queryResult) => {
-        const contact = ContactManager.buildContactFromQueryResult(
-          queryResult, profileQuery, theirUserId, theirPublicKey)
-        if (contact) {
-          const makeActiveContact = false
-          this.handleContactAdd(contact, makeActiveContact)
-        }
-      })
-      .catch((err) => {
-        console.log(`ERROR(engine.js): handling discovery new-invitation. ${err}`)
-      })
+    try {
+      const queryResult = await api.getUserProfile(theirUserId)
+      const contact = ContactManager.buildContactFromQueryResult(
+        queryResult, theirUserId, theirUserId, theirPublicKey)
+
+      if (contact) {
+        const makeActiveContact = false
+        await this.handleContactAdd(contact, makeActiveContact)
+      }
+    } catch (error) {
+      console.log(`ERROR(${method}): handling discovery new-invitation from ${theirUserId}.\n${error}`)
     }
   }
 
@@ -1347,7 +1361,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   async _writeContactList(aContactArr) {
     const method = 'MessagingEngine::_writeContactList'
 
-    bool decryptionPassed = false
+    let decryptionPassed = false
     let encContactsData = undefined
     try {
       encContactsData = await utils.encryptObj(this.publicKey, aContactArr, ENCRYPT_CONTACTS)
@@ -1365,7 +1379,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     if (decryptionPassed) {
       try {
         await this.io.robustLocalWrite(this.userId, 'contacts.json', encContactsData)
-      } catch (error)) {
+      } catch (error) {
         // We write the contact list quite frequently so it's not clear when
         // it's important to throw on failure (other than encryption above).
         // For now we'll suppress it and log it
@@ -1525,6 +1539,29 @@ export class MessagingEngine extends EventEmitterAdapter {
     } catch (error) {
       // Suppress
       console.log(`ERROR:(engine::_sendChannelNotification): ${error}`)
+    }
+  }
+
+  async _addDefaultChannels() {
+    const method = `engine::_addDefaultChannels`
+
+    const defaultChannelIds = ['hello.stealthy.id',
+                               'techcrunch.stealthy.id',
+                               'blockstack.stealthy.id']
+
+    for (const channelId of defaultChannelIds) {
+      if (this.contactMgr.isExistingContactId(channelId)) {
+        continue
+      }
+
+      try {
+        const publicKey = await this._fetchPublicKey(channelId)
+        await this.handleContactInvitation(publicKey, channelId)
+      } catch (error){
+        // Suppress
+        console.log(`WARNING(${method}): problem adding default channel ${channelId}.\n${error}.`)
+        continue
+      }
     }
   }
 }
