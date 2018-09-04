@@ -1423,7 +1423,9 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     const defaultChannelIds = ['hello.stealthy.id',
                                'techcrunch.stealthy.id',
-                               'blockstack.stealthy.id']
+                               'blockstack.stealthy.id',
+                               'graphite.stealthy.id'
+                              ]
 
     for (const channelId of defaultChannelIds) {
       if (this.contactMgr.isExistingContactId(channelId)) {

@@ -1,5 +1,5 @@
 import React from 'react'
-import { AsyncStorage, BackHandler, NativeModules, View, Text, Image, Platform, PushNotificationIOS } from 'react-native'
+import { AsyncStorage, BackHandler, NativeModules, View, Text, Image, Platform, PushNotificationIOS, NetInfo } from 'react-native'
 import { addNavigationHelpers } from 'react-navigation'
 import { createReduxBoundAddListener } from 'react-navigation-redux-helpers'
 import { connect } from 'react-redux'
@@ -12,12 +12,14 @@ const common = require('./../common.js');
 const utils = require('./../Engine/misc/utils.js')
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
 import RNExitApp from 'react-native-exit-app';
+import chatIcon from '../Images/blue512.png';
 
 class ReduxNavigation extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      fbListner: false
+      fbListner: false,
+      isConnected: undefined
     }
     this.publicKey = undefined
     this.ref = undefined
@@ -50,6 +52,8 @@ class ReduxNavigation extends React.Component {
       BackgroundFetch.finish(BackgroundFetch.FETCH_RESULT_NEW_DATA);
       if (Platform.OS === 'ios') {
         const number = this.props.contactMgr.getAllUnread()
+        if (number > 100)
+          number = 99
         PushNotificationIOS.setApplicationIconBadgeNumber(number)
       }
     }, (error) => {
@@ -72,6 +76,18 @@ class ReduxNavigation extends React.Component {
     });
   }
 
+  componentDidMount() {
+    NetInfo.isConnected.addEventListener('connectionChange', this.handleConnectionChange);
+    NetInfo.isConnected.fetch().done(
+      (isConnected) => { this.setState({ status: isConnected }); }
+    );
+  }
+
+  handleConnectionChange = (isConnected) => {
+    this.setState({ status: isConnected });
+    console.log(`is connected: ${this.state.status}`);
+  }
+
   componentWillReceiveProps (nextProps) {
     if (nextProps.engineShutdown) {
       // #FearThis  - Changes can result in loss of time, efficiency, users &
@@ -84,6 +100,7 @@ class ReduxNavigation extends React.Component {
     if (!utils.is_iOS()) {
       BackHandler.removeEventListener('hardwareBackPress')
     }
+    NetInfo.isConnected.removeEventListener('connectionChange', this.handleConnectionChange);
   }
 
   _authWork = async (userData) => {
@@ -268,6 +285,19 @@ class ReduxNavigation extends React.Component {
               raised
             />
           </View>
+        </View>
+      )
+    }
+    else if (this.state.isConnected === false) {
+      return (
+        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
+          <Image
+            style={{width: 150, height: 150}}
+            source={chatIcon}
+          />
+          <Text style={{fontSize: 30, fontWeight: 'bold', marginTop: 40}}>
+            No internet connection!
+          </Text>
         </View>
       )
     }
