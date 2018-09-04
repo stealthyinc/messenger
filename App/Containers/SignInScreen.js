@@ -89,7 +89,7 @@ class SignInScreen extends React.Component {
             borderColor: "transparent",
             borderWidth: 0,
             borderRadius: 5,
-            marginTop: 25
+            marginTop: (oldPad) ? 10 : 25
           }}
         />
         <Button
@@ -105,7 +105,7 @@ class SignInScreen extends React.Component {
             borderColor: "black",
             borderWidth: 2,
             borderRadius: 5,
-            marginTop: 25
+            marginTop: (oldPad) ? 10 : 25
           }}
         />
       </ScrollView>
