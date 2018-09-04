@@ -18,7 +18,15 @@ const utils = require('./../Engine/misc/utils.js');
 
 const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js');
 
-// import graphiteIcon from '../Images/Graphite.png';
+const stealthyChannelIds = [
+  'hello.stealthy.id',
+  'techcrunch.stealthy.id',
+  'blockstack.stealthy.id',
+  'graphite.stealthy.id',
+  'travelstack.stealthy.id',
+  'random.stealthy.id',
+  'support.stealthy',
+]
 
 class ChatScreen extends Component {
   static navigationOptions = ({ navigation }) => {
@@ -237,7 +245,8 @@ class ChatScreen extends Component {
           author = newText.substring(0, index)
           if (author) {
             text = newText.substring(index+2)
-            image = ''
+            if (stealthyChannelIds.indexOf(author) === -1)
+              image = ''
             name = ''
           }
         }
@@ -328,7 +337,8 @@ class ChatScreen extends Component {
         const index = text.indexOf(': ')
         const newId = text.substring(0, index)
         const newText = text.substring(index+2)
-        user.avatar = ''
+        if (stealthyChannelIds.indexOf(newId) === -1)
+          user.avatar = ''
         user.name = newId
         user._id = newId
         newMessages[0].user = user
