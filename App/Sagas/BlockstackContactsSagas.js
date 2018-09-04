@@ -20,17 +20,20 @@ export function * getBlockstackContacts (api, action) {
   // const currentData = yield select(BlockstackContactsSelectors.getData)
   // make the call to the api
   const name = data.data
-  const response = yield call(api.getBlockstackContacts, name)
-
   if (name) {
+    // console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%0')
+    const response = yield call(api.getBlockstackContacts, name)
     // success?
     if (response.ok) {
       // You might need to change the response here - do this with a 'transform',
       // located in ../Transforms/. Otherwise, just pass the data back from the api.
+      // console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%1')
       const {results} = response.data
-      if (!results.length) {
+      if (results && !results.length) {
+        // console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%2')
         const namesResponse = yield call (api.getBlockstackNames, name)
         if (namesResponse) {
+          // console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%3')
           const item = {
             profile: namesResponse,
             fullyQualifiedName: name,
@@ -39,11 +42,17 @@ export function * getBlockstackContacts (api, action) {
           let newResults = [item]
           yield put(BlockstackContactsActions.blockstackContactsSuccess(newResults))
         }
+        // else {
+        //   console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%4')
+        //   yield put(BlockstackContactsActions.blockstackContactsSuccess({payload: []}))
+        // }
       }
       else {
+        // console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5')
         yield put(BlockstackContactsActions.blockstackContactsSuccess(results))
       }
     } else {
+      // console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%6')
       yield put(BlockstackContactsActions.blockstackContactsFailure())
     }
   }

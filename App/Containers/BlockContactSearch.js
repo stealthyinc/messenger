@@ -46,6 +46,7 @@ class BlockContactSearch extends Component {
     super(props)
     this.state = {
       showLoading: false,
+      showNothing: true
     }
     this.search = undefined
     this.numContacts = (props.contactMgr) ?
@@ -95,49 +96,49 @@ class BlockContactSearch extends Component {
   }
   createListItem(contact) {
     const { payload, error } = this.props
-    if (payload) {
-      // console.log('****', payload)
-      if (payload.length) {
-        return payload.map((item, i) => (
-          <ListItem key={i} onPress={this.parseContact.bind(this, item)}>
-            <Thumbnail square size={80} source={{ uri: (item.profile.image && item.profile.image[0]) ? item.profile.image[0].contentUrl : '' }} />
-            <Body>
-              <Text>{(item.profile.name) ? `${item.profile.name} (${item.username})` : item.username}</Text>
-              <Text note>{item.profile.description ? item.profile.description : null}</Text>
-            </Body>
-          </ListItem>
-        ))
-      }
-      else {
-        return (
-          <ListItem>
-            <Body>
-              <Text>No Profiles Found: Invite via Text/Email</Text>
-              <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 20}}>
-                <Button
-                  backgroundColor={'#34bbed'}
-                  onPress={() => Communications.email([''],null,null,'Add me on Stealthy IM','')}
-                  icon={{name: 'email', color: 'white'}}
-                  title='Email'
-                  raised
-                />
-                <Button
-                  backgroundColor={'#34bbed'}
-                  onPress={() => Communications.text('')}
-                  icon={{name: 'chat', color: 'white'}}
-                  title='Message'
-                />
-              </View>
-            </Body>
-          </ListItem>
-        )
-      }
+    if (this.state.showNothing) {
+      return <ListItem>{null}</ListItem>
+    }
+    else if (payload && payload.length) {
+      return payload.map((item, i) => (
+        <ListItem key={i} onPress={this.parseContact.bind(this, item)}>
+          <Thumbnail square size={80} source={{ uri: (item.profile.image && item.profile.image[0]) ? item.profile.image[0].contentUrl : '' }} />
+          <Body>
+            <Text>{(item.profile.name) ? `${item.profile.name} (${item.username})` : item.username}</Text>
+            <Text note>{item.profile.description ? item.profile.description : null}</Text>
+          </Body>
+        </ListItem>
+      ))
     }
     else if (this.state.showLoading) {
+      setTimeout(() => {
+        this.setState({showLoading: false})
+      }, 5000);
       return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View>
     }
     else {
-      return <ListItem>{null}</ListItem>
+      return (
+        <ListItem>
+          <Body>
+            <Text>No Profiles Found: Invite via Text/Email</Text>
+            <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 20}}>
+              <Button
+                backgroundColor={'#34bbed'}
+                onPress={() => Communications.email([''],null,null,'Add me on Stealthy IM','')}
+                icon={{name: 'email', color: 'white'}}
+                title='Email'
+                raised
+              />
+              <Button
+                backgroundColor={'#34bbed'}
+                onPress={() => Communications.text('')}
+                icon={{name: 'chat', color: 'white'}}
+                title='Message'
+              />
+            </View>
+          </Body>
+        </ListItem>
+      )
     }
   }
   onChangeText = (text) => {
@@ -145,7 +146,7 @@ class BlockContactSearch extends Component {
     if (text.length > 1) {
       setTimeout(() => {
         this.props.request(text)
-        this.setState({showLoading: true})
+        this.setState({showLoading: true, showNothing: false})
       }, timeout);
     }
     else if (text.length < 1) {
@@ -154,7 +155,7 @@ class BlockContactSearch extends Component {
   }
   onClear = () => {
     this.props.request('')
-    this.setState({showLoading: false})
+    this.setState({showLoading: false, showNothing: true})
     this.props.clear()
     this.search.input.clear();
   }
