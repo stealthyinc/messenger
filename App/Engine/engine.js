@@ -59,7 +59,7 @@ let STEALTHY_PAGE = 'LOCALHOST';
 //
 // Logging Scopes
 const LOG_GAIAIO = false;
-const LOG_OFFLINEMESSAGING = true;
+const LOG_OFFLINEMESSAGING = false;
 //
 const ENABLE_CHANNELS_V2_0 = true
 const ENCRYPT_CHANNEL_NOTIFICATIONS = true

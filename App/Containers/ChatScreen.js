@@ -221,7 +221,7 @@ class ChatScreen extends Component {
 
   setupMessages = (inputMessages) => {
     let messages = []
-    const { description, id } = this.activeContact
+    let { description, id } = this.activeContact
     for (const message of inputMessages) {
       const { author, body, time, image, state, contentType } = message
       const sent = (state === MESSAGE_STATE.SENT_OFFLINE || state === MESSAGE_STATE.SENT_REALTIME || state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
@@ -241,13 +241,14 @@ class ChatScreen extends Component {
       if (author === id) {
         if (this.protocol) {
           const newText = text
-          const index = newText.indexOf(': ')
+          const index = newText.indexOf(' says: ')
           author = newText.substring(0, index)
           if (author) {
-            text = newText.substring(index+2)
+            text = newText.substring(index+7)
             if (stealthyChannelIds.indexOf(author) === -1)
               image = ''
             name = ''
+            description = author
           }
         }
         messages.push({
