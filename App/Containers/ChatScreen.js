@@ -3,6 +3,7 @@ import { Image, Modal, Keyboard, StyleSheet, ScrollView, TouchableOpacity, Touch
 import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button, Icon } from 'react-native-elements'
+import { Toast } from 'native-base';
 
 // Styles
 import styles from './Styles/ChatStyle'
@@ -472,6 +473,11 @@ class ChatScreen extends Component {
           onSend={this.onSend}
           loadEarlier={this.state.loadEarlier}
           onLoadEarlier={this.onLoadEarlier}
+          onPressAvatar={(this.protocol) ? (user) => Toast.show({
+                  text: user._id,
+                  buttonText: "Close",
+                  type: "success"
+                }) : () => this.props.navigation.navigate('ContactProfile')}
           isLoadingEarlier={this.state.isLoadingEarlier}
           user={{
             _id: this.state.author.username, // sent messages should have same user._id
