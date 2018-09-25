@@ -322,26 +322,34 @@ class ChatScreen extends Component {
   }
 
   onReceive = (newMessages) => {
-    if (newMessages.length > 0) {
-      //hack to show the generated id instead of stealthy all the time
-      if (this.protocol) {
-        let {text, user} = newMessages[0]
-        const index = text.indexOf(': ')
+    //hack to show the generated id instead of stealthy all the time
+    let updatedMessages = []
+    if (this.protocol) {
+      for (let i of newMessages) {
+        let {text, user, createdAt, _id} = i
+        const index = text.indexOf(' says: ')
         const newId = text.substring(0, index)
-        const newText = text.substring(index+2)
-        if (this.protocol)
-          user.avatar = ''
+        const newText = text.substring(index+7)
+        user.avatar = ''
         user.name = newId
         user._id = newId
-        newMessages[0].user = user
-        newMessages[0].text = newText
+        let crap = {
+          user,
+          text: newText,
+          createdAt,
+          _id,
+        }
+        updatedMessages.push(crap)
       }
-      this.setState((previousState) => {
-        return {
-          messages: GiftedChat.append(previousState.messages, newMessages),
-        };
-      });
     }
+    else {
+      updatedMessages = newMessages
+    }
+    this.setState((previousState) => {
+      return {
+        messages: GiftedChat.append(previousState.messages, updatedMessages),
+      };
+    });
   }
 
   setModalVisible = (flag) => {

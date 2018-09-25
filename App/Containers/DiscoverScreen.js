@@ -50,9 +50,7 @@ class DiscoverScreen extends Component {
     this.numContacts = (props.contactMgr) ?
       (props.contactMgr.getAllContacts().length) : 0;
   }
-  componentWillMount() {
-  }
-  componentWillReceiveProps(nextProps, nextState) {
+  componentWillReceiveProps(nextProps) {
     const { contactAdded, contactMgr } = nextProps
     const { channelClicked } = this.state
     if (channelClicked && contactMgr && contactMgr.getAllContacts().length > this.numContacts) {
@@ -111,9 +109,7 @@ class DiscoverScreen extends Component {
                     <Text note>{item.description}</Text>
                   </Body>
                   {(item.members > 0) ? <Right>
-                    <Badge style={{ backgroundColor: '#34bbed' }}>
-                      <Text style={{color: 'white'}}>{item.members}</Text>
-                    </Badge>
+                    <Text style={{color: '#34bbed', fontSize: 18, fontWeight: 'bold'}}>{item.members}</Text>
                   </Right> : null}
                 </ListItem>}
               renderRightHiddenRow={(data, secId, rowId, rowMap) =>
