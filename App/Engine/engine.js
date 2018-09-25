@@ -388,7 +388,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     // Add the default channels if we are a first time user
     //  - TODO: mechanism to tie this into settings or firebase (i.e. added
     //          channels once)  This would catch folks like Justin.
-    if (ENABLE_CHANNELS_V2_0 && this.newUser) {
+    if ((ENABLE_CHANNELS_V2_0 && this.newUser) || process.env.NODE_ENV === 'development') {
       await this._addDefaultChannels()
     }
 
@@ -867,6 +867,14 @@ export class MessagingEngine extends EventEmitterAdapter {
     else if (name === 'console') {
       this.settings.console = !this.settings.console;
       this.anonalytics.aeSettings(`console:${this.settings.console}`);
+    } else if (name === 'analytics') {
+      this.settings.analytics = !this.settings.analytics;
+      if (this.settings.analytics) {
+        this.anonalytics.aeEnable();
+      }
+      else {
+        this.anonalytics.aeDisable();
+      }
     } else if (name === 'notifications') {
       this.settings.notifications = !this.settings.notifications;
       // this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`);
@@ -1420,12 +1428,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   async _addDefaultChannels() {
     const method = `engine::_addDefaultChannels`
-
-    const defaultChannelIds = ['hello.stealthy.id',
-                               'techcrunch.stealthy.id',
-                               'blockstack.stealthy.id',
-                               'graphite.stealthy.id'
-                              ]
+    const defaultChannelIds = ['hello.stealthy.id']
 
     for (const channelId of defaultChannelIds) {
       if (this.contactMgr.isExistingContactId(channelId)) {
@@ -1441,5 +1444,6 @@ export class MessagingEngine extends EventEmitterAdapter {
         continue
       }
     }
+
   }
 }

@@ -7,6 +7,7 @@ export const statusIndicators = {
 
 export const defaultSettings = {
   notifications: true,
+  analytics: true,
   discovery: true,
   heartbeat: false,
   webrtc: false,

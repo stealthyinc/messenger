@@ -6,6 +6,9 @@ import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import { Toast } from 'native-base';
 import { shareOnTwitter } from 'react-native-social-share';
+import Communications from 'react-native-communications';
+import ActionSheet from 'react-native-actionsheet'
+
 const utils = require('./../Engine/misc/utils.js');
 
 const common = require('./../common.js');
@@ -48,7 +51,9 @@ class ProfileScreen extends React.Component {
   showOverlay = () => {
     this.setState({isVisible: !this.state.isVisible})
   }
-
+  showActionSheet = () => {
+    this.ActionSheet.show()
+  }
   render() {
     console.log('ProfileScreen render')
     const { userProfile, userData, userSettings } = this.props
@@ -60,7 +65,7 @@ class ProfileScreen extends React.Component {
         </View>
       );
     }
-    const { discovery, notifications, heartbeat, webrtc } = userSettings
+    const { discovery, notifications, heartbeat, webrtc, analytics } = userSettings
     const { profile } = userProfile
     const { username } = userData
     const { name, image } = profile
@@ -68,6 +73,7 @@ class ProfileScreen extends React.Component {
     const userImage = (image && image[0] && image[0].contentUrl) ?
       image[0].contentUrl : undefined
     const shareText = 'You can securely message me at: ' + username + ' on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im'
+    const shareText1 = 'Come chat with me on Stealthy.IM! Add me: ' + username
     const oldPad = utils.is_oldPad()
     const margin = (oldPad) ? 20 : 30
     const marginBottom = (oldPad) ? 5 : 15
@@ -96,7 +102,7 @@ class ProfileScreen extends React.Component {
         <View style={{flex: flex}} />
         <View style={{flex: 60, alignItems: 'center'}}>
           {avatarSize}
-          <Text h4 style={{marginTop: 25, marginBottom: marginBottom}}>{fullName}</Text>
+          <Text h4 style={{marginTop: 15, marginBottom: marginBottom}}>{fullName}</Text>
           <Text h4 style={{marginBottom: marginBottom, fontWeight: 'bold'}}>({username})</Text>
           <View style={{flexDirection: 'row', margin: margin}}>
             <Icon
@@ -125,6 +131,18 @@ class ProfileScreen extends React.Component {
               } />
               <Icon
                 reverse
+                name='pie-chart'
+                type='font-awesome'
+                color={(analytics) ? '#34bbed' : 'grey'}
+                onPress={() => {
+                  Toast.show({
+                    text: (analytics) ? 'Analytics Setting Disabled!' : 'Analytics Setting Enabled!',
+                    duration: 1500
+                  })
+                  this.props.updateUserSettings('analytics')}
+                } />
+              {/*<Icon
+                reverse
                 name='twitter'
                 type='font-awesome'
                 color='#34bbed'
@@ -135,8 +153,15 @@ class ProfileScreen extends React.Component {
                   (results) => {
                     console.log(results);
                   }
-              )} />
+              )} />*/}
           </View>
+          <Button
+            onPress={this.showActionSheet}
+            icon={{name: 'share', color: 'white'}}
+            buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 180, height: 50, backgroundColor: '#34bbed'}}
+            textStyle={{ fontSize: 18, fontWeight: "900", color: "white"}}
+            title='Share On'
+          />
           <Button
             onPress={this.props.screenProps.logout}
             icon={{name: 'launch', color: 'white'}}
@@ -146,6 +171,30 @@ class ProfileScreen extends React.Component {
           />
         </View>
         <View style={{flex: 20}} />
+        <ActionSheet
+          ref={o => this.ActionSheet = o}
+          title={'Sharing Options'}
+          options={['Tweet your ID', 'Invite via SMS', 'Email Contacts', 'Cancel']}
+          cancelButtonIndex={3}
+          destructiveButtonIndex={3}
+          onPress={(index) => { 
+            if (index === 0) {
+              shareOnTwitter({
+                    'text': shareText,
+                  },
+                  (results) => {
+                    console.log(results);
+                  }
+              )
+            }
+            else if (index === 1) {
+              Communications.textWithoutEncoding(null, `Add me on Stealthy IM: ${username}. Download Stealthy here: http://onelink.to/5krfsk`)
+            }
+            else if (index === 2) {
+              Communications.email([''],null,null,`Add me on Stealthy IM: ${username}`,'Download Stealthy here: http://onelink.to/5krfsk')
+            }
+          }}
+        />
       </View>
     );
   }

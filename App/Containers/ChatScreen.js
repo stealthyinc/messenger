@@ -19,16 +19,6 @@ const utils = require('./../Engine/misc/utils.js');
 
 const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js');
 
-const stealthyChannelIds = [
-  'hello.stealthy.id',
-  'techcrunch.stealthy.id',
-  'blockstack.stealthy.id',
-  'graphite.stealthy.id',
-  'travelstack.stealthy.id',
-  'random.stealthy.id',
-  'support.stealthy',
-]
-
 class ChatScreen extends Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {};
@@ -246,7 +236,7 @@ class ChatScreen extends Component {
           author = newText.substring(0, index)
           if (author) {
             text = newText.substring(index+7)
-            if (stealthyChannelIds.indexOf(author) === -1)
+            if (this.protocol)
               image = ''
             name = ''
             description = author
@@ -339,7 +329,7 @@ class ChatScreen extends Component {
         const index = text.indexOf(': ')
         const newId = text.substring(0, index)
         const newText = text.substring(index+2)
-        if (stealthyChannelIds.indexOf(newId) === -1)
+        if (this.protocol)
           user.avatar = ''
         user.name = newId
         user._id = newId
@@ -421,7 +411,7 @@ class ChatScreen extends Component {
 
   renderInputToolbar (props) {
      //Add the extra styles via containerStyle
-    return <InputToolbar {...props} containerStyle={{marginBottom: 5, borderTopWidth: 1.5, borderTopColor: '#333'}} />
+    return <InputToolbar {...props} />
   }
 
   onPressUrl = (url) => {
@@ -487,6 +477,7 @@ class ChatScreen extends Component {
           renderSystemMessage={this.renderSystemMessage}
           renderCustomView={this.renderCustomView}
           renderFooter={this.renderFooter}
+          maxInputLength={240}
           renderInputToolbar={this.renderInputToolbar}
           parsePatterns={(linkStyle) => [
             { type: 'url', style: linkStyle, onPress: this.onPressUrl },

@@ -104,7 +104,6 @@ class ConversationScreen extends React.Component {
     })
   }
   render() {
-    const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
     const { contactMgr, activateShare, userData, userSettings, engineInit } = this.props
     const activeContact = (contactMgr) ? contactMgr.getActiveContact() : undefined
     if (!contactMgr || activeContact || !engineInit) {

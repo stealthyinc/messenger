@@ -12,6 +12,14 @@ class Anonalytics {
     }
   }
 
+  aeEnable() {
+    Analytics.enable()
+  }
+
+  aeDisable() {
+    Analytics.disable()
+  }
+
   // Homepage Events:
   //
   aeReferral(aReferer) {

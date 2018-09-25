@@ -10,7 +10,7 @@ import DappStore from './DappStore'
 
 export default TabNavigator(
   {
-    // Discover: { screen: DiscoverScreen },
+    Discover: { screen: DiscoverScreen },
     Messages: { screen: ConversationScreen },
     // Wallet: { screen: WalletScreen },
     dApps: { screen: DappStore },
