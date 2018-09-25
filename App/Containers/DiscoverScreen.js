@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { ActivityIndicator, FlatList, View, TouchableOpacity, StyleSheet } from 'react-native'
+import { ActivityIndicator, FlatList, ListView, View, TouchableOpacity, StyleSheet } from 'react-native'
 import { Text, Divider } from 'react-native-elements'
 import { Button, Badge, Container, Header, Content, List, ListItem, Left, Body, Right, Item, Icon, Input, Thumbnail, Title, Separator } from 'native-base';
 import { connect } from 'react-redux'
@@ -40,6 +40,7 @@ class DiscoverScreen extends Component {
   };
   constructor (props) {
     super(props)
+    this.ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
     this.state = {
       channelClicked: false,
       showLoading: true,
@@ -49,16 +50,19 @@ class DiscoverScreen extends Component {
     this.numContacts = (props.contactMgr) ?
       (props.contactMgr.getAllContacts().length) : 0;
   }
-  componentWillReceiveProps(nextProps) {
+  componentWillMount() {
+  }
+  componentWillReceiveProps(nextProps, nextState) {
     const { contactAdded, contactMgr } = nextProps
     const { channelClicked } = this.state
     if (channelClicked && contactMgr && contactMgr.getAllContacts().length > this.numContacts) {
       this.numContacts = contactMgr.getAllContacts().length;
+      this.setState({channelClicked: false})
       this.props.navigation.goBack();
       this.props.navigation.navigate('ChatRoom')
       this.props.setContactAdded(false)
     }
-    if (contactMgr && this.state.channels.length === 0) {
+    else if (contactMgr && this.state.channels.length === 0) {
       let channels = {}
       firebaseInstance.getFirebaseRef('/global/public_channel_v2_0/auto').once('value')
       .then(snapshot => {
@@ -79,28 +83,28 @@ class DiscoverScreen extends Component {
       })
     }
   }
-  contactSelected = (data) => {
+  contactSelected = (data, secId, rowId, rowMap) => {
     this.props.addNewContact(data)
     this.props.setActiveContact(data);
-    // rowMap[`${secId}${rowId}`].props.closeRow();
-    // const newData = [...this.state.channels];
-    // newData.splice(rowId, 1);
-    // this.setState({ channels: newData, channelClicked: true });
+    rowMap[`${secId}${rowId}`].props.closeRow();
+    let newData = this.state.channels;
+    delete newData[rowId]
+    this.setState({ channelClicked: true, channels: newData })
   }
   render () {
-    if (this.state.showLoading) {
+    if (this.state.showLoading || this.state.channelClicked) {
       return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View>
     }
     else {
       return (
         <Container style={{backgroundColor: 'white'}}>
           <Content>
-            <FlatList
-              data={this.state.channels}
-              renderItem={({item}) =>
-                <ListItem style={{marginLeft: 5}} avatar onPress={this.contactSelected.bind(this, item)}>
+            <List
+              dataSource={this.ds.cloneWithRows(this.state.channels)}
+              renderRow={(item, secId, rowId, rowMap) =>
+                <ListItem style={{marginLeft: 5}} avatar onPress={_ => this.contactSelected(item, secId, rowId, rowMap)}>
                   <Left>
-                    <Thumbnail square source={{ uri: item.image}} />
+                    <Thumbnail square source={{ uri: item.image }} />
                   </Left>
                   <Body>
                     <Text style={{fontWeight: 'bold', fontSize: 18}}>{item.title}</Text>
@@ -112,6 +116,11 @@ class DiscoverScreen extends Component {
                     </Badge>
                   </Right> : null}
                 </ListItem>}
+              renderRightHiddenRow={(data, secId, rowId, rowMap) =>
+                <Button full danger onPress={_ => this.deleteRow(data, secId, rowId, rowMap)}>
+                  <Icon active name="trash" />
+                </Button>}
+              rightOpenValue={0}
             />
           </Content>
         </Container>
