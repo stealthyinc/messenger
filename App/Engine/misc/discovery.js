@@ -52,9 +52,32 @@ class Discovery extends EventEmitterAdapter {
     }
   }
 
-  async clearInvitation(theirPublicKey) {
+  // Clears an invitation from this user (this.publicKey) to a remote
+  // user (theirPublicKey).
+  //
+  // Used right now only with channels (for maintaining counts of users in room).
+  //
+  async clearSentInvitation(theirPublicKey) {
     if (!theirPublicKey) {
-      throw(`ERROR(discovery.js::clearInvitation): theirPublicKey unspecified.`)
+      console.log(`ERROR(discovery.js::inviteContact): theirPublicKey unspecified.`)
+      return
+    }
+
+    try {
+      const discoveryPath = `${common.getDbDiscoveryPath(theirPublicKey)}/${this.publicKey}`
+      const discoveryRef = firebaseInstance.getFirebaseRef(discoveryPath)
+      const result = await discoveryRef.remove()
+    } catch (err) {
+      console.log(`ERROR(discovery.js::inviteContact): ${err}`)
+    }
+  }
+
+  // Clears an invitation to this user (this.publicKey) from a remote user
+  // (theirPublicKey).
+  async clearReceivedInvitation(theirPublicKey) {
+    if (!theirPublicKey) {
+      console.log(`ERROR(discovery.js::clearReceivedInvitation): theirPublicKey unspecified.`)
+      return
     }
 
     try {
@@ -62,7 +85,7 @@ class Discovery extends EventEmitterAdapter {
       const discoveryRef = firebaseInstance.getFirebaseRef(discoveryPath)
       const result = await discoveryRef.remove()
     } catch (err) {
-      console.log(`ERROR(discovery.js::clearInvitation): ${err}`)
+      console.log(`ERROR(discovery.js::clearReceivedInvitation): ${err}`)
     }
   }
 

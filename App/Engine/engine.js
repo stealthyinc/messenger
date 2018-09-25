@@ -798,12 +798,14 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     this.contactMgr.addNewContact(contact, contact.id, publicKey, makeActiveContact);
 
+    let isChannel = false
     let protocol = undefined
     if (ENABLE_CHANNELS_V2_0) {
       protocol = await this._fetchProtocol(contact.id)
       if (protocol) {
         this.contactMgr.setProtocol(contact.id, protocol)
       }
+      isChannel = (protocol === 'public channel 2.0')
     }
 
     this._writeContactList(this.contactMgr.getContacts());
@@ -811,13 +813,23 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.conversations.createConversation(contact.id);
     this._writeConversations();
 
-    if (ENABLE_CHANNELS_V2_0) {
+    if (ENABLE_CHANNELS_V2_0 && isChannel) {
       let msgAddress = {
         outerFolderNumber: 0,
         innerFolderNumber: 0,
         fileNumber: 0
       }
       this.offlineMsgSvc.addChannelAddress(contact.id, msgAddress)
+
+      // Automatically send a message invite for channels that are added
+      // -- this is used to increment/decrement the number of people in the room.
+      //
+      try {
+        this.discovery.inviteContact(publicKey)
+      } catch (error) {
+        // Suppress
+        console.log(`ERROR(MessagingEngine::handleContactAdd): ${error}.`)
+      }
     }
 
     this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
@@ -835,7 +847,11 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   handleDeleteContact = (e, { contact }) => {
     if (this.discovery) {
-      this.discovery.clearInvitation(contact.publicKey)
+      this.discovery.clearReceivedInvitation(contact.publicKey)
+
+      if (this.contactMgr.getProtocol(contact.id) === 'public channel 2.0') {
+        this.discovery.clearSentInvitation(contact.publicKey)
+      }
     }
 
     this.contactMgr.deleteContact(contact);
