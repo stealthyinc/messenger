@@ -128,7 +128,7 @@ class ConversationScreen extends React.Component {
             renderRow={item =>
               <ListItem style={{marginLeft: 5}} avatar onPress={this.contactSelected.bind(this, item.id)}>
                 <Left>
-                  <Thumbnail square source={(item.image) ? { uri: item.image } : defaultProfile} />
+                  <Thumbnail square source={{ uri: (item.base64) ? item.base64 : item.image }} />
                 </Left>
                 <Body>
                   <Text style={{fontWeight: 'bold', fontSize: 18}}>{(item.title) ? item.title : item.id}</Text>

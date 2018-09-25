@@ -66,7 +66,7 @@ class ProfileScreen extends React.Component {
       );
     }
     const { discovery, notifications, heartbeat, webrtc, analytics } = userSettings
-    const { profile } = userProfile
+    const { profile, base64 } = userProfile
     const { username } = userData
     const { name, image } = profile
     const fullName = (name) ? name : null
@@ -82,7 +82,7 @@ class ProfileScreen extends React.Component {
       <Avatar
         large
         rounded
-        source={(userImage) ? {uri: userImage} : chatIcon}
+        source={{uri: base64}}
         onPress={() => console.log("Works!")}
         activeOpacity={(userImage) ? 0.7 : 0.5}
         containerStyle={{marginBottom: 15}}
@@ -91,7 +91,7 @@ class ProfileScreen extends React.Component {
       <Avatar
         xlarge
         rounded
-        source={(userImage) ? {uri: userImage} : chatIcon}
+        source={{uri: base64}}
         onPress={() => console.log("Works!")}
         activeOpacity={(userImage) ? 0.7 : 0.5}
         containerStyle={{marginBottom: 15}}

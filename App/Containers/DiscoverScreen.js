@@ -100,18 +100,22 @@ class DiscoverScreen extends Component {
             <List
               dataSource={this.ds.cloneWithRows(this.state.channels)}
               renderRow={(item, secId, rowId, rowMap) =>
-                <ListItem style={{marginLeft: 5}} avatar onPress={_ => this.contactSelected(item, secId, rowId, rowMap)}>
-                  <Left>
-                    <Thumbnail square source={{ uri: item.image }} />
-                  </Left>
-                  <Body>
-                    <Text style={{fontWeight: 'bold', fontSize: 18}}>{item.title}</Text>
-                    <Text note>{item.description}</Text>
-                  </Body>
-                  {(item.members > 0) ? <Right>
-                    <Text style={{color: '#34bbed', fontSize: 18, fontWeight: 'bold'}}>{item.members}</Text>
-                  </Right> : null}
-                </ListItem>}
+                <View>
+                  <ListItem style={{marginLeft: 5}} avatar onPress={_ => this.contactSelected(item, secId, rowId, rowMap)}>
+                    <Left>
+                      <Thumbnail square source={{ uri: (item.base64) ? item.base64 : item.image }} />
+                    </Left>
+                    <Body>
+                      <Text style={{fontWeight: 'bold', fontSize: 18}}>{item.title}</Text>
+                      <Text note>{item.description}</Text>
+                    </Body>
+                    {(item.members > 0) ? <Right>
+                      <Text style={{color: '#34bbed', fontSize: 18, fontWeight: 'bold'}}>{item.members}</Text>
+                    </Right> : null}
+                  </ListItem>
+                  <Divider style={{ backgroundColor: '#34bbed', height: 4 }} />
+                </View>
+              }
               renderRightHiddenRow={(data, secId, rowId, rowMap) =>
                 <Button full danger onPress={_ => this.deleteRow(data, secId, rowId, rowMap)}>
                   <Icon active name="trash" />
