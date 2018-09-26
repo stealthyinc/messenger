@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
 
 class DiscoverScreen extends Component {
   static navigationOptions = {
-    headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Discover</Text>,
+    headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Channels</Text>,
     headerRight: (
       <TouchableOpacity onPress={() => alert('Public chatrooms for various topics')} style={{marginRight: 10}}> 
         <Ionicons name="ios-help-buoy" size={30} color='white'/>
@@ -98,6 +98,7 @@ class DiscoverScreen extends Component {
         <Container style={{backgroundColor: 'white'}}>
           <Content>
             <List
+              removeClippedSubviews={false}
               dataSource={this.ds.cloneWithRows(this.state.channels)}
               renderRow={(item, secId, rowId, rowMap) =>
                 <View>
@@ -110,7 +111,7 @@ class DiscoverScreen extends Component {
                       <Text note>{item.description}</Text>
                     </Body>
                     {(item.members > 0) ? <Right>
-                      <Text style={{color: '#34bbed', fontSize: 18, fontWeight: 'bold'}}>{item.members}</Text>
+                      <Text style={{color: '#34bbed', fontSize: 15, fontWeight: 'bold'}}>{item.members} People</Text>
                     </Right> : null}
                   </ListItem>
                   <Divider style={{ backgroundColor: '#34bbed', height: 4 }} />

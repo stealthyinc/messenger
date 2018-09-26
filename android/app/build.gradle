@@ -108,7 +108,7 @@ android {
         applicationId "com.stealthy"
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 18
+        versionCode 20
         versionName "1.0"
         multiDexEnabled true
         ndk {
@@ -145,13 +145,7 @@ android {
 }
 
 dependencies {
-    compile project(':rn-fetch-blob')
-    compile project(':react-native-vector-icons')
-    compile project(':react-native-social-share')
-    compile project(':react-native-firebase')
-    compile project(':react-native-exit-app')
-    compile project(':react-native-config')
-    compile project(':react-native-background-fetch')
+    implementation project(':rn-fetch-blob')
     implementation project(':react-native-exit-app')
     implementation project(':react-native-social-share')
     implementation project(':react-native-vector-icons')

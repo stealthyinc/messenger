@@ -11,12 +11,6 @@ import io.invertase.firebase.RNFirebasePackage;
 import com.github.wumke.RNExitApp.RNExitAppPackage;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
 import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
-import com.oblador.vectoricons.VectorIconsPackage;
-import io.invertase.firebase.RNFirebasePackage;
-import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
-import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
-import com.barefootcoders.android.react.KDSocialShare.KDSocialShare;
-import com.github.wumke.RNExitApp.RNExitAppPackage;
 import io.invertase.firebase.notifications.RNFirebaseNotificationsPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -42,12 +36,6 @@ public class MainApplication extends Application implements ReactApplication {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
             new RNFetchBlobPackage(),
-            new VectorIconsPackage(),
-            new KDSocialShare(),
-            new RNFirebasePackage(),
-            new RNExitAppPackage(),
-            new ReactNativeConfigPackage(),
-            new RNBackgroundFetchPackage(),
             new RNExitAppPackage(),
             new KDSocialShare(),
             new BlockstackPackage(),

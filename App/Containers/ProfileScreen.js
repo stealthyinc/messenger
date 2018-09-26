@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, AsyncStorage, Image, View, StyleSheet, TouchableOpacity, NativeModules, StatusBar } from 'react-native';
+import { ActivityIndicator, AsyncStorage, Image, View, StyleSheet, TouchableOpacity, NativeModules, StatusBar, Platform } from 'react-native';
 import { Avatar, Card, Button, Text, Icon, Overlay } from 'react-native-elements'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux'
@@ -70,22 +70,21 @@ class ProfileScreen extends React.Component {
     const { username } = userData
     const { name, image } = profile
     const fullName = (name) ? name : null
-    const userImage = (image && image[0] && image[0].contentUrl) ?
-      image[0].contentUrl : undefined
     const shareText = 'You can securely message me at: ' + username + ' on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im'
     const shareText1 = 'Come chat with me on Stealthy.IM! Add me: ' + username
     const oldPad = utils.is_oldPad()
     const margin = (oldPad) ? 20 : 30
-    const marginBottom = (oldPad) ? 5 : 15
+    const marginTop = (oldPad) ? 0 : 15
+    const marginBottom = (oldPad) ? 2 : 15
     const flex = (oldPad) ? 5 : 10
-    const avatarSize = (oldPad) ? (
+    const avatarSize = (oldPad || (Platform.OS !== 'ios')) ? (
       <Avatar
         large
         rounded
         source={{uri: base64}}
         onPress={() => console.log("Works!")}
-        activeOpacity={(userImage) ? 0.7 : 0.5}
-        containerStyle={{marginBottom: 15}}
+        activeOpacity={0.7}
+        containerStyle={{marginBottom: 5}}
       />
     ) : (
       <Avatar
@@ -93,7 +92,7 @@ class ProfileScreen extends React.Component {
         rounded
         source={{uri: base64}}
         onPress={() => console.log("Works!")}
-        activeOpacity={(userImage) ? 0.7 : 0.5}
+        activeOpacity={0.7}
         containerStyle={{marginBottom: 15}}
       />
     )
@@ -102,8 +101,8 @@ class ProfileScreen extends React.Component {
         <View style={{flex: flex}} />
         <View style={{flex: 60, alignItems: 'center'}}>
           {avatarSize}
-          <Text h4 style={{marginTop: 15, marginBottom: marginBottom}}>{fullName}</Text>
-          <Text h4 style={{marginBottom: marginBottom, fontWeight: 'bold'}}>({username})</Text>
+          <Text h4 style={{marginTop, marginBottom}}>{fullName}</Text>
+          <Text h4 style={{marginBottom, fontWeight: 'bold'}}>({username})</Text>
           <View style={{flexDirection: 'row', margin: margin}}>
             <Icon
               reverse

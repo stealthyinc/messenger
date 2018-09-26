@@ -124,6 +124,7 @@ class ConversationScreen extends React.Component {
       <Container style={{backgroundColor: 'white'}}>
         <Content>
           <List
+            removeClippedSubviews={false}
             dataSource={this.ds.cloneWithRows(this.state.listViewData)}
             renderRow={item =>
               <ListItem style={{marginLeft: 5}} avatar onPress={this.contactSelected.bind(this, item.id)}>
@@ -135,7 +136,7 @@ class ConversationScreen extends React.Component {
                   <Text note>{item.summary}</Text>
                 </Body>
                 {(item.unread > 0) ? <Right>
-                  <Badge style={{ backgroundColor: '#34bbed' }}>
+                  <Badge style={{ backgroundColor: 'red' }}>
                     <Text style={{color: 'white'}}>{item.unread}</Text>
                   </Badge>
                 </Right> : null}

@@ -10,7 +10,7 @@ import DappStore from './DappStore'
 
 export default TabNavigator(
   {
-    Discover: { screen: DiscoverScreen },
+    Channels: { screen: DiscoverScreen },
     Messages: { screen: ConversationScreen },
     // Wallet: { screen: WalletScreen },
     dApps: { screen: DappStore },
@@ -27,7 +27,7 @@ export default TabNavigator(
         // else if (routeName === 'Wallet') {
         //   iconName = `ios-cash${focused ? '' : '-outline'}`;
         // }
-        else if (routeName === 'Discover') {
+        else if (routeName === 'Channels') {
           iconName = `ios-radio`;
         }
         else if (routeName === 'dApps') {
