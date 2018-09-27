@@ -45,17 +45,18 @@ class DiscoverScreen extends Component {
       channelClicked: false,
       showLoading: true,
       showNothing: true,
-      channels: []
+      channels: [],
+      channelId: '',
     }
     this.numContacts = (props.contactMgr) ?
       (props.contactMgr.getAllContacts().length) : 0;
   }
   componentWillReceiveProps(nextProps) {
     const { contactAdded, contactMgr } = nextProps
-    const { channelClicked } = this.state
-    if (channelClicked && contactMgr && contactMgr.getAllContacts().length > this.numContacts) {
+    const { channelClicked, channelId } = this.state
+    if (channelClicked && contactMgr && contactMgr.isExistingContactId(channelId)) {
       this.numContacts = contactMgr.getAllContacts().length;
-      this.setState({channelClicked: false})
+      this.setState({channelClicked: false, channelId: ''})
       this.props.navigation.navigate('ChatRoom')
       this.props.setContactAdded(false)
     }
@@ -86,7 +87,7 @@ class DiscoverScreen extends Component {
     rowMap[`${secId}${rowId}`].props.closeRow();
     let newData = this.state.channels;
     delete newData[rowId]
-    this.setState({ channelClicked: true, channels: newData })
+    this.setState({ channelClicked: true, channelId: data.id, channels: newData })
   }
   render () {
     if (this.state.showLoading || this.state.channelClicked) {
