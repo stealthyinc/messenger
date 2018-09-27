@@ -29,7 +29,7 @@ class DiscoverScreen extends Component {
   static navigationOptions = {
     headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Channels</Text>,
     headerRight: (
-      <TouchableOpacity onPress={() => alert('Public chatrooms for various topics')} style={{marginRight: 10}}> 
+      <TouchableOpacity onPress={() => alert('Public chatrooms for various topics')} style={{marginRight: 10}}>
         <Ionicons name="ios-help-buoy" size={30} color='white'/>
       </TouchableOpacity>
     ),
@@ -56,7 +56,6 @@ class DiscoverScreen extends Component {
     if (channelClicked && contactMgr && contactMgr.getAllContacts().length > this.numContacts) {
       this.numContacts = contactMgr.getAllContacts().length;
       this.setState({channelClicked: false})
-      this.props.navigation.goBack();
       this.props.navigation.navigate('ChatRoom')
       this.props.setContactAdded(false)
     }

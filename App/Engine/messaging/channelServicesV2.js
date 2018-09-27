@@ -42,6 +42,12 @@ class ChannelServicesV2 {
   static MAX_MESSAGES_PER_FILE = 1
   static MAX_FILES_PER_INNER_FOLDER = 1000
   static MAX_FOLDERS_PER_OUTER_FOLDER = 1000
+  static MAX_MESSAGES_PER_OUTER_FOLDER = ChannelServicesV2.MAX_MESSAGES_PER_FILE *
+    ChannelServicesV2.MAX_FILES_PER_INNER_FOLDER *
+    ChannelServicesV2.MAX_FOLDERS_PER_OUTER_FOLDER
+  static MAX_SUPPORTED_OUTER_FOLDER_NUM = Math.floor(Number.MAX_SAFE_INTEGER /
+    (ChannelServicesV2.MAX_FILES_PER_INNER_FOLDER *
+     ChannelServicesV2.MAX_FOLDERS_PER_OUTER_FOLDER))
   //
   static CHANNEL_DIR = 'channel'
   static STATUS_FILENAME = 'status.json'
@@ -90,12 +96,46 @@ class ChannelServicesV2 {
   // NOTE / WARNING: Also increments aMsgAddress object passed in.
   //
   // // TODO: better check on types (numbers etc.)
-  getMsgFilePaths(aMsgAddress, maxPaths=4) {
+  //
+  // Special case:  If aMsgAddress is 0/0/0, then return the last n messages as
+  //                specified in firstFetchLimit after returning the first message
+  //                (which is typically a disclaimer)
+  getMsgFilePaths(aMsgAddress, maxPaths=4, firstFetchLimit=20) {
     let msgFilePaths = []
     if (aMsgAddress) {
+      let pathCount = 0
+
+      if (ChannelServicesV2.isFirstMsgAddress(aMsgAddress)) {
+        // The channel was just added so fetch the maximum number of first time
+        // messages to kick things off.
+        maxPaths = firstFetchLimit
+
+        // How many messages are outstanding to d/l or fetch:
+        const numMsgs = ChannelServicesV2.getNumberOfMessages(this.lastMsgAddress)
+        if (numMsgs > firstFetchLimit) {
+          msgFilePaths.push(ChannelServicesV2.getMsgFilePath(aMsgAddress))
+          pathCount++
+
+          // Now increment to the last message minus the first fetch limit
+          let startMsgNum = numMsgs - firstFetchLimit
+
+          // Special case for not duplicating the 0th message:
+          if (startMsgNum === 1) {
+            startMsgNum++
+          }
+
+          // Get the address and then set the members of aMsgAddress below (because
+          // we are using pass by ref style modification of the object passed in):
+          const startMsgAddr = ChannelServicesV2.getMsgAddressFromMsgNum(startMsgNum)
+          aMsgAddress.outerFolderNumber = startMsgAddr.outerFolderNumber
+          aMsgAddress.innerFolderNumber = startMsgAddr.innerFolderNumber
+          aMsgAddress.fileNumber = startMsgAddr.fileNumber
+        }
+      }
+
       // Note msgAddressLessThan returns undefined if objects are problematic (which
       // resolves to falsy and prevents our loop from running)
-      let pathCount = 0
+
       while ((pathCount < maxPaths) &&
              ChannelServicesV2.msgAddressLessThanOrEqual(aMsgAddress, this.lastMsgAddress)) {
         msgFilePaths.push(ChannelServicesV2.getMsgFilePath(aMsgAddress))
@@ -211,6 +251,71 @@ class ChannelServicesV2 {
     } catch (error) {
       return undefined
     }
+  }
+
+  // TODO: these methods below will fail for values larger than 2^53-1 (js max
+  //       safe integer). We should handle that at some point.
+
+  // Returns the number of messages for a given message address object.
+  // For example, consider msg address 3/4/10 (short format):
+  // numMsgs = (10+1)*1 +
+  //           4 * 1000 +
+  //           3 * 1000 * 1000
+  //         = 11 + 4,000 + 3,000,000
+  //         = 3,004,011
+  //
+  static getNumberOfMessages(aMsgAddress) {
+    let numMsgs = 0
+    if (aMsgAddress) {
+      if (aMsgAddress.outerFolderNumber >=
+          ChannelServicesV2.MAX_SUPPORTED_OUTER_FOLDER_NUM) {
+        throw(`ERROR(ChannelServicesV2::getNumberOfMessages): aMsgAddress will calculate to exceed a number representable in js.`)
+      }
+
+      numMsgs = ((aMsgAddress.fileNumber + 1) *
+                 ChannelServicesV2.MAX_MESSAGES_PER_FILE) +
+                (aMsgAddress.innerFolderNumber *
+                 ChannelServicesV2.MAX_FILES_PER_INNER_FOLDER) +
+                (aMsgAddress.outerFolderNumber *
+                 ChannelServicesV2.MAX_FOLDERS_PER_OUTER_FOLDER *
+                 ChannelServicesV2.MAX_FILES_PER_INNER_FOLDER)
+    }
+    return numMsgs
+  }
+
+  // Returns the address for a given message number--i.e.
+  //  * aMsgNum=1 would return the long form of 0/0/0
+  //  * aMsgNum=327 would return the long form of 0/0/326
+  //  * aMsgNum=3004011 would return the long form of 3/4/10
+  //  * aMsgNum < 1 returns the long form of 0/0/0
+  static getMsgAddressFromMsgNum(aMsgNum) {
+    if (aMsgNum >= Number.MAX_SAFE_INTEGER) {
+      throw(`ERROR(ChannelServicesV2::getMsgAddressFromMsgNum): aMsgNum exceeds or is the max number representable in js.`)
+    } else if (aMsgNum <= 0) {
+      throw(`ERROR(ChannelServicesV2::getMsgAddressFromMsgNum): aMsgNum(${aMsgNum}) must be > 0.`)
+    }
+
+    const outerFolderNumber = Math.floor(aMsgNum / ChannelServicesV2.MAX_MESSAGES_PER_OUTER_FOLDER)
+    let remainingMsgs = Math.floor(aMsgNum % ChannelServicesV2.MAX_MESSAGES_PER_OUTER_FOLDER)
+    const innerFolderNumber = Math.floor(remainingMsgs / ChannelServicesV2.MAX_FILES_PER_INNER_FOLDER)
+    remainingMsgs = Math.floor(remainingMsgs % ChannelServicesV2.MAX_FILES_PER_INNER_FOLDER)
+    let fileNumber = remainingMsgs - 1
+    if (fileNumber < 0) {
+      fileNumber = 0
+    }
+
+    return {
+      outerFolderNumber,
+      innerFolderNumber,
+      fileNumber
+    }
+  }
+
+  static isFirstMsgAddress(aMsgAddress) {
+    return aMsgAddress &&
+           aMsgAddress.fileNumber === 0 &&
+           aMsgAddress.innerFolderNumber === 0 &&
+           aMsgAddress.outerFolderNumber === 0
   }
 }
 

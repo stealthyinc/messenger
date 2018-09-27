@@ -425,13 +425,13 @@ class OfflineMessagingServices extends EventEmitterAdapter {
             new Promise((resolve, reject) => {
               this.ioInst.robustRemoteRead(contactId, messageFilePath)
               .then((data) => {
+                let channelChatMsg = undefined
                 try {
-                  let channelChatMsg = JSON.parse(data)
-                  resolve(channelChatMsg)
+                  channelChatMsg = JSON.parse(data)                  
                 } catch(error) {
                   // Suppress
                 }
-                resolve(undefined)
+                resolve(channelChatMsg)
               })
               .catch((error) => {
                 resolve(undefined)

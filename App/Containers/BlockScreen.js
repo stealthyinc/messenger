@@ -1,15 +1,15 @@
 import React, { Component } from 'react'
 // import PropTypes from 'prop-types'
-import { 
-  ActivityIndicator, 
-  AsyncStorage, 
-  NativeModules, 
+import {
+  ActivityIndicator,
+  AsyncStorage,
+  NativeModules,
   Image,
-  View, 
-  Text, 
+  View,
+  Text,
   StyleSheet,
-  ScrollView, 
-  Platform 
+  ScrollView,
+  Platform
 } from 'react-native'
 import { Button, SocialIcon } from 'react-native-elements'
 import { connect } from 'react-redux'
@@ -39,7 +39,7 @@ class BlockScreen extends Component {
       // Delay before starting session to allow closing session to finish writes etc.
       // Thoughts:
       //   - would be good to implement a handshake to know if this is necessary / status etc.
-      const DELAY_BEFORE_START_MS = 5 * 1000;
+      const DELAY_BEFORE_START_MS = 3 * 1000;
       utils.resolveAfterMilliseconds(DELAY_BEFORE_START_MS)
       .then(() => {
         this.setState({spinner: false})
