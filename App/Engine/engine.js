@@ -782,10 +782,14 @@ export class MessagingEngine extends EventEmitterAdapter {
   }
 
   async handleContactAdd(contact, makeActiveContact=true) {
+    const method = 'MessagingEngine::handleContactAdd'
+
+    console.log(`DEBUG($method): starting contact add for ${contact.id}.`)
     if (this.anonalytics) {
       this.anonalytics.aeContactAdded();
     }
 
+    console.log(`DEBUG($method): fetching public key ...`)
     let publicKey = contact.publicKey
     if (!publicKey) {
       try {
@@ -796,24 +800,32 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     }
 
+    console.log(`DEBUG($method): adding new contact to contact manager ...`)
     this.contactMgr.addNewContact(contact, contact.id, publicKey, makeActiveContact);
 
     let isChannel = false
     let protocol = undefined
     if (ENABLE_CHANNELS_V2_0) {
+      console.log(`DEBUG($method): fetching channel protocol ...`)
       protocol = await this._fetchProtocol(contact.id)
       if (protocol) {
+        console.log(`DEBUG($method): setting channel protocol ...`)
         this.contactMgr.setProtocol(contact.id, protocol)
       }
       isChannel = (protocol === 'public channel 2.0')
     }
 
+    console.log(`DEBUG($method): writing contact list (non blocking) ...`)
     this._writeContactList(this.contactMgr.getContacts());
 
+    console.log(`DEBUG($method): creating conversation ...`)
     this.conversations.createConversation(contact.id);
+
+    console.log(`DEBUG($method): writing conversations (non blocking) ...`)
     this._writeConversations();
 
     if (ENABLE_CHANNELS_V2_0 && isChannel) {
+      console.log(`DEBUG($method): setting channel address in offline msg svc ...`)
       let msgAddress = {
         outerFolderNumber: 0,
         innerFolderNumber: 0,
@@ -824,14 +836,16 @@ export class MessagingEngine extends EventEmitterAdapter {
       // Automatically send a message invite for channels that are added
       // -- this is used to increment/decrement the number of people in the room.
       //
+      console.log(`DEBUG($method): db invite contact (member incr, blocking) ...`)
       try {
-        this.discovery.inviteContact(publicKey)
+        await this.discovery.inviteContact(publicKey)
       } catch (error) {
         // Suppress
         console.log(`ERROR(MessagingEngine::handleContactAdd): ${error}.`)
       }
     }
 
+    console.log(`DEBUG($method): updating contacts in offline messaging service ...`)
     this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
 
     // IMPORTANT (even for Prabhaav):
@@ -839,9 +853,13 @@ export class MessagingEngine extends EventEmitterAdapter {
     //   contact length changed to navigate to the ChatScreen. If you
     //   update messages last, it navigates to a screen with the wrong
     //   messages.
+    console.log(`DEBUG($method): updating messages (sends event 'me-update-messages') ...`)
     this.updateMessages(contact.id);
+
+    console.log(`DEBUG($method): updating contact manager (sends event 'me-update-contactmgr') ...`)
     this.updateContactMgr();
 
+    console.log(`DEBUG($method): close contact search (sends event 'me-close-contact-search') ...`)
     this.closeContactSearch();
   }
 
@@ -1403,12 +1421,30 @@ export class MessagingEngine extends EventEmitterAdapter {
   //////////////////////////////////////////////////////////////////////////////
 
   async _fetchProtocol(aUserId) {
+    const method = 'MessagingEngine::_fetchProtocol'
+
+    const maxAttempts = 5
+    let stringifiedInfo = undefined
     try {
-      const stringifiedInfo = await this.io.robustRemoteRead(aUserId, 'info.json')
-      const info = JSON.parse(stringifiedInfo)
-      return `${info.protocol} ${info.version.major}.${info.version.minor}`
+      console.log(`INFO(${method}): reading info.json.`)
+      stringifiedInfo = await this.io.robustRemoteRead(aUserId, 'info.json', maxAttempts)
     } catch (error) {
       // Supress: assume user is regular user, return undefined
+      console.log(`ERROR(${method}): failed reading info.json for ${aUserId}.\n  ${error}`)
+      return undefined
+    }
+
+    if (stringifiedInfo) {
+      try {
+        console.log(`INFO(${method}): processing data from info.json.\n  ${stringifiedInfo}\n`)
+        const info = JSON.parse(stringifiedInfo)
+        return `${info.protocol} ${info.version.major}.${info.version.minor}`
+      } catch (error) {
+        // Supress: assume user is regular user, return undefined
+        console.log(`ERROR(${method}): failed processing data from info.json.\n  ${error}`)
+      }
+    } else {
+      console.log(`INFO(${method}): no data in info.json or info.json doesn't exist.`)
     }
 
     return undefined
