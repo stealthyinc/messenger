@@ -46,21 +46,27 @@ class SignInScreen extends React.Component {
     const marginBottom = (this.props.spinner) ? 40 : (oldPad) ? 50 : 80
     if (this.state.error) {
       return (
-        <AwesomeAlert
-          show={this.state.error}
-          showProgress={false}
-          title="Stealthy Error"
-          message={this.state.errorText}
-          closeOnTouchOutside={false}
-          closeOnHardwareBackPress={false}
-          showCancelButton={true}
-          showConfirmButton={false}
-          cancelText="Close"
-          cancelButtonColor="#DD6B55"
-          onCancelPressed={() => {
-            this.setState({error: false, errorText: ''})
-          }}
-        />
+          <AwesomeAlert
+            show={this.state.error}
+            showProgress={false}
+            title="Stealthy Error"
+            message={this.state.errorText}
+            closeOnTouchOutside={false}
+            closeOnHardwareBackPress={false}
+            showCancelButton={true}
+            showConfirmButton={true}
+            cancelText="Close"
+            cancelButtonColor="#DD6B55"
+            confirmText="More Info"
+            confirmButtonColor="#34bbed"
+            onCancelPressed={() => {
+              this.setState({error: false, errorText: ''})
+            }}
+            onCancelPressed={() => {
+              this.setState({error: false, errorText: ''})
+            }}
+            onConfirmPressed={() => Linking.openURL('https://www.stealthy.im/badIdError1.jpg').catch(err => console.error('An error occurred', err))}
+          />
       )
     }
     return (
@@ -145,7 +151,7 @@ class SignInScreen extends React.Component {
       if (error) {
         // throw(`Failed to get user data.  ${error}`);
         // this.props.setEngineFault(true)
-        this.setState({error: true, errorText: 'User data not found. Please ensure you have a valid Blockstack ID', errorCode: 1})
+        this.setState({error: true, errorText: 'User data not found. Please ensure you have a valid Blockstack username. E-mail support@stealthy.im for further help.'})
         this.props.setSignInPending(false)
       } else {
         BlockstackNativeModule.getPublicKeyFromPrivate(
