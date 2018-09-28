@@ -108,7 +108,7 @@ android {
         applicationId "com.stealthy"
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 20
+        versionCode 22
         versionName "1.0"
         multiDexEnabled true
         ndk {

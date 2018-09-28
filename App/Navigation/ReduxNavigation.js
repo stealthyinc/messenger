@@ -13,6 +13,7 @@ const utils = require('./../Engine/misc/utils.js')
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
 import RNExitApp from 'react-native-exit-app';
 import chatIcon from '../Images/blue512.png';
+import AwesomeAlert from 'react-native-awesome-alerts';
 
 class ReduxNavigation extends React.Component {
   constructor(props) {
@@ -261,31 +262,26 @@ class ReduxNavigation extends React.Component {
     if (this.props.engineFault) {
       // console.log("Engine Fault", this.props.engineFault, this.props.userData)
       return (
-        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
-          <Text style={{fontSize: 30, fontWeight: 'bold', marginBottom: 20}}>
-            Stealthy Error
-          </Text>
-          <Image
-            style={{width: 300, height: 300}}
-            source={{uri: 'https://media.giphy.com/media/bi6RQ5x3tqoSI/giphy.gif'}}
-          />
-          <View style={{flexDirection: 'row', marginTop: 20}}>
-            <Button
-              backgroundColor={'#34bbed'}
-              onPress={() => this.props.dispatch(EngineActions.restartEngine(this.props.userData))}
-              icon={{name: 'refresh', color: 'white'}}
-              title='Restart'
-              raised
-            />
-            <Button
-              backgroundColor={'#34bbed'}
-              onPress={() => this.___startLogOutSequence()}
-              icon={{name: 'close', color: 'white'}}
-              title='Logout'
-              raised
-            />
-          </View>
-        </View>
+        <AwesomeAlert
+          show={this.props.engineFault}
+          showProgress={false}
+          title="Stealthy Error"
+          message="Engine in a bad state"
+          closeOnTouchOutside={false}
+          closeOnHardwareBackPress={false}
+          showCancelButton={true}
+          showConfirmButton={true}
+          cancelText="Restart Engine"
+          confirmText="Logout"
+          cancelButtonColor="#34bbed"
+          confirmButtonColor="#DD6B55"
+          onCancelPressed={() => {
+            this.props.dispatch(EngineActions.restartEngine(this.props.userData))
+          }}
+          onConfirmPressed={() => {
+            this.___startLogOutSequence()
+          }}
+        />
       )
     }
     else if (this.state.isConnected === false) {
