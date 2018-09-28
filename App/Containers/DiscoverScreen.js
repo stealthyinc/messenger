@@ -51,9 +51,21 @@ class DiscoverScreen extends Component {
       (props.contactMgr.getAllContacts().length) : 0;
   }
   componentWillReceiveProps(nextProps) {
+    const method = 'DiscoverScreen::componentWillReceiveProps'
+
     const { contactAdded, contactMgr } = nextProps
     const { channelClicked } = this.state
+    console.log(`INFO(${method}): channelClicked=${channelClicked}, contactAdded=${contactAdded}`)
+    if (contactMgr) {
+      console.log(`INFO(${method}): contactMgr length=${contactMgr.getAllContacts().length}`)
+      for (const contactId of contactMgr.getContactIds()) {
+        console.log(`INFO(${method}):   ${contactId}`)
+      }
+    }
+    console.log(`INFO(${method}):`)
+
     if (channelClicked && contactMgr && contactMgr.getAllContacts().length > this.numContacts) {
+      console.log(`INFO(${method}): in code to stop spinner ...`)
       this.numContacts = contactMgr.getAllContacts().length;
       this.setState({channelClicked: false})
       this.props.navigation.navigate('ChatRoom')
@@ -81,12 +93,18 @@ class DiscoverScreen extends Component {
     }
   }
   contactSelected = (data, secId, rowId, rowMap) => {
+    const method = 'DiscoverScreen::contactSelected'
+    console.log(`INFO(${method}): selected contact ${data.id}`)
     this.props.addNewContact(data)
+    console.log(`INFO(${method}): called addNewContact for ${data.id}`)
     this.props.setActiveContact(data);
+    console.log(`INFO(${method}): called setActiveContact for ${data.id}`)
+
     rowMap[`${secId}${rowId}`].props.closeRow();
     let newData = this.state.channels;
     delete newData[rowId]
     this.setState({ channelClicked: true, channels: newData })
+    console.log(`INFO(${method}): called setState channelClicked-->true for ${data.id}`)
   }
   render () {
     if (this.state.showLoading || this.state.channelClicked) {

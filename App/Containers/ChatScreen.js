@@ -63,9 +63,14 @@ class ChatScreen extends Component {
   }
 
   configWithActiveContact = (anActiveContact, force=false, callSetState=false) => {
+    const method = 'ChatScreen::configWithActiveContact'
+    console.log(`INFO(${method}): anActiveContact=${anActiveContact}`)
+
     if ((this.activeContact && !force) || !anActiveContact) {
       return
     }
+
+    console.log(`INFO(${method}): anActiveContact.id=${anActiveContact.id}`)
 
     this.activeContact = anActiveContact
     this.publicKey = (this.activeContact) ? this.activeContact.publicKey : undefined
@@ -85,6 +90,8 @@ class ChatScreen extends Component {
     });
     this.protocol = (this.activeContact) ? (this.activeContact.protocol === "public channel 2.0") : false
 
+    console.log(`INFO(${method}): check #2 anActiveContact=${anActiveContact}`)
+    console.log(`INFO(${method}): check #2 anActiveContact=${anActiveContact}`)
     const displayname = (anActiveContact.title) ? anActiveContact.title : anActiveContact.id
     this.props.navigation.setParams({ navigation: this.props.navigation, name: displayname });
   }
