@@ -671,6 +671,20 @@ export class MessagingEngine extends EventEmitterAdapter {
     console.log('Engine: Background')
   }
 
+  // Requires this.offlineMsgSvc configured and not null/undefined
+  async receiveMessagesNow() {
+    const method = `MessagingEngine::receiveMessagesNow`
+
+    try {
+      this.offlineMsgSvc.pauseRecvService();
+      await this.offlineMsgSvc.receiveMessages()
+    } catch (error) {
+      console.log(`ERROR:(${method}): ${error}`);
+    } finally {
+      this.offlineMsgSvc.resumeRecvService()
+    }
+  }
+
   handleMobileBackgroundUpdate() {
     console.log('MessagingEngine::handleMobileBackgroundUpdate:');
 
@@ -861,6 +875,14 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     console.log(`DEBUG($method): close contact search (sends event 'me-close-contact-search') ...`)
     this.closeContactSearch();
+
+    // Fast read of messages from contact (in case we're at the start or middle of a polling delay):
+    //
+    try {
+      await this.receiveMessagesNow()
+    } catch (error) {
+      console.log(`ERROR($method): receiveMessagesNow failed.\n${error}`)
+    }
   }
 
   handleDeleteContact = (e, { contact }) => {
