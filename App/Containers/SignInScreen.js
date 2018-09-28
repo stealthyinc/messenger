@@ -27,15 +27,42 @@ import chatIcon from '../Images/blue512.png';
 import chatV1 from '../Images/StealthyV1.png';
 import flow from '../Images/rStealthyFlow.jpg';
 import graphitePlugin from '../Images/plugin.jpg';
+import AwesomeAlert from 'react-native-awesome-alerts';
 
 class SignInScreen extends React.Component {
   static navigationOptions = {
     header: null,
   };
+  constructor(props) {
+    super(props);
+    this.state = {
+      error: false,
+      errorText: '',
+    };
+  }
   render() {
     const activityIndicator = (this.props.spinner) ? <ActivityIndicator size="large" color="#34bbed"/> : null
     const oldPad = utils.is_oldPad()
     const marginBottom = (this.props.spinner) ? 40 : (oldPad) ? 50 : 80
+    if (this.state.error) {
+      return (
+        <AwesomeAlert
+          show={this.state.error}
+          showProgress={false}
+          title="Stealthy Error"
+          message={this.state.errorText}
+          closeOnTouchOutside={false}
+          closeOnHardwareBackPress={false}
+          showCancelButton={true}
+          showConfirmButton={false}
+          cancelText="Close"
+          cancelButtonColor="#DD6B55"
+          onCancelPressed={() => {
+            this.setState({error: false, errorText: ''})
+          }}
+        />
+      )
+    }
     return (
       <ScrollView contentContainerStyle={styles.container}>
         <View style={{flexDirection: 'row', marginTop: 40}}>
@@ -116,13 +143,17 @@ class SignInScreen extends React.Component {
     const {BlockstackNativeModule} = NativeModules;
     BlockstackNativeModule.getUserData((error, userData) => {
       if (error) {
-        throw(`Failed to get user data.  ${error}`);
+        // throw(`Failed to get user data.  ${error}`);
+        // this.props.setEngineFault(true)
+        this.setState({error: true, errorText: 'User data not found. Please ensure you have a valid Blockstack ID', errorCode: 1})
         this.props.setSignInPending(false)
       } else {
         BlockstackNativeModule.getPublicKeyFromPrivate(
           userData['privateKey'], async (error, publicKey) => {
             if (error) {
-              throw(`Failed to get public key from private. ${error}`);
+              // throw(`Failed to get public key from private. ${error}`);
+              // this.props.setEngineFault(true)
+              this.setState({error: true, errorText: 'Failed to get public key from private.'})
               this.props.setSignInPending(false)
             }
             else {
@@ -206,6 +237,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     setSignInPending: (flag) => dispatch(EngineActions.setSignInPending(flag)),
+    // setEngineFault: (flag) => dispatch(EngineActions.setEngineFault(flag)),
   }
 }
 
