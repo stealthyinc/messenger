@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import {
   ActivityIndicator,
   AsyncStorage,
+  Linking,
   NativeModules,
   Image,
   View,

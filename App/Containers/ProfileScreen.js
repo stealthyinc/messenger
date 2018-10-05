@@ -8,6 +8,7 @@ import { Toast } from 'native-base';
 import { shareOnTwitter } from 'react-native-social-share';
 import Communications from 'react-native-communications';
 import ActionSheet from 'react-native-actionsheet'
+import QRCode from 'react-native-qrcode';
 
 const utils = require('./../Engine/misc/utils.js');
 
@@ -40,6 +41,7 @@ class ProfileScreen extends React.Component {
     super(props);
     this.state = {
       showToast: false,
+      showQR: false,
       isVisible: false
     }
   }
@@ -77,7 +79,17 @@ class ProfileScreen extends React.Component {
     const marginTop = (oldPad) ? 0 : 15
     const marginBottom = (oldPad) ? 2 : 15
     const flex = (oldPad) ? 5 : 10
-    const avatarSize = (oldPad || (Platform.OS !== 'ios')) ? (
+    const qrText = `stealthy://`+username
+    const { showQR } = this.state
+    // const qrText = "http://facebook.github.io/react-native/"
+    const avatarSize = (showQR || !base64) ? (
+        <QRCode
+          value={qrText}
+          size={160}
+          bgColor='black'
+          fgColor='white'
+        />
+      ) : (oldPad || (Platform.OS !== 'ios')) ? (
       <Avatar
         large
         rounded
@@ -104,6 +116,19 @@ class ProfileScreen extends React.Component {
           <Text h4 style={{marginTop, marginBottom}}>{fullName}</Text>
           <Text h4 style={{marginBottom, fontWeight: 'bold'}}>({username})</Text>
           <View style={{flexDirection: 'row', margin: margin}}>
+            <Icon
+              reverse
+              name='qrcode'
+              type='font-awesome'
+              disabled={!base64}
+              color={(showQR) ? '#34bbed' : 'grey'}
+              onPress={() => {
+                Toast.show({
+                  text: (showQR) ? 'Hide QR Code' : 'Show QR Code',
+                  duration: 1500
+                })
+                this.setState({showQR: !showQR})}
+              } />
             <Icon
               reverse
               name='connectdevelop'

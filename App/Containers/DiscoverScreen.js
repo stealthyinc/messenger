@@ -6,6 +6,7 @@ import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
+import {NavigationActions} from 'react-navigation';
 
 // Styles
 const styles = StyleSheet.create({
@@ -76,7 +77,9 @@ class DiscoverScreen extends Component {
 
       this.numContacts = contactMgr.getAllContacts().length;
       this.setState({channelClicked: false, channelId: ''})
-      this.props.navigation.navigate('ChatRoom')
+      // this.props.navigation.navigate('ChatRoom')
+      const params = {id: channelId}
+      this.props.pushToChannel('Messages', params)
       this.props.setContactAdded(false)
     }
     else if (contactMgr && this.state.channels.length === 0) {
@@ -166,6 +169,10 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    pushToChannel: (routeName, params) => dispatch(NavigationActions.navigate({
+      routeName,
+      params,
+    })),
     addNewContact: (contact) => dispatch(EngineActions.addNewContact(contact)),
     setContactAdded: (flag) => dispatch(EngineActions.setContactAdded(flag)),
     setActiveContact: (contact) => dispatch(EngineActions.setActiveContact(contact)),

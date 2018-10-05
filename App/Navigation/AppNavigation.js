@@ -76,7 +76,10 @@ return {
 
 const PrimaryNav = StackNavigator({
   Tab: { screen: TabScreen },
-  ChatRoom: { screen: ChatScreen },
+  ChatRoom: { 
+    screen: ChatScreen,
+    path: 'chatRoom/:user'
+  },
   ContactProfile: { screen: ContactProfile },
   BlockContactSearch: { screen: BlockContactSearch },
   ChatMenu: { screen: ChatMenuScreen },

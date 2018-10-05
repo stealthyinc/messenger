@@ -4,8 +4,8 @@ import React, { Component } from 'react'
 import { Provider } from 'react-redux'
 import RootContainer from './RootContainer'
 import createStore from '../Redux'
-import { AppState, AsyncStorage, PushNotificationIOS, Platform } from 'react-native'
-
+import { AppState, AsyncStorage, PushNotificationIOS, Platform, Linking } from 'react-native'
+import LinkRoutes from './LinkRoutes';
 import EngineActions from '../Redux/EngineRedux'
 import Amplify, { Analytics } from 'aws-amplify';
 import aws_exports from '../../aws-exports';
@@ -37,10 +37,17 @@ class App extends Component {
   async componentDidMount() {
     AppState.addEventListener('change', this._handleAppStateChange);
     firebaseInstance.setFirebaseNotifications(store)
+    Linking.addEventListener('url', event => this.handleOpenURL(event.url));
+    Linking.getInitialURL().then(url => url && this.handleOpenURL(url));
   }
   componentWillUnmount() {
     AppState.removeEventListener('change', this._handleAppStateChange);
     firebaseInstance.cleanNotificationListeners()
+    Linking.removeEventListener('url', this.handleOpenURL);
+  }
+  handleOpenURL(url) {
+    const path = url.split(':/')[1];
+    LinkRoutes(path, store);
   }
   _handleAppStateChange = (nextAppState) => {
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {

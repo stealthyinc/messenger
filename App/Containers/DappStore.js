@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { ScrollView, StyleSheet, View, TouchableOpacity, Image, Platform, Dimensions } from 'react-native';
+import { ScrollView, StyleSheet, View, TouchableOpacity, Image, Platform, Dimensions, NativeModules } from 'react-native';
 import DappActions, { DappSelectors } from '../Redux/DappRedux'
 import { List, ListItem, Text } from 'react-native-elements'
 import { Container, Header, Content, Icon } from 'native-base';
@@ -40,6 +40,86 @@ class DappStore extends Component {
     this.props.navigation.navigate('DappScreen')
   }
 
+  // // iOS specific (possibly works on web too)
+  // _getUserData = async () => {
+  //   const {BlockstackNativeModule} = NativeModules;
+  //   BlockstackNativeModule.getUserData((error, userData) => {
+  //     if (error) {
+  //       // throw(`Failed to get user data.  ${error}`);
+  //       // this.props.setEngineFault(true)
+  //       this.setState({error: true, errorText: 'User data not found. Please ensure you have a valid Blockstack username. E-mail support@stealthy.im for further help.'})
+  //       // this.props.setSignInPending(false)
+  //     } else {
+  //       BlockstackNativeModule.getPublicKeyFromPrivate(
+  //         userData['privateKey'], async (error, publicKey) => {
+  //           if (error) {
+  //             // throw(`Failed to get public key from private. ${error}`);
+  //             // this.props.setEngineFault(true)
+  //             this.setState({error: true, errorText: 'Failed to get public key from private.'})
+  //             // this.props.setSignInPending(false)
+  //           }
+  //           else {
+  //             userData['appPublicKey'] = publicKey;
+  //             // AsyncStorage.setItem('userData', JSON.stringify(userData));
+  //             // this.props.screenProps.authWork(userData)
+  //           }
+  //       });
+  //     }
+  //   });
+  //   return;
+  // };
+  // _signInAsync = async (baseUrl) => {
+  //   // this.props.setSignInPending(true)
+  //   const method = 'SignInScreen::_signInAsync'
+
+  //   const {BlockstackNativeModule} = NativeModules;
+  //   // const baseUrl = "https://www.stealthy.im"
+
+  //   if (utils.isAndroid()) {
+  //     // Need to populate userData as follows:
+  //     // {
+  //     //   username: <...>,
+  //     //   profileURL: <...>,   TODO: AC
+  //     //   privateKey: <...>,
+  //     //   appPublicKey: <...>,
+  //     // }
+  //     let userData = {}
+
+  //     try {
+  //       // androidUserData {
+  //       //   decentralizedID: <...>
+  //       //   appPrivateKey: <...>
+  //       // }
+  //       const androidUserData = await BlockstackNativeModule.signIn()
+  //       userData.privateKey = androidUserData.appPrivateKey
+  //       userData.username = androidUserData.username
+  //     } catch (error) {
+  //       this.props.setSignInPending(false)
+  //       throw utils.fmtErrorStr('Failed to sign in to Blockstack.', method, error)
+  //     }
+
+  //     try {
+  //       const publicKey = await BlockstackNativeModule.getPublicKeyFromPrivateKey(userData.privateKey)
+  //       userData.appPublicKey = publicKey
+  //     } catch (error) {
+  //       this.props.setSignInPending(false)
+  //       throw utils.fmtErrorStr('Failed to get public key.', method, error)
+  //     }
+
+  //     AsyncStorage.setItem('userData', JSON.stringify(userData));
+  //     this.props.screenProps.authWork(userData)
+  //   } else if (utils.is_iOS()) {
+  //     await BlockstackNativeModule.signIn(`${baseUrl}/stealthyredirect.html`, baseUrl, null, (error, events) => {
+  //       if (!error) {
+  //         this._getUserData()
+  //       }
+  //       else {
+  //         // this.props.setSignInPending(false)
+  //       }
+  //     });
+  //   }
+  // }
+
   render() {
     const oldPad = utils.is_oldPad()
     const customStyle = (oldPad) ? styles.oldbutton : styles.button
@@ -47,13 +127,14 @@ class DappStore extends Component {
       <ScrollView contentContainerStyle={styles.container}>
         <View style={{flexDirection: 'row', marginTop: 10, marginBottom: 5}}>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={customStyle} onPress={(url) => this._onPressButton('https://app.graphitedocs.com')}>
+            {/*<TouchableOpacity style={customStyle} onPress={(url) => this._signInAsync('https://serene-hamilton-56e88e.netlify.com')}>*/}
+            <TouchableOpacity style={customStyle} onPress={(url) => this._onPressButton('https://www.graphitedocs.com/')}>
               <Image source={GraphiteIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Graphite</Text>
           </View>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={customStyle} onPress={() => this._onPressButton('https://app.travelstack.club')}>
+            <TouchableOpacity style={customStyle} onPress={() => this._onPressButton('https://travelstack.club/')}>
               <Image source={TravelIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Travelstack</Text>

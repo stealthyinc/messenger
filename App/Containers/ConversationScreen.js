@@ -64,6 +64,10 @@ class ConversationScreen extends React.Component {
   async componentWillMount() {
     const { userData, token, publicKey } = this.props
     this.props.navigation.setParams({ navigation: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
+    const { id } = this.props.navigation.state.params
+    if (id) {
+      this.contactSelected(id)
+    }
   }
   componentWillReceiveProps(nextProps) {
     const { contactMgr, engineInit } = nextProps
