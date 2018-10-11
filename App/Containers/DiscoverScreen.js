@@ -27,16 +27,19 @@ const styles = StyleSheet.create({
 });
 
 class DiscoverScreen extends Component {
-  static navigationOptions = {
-    headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Channels</Text>,
-    headerRight: (
-      <TouchableOpacity onPress={() => alert('Public chatrooms for various topics')} style={{marginRight: 10}}>
-        <Ionicons name="ios-help-buoy" size={30} color='white'/>
-      </TouchableOpacity>
-    ),
-    headerTintColor: 'white',
-    headerStyle: {
-      backgroundColor: '#34bbed'
+  static navigationOptions = ({ navigation }) => {
+    const params = navigation.state.params || {};
+    return {
+      headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Channels</Text>,
+      headerRight: (
+        <TouchableOpacity onPress={() => console.log("Public Channels")} style={{marginRight: 10}}>
+          <Ionicons name="ios-help-buoy" size={30} color='white'/>
+        </TouchableOpacity>
+      ),
+      headerTintColor: 'white',
+      headerStyle: {
+        backgroundColor: '#34bbed'
+      }
     }
   };
   constructor (props) {
@@ -51,6 +54,9 @@ class DiscoverScreen extends Component {
     }
     this.numContacts = (props.contactMgr) ?
       (props.contactMgr.getAllContacts().length) : 0;
+  }
+  componentWillMount() {
+    this.props.navigation.setParams({ navigation: this.props.navigation });
   }
   componentWillReceiveProps(nextProps) {
     const method = 'DiscoverScreen::componentWillReceiveProps'

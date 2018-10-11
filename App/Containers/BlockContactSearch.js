@@ -2,11 +2,12 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Container, Header, Content, List, ListItem, Thumbnail, Text, Body } from 'native-base';
 import { Platform, TouchableOpacity } from 'react-native'
-import { Button, SearchBar } from 'react-native-elements'
+import { Button, Icon, SearchBar } from 'react-native-elements'
 import BlockstackContactsActions, { BlockstackContactsSelectors } from '../Redux/BlockstackContactsRedux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import Communications from 'react-native-communications';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import FIcon from 'react-native-vector-icons/dist/FontAwesome';
 
 import {
   ActivityIndicator,
@@ -34,6 +35,11 @@ class BlockContactSearch extends Component {
       headerLeft: (
         <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
           <Ionicons name="ios-arrow-dropleft" size={32} color='white'/>
+        </TouchableOpacity>
+      ),
+      headerRight: (
+        <TouchableOpacity onPress={() => params.navigation.navigate('Camera')} style={{marginRight: 10}}>
+          <FIcon name="qrcode" size={30} color='white'/>
         </TouchableOpacity>
       ),
       headerTintColor: 'white',
@@ -113,7 +119,7 @@ class BlockContactSearch extends Component {
     else if (this.state.showLoading) {
       setTimeout(() => {
         this.setState({showLoading: false})
-      }, 5000);
+      }, 7000);
       return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View>
     }
     else {
@@ -172,8 +178,6 @@ class BlockContactSearch extends Component {
           icon={{ type: 'material', name: 'search', size: 28 }}
           searchIcon={{ color: 'white', size: 24 }}
           onChangeText={this.onChangeText}
-          onClear={this.onClear}
-          onCancel={this.onClear}
           autoCorrect={false}
           autoCapitalize='none'
           placeholder='Search for contacts...' />

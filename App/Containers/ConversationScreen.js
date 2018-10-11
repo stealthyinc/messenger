@@ -64,16 +64,17 @@ class ConversationScreen extends React.Component {
   async componentWillMount() {
     const { userData, token, publicKey } = this.props
     this.props.navigation.setParams({ navigation: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
-    const { id } = this.props.navigation.state.params
-    if (id) {
-      this.contactSelected(id)
-    }
   }
   componentWillReceiveProps(nextProps) {
-    const { contactMgr, engineInit } = nextProps
+    const { contactMgr, engineInit, navigation } = nextProps
     if (engineInit && contactMgr && contactMgr.getContactIds) {
       const listViewData = contactMgr.getAllContacts()
       this.setState({listViewData})
+    }
+    const { params } = navigation.state
+    if (params && params.id && contactMgr && !contactMgr.isExistingContactId(params.id)) {
+      this.props.addContactId(params.id)
+      this.props.navigation.setParams({ id: '' });
     }
   }
   contactSelected = (id) => {
@@ -173,6 +174,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     shareDecline: () => dispatch(TwitterShareActions.shareDecline()),
     shareSuccess: () => dispatch(TwitterShareActions.shareSuccess()),
+    addContactId: (id) => dispatch(EngineActions.addContactId(id)),
     handleDeleteContact: (contact) => dispatch(EngineActions.handleDeleteContact(contact)),
     handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
     updateUserSettings: (radio) => dispatch(EngineActions.updateUserSettings(radio)),

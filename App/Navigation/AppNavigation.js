@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Animated, Easing, NativeModules, ScrollView, Text, Image, View } from 'react-native'
 import { DrawerNavigator, StackNavigator, SwitchNavigator } from 'react-navigation';
+import CameraScreen from '../Containers/CameraScreen'
 import DiscoverScreen from '../Containers/DiscoverScreen'
 // import FileDrawer from '../Containers/FileDrawer'
 import { Images } from '../Themes'
@@ -14,7 +15,6 @@ import TabScreen from '../Containers/TabScreen'
 import BlockScreen from '../Containers/BlockScreen'
 import ChatScreen from '../Containers/ChatScreen'
 import StartChatScreen from '../Containers/StartChatScreen'
-import ContactScreen from '../Containers/ContactScreen'
 import ChatMenuScreen from '../Containers/ChatMenuScreen'
 import ContactProfile from '../Containers/ContactProfile'
 import BlockContactSearch from '../Containers/BlockContactSearch'
@@ -76,10 +76,8 @@ return {
 
 const PrimaryNav = StackNavigator({
   Tab: { screen: TabScreen },
-  ChatRoom: { 
-    screen: ChatScreen,
-    path: 'chatRoom/:user'
-  },
+  ChatRoom: { screen: ChatScreen },
+  Camera: { screen: CameraScreen },
   ContactProfile: { screen: ContactProfile },
   BlockContactSearch: { screen: BlockContactSearch },
   ChatMenu: { screen: ChatMenuScreen },

@@ -10,6 +10,7 @@ import Immutable from 'seamless-immutable'
 const { Types, Creators } = createActions({
   setEngineFailure: null,
   setUserData:['userData'],
+  addContactId:['id'],
   setPublicKey: ['publicKey'],
   setEngineInitial: ['engineInit'],
   setEngineContactMgr: ['contactMgr'],
@@ -66,6 +67,7 @@ export const INITIAL_STATE = Immutable({
   session: '',
   engineFault: '',
   signInPending: null,
+  id: ''
 })
 
 /* ------------- Selectors ------------- */
@@ -93,6 +95,10 @@ export const EngineSelectors = {
 /* ------------- Reducers ------------- */
 
 // set current platform
+export const setContactId = (state, { id }) => {
+  return state.merge({ id })
+}
+
 export const setCurrentPlatform = (state, { currentPlatform }) => {
   return state.merge({ currentPlatform })
 }
@@ -190,6 +196,7 @@ export const restartEngine = (state) => {
 export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_USER_DATA]: setUserData,
   [Types.SET_PUBLIC_KEY]: setPublicKey,
+  [Types.ADD_CONTACT_ID]: setContactId,
   [Types.SET_CURRENT_PLATFORM]: setCurrentPlatform,
   [Types.SET_SIGN_IN_PENDING]: setSignInPending,
   [Types.CLEAR_USER_DATA]: clearUserData,

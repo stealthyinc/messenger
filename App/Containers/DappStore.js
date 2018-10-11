@@ -10,6 +10,7 @@ import GraphiteIcon from '../Images/GraphiteIcon.png';
 import CryptoIcon from '../Images/CryptoIcon.png';
 import BlockSignIcon from '../Images/BlockSignIcon.png';
 import TravelIcon from '../Images/TravelIcon.png';
+import demoIcon from '../Images/democ.png';
 import healthHere from '../Images/healthHere.png';
 import note from '../Images/note.png';
 import misthos from '../Images/misthos.png';
@@ -140,30 +141,31 @@ class DappStore extends Component {
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Travelstack</Text>
           </View>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={customStyle} onPress={() => this._onPressButton('https://testnet.misthos.io/')}>
-              <Image source={misthos} style={{width: 80, height: 80, borderRadius: 10}}/>
+            <TouchableOpacity style={styles.button} onPress={() => this._onPressButton('https://vote.democracy.earth')}>
+              <Image source={demoIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
-            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Misthos</Text>
+            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Democracy</Text>
           </View>
         </View>
         <View style={{flexDirection: 'row', marginBottom: 5}}>
           <View style={{margin: 10}}>
+            {/*<TouchableOpacity style={customStyle} onPress={() => this._signInAsync('https://graphite--infallible-williams-866040.netlify.com')}>*/}
             <TouchableOpacity style={customStyle} onPress={() => this._onPressButton('https://note.riot.ai/')}>
               <Image source={note} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Notes</Text>
           </View>
           <View style={{margin: 10}}>
+            <TouchableOpacity style={customStyle} onPress={() => this._onPressButton('https://testnet.misthos.io/')}>
+              <Image source={misthos} style={{width: 80, height: 80, borderRadius: 10}}/>
+            </TouchableOpacity>
+            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Misthos</Text>
+          </View>
+          <View style={{margin: 10}}>
             <TouchableOpacity style={customStyle} onPress={(url) => this._onPressButton('https://blockusign.co')}>
               <Image source={BlockSignIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Blockusign</Text>
-          </View>
-          <View style={{margin: 10}}>
-            <TouchableOpacity style={customStyle} onPress={() => this._onPressButton('https://www.healthhere.com')}>
-              <Image source={healthHere} style={{width: 80, height: 80, borderRadius: 10}}/>
-            </TouchableOpacity>
-            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Clinic Q</Text>
           </View>
         </View>
         {(!oldPad) ? (<View style={{flexDirection: 'row', marginBottom: 5}}>
@@ -174,10 +176,10 @@ class DappStore extends Component {
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Cryptocracy</Text>
           </View>
           <View style={{margin: 10}}>
-            <TouchableOpacity disabled={true} style={styles.button} onPress={() => this._onPressButton()}>
-              <Image source={chatIcon} style={{opacity: 0.1, width: 80, height: 80, borderRadius: 10}}/>
+            <TouchableOpacity style={customStyle} onPress={() => this._onPressButton('https://www.healthhere.com')}>
+              <Image source={healthHere} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
-            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}></Text>
+            <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Clinic Q</Text>
           </View>
           <View style={{margin: 10}}>
             <TouchableOpacity disabled={true} style={styles.button} onPress={() => this._onPressButton()}>

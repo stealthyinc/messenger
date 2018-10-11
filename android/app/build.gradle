@@ -145,6 +145,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-camera')
     implementation project(':rn-fetch-blob')
     implementation project(':react-native-exit-app')
     implementation project(':react-native-social-share')

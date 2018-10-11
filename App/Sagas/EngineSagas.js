@@ -154,6 +154,11 @@ function* watchIntegrationDataChannel() {
   }
 }
 
+function* addContactId(action) {
+  const { id } = action
+  EngineInstance.handleContactInvitation(undefined, id)
+}
+
 function* handleShutDownRequest() {
   EngineInstance.handleShutDownRequest();
 }
@@ -257,6 +262,7 @@ export function* startEngine (action) {
   yield fork(watchIntegrationDataChannel)
   yield takeLatest(DappTypes.REFRESH_INTEGRATION_DATA, getIntegrationData)
   yield takeLatest(EngineTypes.INIT_SHUTDOWN, handleShutDownRequest)
+  yield takeLatest(EngineTypes.ADD_CONTACT_ID, addContactId)
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
   yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)
   yield takeLatest(EngineTypes.ADD_NEW_CONTACT, handleSearchSelect)
