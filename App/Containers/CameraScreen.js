@@ -12,6 +12,7 @@ import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AwesomeAlert from 'react-native-awesome-alerts';
 import { Text, Divider } from 'react-native-elements'
+import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 // Styles
 import styles from './Styles/CameraScreenStyle'
@@ -59,16 +60,8 @@ class CameraScreen extends Component {
           confirmText="Add Contact"
           cancelButtonColor="#DD6B55"
           confirmButtonColor="#34bbed"
-          onCancelPressed={() => {
-            console.log("Cancelled")
-            // this.setState({showAlert: false, data: null})
-            this.props.navigation.goBack()
-          }}
-          onConfirmPressed={() => {
-            console.log("Confirmed")
-            // this.setState({showAlert: false, data: null})
-            this.props.navigation.goBack()
-          }}
+          onCancelPressed={() => this.props.navigation.goBack()}
+          onConfirmPressed={() => this.props.addContactId(data)}
         />
         {!showAlert ? (<RNCamera
             ref={ref => {
@@ -91,11 +84,13 @@ class CameraScreen extends Component {
 
 const mapStateToProps = (state) => {
   return {
+    contactMgr: EngineSelectors.getContactMgr(state),
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    addContactId: (id) => dispatch(EngineActions.addContactId(id)),
   }
 }
 

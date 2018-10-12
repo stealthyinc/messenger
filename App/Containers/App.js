@@ -46,8 +46,10 @@ class App extends Component {
     Linking.removeEventListener('url', this.handleOpenURL);
   }
   handleOpenURL(url) {
-    const path = url.split(':/')[1];
-    LinkRoutes(path, store);
+    if (url) {
+      const path = url.split(':/')[1];
+      LinkRoutes(path, store);
+    }
   }
   _handleAppStateChange = (nextAppState) => {
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {

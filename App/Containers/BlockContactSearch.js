@@ -70,7 +70,12 @@ class BlockContactSearch extends Component {
     if (contactMgr && contactMgr.getAllContacts().length > this.numContacts) {
       this.numContacts = contactMgr.getAllContacts().length;
       this.props.navigation.goBack();
-      this.props.navigation.navigate('ChatRoom')
+      if (contactMgr.getActiveContact()) {
+        this.props.navigation.navigate('ChatRoom')
+      }
+      else {
+        this.props.navigation.goBack();
+      }
       this.props.setContactAdded(false)
     }
   }

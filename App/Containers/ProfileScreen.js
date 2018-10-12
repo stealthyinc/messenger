@@ -79,7 +79,8 @@ class ProfileScreen extends React.Component {
     const marginTop = (oldPad) ? 0 : 15
     const marginBottom = (oldPad) ? 2 : 15
     const flex = (oldPad) ? 5 : 10
-    const qrText = `stealthy://`+username
+    // const qrText = `stealthy://messages/`+username+`/`
+    const qrText = username
     const { showQR } = this.state
     // const qrText = "http://facebook.github.io/react-native/"
     const avatarSize = (showQR || !base64) ? (
