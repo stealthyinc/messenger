@@ -50,6 +50,7 @@
     "react-native-exit-app": "^1.0.0",
     "react-native-firebase": "^4.3.8",
     "react-native-gifted-chat": "^0.4.3",
+    "react-native-photo-browser": "^0.4.0",
     "react-native-qrcode": "^0.2.7",
     "react-native-social-share": "^1.6.1",
     "react-native-swipeout": "^2.3.3",

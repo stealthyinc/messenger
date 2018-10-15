@@ -12,16 +12,15 @@ import {
 
 export default class CustomView extends React.Component {
   render() {
-    const {url, gimage, gtext} = this.props.currentMessage
+    const {url, image, text} = this.props.currentMessage
     const {onPress} = this.props
-    if (url && gimage) {
+    if (url && image) {
       return (
         <TouchableOpacity style={[styles.container, this.props.containerStyle]} onPress={() => onPress(url)}>
           <Image
             style={[styles.mapView, this.props.mapViewStyle]}
-            source={{uri: gimage}}
+            source={{uri: image}}
           />
-          <Text style={{fontSize: 16, fontWeight: 'bold', fontStyle: 'italic', color: '#fff'}}>{`"${gtext}"`}</Text>
         </TouchableOpacity>
       );
     }

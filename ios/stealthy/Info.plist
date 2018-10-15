@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Stealthy needs to access your cameral roll to post photos</string>
 	<key>NSCameraUsageDescription</key>
 	<string>QR Code scanner needs to use camera</string>
 	<key>CFBundleDevelopmentRegion</key>

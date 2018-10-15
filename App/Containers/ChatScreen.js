@@ -157,10 +157,8 @@ class ChatScreen extends Component {
       // const messageContent = `${name} shared "${dappData.title}" with you:\n\n${dappUrl}`
       const fileMessage = [{
         createdAt: time,
-        text: null,
-        image: null,
-        gtext: title,
-        gimage: image,
+        text: title,
+        image,
         url: dappUrl,
         user: {
           _id: username,
@@ -180,23 +178,21 @@ class ChatScreen extends Component {
         const { author } = msg
         if (author !== this.state.author.username) {
           const { body, time, image, contentType } = msg
-          let gtext, url, gimage, press
+          let url, press, gimage
           if (contentType === 'TEXT') {
             text = body
             url = ''
             gimage = ''
           }
           else if (contentType === 'TEXT_JSON') {
-            text = undefined
-            gtext = body.gtext
+            text = body.text
             url = body.url
-            gimage = body.gimage
+            gimage = body.image
           }
           const newMessage = {
             _id: Math.round(Math.random() * 1000000),
             text,
-            gtext,
-            gimage,
+            image: gimage,
             url,
             createdAt: time,
             user: {
@@ -231,10 +227,9 @@ class ChatScreen extends Component {
         gimage = ''
       }
       else if (contentType === 'TEXT_JSON') {
-        text = undefined
-        gtext = body.gtext
+        text = body.text
         url = body.url
-        gimage = body.gimage
+        gimage = body.image
       }
       if (author === id) {
         if (this.protocol) {
@@ -251,10 +246,9 @@ class ChatScreen extends Component {
         }
         messages.push({
           _id: Math.round(Math.random() * 1000000),
-          gtext,
           text,
           url,
-          gimage: gimage,
+          image: gimage,
           createdAt: time,
           sent: sent,
           received: received,
@@ -268,10 +262,9 @@ class ChatScreen extends Component {
       else {
         messages.push({
           _id: Math.round(Math.random() * 1000000),
-          gtext,
           text,
           url,
-          gimage: gimage,
+          image: gimage,
           createdAt: time,
           sent: sent,
           received: received,
@@ -312,8 +305,8 @@ class ChatScreen extends Component {
     if (token) {
       this.props.sendNotification(token, publicKey, bearerToken)
     }
-    const {text, gtext, gimage, url} = messages[0]
-    if (gimage && url) {
+    const {text, gtext, image, url} = messages[0]
+    if (image && url) {
       this.props.handleOutgoingMessage(undefined, messages[0])
     }
     else if (text) {
@@ -490,7 +483,7 @@ class ChatScreen extends Component {
           renderActions={this.renderCustomActions}
           renderBubble={this.renderBubble}
           renderSystemMessage={this.renderSystemMessage}
-          renderCustomView={this.renderCustomView}
+          renderMessageImage={this.renderCustomView}
           renderFooter={this.renderFooter}
           maxInputLength={240}
           renderInputToolbar={this.renderInputToolbar}
