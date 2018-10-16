@@ -12,6 +12,7 @@ import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import TwitterShareActions, { TwitterShareSelectors } from '../Redux/TwitterShareRedux'
 import { shareOnTwitter } from 'react-native-social-share';
 const utils = require('./../Engine/misc/utils.js');
+import QRCode from 'react-native-qrcode';
 
 import defaultProfile from '../Images/defaultProfile.png'
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
@@ -134,7 +135,15 @@ class ConversationScreen extends React.Component {
             renderRow={item =>
               <ListItem style={{marginLeft: 5}} avatar onPress={this.contactSelected.bind(this, item.id)}>
                 <Left>
-                  <Thumbnail square source={{ uri: (item.base64) ? item.base64 : item.image }} />
+                  {(item.base64 || item.image) ? (<Thumbnail square source={{ uri: (item.base64) ? item.base64 : item.image }} />)
+                  : 
+                  (<QRCode
+                    value={item.id}
+                    size={55}
+                    bgColor='black'
+                    fgColor='white'
+                  />) 
+                }
                 </Left>
                 <Body>
                   <Text style={{fontWeight: 'bold', fontSize: 18}}>{(item.title) ? item.title : item.id}</Text>

@@ -20,7 +20,7 @@ class ReduxNavigation extends React.Component {
     super(props);
     this.state = {
       fbListner: false,
-      isConnected: undefined
+      isConnected: true,
     }
     this.publicKey = undefined
     this.ref = undefined
@@ -78,16 +78,12 @@ class ReduxNavigation extends React.Component {
   }
 
   componentDidMount() {
-    NetInfo.isConnected.addEventListener('connectionChange', this.handleConnectionChange);
-    NetInfo.isConnected.fetch().done(
-      (isConnected) => { this.setState({ status: isConnected }); }
-    );
+    NetInfo.isConnected.addEventListener('connectionChange', this.handleConnectivityChange);
   }
 
-  handleConnectionChange = (isConnected) => {
-    this.setState({ status: isConnected });
-    console.log(`is connected: ${this.state.status}`);
-  }
+  handleConnectivityChange = isConnected => {
+    this.setState({ isConnected });
+  };
 
   componentWillReceiveProps (nextProps) {
     if (nextProps.engineShutdown) {
@@ -101,7 +97,7 @@ class ReduxNavigation extends React.Component {
     if (!utils.is_iOS()) {
       BackHandler.removeEventListener('hardwareBackPress')
     }
-    NetInfo.isConnected.removeEventListener('connectionChange', this.handleConnectionChange);
+    NetInfo.isConnected.removeEventListener('connectionChange', this.handleConnectivityChange);
   }
 
   _authWork = async (userData) => {
@@ -284,7 +280,7 @@ class ReduxNavigation extends React.Component {
         />
       )
     }
-    else if (this.state.isConnected === false) {
+    else if (!this.state.isConnected) {
       return (
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
           <Image

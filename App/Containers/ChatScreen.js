@@ -4,6 +4,10 @@ import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button, Icon } from 'react-native-elements'
 import { Toast } from 'native-base';
+import Drawer from 'react-native-drawer'
+import ControlPanel from './ControlPanel'
+import dismissKeyboard from 'dismissKeyboard';
+
 
 // Styles
 import styles from './Styles/ChatStyle'
@@ -54,6 +58,9 @@ class ChatScreen extends Component {
       publicKey: '',
       modalVisible: false,
       sharedUrl: '',
+      drawerOpen: false,
+      drawerDisabled: false,
+      inputText: ''
     };
 
     this._isMounted = false;
@@ -61,7 +68,6 @@ class ChatScreen extends Component {
     this.activeContact = undefined;
     this.publicKey = undefined
   }
-
   configWithActiveContact = (anActiveContact, force=false, callSetState=false) => {
     const method = 'ChatScreen::configWithActiveContact'
     console.log(`INFO(${method}): anActiveContact=${anActiveContact}`)
@@ -95,7 +101,6 @@ class ChatScreen extends Component {
     const displayname = (anActiveContact.title) ? anActiveContact.title : anActiveContact.id
     this.props.navigation.setParams({ navigation: this.props.navigation, name: displayname });
   }
-
   componentWillMount() {
     this._isMounted = true;
 
@@ -126,7 +131,6 @@ class ChatScreen extends Component {
       }
     }
   }
-
   componentWillReceiveProps(nextProps) {
     if (!this.activeContact) {
       return
@@ -207,12 +211,10 @@ class ChatScreen extends Component {
       this.onReceive(newMessages)
     }
   }
-
   componentWillUnmount() {
     this._isMounted = false;
     this.props.handleContactClick()
   }
-
   setupMessages = (inputMessages) => {
     let messages = []
     let { description, id } = this.activeContact
@@ -278,7 +280,6 @@ class ChatScreen extends Component {
     }
     return messages;
   }
-
   onLoadEarlier = () => {
     this.setState((previousState) => {
       return {
@@ -298,7 +299,6 @@ class ChatScreen extends Component {
       }
     }, 1000); // simulating network
   }
-
   onSend = (messages = [], json) => {
     const { token } = this.state
     const { publicKey, bearerToken } = this.props
@@ -320,7 +320,6 @@ class ChatScreen extends Component {
     //call twitter share after first send
     this.props.shareInit()
   }
-
   onReceive = (newMessages) => {
     //hack to show the generated id instead of stealthy all the time
     let updatedMessages = []
@@ -351,12 +350,10 @@ class ChatScreen extends Component {
       };
     });
   }
-
   setModalVisible = (flag) => {
     console.log("flag", flag)
     this.setState({modalVisible: flag})
   }
-
   renderCustomActions = (props) => {
     return (!this.protocol) ? (
       <TouchableOpacity
@@ -365,9 +362,15 @@ class ChatScreen extends Component {
       >
         <Ionicons name="ios-aperture" size={28} color='#34bbed' />
       </TouchableOpacity>
-    ) : null
+    ) : (
+      <TouchableOpacity
+        style={[styles.chatContainer, this.props.containerStyle]}
+        onPress={() => this.toggleDrawer()}
+      >
+        <Ionicons name="ios-compass" size={28} color='#34bbed' />
+      </TouchableOpacity>
+    )
   }
-
   renderBubble = (props) => {
     return (
       <Bubble
@@ -380,7 +383,6 @@ class ChatScreen extends Component {
       />
     );
   }
-
   renderSystemMessage = (props) => {
     return (
       <SystemMessage
@@ -394,7 +396,6 @@ class ChatScreen extends Component {
       />
     );
   }
-
   renderCustomView = (props) => {
     return (
       <CustomView
@@ -403,7 +404,6 @@ class ChatScreen extends Component {
       />
     );
   }
-
   renderFooter = (props) => {
     if (this.state.typingText) {
       return (
@@ -416,17 +416,33 @@ class ChatScreen extends Component {
     }
     return null;
   }
-
-  renderInputToolbar (props) {
+  renderInputToolbar = (props) => {
      //Add the extra styles via containerStyle
-    return <InputToolbar {...props} />
+    return (
+        <InputToolbar {...props} />
+    )
   }
-
   onPressUrl = (url) => {
     this.props.setDappUrl(url)
     this.props.navigation.navigate('DappScreen')
   }
-
+  toggleDrawer = () => {
+    if (this.state.drawerOpen)
+      this.closeDrawer()
+    else
+      this.openDrawer()
+  };
+  closeDrawer = () => {
+    this._drawer.close()
+  };
+  openDrawer = () => {
+    this._drawer.open()
+  };
+  setCustomText = (inputText) => {
+    if (this.protocol && inputText && (inputText[0] === '@' || inputText[0] === '/')) {
+      this.openDrawer()
+    }
+  }
   render() {
     if (!this.publicKey) {
       const {id} = this.activeContact
@@ -465,45 +481,76 @@ class ChatScreen extends Component {
         </View>
       )
     }
-    const content = this.activeContact ?
-        (<GiftedChat
-          messages={this.state.messages}
-          onSend={this.onSend}
-          loadEarlier={this.state.loadEarlier}
-          onLoadEarlier={this.onLoadEarlier}
-          onPressAvatar={(this.protocol) ? (user) => Toast.show({
-                  text: user._id,
-                  buttonText: "Close",
-                  type: "success"
-                }) : () => this.props.navigation.navigate('ContactProfile')}
-          isLoadingEarlier={this.state.isLoadingEarlier}
-          user={{
-            _id: this.state.author.username, // sent messages should have same user._id
-          }}
-          renderActions={this.renderCustomActions}
-          renderBubble={this.renderBubble}
-          renderSystemMessage={this.renderSystemMessage}
-          renderMessageImage={this.renderCustomView}
-          renderFooter={this.renderFooter}
-          maxInputLength={240}
-          renderInputToolbar={this.renderInputToolbar}
-          parsePatterns={(linkStyle) => [
-            { type: 'url', style: linkStyle, onPress: this.onPressUrl },
-          ]}
-        />)
-      :
-        (<View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
-          <ActivityIndicator size="large" color="#34bbed"/>
-        </View>)
-
     return (
       <View id='GiftedChatContainer'
            style={{flex: 1,
                    backgroundColor: 'white'}}>
-        {content}
+          {(this.activeContact) ?
+            (
+              <Drawer
+                ref={(ref) => this._drawer = ref}
+                type="overlay"
+                tapToClose={true}
+                openDrawerOffset={0.1}
+                panCloseMask={0.2}
+                closedDrawerOffset={-3}
+                styles={drawerStyles}
+                tweenHandler={(ratio) => ({
+                  main: { opacity:(2-ratio)/2 }
+                })}
+                content={
+                  <ControlPanel show={this.state.drawerOpen} closeDrawer={this.closeDrawer} />
+                }
+                onOpen={() => {
+                  this.setState({drawerOpen: true})
+                }}
+                onClose={() => {
+                  this.setState({drawerOpen: false})
+                }}
+                side='bottom'
+              >
+                <GiftedChat
+                  messages={this.state.messages}
+                  onSend={this.onSend}
+                  loadEarlier={this.state.loadEarlier}
+                  onLoadEarlier={this.onLoadEarlier}
+                  onPressAvatar={(this.protocol) ? (user) => Toast.show({
+                    text: user._id,
+                    buttonText: "Close",
+                    type: "success"
+                  }) : () => this.props.navigation.navigate('ContactProfile')}
+                  isLoadingEarlier={this.state.isLoadingEarlier}
+                  user={{
+                    _id: this.state.author.username, // sent messages should have same user._id
+                  }}
+                  renderActions={this.renderCustomActions}
+                  renderBubble={this.renderBubble}
+                  renderSystemMessage={this.renderSystemMessage}
+                  renderMessageImage={this.renderCustomView}
+                  renderFooter={this.renderFooter}
+                  maxInputLength={240}
+                  minInputToolbarHeight={50}
+                  renderInputToolbar={this.renderInputToolbar}
+                  parsePatterns={(linkStyle) => [
+                    { type: 'url', style: linkStyle, onPress: this.onPressUrl },
+                  ]}
+                  onInputTextChanged={text => this.setCustomText(text)}
+                />
+              </Drawer>
+            )
+            :
+            (<View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
+              <ActivityIndicator size="large" color="#34bbed"/>
+            </View>)
+          }
       </View>
     );
   }
+}
+
+const drawerStyles = {
+  drawer: { shadowColor: '#000000', shadowOpacity: 0.8, shadowRadius: 3},
+  main: {paddingLeft: 3},
 }
 
 const mapStateToProps = (state) => {
