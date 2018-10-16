@@ -70,51 +70,6 @@ export default class CustomActions extends React.Component {
     this.setImages(images);
   }
 
-  {/*renderNavBar() {
-    return (
-      <NavBar style={{
-        statusBar: {
-          backgroundColor: '#FFF',
-        },
-        navBar: {
-          backgroundColor: '#FFF',
-        },
-      }}>
-        <NavButton onPress={() => {
-          this.setModalVisible(false);
-        }}>
-          <NavButtonText style={{
-            color: '#000',
-          }}>
-            {'Cancel'}
-          </NavButtonText>
-        </NavButton>
-        <NavTitle style={{
-          color: '#000',
-        }}>
-          {'Camera Roll'}
-        </NavTitle>
-        <NavButton onPress={() => {
-          this.setModalVisible(false);
-
-          const images = this.getImages().map((image) => {
-            return {
-              image: image.uri,
-            };
-          });
-          this.props.onSend(images);
-          this.setImages([]);
-        }}>
-          <NavButtonText style={{
-            color: '#000',
-          }}>
-            {'Send'}
-          </NavButtonText>
-        </NavButton>
-      </NavBar>
-    );
-  }*/}
-
   renderIcon() {
     if (this.props.icon) {
       return this.props.icon();
@@ -146,13 +101,6 @@ export default class CustomActions extends React.Component {
             this.setModalVisible(false);
           }}
         >
-          {this.renderNavBar()}
-          <CameraRollPicker
-            maximum={10}
-            imagesPerRow={4}
-            callback={this.selectImages}
-            selected={[]}
-          />
         </Modal>
         {this.renderIcon()}
       </TouchableOpacity>

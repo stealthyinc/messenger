@@ -8,7 +8,6 @@ import Drawer from 'react-native-drawer'
 import ControlPanel from './ControlPanel'
 import dismissKeyboard from 'dismissKeyboard';
 
-
 // Styles
 import styles from './Styles/ChatStyle'
 import {GiftedChat, Actions, Bubble, SystemMessage, InputToolbar} from 'react-native-gifted-chat';
@@ -419,7 +418,9 @@ class ChatScreen extends Component {
   renderInputToolbar = (props) => {
      //Add the extra styles via containerStyle
     return (
-        <InputToolbar {...props} />
+      <InputToolbar
+        {...props}
+      />
     )
   }
   onPressUrl = (url) => {
@@ -434,14 +435,22 @@ class ChatScreen extends Component {
   };
   closeDrawer = () => {
     this._drawer.close()
+    this._giftedChat.textInput.focus()
   };
   openDrawer = () => {
     this._drawer.open()
+    this._giftedChat.textInput.focus()
   };
   setCustomText = (inputText) => {
-    if (this.protocol && inputText && (inputText[0] === '@' || inputText[0] === '/')) {
+    if (this.protocol && inputText && (inputText[0] === '@' || inputText[0] === '/') && inputText.length < 2) {
       this.openDrawer()
     }
+    this.setState({inputText})
+  }
+  addToInput = (text) => {
+    const newText = this.state.inputText + text
+    this.setState({inputText: newText})
+    this.closeDrawer()
   }
   render() {
     if (!this.publicKey) {
@@ -490,16 +499,14 @@ class ChatScreen extends Component {
               <Drawer
                 ref={(ref) => this._drawer = ref}
                 type="overlay"
-                tapToClose={true}
-                openDrawerOffset={0.1}
-                panCloseMask={0.2}
-                closedDrawerOffset={-3}
                 styles={drawerStyles}
+                tapToClose={true}
+                closedDrawerOffset={-3}
                 tweenHandler={(ratio) => ({
                   main: { opacity:(2-ratio)/2 }
                 })}
                 content={
-                  <ControlPanel show={this.state.drawerOpen} closeDrawer={this.closeDrawer} />
+                  <ControlPanel addToInput={this.addToInput} closeDrawer={this.closeDrawer} />
                 }
                 onOpen={() => {
                   this.setState({drawerOpen: true})
@@ -510,6 +517,7 @@ class ChatScreen extends Component {
                 side='bottom'
               >
                 <GiftedChat
+                  ref={(ref) => this._giftedChat = ref}
                   messages={this.state.messages}
                   onSend={this.onSend}
                   loadEarlier={this.state.loadEarlier}
@@ -523,13 +531,13 @@ class ChatScreen extends Component {
                   user={{
                     _id: this.state.author.username, // sent messages should have same user._id
                   }}
+                  text={this.state.inputText}
                   renderActions={this.renderCustomActions}
                   renderBubble={this.renderBubble}
                   renderSystemMessage={this.renderSystemMessage}
                   renderMessageImage={this.renderCustomView}
                   renderFooter={this.renderFooter}
                   maxInputLength={240}
-                  minInputToolbarHeight={50}
                   renderInputToolbar={this.renderInputToolbar}
                   parsePatterns={(linkStyle) => [
                     { type: 'url', style: linkStyle, onPress: this.onPressUrl },
