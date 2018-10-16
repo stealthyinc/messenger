@@ -109,7 +109,8 @@ class ReduxNavigation extends React.Component {
     // When you change code pertaining to the session listener, you should
     // set this var to false and test by changing the session id in the database.
     //
-    const SKIP_SESSION_BLOCK_PAGE_FOR_DEV = (process.env.NODE_ENV !== 'production')
+    // const SKIP_SESSION_BLOCK_PAGE_FOR_DEV = (process.env.NODE_ENV !== 'production')
+    const SKIP_SESSION_BLOCK_PAGE_FOR_DEV = true
 
     this.shutDownSignOut = false
     this.publicKey = userData['appPublicKey']
