@@ -110,6 +110,7 @@ class ReduxNavigation extends React.Component {
     // set this var to false and test by changing the session id in the database.
     //
     // const SKIP_SESSION_BLOCK_PAGE_FOR_DEV = (process.env.NODE_ENV !== 'production')
+    // pbj disabling this due to app background crashing
     const SKIP_SESSION_BLOCK_PAGE_FOR_DEV = true
 
     this.shutDownSignOut = false

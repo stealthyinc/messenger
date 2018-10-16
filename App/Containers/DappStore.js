@@ -47,10 +47,13 @@ class DappStore extends Component {
   };
   constructor(props) {
     super(props);
+    this.state = {
+      iconColor: []
+    }
   }
   async componentWillMount() {
     this.userData = JSON.parse(await AsyncStorage.getItem('userData'));
-    console.log("User Data", this.userData)
+    this._iconColor()
   }
   _onPressButton = (url) => {
     this.props.setDappUrl(url)
@@ -76,11 +79,20 @@ class DappStore extends Component {
             }
             else {
               // userData['appPublicKey'] = publicKey;
-              let appData = []
-              appData['privateKey'] = userData['privateKey']
-              appData['appPublicKey'] = publicKey
-              this.userData[app] = appData
+              let appData = {
+                app,
+                privateKey: userData['privateKey'],
+                appPublicKey: publicKey
+              }
+              if (this.userData.apps)
+                this.userData.apps.push(appData)
+              else {
+                let apps = []
+                apps.push(appData)
+                this.userData.apps = apps
+              }
               AsyncStorage.setItem('userData', JSON.stringify(this.userData));
+              this._iconColor()
             }
         });
       }
@@ -102,7 +114,7 @@ class DappStore extends Component {
       //   privateKey: <...>,
       //   appPublicKey: <...>,
       // }
-      let userData = {}
+      let appData = {app}
 
       try {
         // androidUserData {
@@ -110,23 +122,29 @@ class DappStore extends Component {
         //   appPrivateKey: <...>
         // }
         const androidUserData = await BlockstackNativeModule.signIn()
-        userData.privateKey = androidUserData.appPrivateKey
-        userData.username = androidUserData.username
+        appData.privateKey = androidUserData.appPrivateKey
+        appData.username = androidUserData.username
       } catch (error) {
         this.props.setSignInPending(false)
         throw utils.fmtErrorStr('Failed to sign in to Blockstack.', method, error)
       }
 
       try {
-        const publicKey = await BlockstackNativeModule.getPublicKeyFromPrivateKey(userData.privateKey)
-        userData.appPublicKey = publicKey
+        const publicKey = await BlockstackNativeModule.getPublicKeyFromPrivateKey(appData.privateKey)
+        appData.appPublicKey = publicKey
       } catch (error) {
         this.props.setSignInPending(false)
         throw utils.fmtErrorStr('Failed to get public key.', method, error)
       }
-
-      AsyncStorage.setItem('userData', JSON.stringify(userData));
-      this.props.screenProps.authWork(userData)
+      if (this.userData.apps)
+        this.userData.apps.push(appData)
+      else {
+        let apps = []
+        apps.push(appData)
+        this.userData.apps = apps
+      }
+      AsyncStorage.setItem('userData', JSON.stringify(this.userData));
+      this._iconColor()
     } else if (utils.is_iOS()) {
       await BlockstackNativeModule.signIn(`${baseUrl}/stealthyredirect.html`, baseUrl, null, (error, events) => {
         if (!error) {
@@ -138,6 +156,28 @@ class DappStore extends Component {
       });
     }
   }
+  _iconColor = () => {
+    if (this.userData.apps) {
+      let iconColor = []
+      for (let data of this.userData.apps) {
+        iconColor[data.app] = '#98FB98'
+      }
+      this.setState({iconColor})
+    }
+  }
+  getIconColor = (app) => {
+    if (!this.state.iconColor[app])
+      return '#F5F5F5'
+    return this.state.iconColor[app]
+  }
+  handleMiddleWare = (url, app) => {
+    if (this.getIconColor(app) === '#98FB98') {
+      this._onPressButton(url)
+    }
+    else {
+      this._signInAsync(url, app)
+    }
+  }
   render() {
     const oldPad = utils.is_oldPad()
     const customStyle = (oldPad) ? styles.oldbutton : styles.button
@@ -145,7 +185,7 @@ class DappStore extends Component {
       <ScrollView contentContainerStyle={styles.container}>
         <View style={{flexDirection: 'row', marginTop: 10, marginBottom: 5}}>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={customStyle} onPress={(url) => this._signInAsync('https://serene-hamilton-56e88e.netlify.com', 'graphite')}>
+            <TouchableOpacity style={[customStyle, { backgroundColor: this.getIconColor('graphite') }]} onPress={(url) => this.handleMiddleWare('https://serene-hamilton-56e88e.netlify.com', 'graphite')}>
             {/*<TouchableOpacity style={customStyle} onPress={(url) => this._onPressButton('https://www.graphitedocs.com/')}>*/}
               <Image source={GraphiteIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
@@ -153,7 +193,7 @@ class DappStore extends Component {
           </View>
           <View style={{margin: 10}}>
             {/*<TouchableOpacity style={customStyle} onPress={() => this.props.navigation.navigate('CameraRoll')}>*/}
-            <TouchableOpacity style={customStyle} onPress={() => this._signInAsync('https://app.travelstack.club', 'travelstack')}>
+            <TouchableOpacity style={[customStyle, { backgroundColor: this.getIconColor('travelstack') }]} onPress={() => this.handleMiddleWare('https://app.travelstack.club', 'travelstack')}>
             {/*<TouchableOpacity style={customStyle} onPress={() => this._onPressButton('https://travelstack.club/')}>*/}
               <Image source={TravelIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
@@ -168,20 +208,20 @@ class DappStore extends Component {
         </View>
         <View style={{flexDirection: 'row', marginBottom: 5}}>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={customStyle} onPress={() => this._signInAsync('https://graphite--infallible-williams-866040.netlify.com', 'notes')}>
+            <TouchableOpacity style={[customStyle, { backgroundColor: this.getIconColor('notes') }]} onPress={() => this.handleMiddleWare('https://graphite--infallible-williams-866040.netlify.com', 'notes')}>
             {/*<TouchableOpacity style={customStyle} onPress={() => this._onPressButton('https://note.riot.ai/')}>*/}
               <Image source={note} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Notes</Text>
           </View>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={customStyle} onPress={() => this._onPressButton('https://testnet.misthos.io/')}>
+            <TouchableOpacity style={customStyle} onPress={() => this.handleMiddleWare('https://testnet.misthos.io/')}>
               <Image source={misthos} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Misthos</Text>
           </View>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={customStyle} onPress={(url) => this._onPressButton('https://blockusign.co')}>
+            <TouchableOpacity style={customStyle} onPress={(url) => this.handleMiddleWare('https://blockusign.co')}>
               <Image source={BlockSignIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Blockusign</Text>
@@ -189,13 +229,13 @@ class DappStore extends Component {
         </View>
         {(!oldPad) ? (<View style={{flexDirection: 'row', marginBottom: 5}}>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={styles.button} onPress={() => this._onPressButton('https://cryptocracy.io')}>
+            <TouchableOpacity style={styles.button} onPress={() => this.handleMiddleWare('https://cryptocracy.io')}>
               <Image source={CryptoIcon} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Cryptocracy</Text>
           </View>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={customStyle} onPress={() => this._onPressButton('https://www.healthhere.com')}>
+            <TouchableOpacity style={customStyle} onPress={() => this.handleMiddleWare('https://www.healthhere.com')}>
               <Image source={healthHere} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>
             <Text style={{fontWeight: 'bold', fontSize: 16, textAlign: 'center'}}>Clinic Q</Text>
