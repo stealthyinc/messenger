@@ -20,7 +20,7 @@ import GraphiteIcon from '../Images/GraphiteIcon.png';
 import CryptoIcon from '../Images/CryptoIcon.png';
 import BlockSignIcon from '../Images/BlockSignIcon.png';
 import TravelIcon from '../Images/TravelIcon.png';
-import demoIcon from '../Images/democ.png';
+import demoIcon from '../Images/democ1.png';
 import healthHere from '../Images/healthHere.png';
 import note from '../Images/note.png';
 import misthos from '../Images/misthos.png';

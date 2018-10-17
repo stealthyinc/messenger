@@ -5,12 +5,14 @@ import ConversationScreen from './ConversationScreen'
 import ContactProfile from './ContactProfile'
 import ProfileScreen from './ProfileScreen'
 // import WalletScreen from './WalletScreen'
+import SlackScreen from '../Containers/SlackScreen'
 import DiscoverScreen from './DiscoverScreen'
 import DappStore from './DappStore'
 
 export default TabNavigator(
   {
     Channels: { screen: DiscoverScreen },
+    // Channels: { screen: SlackScreen },
     Messages: { screen: ConversationScreen },
     // Wallet: { screen: WalletScreen },
     dApps: { screen: DappStore },
