@@ -5,7 +5,21 @@ import {NativeModules, Platform, Dimensions} from 'react-native';
 //const Platform = require('platform');
 //
 //const { encryptECIES, decryptECIES } = require('blockstack/lib/encryption');
+const CHANNEL_PROTOCOLS = ['public channel 2.0']
+const AMA_PROTOCOLS = ['public ama 1.0']
 
+module.exports.isChannel = function(protocolStr) {
+  return CHANNEL_PROTOCOLS.includes(protocolStr)
+}
+
+module.exports.isAma = function(protocolStr) {
+  return AMA_PROTOCOLS.includes(protocolStr)
+}
+
+module.exports.isChannelOrAma = function(protocolStr) {
+  return module.exports.isChannel(protocolStr) ||
+         module.exports.isAma(protocolStr)
+}
 
 module.exports.fmtErrorStr = function(anErrDescription,
                            aMethodName=undefined,

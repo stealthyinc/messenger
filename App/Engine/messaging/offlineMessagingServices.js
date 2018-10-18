@@ -392,7 +392,7 @@ class OfflineMessagingServices extends EventEmitterAdapter {
 
     for (const contact of contacts) {
       // TODO: refactor proocol constants
-      if (contact.protocol && (contact.protocol  === 'public channel 2.0' )) {
+      if (contact.protocol && utils.isChannelOrAma(contact.protocol)) {
         if (!ENABLE_CHANNELS_V2_0) {
           continue
         }
@@ -427,7 +427,7 @@ class OfflineMessagingServices extends EventEmitterAdapter {
               .then((data) => {
                 let channelChatMsg = undefined
                 try {
-                  channelChatMsg = JSON.parse(data)                  
+                  channelChatMsg = JSON.parse(data)
                 } catch(error) {
                   // Suppress
                 }

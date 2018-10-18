@@ -93,7 +93,9 @@ class ChatScreen extends Component {
         }
       }
     });
-    this.protocol = (this.activeContact) ? (this.activeContact.protocol === "public channel 2.0") : false
+    this.protocol = (this.activeContact) ?
+      utils.isChannelOrAma(this.activeContact.protocol) : false
+    console.log(`DEBUG(${method}): this.protocol = ${this.protocol}, this.activeContact.protocol = ${this.activeContact.protocol}.`)
 
     console.log(`INFO(${method}): check #2 anActiveContact=${anActiveContact}`)
     console.log(`INFO(${method}): check #2 anActiveContact=${anActiveContact}`)

@@ -61,6 +61,7 @@ let STEALTHY_PAGE = 'LOCALHOST';
 const LOG_GAIAIO = false;
 const LOG_OFFLINEMESSAGING = false;
 //
+const ENABLE_AMA = true
 const ENABLE_CHANNELS_V2_0 = true
 const ENCRYPT_CHANNEL_NOTIFICATIONS = true
 const { ChannelServicesV2 } = require('./messaging/channelServicesV2.js')
@@ -287,7 +288,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       const channelAddresses = {}
       for (const contactId of this.contactMgr.getContactIds()) {
         // TODO: refactor protocol to const string
-        if (!this.contactMgr.getProtocol(contactId) === 'public channel 2.0') {
+        if (!utils.isChannelOrAma(this.contactMgr.getProtocol(contactId))) {
           continue
         }
 
@@ -798,12 +799,12 @@ export class MessagingEngine extends EventEmitterAdapter {
   async handleContactAdd(contact, makeActiveContact=true) {
     const method = 'MessagingEngine::handleContactAdd'
 
-    console.log(`DEBUG($method): starting contact add for ${contact.id}.`)
+    console.log(`DEBUG(${method}): starting contact add for ${contact.id}.`)
     if (this.anonalytics) {
       this.anonalytics.aeContactAdded();
     }
 
-    console.log(`DEBUG($method): fetching public key ...`)
+    console.log(`DEBUG(${method}): fetching public key ...`)
     let publicKey = contact.publicKey
     if (!publicKey) {
       try {
@@ -814,32 +815,71 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     }
 
-    console.log(`DEBUG($method): adding new contact to contact manager ...`)
-    this.contactMgr.addNewContact(contact, contact.id, publicKey, makeActiveContact);
-
     let isChannel = false
     let protocol = undefined
+    let administrable = false
     if (ENABLE_CHANNELS_V2_0) {
-      console.log(`DEBUG($method): fetching channel protocol ...`)
+      console.log(`DEBUG(${method}): fetching channel protocol ...`)
       protocol = await this._fetchProtocol(contact.id)
-      if (protocol) {
-        console.log(`DEBUG($method): setting channel protocol ...`)
-        this.contactMgr.setProtocol(contact.id, protocol)
+      isChannel = utils.isChannelOrAma(protocol)
+
+      // Check to see if we are an administrator on the channel we just added.
+      //
+      if (ENABLE_AMA && utils.isAma(protocol)) {
+        // Fetch the Ama's owner.json and see if we're the owner.
+        let owner = false
+        let delegate = false
+        let administrable = false
+
+        try {
+          const ownerDataStr = await this.io.robustRemoteRead(contact.id, 'owner.json')
+          if (ownerDataStr) {
+            const ownerData = JSON.parse(ownerDataStr)
+            const ownerIdEnc = ownerData.for_owner
+            const ownerId = await utils.decryptObj(this.privateKey, ownerIdEnc, true)
+            owner = (this.userId === ownerId)
+          }
+        } catch (error) {
+          console.log(`INFO(${method}): ${error}.`)
+        }
+
+        // TODO: failing being the owner, fetch the delegates.json and see if we're
+        //       a delegate.
+        // if (!owner) {
+        //   // TODO: time-permitting
+        // }
+        administrable = owner || delegate
+        console.log(`INFO(${method}): administrable = ${administrable}`)
       }
-      isChannel = (protocol === 'public channel 2.0')
     }
 
-    console.log(`DEBUG($method): writing contact list (non blocking) ...`)
+    console.log(`DEBUG(${method}): adding new contact ${contact.id} to contact manager ...`)
+    await this.contactMgr.addNewContact(contact, contact.id, publicKey, makeActiveContact);
+    // We do the next part here to minimize the reading delay on protocol so that
+    // when the contact is added and inserted into the offline messaging service, the
+    // protocol and administrability are known and set.
+    if (ENABLE_CHANNELS_V2_0) {
+      if (protocol) {
+        console.log(`DEBUG(${method}): setting channel protocol ...`)
+        this.contactMgr.setProtocol(contact.id, protocol)
+      }
+      if (administrable) {
+        this.contactMgr.setAdministrable(contact.id, administrable)
+      }
+    }
+
+
+    console.log(`DEBUG(${method}): writing contact list (non blocking) ...`)
     this._writeContactList(this.contactMgr.getContacts());
 
-    console.log(`DEBUG($method): creating conversation ...`)
+    console.log(`DEBUG(${method}): creating conversation ...`)
     this.conversations.createConversation(contact.id);
 
-    console.log(`DEBUG($method): writing conversations (non blocking) ...`)
+    console.log(`DEBUG(${method}): writing conversations (non blocking) ...`)
     this._writeConversations();
 
     if (ENABLE_CHANNELS_V2_0 && isChannel) {
-      console.log(`DEBUG($method): setting channel address in offline msg svc ...`)
+      console.log(`DEBUG(${method}): setting channel address in offline msg svc ...`)
       let msgAddress = {
         outerFolderNumber: 0,
         innerFolderNumber: 0,
@@ -850,16 +890,16 @@ export class MessagingEngine extends EventEmitterAdapter {
       // Automatically send a message invite for channels that are added
       // -- this is used to increment/decrement the number of people in the room.
       //
-      console.log(`DEBUG($method): db invite contact (member incr, blocking) ...`)
+      console.log(`DEBUG(${method}): db invite contact (member incr, blocking) ...`)
       try {
         await this.discovery.inviteContact(publicKey)
       } catch (error) {
         // Suppress
-        console.log(`ERROR(MessagingEngine::handleContactAdd): ${error}.`)
+        console.log(`ERROR(${method}): ${error}.`)
       }
     }
 
-    console.log(`DEBUG($method): updating contacts in offline messaging service ...`)
+    console.log(`DEBUG(${method}): updating contacts in offline messaging service ...`)
     this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
 
     // IMPORTANT (even for Prabhaav):
@@ -867,13 +907,13 @@ export class MessagingEngine extends EventEmitterAdapter {
     //   contact length changed to navigate to the ChatScreen. If you
     //   update messages last, it navigates to a screen with the wrong
     //   messages.
-    console.log(`DEBUG($method): updating messages (sends event 'me-update-messages') ...`)
+    console.log(`DEBUG(${method}): updating messages (sends event 'me-update-messages') ...`)
     this.updateMessages(contact.id);
 
-    console.log(`DEBUG($method): updating contact manager (sends event 'me-update-contactmgr') ...`)
+    console.log(`DEBUG(${method}): updating contact manager (sends event 'me-update-contactmgr') ...`)
     this.updateContactMgr();
 
-    console.log(`DEBUG($method): close contact search (sends event 'me-close-contact-search') ...`)
+    console.log(`DEBUG(${method}): close contact search (sends event 'me-close-contact-search') ...`)
     this.closeContactSearch();
 
     // Fast read of messages from contact (in case we're at the start or middle of a polling delay):
@@ -881,7 +921,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     try {
       await this.receiveMessagesNow()
     } catch (error) {
-      console.log(`ERROR($method): receiveMessagesNow failed.\n${error}`)
+      console.log(`ERROR(${method}): receiveMessagesNow failed.\n${error}`)
     }
   }
 
@@ -889,7 +929,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     if (this.discovery) {
       this.discovery.clearReceivedInvitation(contact.publicKey)
 
-      if (this.contactMgr.getProtocol(contact.id) === 'public channel 2.0') {
+      if (utils.isChannelOrAma(this.contactMgr.getProtocol(contact.id))) {
         this.discovery.clearSentInvitation(contact.publicKey)
       }
     }
@@ -1088,7 +1128,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
         // If the message is from a channel, don't send read receipts:
         // TODO: unify the protocol constant
-        if (this.contactMgr.getProtocol(fromId) === 'public channel 2.0') {
+        if (utils.isChannelOrAma(this.contactMgr.getProtocol(fromId))) {
           continue
         }
 
@@ -1478,7 +1518,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       const destinationId = aMessageTuple.chatMsg.to
 
       // TODO: refactor constants to channel 2.0 ...
-      if ((this.contactMgr.getProtocol(destinationId) === 'public channel 2.0') &&
+      if (utils.isChannelOrAma(this.contactMgr.getProtocol(destinationId)) &&
           aMessageTuple.filePath && aMessageTuple.publicKey) {
         const notificationData = {
           sender: this.userId,
