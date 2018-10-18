@@ -173,6 +173,11 @@ function* handleOutgoingMessage(action) {
   EngineInstance.handleOutgoingMessage(outgoingMessage, json)
 }
 
+function* handleContactAdd(action) {
+  const { newContact, flag } = action
+  EngineInstance.handleContactAdd(newContact, flag)
+}
+
 function* handleSearchSelect(action) {
   const { newContact } = action
   EngineInstance.handleSearchSelect(newContact)
@@ -265,7 +270,7 @@ export function* startEngine (action) {
   yield takeLatest(EngineTypes.ADD_CONTACT_ID, addContactId)
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
   yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)
-  yield takeLatest(EngineTypes.ADD_NEW_CONTACT, handleSearchSelect)
+  yield takeLatest(EngineTypes.ADD_NEW_CONTACT, handleContactAdd)
   yield takeLatest(EngineTypes.SEND_NOTIFICATION, sendNotificationWorker)
   yield takeLatest(EngineTypes.UPDATE_USER_SETTINGS, updateUserSettings)
   yield takeLatest(EngineTypes.BACKGROUND_REFRESH, backgroundTasks)

@@ -102,12 +102,13 @@ class BlockContactSearch extends Component {
       key: Date.now(),
       title: name
     }
-    this.props.addNewContact(contact)
-    this.props.setActiveContact(contact);
+    this.props.addNewContact(contact, true)
+    // this.props.setActiveContact(contact);
   }
   createListItem(contact) {
     const { payload, error } = this.props
-    if (this.state.showNothing) {
+    const { showNothing, showAdding, showLoading } = this.state
+    if (showNothing) {
       return <ListItem>{null}</ListItem>
     }
     else if (payload && payload.length) {
@@ -121,7 +122,7 @@ class BlockContactSearch extends Component {
         </ListItem>
       ))
     }
-    else if (this.state.showLoading) {
+    else if (showLoading) {
       setTimeout(() => {
         this.setState({showLoading: false})
       }, 7000);
@@ -207,7 +208,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     request: (data) => dispatch(BlockstackContactsActions.blockstackContactsRequest({data})),
     clear: () => dispatch(BlockstackContactsActions.blockstackContactsFailure()),
-    addNewContact: (contact) => dispatch(EngineActions.addNewContact(contact)),
+    addNewContact: (contact, flag) => dispatch(EngineActions.addNewContact(contact, flag)),
     setContactAdded: (flag) => dispatch(EngineActions.setContactAdded(flag)),
     setActiveContact: (contact) => dispatch(EngineActions.setActiveContact(contact)),
   }

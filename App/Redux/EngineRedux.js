@@ -19,7 +19,7 @@ const { Types, Creators } = createActions({
   setOutgoingMessage: ['outgoingMessage', 'json'],
   setUserProfile: ['userProfile'],
   setActiveUserProfile: ['activeUserProfile'],
-  addNewContact: ['newContact'],
+  addNewContact: ['newContact', 'flag'],
   setContactAdded: ['contactAdded'],
   setToken: ['token'],
   sendNotification: ['recepientToken', 'publicKey', 'bearerToken'],

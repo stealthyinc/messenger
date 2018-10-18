@@ -84,7 +84,8 @@ class DiscoverScreen extends Component {
       this.numContacts = contactMgr.getAllContacts().length;
       this.setState({channelClicked: false, channelId: ''})
       // this.props.navigation.navigate('ChatRoom')
-      const params = {id: channelId}
+      // const params = {id: channelId}
+      const params = {id: ''}
       this.props.pushToChannel('Messages', params)
       this.props.setContactAdded(false)
     }
@@ -112,10 +113,10 @@ class DiscoverScreen extends Component {
   contactSelected = (data, secId, rowId, rowMap) => {
     const method = 'DiscoverScreen::contactSelected'
     console.log(`INFO(${method}): selected contact ${data.id}`)
-    this.props.addNewContact(data)
+    this.props.addNewContact(data, false)
     console.log(`INFO(${method}): called addNewContact for ${data.id}`)
-    this.props.setActiveContact(data);
-    console.log(`INFO(${method}): called setActiveContact for ${data.id}`)
+    // this.props.setActiveContact(data);
+    // console.log(`INFO(${method}): called setActiveContact for ${data.id}`)
 
     rowMap[`${secId}${rowId}`].props.closeRow();
     let newData = this.state.channels;
@@ -179,7 +180,7 @@ const mapDispatchToProps = (dispatch) => {
       routeName,
       params,
     })),
-    addNewContact: (contact) => dispatch(EngineActions.addNewContact(contact)),
+    addNewContact: (contact, flag) => dispatch(EngineActions.addNewContact(contact, flag)),
     setContactAdded: (flag) => dispatch(EngineActions.setContactAdded(flag)),
     setActiveContact: (contact) => dispatch(EngineActions.setActiveContact(contact)),
     handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
