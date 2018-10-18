@@ -1,4 +1,6 @@
 import { Analytics } from 'aws-amplify';
+import Gun from 'gun/gun.js' // or use the minified version 'gun/gun.min.js'
+var gun = new Gun('https://gun-stealthy-db.herokuapp.com/') // or use your own GUN server
 const MAX_QUEUE = 100;
 
 class Anonalytics {
@@ -138,20 +140,38 @@ class Anonalytics {
   //
 
   _storeEvent(anEventName, aString = undefined) {
-    if (anEventName && this.publicKey) {
+    try {
+      if (anEventName && this.publicKey) {
+        const eventTimeMs = Date.now();
+        const AWS_LIMIT = 1000;
+        const d = new Date();
+        const dateStamp = d.toDateString();
+        if (aString) {
+          let awsCleanString = (aString.length >= AWS_LIMIT) ?
+            aString.substring(0, AWS_LIMIT -2) :
+            aString;
+          Analytics.record({name: anEventName, attributes: {data: awsCleanString, id: this.publicKey, dateStamp}});
+          gun.get('analytics').get(this.publicKey).get(eventTimeMs).put({name: anEventName, attributes: {data: awsCleanString, id: this.publicKey, dateStamp}}, function(ack) {
+            if (ack.err) {
+              console.log("GUN", ack.err)
+            }
+            console.log("GUN Success")
+          });
+        }
+        else {
+          Analytics.record({name: anEventName, attributes: {id: this.publicKey, dateStamp}});
+          gun.get('analytics').get(this.publicKey).get(eventTimeMs).put({name: anEventName, attributes: {id: this.publicKey, dateStamp}}, function(ack) {
+            if (ack.err) {
+              console.log("GUN", ack.err)
+            }
+            console.log("GUN Success")
+          });
+        }
+      }
+    }
+    catch (error) {
       const eventTimeMs = Date.now();
-      const AWS_LIMIT = 1000;
-      const d = new Date();
-      const dateStamp = d.toDateString();
-      if (aString) {
-        let awsCleanString = (aString.length >= AWS_LIMIT) ?
-          aString.substring(0, AWS_LIMIT -2) :
-          aString;
-        Analytics.record({name: anEventName, attributes: {data: awsCleanString, id: this.publicKey, dateStamp}});
-      }
-      else {
-        Analytics.record({name: anEventName, attributes: {id: this.publicKey, dateStamp}});
-      }
+      gun.get('error').get(eventTimeMs).put({error});
     }
   }
 }

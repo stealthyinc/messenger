@@ -103,7 +103,6 @@ class BlockContactSearch extends Component {
       title: name
     }
     this.props.addNewContact(contact, true)
-    // this.props.setActiveContact(contact);
   }
   createListItem(contact) {
     const { payload, error } = this.props
@@ -125,7 +124,7 @@ class BlockContactSearch extends Component {
     else if (showLoading) {
       setTimeout(() => {
         this.setState({showLoading: false})
-      }, 7000);
+      }, 3000);
       return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View>
     }
     else {
