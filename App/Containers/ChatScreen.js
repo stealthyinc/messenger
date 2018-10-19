@@ -67,6 +67,11 @@ class ChatScreen extends Component {
     this.activeContact = undefined;
     this.publicKey = undefined
     this.displayname = ''
+
+    // Stores AMA id values for each
+    // AMA title (used to pass id in for navigation):
+    //
+    this.amaTitleIndex = {}
   }
   configWithActiveContact = (anActiveContact, force=false, callSetState=false) => {
     const method = 'ChatScreen::configWithActiveContact'
@@ -232,9 +237,18 @@ class ChatScreen extends Component {
       }
       else if (contentType === 'TEXT_JSON') {
         text = body.text
-        if (!text) {
-          text = body.title // fun workaround: TODO-unf me
+        //
+        // Handle AMA message objects
+        if (body.type === 'public ama 1.0') {
+          text = body.title + '\n' +
+                 '\n' +
+                 '(' + body.status + ')'
+          this.amaTitleIndex[body.title] = {
+            id: body.ama_id,
+            msgAddress: message.msgAddress,
+          }
         }
+        //
         url = body.url
         gimage = body.image
       }
@@ -434,7 +448,22 @@ class ChatScreen extends Component {
     this.props.navigation.navigate('DappScreen')
   }
   onPressAma = (amaname) => {
-    this.props.navigation.navigate('SlackScreen', {name: amaname})
+    if (amaname) {
+      // Strip out anything after the first linefeed ('\n'):
+      const amaNameFirstLineMatch = amaname.match(/[^\n]*/)
+      if (amaNameFirstLineMatch.length >= 1) {
+        const amaNameFirstLine = amaNameFirstLineMatch[0]
+        const idInformation = this.amaTitleIndex[amaNameFirstLine]
+        const id = (idInformation) ? idInformation.id : undefined
+        const msgAddress = (idInformation) ? idInformation.msgAddress : undefined
+        this.props.navigation.navigate('SlackScreen',
+          {
+            name: amaNameFirstLine,
+            id,
+            msgAddress
+          })
+      }
+    }
   }
   toggleDrawer = () => {
     if (this.state.drawerOpen)
@@ -559,7 +588,7 @@ class ChatScreen extends Component {
                   renderInputToolbar={this.renderInputToolbar}
                   parsePatterns={(linkStyle) => [
                     { type: 'url', style: linkStyle, onPress: this.onPressUrl },
-                    { pattern: /AMA:.*/, style: linkStyle, onPress: this.onPressAma },
+                    { pattern: /AMA:.*\n\n.*/, style: linkStyle, onPress: this.onPressAma },
                   ]}
                   onInputTextChanged={text => this.setCustomText(text)}
                 />

@@ -27,6 +27,16 @@ class SlackScreen extends React.Component {
     };
   };
 
+  constructor(props) {
+    super(props)
+    if (props.navigation && props.navigation.state && props.navigation.state.params) {
+      const params = props.navigation.state.params
+      this.name = params.name
+      this.id = params.id
+      this.msgAddress = params.msgAddress
+    }
+  }
+
   state = {
     messages: [],
   }

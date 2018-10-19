@@ -1448,6 +1448,8 @@ export class MessagingEngine extends EventEmitterAdapter {
       const chatMessages = this.conversations.getMessages(aRecipientId);
       for (const chatMessage of chatMessages) {
         const isMe = (chatMessage.from === this.userId);
+        const msgAddress = (chatMessage.channel) ?
+          chatMessage.channel.msgAddress : undefined
         const message = {
           me: isMe,
           image: (isMe ? this.avatarUrl : recipientImageUrl),
@@ -1458,6 +1460,7 @@ export class MessagingEngine extends EventEmitterAdapter {
           seen: chatMessage.seen,
           time: chatMessage.time,
           state: chatMessage.msgState,
+          msgAddress
         };
         messages.push(message);
       }
