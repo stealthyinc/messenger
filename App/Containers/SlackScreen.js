@@ -9,6 +9,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import SlackMessage from './chat/SlackMessage';
 import Avatar from './chat/SlackAvatar';
 import demoIcon from '../Images/democ1.png';
+import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 class SlackScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -73,6 +74,7 @@ class SlackScreen extends React.Component {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }))
+    this.props.handleOutgoingMessage(undefined, messages[0])
   }
 
   renderMessage(props) {
@@ -101,6 +103,7 @@ class SlackScreen extends React.Component {
   }
 
   render() {
+    console.log("AMA data in SlackScreen", this.props.amaData)
     return (
       <GiftedChat
         messages={this.state.messages}
@@ -118,11 +121,13 @@ class SlackScreen extends React.Component {
 
 const mapStateToProps = (state) => {
   return {
+    amaData: EngineSelectors.getAmaData(state),
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    handleOutgoingMessage: (text, json) => dispatch(EngineActions.setOutgoingMessage(text, json)),
   }
 }
 

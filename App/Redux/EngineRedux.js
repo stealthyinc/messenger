@@ -40,6 +40,7 @@ const { Types, Creators } = createActions({
   foreGround: [''],
   backGround: [''],
   setSignInPending: ['flag'],
+  setEngineAmaData: ['amaData'],
 })
 
 export const EngineTypes = Types
@@ -67,7 +68,8 @@ export const INITIAL_STATE = Immutable({
   session: '',
   engineFault: '',
   signInPending: null,
-  id: ''
+  id: '',
+  amaData: undefined,
 })
 
 /* ------------- Selectors ------------- */
@@ -90,6 +92,7 @@ export const EngineSelectors = {
   getSession: state => state.engine.session,
   getEngineFault: state => state.engine.engineFault,
   getSignInPending: state => state.engine.signInPending,
+  getAmaData: state => state.engine.amaData,
 }
 
 /* ------------- Reducers ------------- */
@@ -191,6 +194,11 @@ export const restartEngine = (state) => {
   return state.merge({ engineFault: false })
 }
 
+// engine has got new ama data
+export const setEngineAmaData = (state, { amaData }) => {
+  return state.merge({ amaData })
+}
+
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -206,6 +214,7 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_ENGINE_INITIAL]: setEngineInitial,
   [Types.SET_ENGINE_CONTACT_MGR]: setEngineContactMgr,
   [Types.SET_ENGINE_MESSAGES]: setEngineMessages,
+  [Types.SET_ENGINE_AMA_DATA]: setEngineAmaData,
   [Types.SET_CONTACT_ADDED]: setContactAdded,
   [Types.SET_TOKEN]: setToken,
   [Types.SET_USER_SETTINGS]: setUserSettings,

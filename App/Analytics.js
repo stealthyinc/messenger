@@ -1,6 +1,16 @@
 import { Analytics } from 'aws-amplify';
 import Gun from 'gun/gun.js' // or use the minified version 'gun/gun.min.js'
-var gun = new Gun('https://gun-stealthy-db.herokuapp.com/') // or use your own GUN server
+var gun = new Gun ({
+  peers: 'https://gun-stealthy-db.herokuapp.com/',
+  radisk: false,
+  localStorage: false,
+  file: 'data.json',
+  s3: {
+    key: 'AKIAJUW4IWSRN5VM4TFQ', // AWS Access Key
+    secret: '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', // AWS Secret Token
+    bucket: 'gunstealthydata' // The bucket you want to save into
+  }
+})
 const MAX_QUEUE = 100;
 
 class Anonalytics {

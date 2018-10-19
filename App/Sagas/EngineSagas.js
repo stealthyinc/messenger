@@ -41,6 +41,21 @@ const createEngine = (userData) => {
                             )
 }
 
+function* watchAmaDataChannel() {
+  const channel = eventChannel(emitter => {
+    EngineInstance.on('me-update-ama-data', (amaId, amaData) => emitter(amaId, amaData))
+    return () => {
+      console.log(`Messaging Engine AMA Updated`)
+    }
+  })
+  while (true) {
+    console.log('PRE-AMA')
+    const amaData = yield take(channel)
+    console.log('AMA:', amaData)
+    yield put(EngineActions.setEngineAmaData(amaData))
+  }
+}
+
 function* watchEngineFaultChannel() {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-fault', (engineFault) => emitter(engineFault))
@@ -257,6 +272,7 @@ export function* startEngine (action) {
   EngineInstance = yield call (createEngine, userData)
   // const engineInit = yield select(EngineSelectors.getEngineInit)
   EngineInstance.componentDidMountWork(false, userData["username"])
+  yield fork(watchAmaDataChannel)
   yield fork(watchEngineFaultChannel)
   yield fork(watchInitialzedEventChannel)
   yield fork(watchContactMgrEventChannel)

@@ -1573,6 +1573,6 @@ export class MessagingEngine extends EventEmitterAdapter {
       // TODO: resolve msgAddress to .json path, fetch data and issue event
       let amaData = undefined
 
-      this.emit('me-update-ama-data', amaId, amaData)
+      this.emit('me-update-ama-data', amaData)
     }
 }
