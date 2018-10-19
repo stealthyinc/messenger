@@ -1566,10 +1566,13 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   // Stealthy AMA 1.0 Work:
   //////////////////////////////////////////////////////////////////////////////
+
+    // Fetches the json data model for an AMA and pushes it out in an event.
+    //
     async fetchAmaData(msgAddress, amaId) {
       // TODO: resolve msgAddress to .json path, fetch data and issue event
       let amaData = undefined
-      
+
       this.emit('me-update-ama-data', amaId, amaData)
     }
 }
