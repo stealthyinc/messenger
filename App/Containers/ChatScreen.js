@@ -529,7 +529,7 @@ class ChatScreen extends Component {
         </View>
       )
     }
-    const amaButton = (utils.isAma(this.protocol)) ? (
+    const amaButton = (this.activeContact && utils.isAma(this.activeContact.protocol)) ? (
       <Button
         raised
         color='green'

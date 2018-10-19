@@ -74,7 +74,8 @@ class SlackScreen extends React.Component {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }))
-    this.props.handleOutgoingMessage(undefined, messages[0])
+    const {text, gtext, image, url} = messages[0]
+    this.props.handleOutgoingMessage(text, undefined);
   }
 
   renderMessage(props) {
@@ -117,7 +118,7 @@ class SlackScreen extends React.Component {
         text: questionData.question.text,
         createdAt: Date.now(),
         user: {
-          _id: 1,
+          _id: questionData.question_id,
           name: questionData.question.author,
           avatar: '',
         }
@@ -129,7 +130,7 @@ class SlackScreen extends React.Component {
           text: response.text,
           createdAt: Date.now(),
           user: {
-            _id: 2,
+            _id: response.answer_id,
             name: response.author,
             avatar: demoIcon,
           }
