@@ -170,6 +170,15 @@ class ChannelServicesV2 {
     return undefined
   }
 
+  // Yuck. Need to put this somehwere more sensible etc. TODO
+  static getAmaFilePath(aCompactMessageAddress) {
+    if (aCompactMessageAddress) {
+      return `${ChannelServicesV2.CHANNEL_DIR}/${aCompactMessageAddress}.ama.json`
+    }
+    return undefined
+  }
+
+
   // For atomic updates and new object creation.
   static getIncrementedMsgAddress(aMessageAddress) {
     const addr = utils.deepCopyObj(aMessageAddress)

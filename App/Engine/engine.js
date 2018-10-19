@@ -1567,12 +1567,26 @@ export class MessagingEngine extends EventEmitterAdapter {
   // Stealthy AMA 1.0 Work:
   //////////////////////////////////////////////////////////////////////////////
 
-    // Fetches the json data model for an AMA and pushes it out in an event.
-    //
-    async fetchAmaData(msgAddress, amaId) {
-      // TODO: resolve msgAddress to .json path, fetch data and issue event
-      let amaData = 'hello world'
+  // Fetches the json data model for an AMA and pushes it out in an event.
+  //
+  // TODO: work with PBJ to also include the userID of the AMA (hardcode for now)
+  async fetchAmaData(msgAddress, amaId) {
+    const method = 'MessagingEngine::fetchAmaData'
 
+    console.log(`INFO(${method}): msgAddress=${msgAddress}, amaId=${amaId}`)
+    if (msgAddress && amaId) {
+      const idWorkaround = 'startupschool.stealthy.id'
+      const amaFilePath = ChannelServicesV2.getAmaFilePath(msgAddress)
+      const amaDataStringified = await this.io.robustRemoteRead(idWorkaround, amaFilePath)
+      let amaData = {}
+      try {
+        amaData = JSON.parse(amaDataStringified)
+      } catch (error) {
+        // Suppress
+      }
       this.emit('me-update-ama-data', amaData)
+    } else {
+      this.emit('me-update-ama-data', {})
     }
+  }
 }

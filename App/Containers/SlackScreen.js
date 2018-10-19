@@ -108,9 +108,38 @@ class SlackScreen extends React.Component {
       return (<View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
               <ActivityIndicator size="large" color="#34bbed"/>
             </View>)
+
+    // Convert AMA JSON to GC compat. JSON:
+    const amaMsgs = []
+    for (const questionData of this.props.amaData.ama) {
+      const msg = {
+        _id: questionData.question_id,
+        text: questionData.question.text,
+        createdAt: Date.now(),
+        user: {
+          name: questionData.question.author,
+          avatar: '',
+        }
+      }
+      amaMsgs.push(msg)
+      for (const response of questionData.responses) {
+        const resp = {
+          _id: response.answer_id,
+          text: response.text,
+          createdAt: Date.now(),
+          user: {
+            name: response.author,
+            avatar: '',
+          }
+        }
+        amaMsgs.push(resp)
+      }
+    }
+
+    amaMsgs.reverse()
     return (
       <GiftedChat
-        messages={this.state.messages}
+        messages={amaMsgs}
         onSend={messages => this.onSend(messages)}
         user={{
           _id: 1,

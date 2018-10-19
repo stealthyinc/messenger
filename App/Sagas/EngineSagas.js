@@ -50,7 +50,6 @@ function* watchAmaDataChannel() {
   })
   while (true) {
     const amaData = yield take(channel)
-    console.log('AMA:', amaData)
     yield put(EngineActions.setAmaData(amaData))
   }
 }
@@ -221,7 +220,7 @@ function* handleMobileBackground() {
 
 function* fetchAmaData(action) {
   const { msgAddress, amaId } = action
-  console.log('AMA', msgAddress, amaId)
+  console.log('AC AMA fetch test:', msgAddress, amaId)
   EngineInstance.fetchAmaData(msgAddress, amaId)
 }
 
