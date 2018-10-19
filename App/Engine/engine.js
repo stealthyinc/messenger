@@ -1563,4 +1563,13 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
   }
+
+  // Stealthy AMA 1.0 Work:
+  //////////////////////////////////////////////////////////////////////////////
+    async fetchAmaData(msgAddress, amaId) {
+      // TODO: resolve msgAddress to .json path, fetch data and issue event
+      let amaData = undefined
+      
+      this.emit('me-update-ama-data', amaId, amaData)
+    }
 }
