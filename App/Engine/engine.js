@@ -1571,7 +1571,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     //
     async fetchAmaData(msgAddress, amaId) {
       // TODO: resolve msgAddress to .json path, fetch data and issue event
-      let amaData = undefined
+      let amaData = 'hello world'
 
       this.emit('me-update-ama-data', amaData)
     }

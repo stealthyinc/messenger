@@ -462,6 +462,7 @@ class ChatScreen extends Component {
             id,
             msgAddress
           })
+        this.props.sendAmaInfo(msgAddress, id)
       }
     }
   }
@@ -626,6 +627,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     shareInit: () => dispatch(TwitterShareActions.shareInit()),
     handleOutgoingMessage: (text, json) => dispatch(EngineActions.setOutgoingMessage(text, json)),
+    sendAmaInfo: (msgAddress, amaId) => dispatch(EngineActions.sendAmaInfo(msgAddress, amaId)),
     sendNotification: (token, publicKey, bearerToken) => dispatch(EngineActions.sendNotification(token, publicKey, bearerToken)),
     handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),
     updateContactPubKey: (aContactId) => dispatch(EngineActions.updateContactPubKey(aContactId)),

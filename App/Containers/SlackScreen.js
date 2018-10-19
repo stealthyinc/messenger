@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Platform } from 'react-native';
+import { View, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
 import PropTypes from 'prop-types';
 import { GiftedChat } from 'react-native-gifted-chat';
 import emojiUtils from 'emoji-utils';
@@ -104,6 +104,10 @@ class SlackScreen extends React.Component {
 
   render() {
     console.log("AMA data in SlackScreen", this.props.amaData)
+    if (!this.props.amaData)
+      return (<View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
+              <ActivityIndicator size="large" color="#34bbed"/>
+            </View>)
     return (
       <GiftedChat
         messages={this.state.messages}

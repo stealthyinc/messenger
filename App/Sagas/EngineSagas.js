@@ -43,16 +43,15 @@ const createEngine = (userData) => {
 
 function* watchAmaDataChannel() {
   const channel = eventChannel(emitter => {
-    EngineInstance.on('me-update-ama-data', (amaId, amaData) => emitter(amaId, amaData))
+    EngineInstance.on('me-update-ama-data', (amaData) => emitter(amaData))
     return () => {
       console.log(`Messaging Engine AMA Updated`)
     }
   })
   while (true) {
-    console.log('PRE-AMA')
     const amaData = yield take(channel)
     console.log('AMA:', amaData)
-    yield put(EngineActions.setEngineAmaData(amaData))
+    yield put(EngineActions.setAmaData(amaData))
   }
 }
 
@@ -220,6 +219,12 @@ function* handleMobileBackground() {
   EngineInstance.handleMobileBackground()
 }
 
+function* fetchAmaData(action) {
+  const { msgAddress, amaId } = action
+  console.log('AMA', msgAddress, amaId)
+  EngineInstance.fetchAmaData(msgAddress, amaId)
+}
+
 function* getToken() {
   const api = DebugConfig.useFixtures ? FixtureAPI : API.getAccessToken("https://us-central1-coldmessage-ae5bc.cloudfunctions.net/getAccessToken")
   const response = yield call (api.token)
@@ -295,6 +300,7 @@ export function* startEngine (action) {
   yield takeLatest(EngineTypes.FORE_GROUND, handleMobileForeground)
   yield takeLatest(EngineTypes.BACK_GROUND, handleMobileBackground)
   yield takeEvery(EngineTypes.NEW_NOTIFICATION, notificationTasks)
+  yield takeLatest(EngineTypes.SEND_AMA_INFO, fetchAmaData)
 }
 
 export function * getUserProfile (api, action) {

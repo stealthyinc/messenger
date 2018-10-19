@@ -40,7 +40,8 @@ const { Types, Creators } = createActions({
   foreGround: [''],
   backGround: [''],
   setSignInPending: ['flag'],
-  setEngineAmaData: ['amaData'],
+  setAmaData: ['amaData'],
+  sendAmaInfo: ['msgAddress', 'amaId'],
 })
 
 export const EngineTypes = Types
@@ -195,7 +196,7 @@ export const restartEngine = (state) => {
 }
 
 // engine has got new ama data
-export const setEngineAmaData = (state, { amaData }) => {
+export const setAmaData = (state, { amaData }) => {
   return state.merge({ amaData })
 }
 
@@ -214,7 +215,7 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_ENGINE_INITIAL]: setEngineInitial,
   [Types.SET_ENGINE_CONTACT_MGR]: setEngineContactMgr,
   [Types.SET_ENGINE_MESSAGES]: setEngineMessages,
-  [Types.SET_ENGINE_AMA_DATA]: setEngineAmaData,
+  [Types.SET_AMA_DATA]: setAmaData,
   [Types.SET_CONTACT_ADDED]: setContactAdded,
   [Types.SET_TOKEN]: setToken,
   [Types.SET_USER_SETTINGS]: setUserSettings,
