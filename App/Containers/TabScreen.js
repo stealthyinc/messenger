@@ -11,7 +11,7 @@ import DappStore from './DappStore'
 
 export default TabNavigator(
   {
-    // Channels: { screen: DiscoverScreen },
+    Channels: { screen: DiscoverScreen },
     // Channels: { screen: SlackScreen },
     Messages: { screen: ConversationScreen },
     // Wallet: { screen: WalletScreen },
