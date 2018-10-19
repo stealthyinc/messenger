@@ -231,6 +231,9 @@ class ChatScreen extends Component {
       }
       else if (contentType === 'TEXT_JSON') {
         text = body.text
+        if (!text) {
+          text = body.title // fun workaround: TODO-unf me
+        }
         url = body.url
         gimage = body.image
       }
