@@ -208,7 +208,7 @@ class DappStore extends Component {
         </View>
         <View style={{flexDirection: 'row', marginBottom: 5}}>
           <View style={{margin: 10}}>
-            <TouchableOpacity style={[customStyle, { backgroundColor: this.getIconColor('notes') }]} onPress={() => this.handleMiddleWare('https://graphite--infallible-williams-866040.netlify.com', 'notes')}>
+            <TouchableOpacity style={[customStyle, { backgroundColor: this.getIconColor('notes') }]} onPress={() => this.handleMiddleWare('https://notelayout2--infallible-williams-866040.netlify.com', 'notes')}>
             {/*<TouchableOpacity style={customStyle} onPress={() => this._onPressButton('https://note.riot.ai/')}>*/}
               <Image source={note} style={{width: 80, height: 80, borderRadius: 10}}/>
             </TouchableOpacity>

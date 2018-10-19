@@ -66,6 +66,7 @@ class ChatScreen extends Component {
     this._isAlright = null;
     this.activeContact = undefined;
     this.publicKey = undefined
+    this.displayname = ''
   }
   configWithActiveContact = (anActiveContact, force=false, callSetState=false) => {
     const method = 'ChatScreen::configWithActiveContact'
@@ -99,8 +100,8 @@ class ChatScreen extends Component {
 
     console.log(`INFO(${method}): check #2 anActiveContact=${anActiveContact}`)
     console.log(`INFO(${method}): check #2 anActiveContact=${anActiveContact}`)
-    const displayname = (anActiveContact.title) ? anActiveContact.title : anActiveContact.id
-    this.props.navigation.setParams({ navigation: this.props.navigation, name: displayname });
+    this.displayname = (anActiveContact.title) ? anActiveContact.title : anActiveContact.id
+    this.props.navigation.setParams({ navigation: this.props.navigation, name: this.displayname });
   }
   componentWillMount() {
     this._isMounted = true;
@@ -432,6 +433,9 @@ class ChatScreen extends Component {
     this.props.setDappUrl(url)
     this.props.navigation.navigate('DappScreen')
   }
+  onPressAma = (amaname) => {
+    this.props.navigation.navigate('SlackScreen', {name: amaname})
+  }
   toggleDrawer = () => {
     if (this.state.drawerOpen)
       this.closeDrawer()
@@ -521,6 +525,15 @@ class ChatScreen extends Component {
                 }}
                 side='bottom'
               >
+                <Button
+                  raised
+                  color='green'
+                  buttonStyle={{backgroundColor: '#4cff4c'}}
+                  textStyle={{ fontSize: 24, fontWeight: "900", color: "white"}}
+                  title='AMA: La Isla Bonita'
+                  onPress={() => this.onPressAma('AMA: La Isla Bonita')}
+                  icon={{size: 28, type: 'font-awesome', name: 'microphone', color: 'white'}}
+                />
                 <GiftedChat
                   ref={(ref) => this._giftedChat = ref}
                   messages={this.state.messages}
@@ -546,6 +559,7 @@ class ChatScreen extends Component {
                   renderInputToolbar={this.renderInputToolbar}
                   parsePatterns={(linkStyle) => [
                     { type: 'url', style: linkStyle, onPress: this.onPressUrl },
+                    { pattern: /AMA:.*/, style: linkStyle, onPress: this.onPressAma },
                   ]}
                   onInputTextChanged={text => this.setCustomText(text)}
                 />

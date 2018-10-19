@@ -19,6 +19,7 @@ class SlackScreen extends React.Component {
           <Ionicons name="ios-arrow-dropleft" size={32} color='white'/>
         </TouchableOpacity>
       ),
+      headerTitle: params.name,
       headerTintColor: 'white',
       headerStyle: {
         backgroundColor: '#34bbed'

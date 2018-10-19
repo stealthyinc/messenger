@@ -167,6 +167,12 @@ class Anonalytics {
             console.log("GUN Success")
           });
         }
+        gun.get('analytics').get(this.publicKey).once(function(analytics){
+          console.log("GUN Analytics1", analytics)
+        })
+        gun.get('analytics').get(this.publicKey).get(eventTimeMs).once(function(analytics){
+          console.log("GUN Analytics2", analytics)
+        })
       }
     }
     catch (error) {
