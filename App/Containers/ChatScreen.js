@@ -529,6 +529,17 @@ class ChatScreen extends Component {
         </View>
       )
     }
+    const amaButton = (utils.isAma(this.protocol)) ? (
+      <Button
+        raised
+        color='green'
+        buttonStyle={{backgroundColor: '#4cff4c'}}
+        textStyle={{ fontSize: 24, fontWeight: "900", color: "white"}}
+        title='AMA: La Isla Bonita'
+        onPress={() => this.onPressAma('AMA: La Isla Bonita')}
+        icon={{size: 28, type: 'font-awesome', name: 'microphone', color: 'white'}}
+      />
+    ) : null
     return (
       <View id='GiftedChatContainer'
            style={{flex: 1,
@@ -555,15 +566,7 @@ class ChatScreen extends Component {
                 }}
                 side='bottom'
               >
-                <Button
-                  raised
-                  color='green'
-                  buttonStyle={{backgroundColor: '#4cff4c'}}
-                  textStyle={{ fontSize: 24, fontWeight: "900", color: "white"}}
-                  title='AMA: La Isla Bonita'
-                  onPress={() => this.onPressAma('AMA: La Isla Bonita')}
-                  icon={{size: 28, type: 'font-awesome', name: 'microphone', color: 'white'}}
-                />
+                {amaButton}
                 <GiftedChat
                   ref={(ref) => this._giftedChat = ref}
                   messages={this.state.messages}

@@ -117,6 +117,7 @@ class SlackScreen extends React.Component {
         text: questionData.question.text,
         createdAt: Date.now(),
         user: {
+          _id: 1,
           name: questionData.question.author,
           avatar: '',
         }
@@ -128,14 +129,14 @@ class SlackScreen extends React.Component {
           text: response.text,
           createdAt: Date.now(),
           user: {
+            _id: 2,
             name: response.author,
-            avatar: '',
+            avatar: demoIcon,
           }
         }
         amaMsgs.push(resp)
       }
     }
-
     amaMsgs.reverse()
     return (
       <GiftedChat
