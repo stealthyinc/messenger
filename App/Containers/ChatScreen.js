@@ -533,7 +533,7 @@ class ChatScreen extends Component {
       <Button
         raised
         color='green'
-        buttonStyle={{backgroundColor: '#4cff4c'}}
+        buttonStyle={{backgroundColor: '#b37ccf'}}
         textStyle={{ fontSize: 24, fontWeight: "900", color: "white"}}
         title='AMA: La Isla Bonita'
         onPress={() => this.onPressAma('AMA: La Isla Bonita')}

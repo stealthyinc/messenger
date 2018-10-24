@@ -7,7 +7,11 @@ import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import SlackMessage from './chat/SlackMessage';
+import AwesomeAlert from 'react-native-awesome-alerts';
+import ActionSheet from 'react-native-actionsheet'
+import PopupDialog from '../Components/PopupDialog';
 import Avatar from './chat/SlackAvatar';
+import { Toast } from 'native-base';
 import demoIcon from '../Images/democ1.png';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
@@ -27,7 +31,6 @@ class SlackScreen extends React.Component {
       }
     };
   };
-
   constructor(props) {
     super(props)
     if (props.navigation && props.navigation.state && props.navigation.state.params) {
@@ -36,12 +39,15 @@ class SlackScreen extends React.Component {
       this.id = params.id
       this.msgAddress = params.msgAddress
     }
+    this.state = { 
+      messages: [],
+      showDialog: false,
+      showAlert: false,
+      alertMessage: '',
+      alertTitle: '',
+      alertOption: ''
+    }
   }
-
-  state = {
-    messages: [],
-  }
-
   componentWillMount() {
     this.setState({
       messages: [
@@ -69,7 +75,6 @@ class SlackScreen extends React.Component {
     })
     this.props.navigation.setParams({ navigation: this.props.navigation });
   }
-
   onSend(messages = []) {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
@@ -77,12 +82,9 @@ class SlackScreen extends React.Component {
     const {text, gtext, image, url} = messages[0]
     this.props.handleOutgoingMessage(text, undefined);
   }
-
   renderMessage(props) {
     const { currentMessage: { text: currText } } = props;
-
     let messageTextStyle;
-
     // Make "pure emoji" messages much bigger than plain text.
     if (currText && emojiUtils.isPureEmojiString(currText)) {
       messageTextStyle = {
@@ -91,20 +93,53 @@ class SlackScreen extends React.Component {
         lineHeight: Platform.OS === 'android' ? 34 : 30,
       };
     }
-
     return (
       <SlackMessage {...props} messageTextStyle={messageTextStyle} />
     );
   }
-
   renderAvatar(props) {
     return (
       <Avatar {...props} />
     )
   }
-
+  showActionSheet = () => {
+    this.ActionSheet.show()
+  }
+  onLongPress = (context) => {
+    if (context) {
+      const options = [
+        'Answer Question',
+        'Delete Question',
+        'Cancel',
+      ];
+      const destructiveButtonIndex = options.length - 1;
+      context.actionSheet().showActionSheetWithOptions({
+        options,
+        destructiveButtonIndex,
+      },
+      (buttonIndex) => {
+        switch (buttonIndex) {
+          case 0:
+            this.setState({
+              showDialog: true,
+            })
+            break;
+          case 1:
+            this.setState({
+              showAlert: true,
+              alertTitle: 'AMA Admin',
+              alertMessage: 'Do you want to delete the question?',
+              alertOption: 'Delete'
+            })
+            break;
+        }
+      });
+    }
+  }
+  closeDialog = () => {
+    this.setState({ showDialog: false })
+  }
   render() {
-    console.log("AMA data in SlackScreen", this.props.amaData)
     if (!this.props.amaData)
       return (<View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
               <ActivityIndicator size="large" color="#34bbed"/>
@@ -139,16 +174,71 @@ class SlackScreen extends React.Component {
       }
     }
     amaMsgs.reverse()
+    //TODO: need to feed the id of the current user
+    this.user = 'pbj.id'
+    //TODO: need to determine if user is a delegate/admin
+    this.delegate = true
+    const { 
+      showAlert, 
+      alertTitle, 
+      alertMessage, 
+      alertOption, 
+      showDialog 
+    } = this.state
+    if (showDialog) {
+      return (
+        <PopupDialog 
+          closeDialog={this.closeDialog}
+        />
+      )
+    }
+    else if (showAlert) {
+      return (
+        <AwesomeAlert
+          show={true}
+          showProgress={false}
+          title={alertTitle}
+          message={alertMessage}
+          closeOnTouchOutside={false}
+          closeOnHardwareBackPress={true}
+          showCancelButton={true}
+          showConfirmButton={true}
+          cancelText="Cancel"
+          confirmText={alertOption}
+          cancelButtonColor="#DD6B55"
+          confirmButtonColor="#34bbed"
+          onCancelPressed={() => {
+            this.setState({showAlert: false})
+          }}
+          onConfirmPressed={() => {
+            this.setState({showAlert: false})
+          }}
+        />
+      )
+    }
     return (
-      <GiftedChat
-        messages={amaMsgs}
-        onSend={messages => this.onSend(messages)}
-        user={{
-          _id: 1,
-        }}
-        renderMessage={this.renderMessage}
-        renderAvatar={this.renderAvatar}
-      />
+      <View style={{flex:1}}>
+        <ActionSheet
+          ref={o => this.ActionSheet = o}
+          title={'Would you like to delete the user?'}
+          options={['Delete', 'Cancel']}
+          cancelButtonIndex={1}
+          destructiveButtonIndex={0}
+          onPress={(index) => { /* do something */ }}
+        />
+        <GiftedChat
+          messages={amaMsgs}
+          onSend={messages => this.onSend(messages)}
+          user={{
+            _id: this.user
+          }}
+          placeholder='Ask a question...'
+          onLongPress={(this.delegate) ? this.onLongPress : null}
+          renderMessage={this.renderMessage}
+          renderAvatar={this.renderAvatar}
+          onPressAvatar={(this.delegate) ? (user) => this.showActionSheet(user) : null}
+        />
+      </View>
     );
   }
 
