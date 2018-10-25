@@ -115,7 +115,7 @@ class SlackScreen extends React.Component {
       <SlackMessage {...props} messageTextStyle={messageTextStyle} />
     );
   }
-  renderAvatar(props) {
+  renderAvatar = (props) => {
     return (
       <Avatar 
         {...props}
@@ -178,7 +178,7 @@ class SlackScreen extends React.Component {
   handleUserActionSheet = (index) => {
     switch (index) {
       case 0: {
-        const stringifiedCmd = this.amaCmds.userBlock(this.state.user._id)
+        const stringifiedCmd = this.amaCmds.userBlock(this.state.user.name)
         this.props.handleOutgoingMessage(stringifiedCmd, undefined);
         break;
       }
@@ -266,8 +266,8 @@ class SlackScreen extends React.Component {
       <View style={{flex:1}}>
         <ActionSheet
           ref={o => this.ActionSheet = o}
-          title={'Would you like to delete the user?'}
-          options={['Delete', 'Cancel']}
+          title={'Would you like to block the user?'}
+          options={['Block', 'Cancel']}
           cancelButtonIndex={1}
           destructiveButtonIndex={0}
           onPress={(this.delegate) ? (index) => this.handleUserActionSheet(index) : null}
@@ -280,7 +280,7 @@ class SlackScreen extends React.Component {
           }}
           placeholder='Ask a question...'
           onLongPress={(this.delegate) ? this.onLongPress : null}
-          renderMessage={this.renderMessage}
+          // renderMessage={this.renderMessage}
           renderAvatar={this.renderAvatar}
           onPressAvatar={(this.delegate) ? (user) => this.showActionSheet(user) : null}
         />
