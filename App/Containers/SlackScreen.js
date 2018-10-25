@@ -21,7 +21,8 @@ import PopupDialog, {
   DialogTitle,
   SlideAnimation,
 } from 'react-native-popup-dialog';
-import { Button, Container, Header, Content, Item, Form, Textarea } from 'native-base';
+import { Container, Header, Content, Item, Form, Textarea } from 'native-base';
+import { Button, Icon } from 'react-native-elements'
 
 const slideAnimation = new SlideAnimation({ slideFrom: 'bottom' });
 
@@ -72,6 +73,7 @@ class SlackScreen extends React.Component {
       currentMessage: '',
       user: '',
       amaAnswer: '',
+      newContent: true,
     }
   }
   componentWillMount() {
@@ -238,8 +240,20 @@ class SlackScreen extends React.Component {
       alertTitle,
       alertMessage,
       alertOption,
-      showDialog
+      showDialog,
+      newContent,
     } = this.state
+    const refreshButton = (newContent) ? (
+      <Button
+        raised
+        color='green'
+        buttonStyle={{backgroundColor: '#0364bf'}}
+        textStyle={{ fontSize: 24, fontWeight: "900", color: "white"}}
+        title='New Content Available'
+        onPress={() => {this.setState({newContent: false}); alert('Content Refreshed')}}
+        icon={{size: 28, type: 'font-awesome', name: 'refresh', color: 'white'}}
+      />
+    ) : null
     if (showAlert) {
       return (
         <AwesomeAlert
@@ -273,23 +287,29 @@ class SlackScreen extends React.Component {
           }}
           dialogAnimation={slideAnimation}
           actions={[
-            <Button 
-              key="button-1"
-              success 
-              onPress={() => {
-                this.slideAnimationDialog.dismiss();
-                this.answerQuestion(this.state.amaAnswer)
-              }}>
-              <Text> Submit </Text>
-            </Button>,
-            <Button 
-              key="button-2"
-              danger 
-              onPress={() => {
-                this.slideAnimationDialog.dismiss();
-              }}>
-              <Text> Close </Text>
-            </Button>
+            <View style={{flexDirection: 'row'}}>
+              <Button 
+                key="button-2"
+                raised
+                title='Close'
+                leftIcon={{name: 'close'}}
+                buttonStyle={{backgroundColor: '#DD6B55'}}
+                onPress={() => {
+                  this.slideAnimationDialog.dismiss();
+                }}>
+              </Button>,
+              <Button 
+                key="button-1"
+                raised
+                title='Submit'
+                leftIcon={{name: 'check'}}
+                buttonStyle={{backgroundColor: '#34bbed'}}
+                onPress={() => {
+                  this.slideAnimationDialog.dismiss();
+                  this.answerQuestion(this.state.amaAnswer)
+                }}>
+              </Button>
+            </View>
           ]}
         >
           <Container>
@@ -308,6 +328,7 @@ class SlackScreen extends React.Component {
           destructiveButtonIndex={0}
           onPress={(this.delegate) ? (index) => this.handleUserActionSheet(index) : null}
         />
+        {refreshButton}
         <GiftedChat
           messages={amaMsgs}
           onSend={messages => this.onSend(messages)}

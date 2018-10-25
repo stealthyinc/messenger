@@ -3,10 +3,15 @@ import { Image, Modal, Keyboard, StyleSheet, ScrollView, TouchableOpacity, Touch
 import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button, Icon } from 'react-native-elements'
-import { Toast } from 'native-base';
 import Drawer from 'react-native-drawer'
 import ControlPanel from './ControlPanel'
 import dismissKeyboard from 'dismissKeyboard';
+
+import PopupDialog, {
+  DialogTitle,
+  SlideAnimation,
+} from 'react-native-popup-dialog';
+import { Container, Header, Content, Item, Form, Textarea, Toast } from 'native-base';
 
 // Styles
 import styles from './Styles/ChatStyle'
@@ -21,6 +26,7 @@ const common = require('./../common.js');
 const utils = require('./../Engine/misc/utils.js');
 
 const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js');
+const slideAnimation = new SlideAnimation({ slideFrom: 'bottom' });
 
 class ChatScreen extends Component {
   static navigationOptions = ({ navigation }) => {
@@ -67,6 +73,7 @@ class ChatScreen extends Component {
     this.activeContact = undefined;
     this.publicKey = undefined
     this.displayname = ''
+    this.delegate = true
 
     // Stores AMA id values for each
     // AMA title (used to pass id in for navigation):
@@ -85,6 +92,7 @@ class ChatScreen extends Component {
 
     this.activeContact = anActiveContact
     this.publicKey = (this.activeContact) ? this.activeContact.publicKey : undefined
+    this.isAma = utils.isAma(this.activeContact.protocol)
 
     const notificationPath = common.getDbNotificationPath(anActiveContact.publicKey)
     firebaseInstance.getFirebaseRef(`${notificationPath}/token`).once('value')
@@ -381,6 +389,13 @@ class ChatScreen extends Component {
       >
         <Ionicons name="ios-aperture" size={28} color='#34bbed' />
       </TouchableOpacity>
+    ) : (this.isAma) ? (
+      <TouchableOpacity
+        style={[styles.chatContainer, this.props.containerStyle]}
+        onPress={() => this.slideAnimationDialog.show()}
+      >
+        <Ionicons name="ios-compass" size={28} color='#34bbed' />
+      </TouchableOpacity>
     ) : (
       <TouchableOpacity
         style={[styles.chatContainer, this.props.containerStyle]}
@@ -529,17 +544,18 @@ class ChatScreen extends Component {
         </View>
       )
     }
-    const amaButton = (this.activeContact && utils.isAma(this.activeContact.protocol)) ? (
+    const amaButton = (this.activeContact && this.isAma && this.state.amaTitle) ? (
       <Button
         raised
         color='green'
         buttonStyle={{backgroundColor: '#b37ccf'}}
         textStyle={{ fontSize: 24, fontWeight: "900", color: "white"}}
-        title='AMA: La Isla Bonita'
-        onPress={() => this.onPressAma('AMA: La Isla Bonita')}
+        title={this.state.amaTitle}
+        onPress={() => this.onPressAma(this.state.amaTitle)}
         icon={{size: 28, type: 'font-awesome', name: 'microphone', color: 'white'}}
       />
     ) : null
+    const disableAmaFeatures = this.isAma && !this.delegate
     return (
       <View id='GiftedChatContainer'
            style={{flex: 1,
@@ -566,6 +582,48 @@ class ChatScreen extends Component {
                 }}
                 side='bottom'
               >
+                <PopupDialog
+                  dialogTitle={<DialogTitle title="AMA Topic" />}
+                  ref={(popupDialog) => {
+                    this.slideAnimationDialog = popupDialog;
+                  }}
+                  dialogAnimation={slideAnimation}
+                  actions={[
+                    <View style={{flexDirection: 'row'}} key="view3">
+                      <Button 
+                        key="button-2"
+                        raised
+                        title='Close'
+                        leftIcon={{name: 'close'}}
+                        buttonStyle={{backgroundColor: '#DD6B55'}}
+                        onPress={() => {
+                          this.slideAnimationDialog.dismiss();
+                        }}>
+                      </Button>,
+                      <Button 
+                        key="button-1"
+                        raised
+                        title='Submit'
+                        leftIcon={{name: 'check'}}
+                        buttonStyle={{backgroundColor: '#34bbed'}}
+                        onPress={() => {
+                          this.slideAnimationDialog.dismiss();
+                          const stringifiedCmd = this.amaCmds.amaCreate(this.state.amaAnswer)
+                          this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+                          this.setState({amaTitle: this.state.amaAnswer})
+                        }}>
+                      </Button>
+                    </View>
+                  ]}
+                >
+                  <Container>
+                    <Content padder>
+                      <Form>
+                        <Textarea onChangeText={(amaAnswer) => this.setState({amaAnswer})} rowSpan={5} bordered placeholder="Enter a AMA Topic" />
+                      </Form>
+                    </Content>
+                  </Container>
+                </PopupDialog>
                 {amaButton}
                 <GiftedChat
                   ref={(ref) => this._giftedChat = ref}
@@ -583,7 +641,7 @@ class ChatScreen extends Component {
                     _id: this.state.author.username, // sent messages should have same user._id
                   }}
                   text={this.state.inputText}
-                  renderActions={this.renderCustomActions}
+                  renderActions={(!disableAmaFeatures) ? this.renderCustomActions : null}
                   renderBubble={this.renderBubble}
                   renderSystemMessage={this.renderSystemMessage}
                   renderMessageImage={this.renderCustomView}
@@ -595,6 +653,7 @@ class ChatScreen extends Component {
                     { pattern: /AMA:.*\n\n.*/, style: linkStyle, onPress: this.onPressAma },
                   ]}
                   onInputTextChanged={text => this.setCustomText(text)}
+                  textInputProps={{editable: (!disableAmaFeatures)}}
                   onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
                 />
               </Drawer>
