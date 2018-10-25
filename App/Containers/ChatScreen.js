@@ -595,6 +595,7 @@ class ChatScreen extends Component {
                     { pattern: /AMA:.*\n\n.*/, style: linkStyle, onPress: this.onPressAma },
                   ]}
                   onInputTextChanged={text => this.setCustomText(text)}
+                  onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
                 />
               </Drawer>
             )

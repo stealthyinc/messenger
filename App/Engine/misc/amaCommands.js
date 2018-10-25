@@ -1,4 +1,4 @@
-class AmaCommands {
+export default class AmaCommands {
   constructor(aUserId, amaId) {
     this.userId = aUserId
     this.amaId = amaId

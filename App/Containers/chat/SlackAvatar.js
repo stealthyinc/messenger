@@ -46,10 +46,10 @@ export default class Avatar extends React.PureComponent {
     }
     const votes = (!this.props.currentMessage.user.avatar) ? (
       <View style={{marginRight: 10}}>
-        <TouchableOpacity onPress={() => alert('Upvote!')}>
-          <Ionicons name="ios-arrow-dropup" size={20} color='green'/>
+        <TouchableOpacity onPress={() => this.props.questionUpvote(this.props.currentMessage._id)}>
+          <Ionicons name="ios-arrow-dropup" size={30} color='green'/>
         </TouchableOpacity>
-        <Text style={{textAlign: 'center'}}>10</Text>
+        <Text style={{textAlign: 'center', fontSize: 14}}>10</Text>
       </View>
     ) : <View style={{margin: 20}} />
     return (

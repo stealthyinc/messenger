@@ -43,9 +43,9 @@ class SlackScreen extends React.Component {
 
       // TODO: need the actual user ID--for now we'll use the hack pbj did below
       //       and use his ID
-      this.userId = 'pbj.id'
+      this.userId = props.userData.username
       // Pretty sure the id for this object is the AMA id
-      this.amaCmds = new AmaCommands(pbj.id, this.id)
+      this.amaCmds = new AmaCommands(this.userId, this.id)
       //
       // Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav
       // Prabhaav to use this object, when a person does something like answer a
@@ -60,7 +60,9 @@ class SlackScreen extends React.Component {
       showAlert: false,
       alertMessage: '',
       alertTitle: '',
-      alertOption: ''
+      alertOption: '',
+      currentMessage: '',
+      user: '',
     }
   }
   componentWillMount() {
@@ -94,8 +96,9 @@ class SlackScreen extends React.Component {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }))
-    const {text, gtext, image, url} = messages[0]
-    this.props.handleOutgoingMessage(text, undefined);
+    const { text } = messages[0]
+    const stringifiedCmd = this.amaCmds.questionCreate(text)
+    this.props.handleOutgoingMessage(stringifiedCmd, undefined);
   }
   renderMessage(props) {
     const { currentMessage: { text: currText } } = props;
@@ -114,13 +117,21 @@ class SlackScreen extends React.Component {
   }
   renderAvatar(props) {
     return (
-      <Avatar {...props} />
+      <Avatar 
+        {...props}
+        questionUpvote={this.questionUpvote}
+      />
     )
   }
-  showActionSheet = () => {
+  showActionSheet = (user) => {
+    this.setState({ user })
     this.ActionSheet.show()
   }
-  onLongPress = (context) => {
+  questionUpvote = (questionId) => {
+    const stringifiedCmd = this.amaCmds.questionUpvote(questionId)
+    this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+  }
+  onLongPress = (context, currentMessage) => {
     if (context) {
       const options = [
         'Answer Question',
@@ -137,6 +148,7 @@ class SlackScreen extends React.Component {
           case 0:
             this.setState({
               showDialog: true,
+              currentMessage
             })
             break;
           case 1:
@@ -144,15 +156,33 @@ class SlackScreen extends React.Component {
               showAlert: true,
               alertTitle: 'AMA Admin',
               alertMessage: 'Do you want to delete the question?',
-              alertOption: 'Delete'
+              alertOption: 'Delete',
+              currentMessage
             })
             break;
         }
       });
     }
   }
+  answerQuestion = (answer) => {
+    const stringifiedCmd = this.amaCmds.answerCreate(this.state.currentMessage._id, text)
+    this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+  }
+  deleteQuestion = () => {
+    const stringifiedCmd = this.amaCmds.questionDelete(this.state.currentMessage._id)
+    this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+  }
   closeDialog = () => {
     this.setState({ showDialog: false })
+  }
+  handleUserActionSheet = (index) => {
+    switch (index) {
+      case 0: {
+        const stringifiedCmd = this.amaCmds.userBlock(this.state.user._id)
+        this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+        break;
+      }
+    }
   }
   render() {
     if (!this.props.amaData)
@@ -204,6 +234,7 @@ class SlackScreen extends React.Component {
       return (
         <PopupDialog
           closeDialog={this.closeDialog}
+          answerQuestion={(answer) => this.answerQuestion(answer)}
         />
       )
     }
@@ -226,7 +257,7 @@ class SlackScreen extends React.Component {
             this.setState({showAlert: false})
           }}
           onConfirmPressed={() => {
-            this.setState({showAlert: false})
+            this.deleteQuestion()
           }}
         />
       )
@@ -239,7 +270,7 @@ class SlackScreen extends React.Component {
           options={['Delete', 'Cancel']}
           cancelButtonIndex={1}
           destructiveButtonIndex={0}
-          onPress={(index) => { /* do something */ }}
+          onPress={(this.delegate) ? (index) => this.handleUserActionSheet(index) : null}
         />
         <GiftedChat
           messages={amaMsgs}
@@ -261,6 +292,7 @@ class SlackScreen extends React.Component {
 
 const mapStateToProps = (state) => {
   return {
+    userData: EngineSelectors.getUserData(state),
     amaData: EngineSelectors.getAmaData(state),
   }
 }
