@@ -38,8 +38,21 @@ class SlackScreen extends React.Component {
       this.name = params.name
       this.id = params.id
       this.msgAddress = params.msgAddress
+
+      // TODO: need the actual user ID--for now we'll use the hack pbj did below
+      //       and use his ID
+      this.userId = 'pbj.id'
+      // Pretty sure the id for this object is the AMA id
+      this.amaCmds = new AmaCommands(pbj.id, this.id)
+      //
+      // Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav 
+      // Prabhaav to use this object, when a person does something like answer a
+      // question, do the following:
+      // const stringifiedCmd = this.amaCmds.answerCreate(<question_id>, 'This is the answer.')
+      // const json = undefined
+      // EngineActions.setOutgoingMessage(stringifiedCmd, json)
     }
-    this.state = { 
+    this.state = {
       messages: [],
       showDialog: false,
       showAlert: false,
@@ -178,16 +191,16 @@ class SlackScreen extends React.Component {
     this.user = 'pbj.id'
     //TODO: need to determine if user is a delegate/admin
     this.delegate = true
-    const { 
-      showAlert, 
-      alertTitle, 
-      alertMessage, 
-      alertOption, 
-      showDialog 
+    const {
+      showAlert,
+      alertTitle,
+      alertMessage,
+      alertOption,
+      showDialog
     } = this.state
     if (showDialog) {
       return (
-        <PopupDialog 
+        <PopupDialog
           closeDialog={this.closeDialog}
         />
       )
