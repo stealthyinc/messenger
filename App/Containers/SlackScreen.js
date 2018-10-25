@@ -15,6 +15,8 @@ import { Toast } from 'native-base';
 import demoIcon from '../Images/democ1.png';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
+import AmaCommands from '../Engine/misc/amaCommands.js'
+
 class SlackScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {};
@@ -45,7 +47,7 @@ class SlackScreen extends React.Component {
       // Pretty sure the id for this object is the AMA id
       this.amaCmds = new AmaCommands(pbj.id, this.id)
       //
-      // Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav 
+      // Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav
       // Prabhaav to use this object, when a person does something like answer a
       // question, do the following:
       // const stringifiedCmd = this.amaCmds.answerCreate(<question_id>, 'This is the answer.')

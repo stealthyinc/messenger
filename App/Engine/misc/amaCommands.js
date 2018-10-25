@@ -17,7 +17,7 @@ class AmaCommands {
   }
 
   questionCreate(text) {
-    const obj {
+    const obj = {
       ama_id: this.amaId,
       text: text
     }
@@ -26,7 +26,7 @@ class AmaCommands {
   }
 
   questionDelete(aQuestionId) {
-    const obj {
+    const obj = {
       ama_id: this.amaId,
       question_id: aQuestionId
     }
@@ -35,7 +35,7 @@ class AmaCommands {
   }
 
   questionUpvote(aQuestionId) {
-    const obj {
+    const obj = {
       ama_id: this.amaId,
       question_id: aQuestionId
     }
@@ -44,7 +44,7 @@ class AmaCommands {
   }
 
   questionUnvote(aQuestionId) {
-    const obj {
+    const obj = {
       ama_id: this.amaId,
       question_id: aQuestionId
     }
@@ -53,7 +53,7 @@ class AmaCommands {
   }
 
   answerCreate(questionId, text) {
-    const obj {
+    const obj = {
       ama_id: this.amaId,
       question_id: aQuestionId,
       text: text
@@ -63,7 +63,7 @@ class AmaCommands {
   }
 
   userBlock(aUserId) {
-    const obj {
+    const obj = {
       user_id: aUserId
     }
 
@@ -71,7 +71,7 @@ class AmaCommands {
   }
 
   delegateAdd(aUserId) {
-    const obj {
+    const obj = {
       ama_id: this.amaId,
       user_id: aUserId
     }
@@ -80,7 +80,7 @@ class AmaCommands {
   }
 
   delegateDelete(aUserId) {
-    const obj {
+    const obj = {
       ama_id: this.amaId,
       user_id: aUserId
     }
