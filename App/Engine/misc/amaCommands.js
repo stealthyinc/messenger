@@ -52,7 +52,7 @@ export default class AmaCommands {
     return AmaCommands.cmdToText('questionUnvote', obj)
   }
 
-  answerCreate(questionId, text) {
+  answerCreate(aQuestionId, text) {
     const obj = {
       ama_id: this.amaId,
       question_id: aQuestionId,

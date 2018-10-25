@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Platform, ActivityIndicator, StyleSheet } from 'react-native';
 import PropTypes from 'prop-types';
 import { GiftedChat } from 'react-native-gifted-chat';
 import emojiUtils from 'emoji-utils';
@@ -9,13 +9,21 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import SlackMessage from './chat/SlackMessage';
 import AwesomeAlert from 'react-native-awesome-alerts';
 import ActionSheet from 'react-native-actionsheet'
-import PopupDialog from '../Components/PopupDialog';
+// import PopupDialog from '../Components/PopupDialog';
 import Avatar from './chat/SlackAvatar';
 import { Toast } from 'native-base';
 import demoIcon from '../Images/democ1.png';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 import AmaCommands from '../Engine/misc/amaCommands.js'
+
+import PopupDialog, {
+  DialogTitle,
+  SlideAnimation,
+} from 'react-native-popup-dialog';
+import { Button, Container, Header, Content, Item, Form, Textarea } from 'native-base';
+
+const slideAnimation = new SlideAnimation({ slideFrom: 'bottom' });
 
 class SlackScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -63,6 +71,7 @@ class SlackScreen extends React.Component {
       alertOption: '',
       currentMessage: '',
       user: '',
+      amaAnswer: '',
     }
   }
   componentWillMount() {
@@ -145,12 +154,13 @@ class SlackScreen extends React.Component {
       },
       (buttonIndex) => {
         switch (buttonIndex) {
-          case 0:
+          case 0: {
             this.setState({
-              showDialog: true,
               currentMessage
             })
+            this.slideAnimationDialog.show()
             break;
+          }
           case 1:
             this.setState({
               showAlert: true,
@@ -165,7 +175,7 @@ class SlackScreen extends React.Component {
     }
   }
   answerQuestion = (answer) => {
-    const stringifiedCmd = this.amaCmds.answerCreate(this.state.currentMessage._id, text)
+    const stringifiedCmd = this.amaCmds.answerCreate(this.state.currentMessage._id, answer)
     this.props.handleOutgoingMessage(stringifiedCmd, undefined);
   }
   deleteQuestion = () => {
@@ -230,15 +240,7 @@ class SlackScreen extends React.Component {
       alertOption,
       showDialog
     } = this.state
-    if (showDialog) {
-      return (
-        <PopupDialog
-          closeDialog={this.closeDialog}
-          answerQuestion={(answer) => this.answerQuestion(answer)}
-        />
-      )
-    }
-    else if (showAlert) {
+    if (showAlert) {
       return (
         <AwesomeAlert
           show={true}
@@ -264,9 +266,43 @@ class SlackScreen extends React.Component {
     }
     return (
       <View style={{flex:1}}>
+        <PopupDialog
+          dialogTitle={<DialogTitle title="AMA Answer" />}
+          ref={(popupDialog) => {
+            this.slideAnimationDialog = popupDialog;
+          }}
+          dialogAnimation={slideAnimation}
+          actions={[
+            <Button 
+              key="button-1"
+              success 
+              onPress={() => {
+                this.slideAnimationDialog.dismiss();
+                this.answerQuestion(this.state.amaAnswer)
+              }}>
+              <Text> Submit </Text>
+            </Button>,
+            <Button 
+              key="button-2"
+              danger 
+              onPress={() => {
+                this.slideAnimationDialog.dismiss();
+              }}>
+              <Text> Close </Text>
+            </Button>
+          ]}
+        >
+          <Container>
+            <Content padder>
+              <Form>
+                <Textarea onChangeText={(amaAnswer) => this.setState({amaAnswer})} rowSpan={5} bordered placeholder="Textarea" />
+              </Form>
+            </Content>
+          </Container>
+        </PopupDialog>
         <ActionSheet
           ref={o => this.ActionSheet = o}
-          title={'Would you like to block the user?'}
+          title={`Would you like to block the user?`}
           options={['Block', 'Cancel']}
           cancelButtonIndex={1}
           destructiveButtonIndex={0}
@@ -302,5 +338,37 @@ const mapDispatchToProps = (dispatch) => {
     handleOutgoingMessage: (text, json) => dispatch(EngineActions.setOutgoingMessage(text, json)),
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dialogContentView: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navigationBar: {
+    borderBottomColor: '#b5b5b5',
+    borderBottomWidth: 0.5,
+    backgroundColor: '#ffffff',
+  },
+  navigationTitle: {
+    padding: 10,
+  },
+  navigationButton: {
+    padding: 10,
+  },
+  navigationLeftButton: {
+    paddingLeft: 20,
+    paddingRight: 40,
+  },
+  navigator: {
+    flex: 1,
+    // backgroundColor: '#000000',
+  },
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(SlackScreen)
