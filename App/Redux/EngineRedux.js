@@ -41,6 +41,7 @@ const { Types, Creators } = createActions({
   backGround: [''],
   setSignInPending: ['flag'],
   setAmaData: ['amaData'],
+  setAmaStatus: ['amaStatus'],
   sendAmaInfo: ['msgAddress', 'amaId'],
 })
 
@@ -71,6 +72,7 @@ export const INITIAL_STATE = Immutable({
   signInPending: null,
   id: '',
   amaData: undefined,
+  amaStatus: undefined,
 })
 
 /* ------------- Selectors ------------- */
@@ -198,6 +200,11 @@ export const restartEngine = (state) => {
 // engine has got new ama data
 export const setAmaData = (state, { amaData }) => {
   return state.merge({ amaData })
+}
+
+// engine has got new ama status
+export const setAmaStatus = (state, { amaStatus }) => {
+  return state.merge({ amaStatus })
 }
 
 /* ------------- Hookup Reducers To Types ------------- */

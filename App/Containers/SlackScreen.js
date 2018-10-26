@@ -73,6 +73,9 @@ class SlackScreen extends React.Component {
       newContent: true,
     }
   }
+  componentWillReceiveProps(nextProps) {
+    console.log(nextProps.amaStatus)
+  }
   componentWillMount() {
     this.setState({
       messages: [
@@ -350,6 +353,7 @@ const mapStateToProps = (state) => {
   return {
     userData: EngineSelectors.getUserData(state),
     amaData: EngineSelectors.getAmaData(state),
+    amaStatus: EngineSelectors.getAmaStatus(state),
   }
 }
 

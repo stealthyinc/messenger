@@ -54,6 +54,19 @@ function* watchAmaDataChannel() {
   }
 }
 
+function* watchAmaStatusChannel() {
+  const channel = eventChannel(emitter => {
+    EngineInstance.on('me-ama-status-change', (amaStatus) => emitter(amaStatus))
+    return () => {
+      console.log(`Messaging Engine AMA Status Changed`)
+    }
+  })
+  while (true) {
+    const amaStatus = yield take(channel)
+    yield put(EngineActions.setAmaStatus(amaStatus))
+  }
+}
+
 function* watchEngineFaultChannel() {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-fault', (engineFault) => emitter(engineFault))
@@ -277,6 +290,7 @@ export function* startEngine (action) {
   // const engineInit = yield select(EngineSelectors.getEngineInit)
   EngineInstance.componentDidMountWork(false, userData["username"])
   yield fork(watchAmaDataChannel)
+  yield fork(watchAmaStatusChannel)
   yield fork(watchEngineFaultChannel)
   yield fork(watchInitialzedEventChannel)
   yield fork(watchContactMgrEventChannel)
