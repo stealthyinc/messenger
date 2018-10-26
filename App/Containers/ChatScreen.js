@@ -82,13 +82,15 @@ class ChatScreen extends Component {
     //
     this.amaTitleIndex = {}
   }
-  configWithActiveContact = (anActiveContact, force=false, callSetState=false) => {
+  configWithActiveContact = (anActiveContact, administrable= false, force=false, callSetState=false) => {
     const method = 'ChatScreen::configWithActiveContact'
     console.log(`INFO(${method}): anActiveContact=${anActiveContact}`)
 
     if ((this.activeContact && !force) || !anActiveContact) {
       return
     }
+
+    this.delegate = administrable
 
     console.log(`INFO(${method}): anActiveContact.id=${anActiveContact.id}`)
 
@@ -138,9 +140,10 @@ class ChatScreen extends Component {
     const { contactMgr } = this.props
     const activeContact = (contactMgr && contactMgr.getActiveContact()) ?
       contactMgr.getActiveContact() : undefined
+    const administrable = (activeContact && contactMgr.isAdministrable(activeContact.id)) ? true : false
 
     if (activeContact) {
-      this.configWithActiveContact(activeContact)
+      this.configWithActiveContact(activeContact, administrable)
 
       const { messages } = this.props;
       if (messages) {
@@ -157,9 +160,10 @@ class ChatScreen extends Component {
         const activeContact = nextProps.contactMgr.getActiveContact()
         // Ugly AF configWithActiveContact designed to be called before UI
         // exists. Modified it to work after UI exists with setState call option.
+        const administrable = (activeContact && contactMgr.isAdministrable(activeContact.id)) ? true : false
         const FORCE = true
         const CALL_SET_STATE = true
-        this.configWithActiveContact(activeContact, FORCE, CALL_SET_STATE)
+        this.configWithActiveContact(activeContact, administrable, FORCE, CALL_SET_STATE)
       }
     }
     const { messages, dappUrl, dappMessage } = nextProps
@@ -499,7 +503,8 @@ class ChatScreen extends Component {
           {
             name: amaNameFirstLine,
             id,
-            msgAddress
+            msgAddress,
+            delegate: this.delegate
           })
         this.props.sendAmaInfo(msgAddress, id)
       }

@@ -49,6 +49,7 @@ class SlackScreen extends React.Component {
       this.name = params.name
       this.id = params.id
       this.msgAddress = params.msgAddress
+      this.delegate = params.delegate
 
       this.userId = props.userData.username
       this.amaCmds = new AmaCommands(this.userId, this.id)
@@ -230,10 +231,7 @@ class SlackScreen extends React.Component {
       }
     }
     amaMsgs.reverse()
-    //TODO: need to feed the id of the current user
-    this.user = 'pbj.id'
-    //TODO: need to determine if user is a delegate/admin
-    this.delegate = true
+
     const {
       showAlert,
       alertTitle,
@@ -332,7 +330,7 @@ class SlackScreen extends React.Component {
           messages={amaMsgs}
           onSend={messages => this.onSend(messages)}
           user={{
-            _id: this.user
+            _id: this.userId
           }}
           placeholder='Ask a question...'
           onLongPress={(this.delegate) ? this.onLongPress : null}
