@@ -162,6 +162,12 @@ class OfflineMessagingServices extends EventEmitterAdapter {
     this.skipRecvService = false;
 
     this.channelAddresses = {}
+
+    // AMA update tracking object
+    // {
+    //   <channel.id>: <utc>
+    // }
+    this.amaUpdateTimes = {}
   }
 
   log(...args) {
@@ -418,6 +424,19 @@ class OfflineMessagingServices extends EventEmitterAdapter {
         const channelMgr = new ChannelServicesV2()
         channelMgr.setLastMsgAddress(remoteStatusData)
         const messageFilePaths = channelMgr.getMsgFilePaths(this.channelAddresses[contactId])
+
+        // TODO: Yuck! Fix this to be more sensible and less dangerous--out of time
+        //       and doing this for speed purposes
+        if (utils.isAma(contact.protocol) && remoteStatusData.hasOwnProperty('updated')) {
+          const updateTime = remoteStatusData.updated
+          const lastUpdateTime = (this.amaUpdateTimes.hasOwnProperty(contactId)) ?
+            this.amaUpdateTimes[contactId] : 0
+
+          if (updateTime !== lastUpdateTime) {
+            this.amaUpdateTimes[contactId] = updateTime
+            this.emit('ama updated', contactId)
+          }
+        }
 
         for (const messageFilePath of messageFilePaths) {
           console.log(`messageFilePath: ${messageFilePath}`)

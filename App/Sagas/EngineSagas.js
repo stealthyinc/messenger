@@ -62,7 +62,9 @@ function* watchAmaStatusChannel() {
     }
   })
   while (true) {
+    console.log('watchAmaStatusChannel pre')
     const amaStatus = yield take(channel)
+    console.log(`watchAmaStatusChannel post ${amaStatus}`)
     yield put(EngineActions.setAmaStatus(amaStatus))
   }
 }

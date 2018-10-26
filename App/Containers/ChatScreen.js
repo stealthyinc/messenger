@@ -82,7 +82,7 @@ class ChatScreen extends Component {
     //
     this.amaTitleIndex = {}
   }
-  configWithActiveContact = (anActiveContact, administrable= false, force=false, callSetState=false) => {
+  configWithActiveContact = (anActiveContact, administrable=false, force=false, callSetState=false) => {
     const method = 'ChatScreen::configWithActiveContact'
     console.log(`INFO(${method}): anActiveContact=${anActiveContact}`)
 

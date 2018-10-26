@@ -267,6 +267,11 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.offlineMsgSvc.on('offline message written', (messageTuple) => {
         this._sendChannelNotification(messageTuple)
       })
+
+      // AMA specific
+      this.offlineMsgSvc.on('ama updated', (amaId) => {
+        this.emit('me-ama-status-change', amaId)
+      })
     }
 
 
@@ -829,7 +834,6 @@ export class MessagingEngine extends EventEmitterAdapter {
         // Fetch the Ama's owner.json and see if we're the owner.
         let owner = false
         let delegate = false
-        let administrable = false
 
         try {
           const ownerDataStr = await this.io.robustRemoteRead(contact.id, 'owner.json')
@@ -848,7 +852,7 @@ export class MessagingEngine extends EventEmitterAdapter {
         // if (!owner) {
         //   // TODO: time-permitting
         // }
-        administrable = owner || delegate
+        administrable = (owner || delegate)
         console.log(`INFO(${method}): administrable = ${administrable}`)
       }
     }

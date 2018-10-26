@@ -96,6 +96,7 @@ export const EngineSelectors = {
   getEngineFault: state => state.engine.engineFault,
   getSignInPending: state => state.engine.signInPending,
   getAmaData: state => state.engine.amaData,
+  getAmaStatus: state => state.engine.amaStatus,
 }
 
 /* ------------- Reducers ------------- */

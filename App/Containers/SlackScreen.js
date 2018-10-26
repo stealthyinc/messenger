@@ -75,7 +75,9 @@ class SlackScreen extends React.Component {
     }
   }
   componentWillReceiveProps(nextProps) {
-    console.log(nextProps.amaStatus)
+    if (nextProps.amaStatus) {
+      console.log(`amaStatus: nextProps.amaStatus`)
+    }
   }
   componentWillMount() {
     this.setState({
