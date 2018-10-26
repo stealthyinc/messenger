@@ -50,10 +50,7 @@ class SlackScreen extends React.Component {
       this.id = params.id
       this.msgAddress = params.msgAddress
 
-      // TODO: need the actual user ID--for now we'll use the hack pbj did below
-      //       and use his ID
       this.userId = props.userData.username
-      // Pretty sure the id for this object is the AMA id
       this.amaCmds = new AmaCommands(this.userId, this.id)
       //
       // Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav
@@ -128,7 +125,7 @@ class SlackScreen extends React.Component {
   }
   renderAvatar = (props) => {
     return (
-      <Avatar 
+      <Avatar
         {...props}
         questionUpvote={this.questionUpvote}
       />
@@ -288,7 +285,7 @@ class SlackScreen extends React.Component {
           dialogAnimation={slideAnimation}
           actions={[
             <View style={{flexDirection: 'row'}}>
-              <Button 
+              <Button
                 key="button-2"
                 raised
                 title='Close'
@@ -298,7 +295,7 @@ class SlackScreen extends React.Component {
                   this.slideAnimationDialog.dismiss();
                 }}>
               </Button>,
-              <Button 
+              <Button
                 key="button-1"
                 raised
                 title='Submit'

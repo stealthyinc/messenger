@@ -8,7 +8,7 @@ export default class AmaCommands {
     return `/${command} ${JSON.stringify(obj)}`
   }
 
-  amaCreate(aTitle) {
+  static amaCreate(aTitle) {
     const obj = {
       title: aTitle
     }

@@ -7,6 +7,8 @@ import Drawer from 'react-native-drawer'
 import ControlPanel from './ControlPanel'
 import dismissKeyboard from 'dismissKeyboard';
 
+import AmaCommands from '../Engine/misc/amaCommands.js'
+
 import PopupDialog, {
   DialogTitle,
   SlideAnimation,
@@ -190,6 +192,12 @@ class ChatScreen extends Component {
       this.props.setDappMessage(null)
     }
     else if (this.props.messages && this.props.messages.length !== messages.length) {
+      //
+      // TODO: Prabhaav, the code to handle 'TEXT' & 'TEXT_JSON' is duplicated
+      //       below from method setupMessages. We should unify it so it doesn't
+      //       cause crashes when we forget to fix both pieces of code when we add
+      //       new message types.
+      //
       const numNewMsgs = messages.length - this.props.messages.length;
       let newMessages = [];
       for (const idx = messages.length-numNewMsgs; idx < messages.length; idx++) {
@@ -205,6 +213,18 @@ class ChatScreen extends Component {
           }
           else if (contentType === 'TEXT_JSON') {
             text = body.text
+            //
+            // Handle AMA message objects
+            if (body.type === 'public ama 1.0') {
+              text = body.title + '\n' +
+                     '\n' +
+                     '(' + body.status + ')'
+              this.amaTitleIndex[body.title] = {
+                id: body.ama_id,
+                msgAddress: msg.msgAddress,
+              }
+            }
+            //
             url = body.url
             gimage = body.image
           }
@@ -351,14 +371,18 @@ class ChatScreen extends Component {
     //hack to show the generated id instead of stealthy all the time
     let updatedMessages = []
     if (this.protocol) {
-      for (let i of newMessages) {
-        let {text, user, createdAt, _id} = i
+      for (let message of newMessages) {
+        let {text, user, createdAt, _id} = message
         const index = text.indexOf(' says: ')
-        const newId = text.substring(0, index)
-        const newText = text.substring(index+7)
-        user.avatar = ''
-        user.name = newId
-        user._id = newId
+        let newId = ''
+        let newText = text
+        if (index > -1) {
+          newId = text.substring(0, index)
+          newText = text.substring(index+7)
+          user.avatar = ''
+          user.name = newId
+          user._id = newId
+        }
         let crap = {
           user,
           text: newText,
@@ -590,7 +614,7 @@ class ChatScreen extends Component {
                   dialogAnimation={slideAnimation}
                   actions={[
                     <View style={{flexDirection: 'row'}} key="view3">
-                      <Button 
+                      <Button
                         key="button-2"
                         raised
                         title='Close'
@@ -600,7 +624,7 @@ class ChatScreen extends Component {
                           this.slideAnimationDialog.dismiss();
                         }}>
                       </Button>,
-                      <Button 
+                      <Button
                         key="button-1"
                         raised
                         title='Submit'
@@ -608,7 +632,7 @@ class ChatScreen extends Component {
                         buttonStyle={{backgroundColor: '#34bbed'}}
                         onPress={() => {
                           this.slideAnimationDialog.dismiss();
-                          const stringifiedCmd = this.amaCmds.amaCreate(this.state.amaAnswer)
+                          const stringifiedCmd = AmaCommands.amaCreate(this.state.amaAnswer)
                           this.props.handleOutgoingMessage(stringifiedCmd, undefined);
                           this.setState({amaTitle: this.state.amaAnswer})
                         }}>
