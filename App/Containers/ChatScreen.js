@@ -418,7 +418,7 @@ class ChatScreen extends Component {
         style={[styles.chatContainer, this.props.containerStyle]}
         onPress={() => this.slideAnimationDialog.show()}
       >
-        <Ionicons name="ios-compass" size={28} color='#34bbed' />
+        <Ionicons name="ios-star" size={28} color='#34bbed' />
       </TouchableOpacity>
     ) : (
       <TouchableOpacity

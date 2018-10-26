@@ -250,7 +250,7 @@ class SlackScreen extends React.Component {
         textStyle={{ fontSize: 24, fontWeight: "900", color: "white"}}
         title='New Content Available'
         onPress={() => {this.setState({newContent: false}); alert('Content Refreshed')}}
-        icon={{size: 28, type: 'font-awesome', name: 'refresh', color: 'white'}}
+        icon={{size: 28, type: 'font-awesome', name: 'bell', color: 'white'}}
       />
     ) : null
     if (showAlert) {
