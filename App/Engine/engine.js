@@ -269,8 +269,8 @@ export class MessagingEngine extends EventEmitterAdapter {
       })
 
       // AMA specific
-      this.offlineMsgSvc.on('ama updated', (amaId) => {
-        this.emit('me-ama-status-change', amaId)
+      this.offlineMsgSvc.on('ama updated', (amaData) => {
+        this.emit('me-ama-status-change', amaData)
       })
     }
 

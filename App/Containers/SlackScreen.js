@@ -60,6 +60,10 @@ class SlackScreen extends React.Component {
       // const stringifiedCmd = this.amaCmds.answerCreate(<question_id>, 'This is the answer.')
       // const json = undefined
       // EngineActions.setOutgoingMessage(stringifiedCmd, json)
+
+      // TODO: something better for this status/update hack
+      this.fetchAmaData = false
+      this.lastFetch = 0
     }
     this.state = {
       messages: [],
@@ -75,8 +79,22 @@ class SlackScreen extends React.Component {
     }
   }
   componentWillReceiveProps(nextProps) {
-    if (nextProps.amaStatus) {
-      console.log(`amaStatus: nextProps.amaStatus`)
+    // Not quite working--need to fix this:
+    //  (temp workaround below is always update)
+    // if (nextProps.amaStatus && this.fetchAmaData) {
+    //   console.log(`amaStatus: ${JSON.stringify(nextProps.amaStatus)}`)
+    //   if (this.lastFetch !== nextProps.amaStatus.updateTime) {
+    //     this.fetchAmaData = false
+    //     this.lastFetch = nextProps.amaStatus.updateTime
+    //     this.props.sendAmaInfo(this.msgAddress, this.id)
+    //   }
+    // }
+    //
+    if (nextProps.amaStatus && nextProps.amaStatus.updateTime) {
+      if (this.lastFetch !== nextProps.amaStatus.updateTime) {
+        this.lastFetch = nextProps.amaStatus.updateTime
+        this.props.sendAmaInfo(this.msgAddress, this.id)
+      }
     }
   }
   componentWillMount() {
@@ -112,6 +130,7 @@ class SlackScreen extends React.Component {
     }))
     const { text } = messages[0]
     const stringifiedCmd = this.amaCmds.questionCreate(text)
+    this.fetchAmaData = true
     this.props.handleOutgoingMessage(stringifiedCmd, undefined);
   }
   renderMessage(props) {
@@ -360,6 +379,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     handleOutgoingMessage: (text, json) => dispatch(EngineActions.setOutgoingMessage(text, json)),
+    sendAmaInfo: (msgAddress, amaId) => dispatch(EngineActions.sendAmaInfo(msgAddress, amaId)),
   }
 }
 

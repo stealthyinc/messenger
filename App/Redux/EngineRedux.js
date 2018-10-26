@@ -224,6 +224,7 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_ENGINE_CONTACT_MGR]: setEngineContactMgr,
   [Types.SET_ENGINE_MESSAGES]: setEngineMessages,
   [Types.SET_AMA_DATA]: setAmaData,
+  [Types.SET_AMA_STATUS]: setAmaStatus, // copy pasta is death
   [Types.SET_CONTACT_ADDED]: setContactAdded,
   [Types.SET_TOKEN]: setToken,
   [Types.SET_USER_SETTINGS]: setUserSettings,

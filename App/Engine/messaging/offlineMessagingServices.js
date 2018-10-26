@@ -434,7 +434,7 @@ class OfflineMessagingServices extends EventEmitterAdapter {
 
           if (updateTime !== lastUpdateTime) {
             this.amaUpdateTimes[contactId] = updateTime
-            this.emit('ama updated', contactId)
+            this.emit('ama updated', {contactId, updateTime})
           }
         }
 
