@@ -49,7 +49,7 @@ export default class Avatar extends React.PureComponent {
         <TouchableOpacity onPress={() => this.props.questionUpvote(this.props.currentMessage._id)}>
           <Ionicons name="ios-arrow-dropup" size={30} color='green'/>
         </TouchableOpacity>
-        <Text style={{textAlign: 'center', fontSize: 14}}>10</Text>
+        <Text style={{textAlign: 'center', fontSize: 14}}>{this.props.currentMessage.score}</Text>
       </View>
     ) : <View style={{margin: 20}} />
     return (

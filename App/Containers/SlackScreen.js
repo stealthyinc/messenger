@@ -180,6 +180,7 @@ class SlackScreen extends React.Component {
   deleteQuestion = () => {
     const stringifiedCmd = this.amaCmds.questionDelete(this.state.currentMessage._id)
     this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+    this.setState({showAlert: false})
   }
   closeDialog = () => {
     this.setState({ showDialog: false })
@@ -206,6 +207,7 @@ class SlackScreen extends React.Component {
         _id: questionData.question_id,
         text: questionData.question.text,
         createdAt: Date.now(),
+        score: questionData.score,
         user: {
           _id: questionData.question_id,
           name: questionData.question.author,
