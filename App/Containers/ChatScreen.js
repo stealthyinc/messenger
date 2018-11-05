@@ -422,7 +422,7 @@ class ChatScreen extends Component {
         style={[styles.chatContainer, this.props.containerStyle]}
         onPress={() => this.slideAnimationDialog.show()}
       >
-        <Ionicons name="ios-star" size={28} color='#34bbed' />
+        <Ionicons name="ios-radio" size={28} color='#34bbed' />
       </TouchableOpacity>
     ) : (
       <TouchableOpacity
@@ -573,7 +573,7 @@ class ChatScreen extends Component {
         </View>
       )
     }
-    const amaButton = (this.activeContact && this.isAma && this.state.amaTitle) ? (
+    const amaButton = (this.amaTitleIndex[this.state.amaTitle]) ? (
       <Button
         raised
         color='green'
@@ -581,7 +581,7 @@ class ChatScreen extends Component {
         textStyle={{ fontSize: 24, fontWeight: "900", color: "white"}}
         title={this.state.amaTitle}
         onPress={() => this.onPressAma(this.state.amaTitle)}
-        icon={{size: 28, type: 'font-awesome', name: 'microphone', color: 'white'}}
+        icon={{size: 28, type: 'font-awesome', name: 'bullhorn', color: 'white'}}
       />
     ) : null
     const disableAmaFeatures = this.isAma && !this.delegate
@@ -612,18 +612,19 @@ class ChatScreen extends Component {
                 side='bottom'
               >
                 <PopupDialog
-                  dialogTitle={<DialogTitle title="AMA Topic" />}
+                  dialogTitle={<DialogTitle align="left" title="Set your AMA Topic" />}
                   ref={(popupDialog) => {
                     this.slideAnimationDialog = popupDialog;
                   }}
                   dialogAnimation={slideAnimation}
                   actions={[
-                    <View style={{flexDirection: 'row'}} key="view3">
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                       <Button
                         key="button-2"
                         raised
                         title='Close'
                         leftIcon={{name: 'close'}}
+                        style={{paddingBottom: 20}}
                         buttonStyle={{backgroundColor: '#DD6B55'}}
                         onPress={() => {
                           this.slideAnimationDialog.dismiss();
@@ -634,6 +635,7 @@ class ChatScreen extends Component {
                         raised
                         title='Submit'
                         leftIcon={{name: 'check'}}
+                        style={{paddingBottom: 20}}
                         buttonStyle={{backgroundColor: '#34bbed'}}
                         onPress={() => {
                           this.slideAnimationDialog.dismiss();
@@ -648,7 +650,7 @@ class ChatScreen extends Component {
                   <Container>
                     <Content padder>
                       <Form>
-                        <Textarea onChangeText={(amaAnswer) => this.setState({amaAnswer})} rowSpan={5} bordered placeholder="Enter a AMA Topic" />
+                        <Textarea onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})} rowSpan={5} bordered placeholder="Enter a AMA Topic" />
                       </Form>
                     </Content>
                   </Container>

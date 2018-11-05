@@ -133,7 +133,7 @@ class SlackScreen extends React.Component {
     this.fetchAmaData = true
     this.props.handleOutgoingMessage(stringifiedCmd, undefined);
   }
-  renderMessage(props) {
+  renderMessage = (props) => {
     const { currentMessage: { text: currText } } = props;
     let messageTextStyle;
     // Make "pure emoji" messages much bigger than plain text.
@@ -308,12 +308,13 @@ class SlackScreen extends React.Component {
           }}
           dialogAnimation={slideAnimation}
           actions={[
-            <View style={{flexDirection: 'row'}}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
               <Button
                 key="button-2"
                 raised
                 title='Close'
                 leftIcon={{name: 'close'}}
+                style={{paddingBottom: 20}}
                 buttonStyle={{backgroundColor: '#DD6B55'}}
                 onPress={() => {
                   this.slideAnimationDialog.dismiss();
@@ -324,6 +325,7 @@ class SlackScreen extends React.Component {
                 raised
                 title='Submit'
                 leftIcon={{name: 'check'}}
+                style={{paddingBottom: 20}}
                 buttonStyle={{backgroundColor: '#34bbed'}}
                 onPress={() => {
                   this.slideAnimationDialog.dismiss();
@@ -336,7 +338,7 @@ class SlackScreen extends React.Component {
           <Container>
             <Content padder>
               <Form>
-                <Textarea onChangeText={(amaAnswer) => this.setState({amaAnswer})} rowSpan={5} bordered placeholder="Textarea" />
+                <Textarea onChangeText={(amaAnswer) => this.setState({amaAnswer})} rowSpan={5} bordered placeholder="Type AMA Answer..." />
               </Form>
             </Content>
           </Container>
@@ -349,7 +351,7 @@ class SlackScreen extends React.Component {
           destructiveButtonIndex={0}
           onPress={(this.delegate) ? (index) => this.handleUserActionSheet(index) : null}
         />
-        {refreshButton}
+        {/*{refreshButton}*/}
         <GiftedChat
           messages={amaMsgs}
           onSend={messages => this.onSend(messages)}
@@ -358,7 +360,7 @@ class SlackScreen extends React.Component {
           }}
           placeholder='Ask a question...'
           onLongPress={(this.delegate) ? this.onLongPress : null}
-          // renderMessage={this.renderMessage}
+          renderMessage={this.renderMessage}
           renderAvatar={this.renderAvatar}
           onPressAvatar={(this.delegate) ? (user) => this.showActionSheet(user) : null}
         />
