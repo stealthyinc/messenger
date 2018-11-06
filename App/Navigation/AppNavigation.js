@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Animated, Easing, NativeModules, ScrollView, Text, Image, View } from 'react-native'
 import { DrawerNavigator, StackNavigator, SwitchNavigator } from 'react-navigation';
+import ChannelScreen from '../Containers/ChannelScreen'
 import SlackScreen from '../Containers/SlackScreen'
 import CameraRollScreen from '../Containers/CameraRollScreen'
 import CameraScreen from '../Containers/CameraScreen'
@@ -84,6 +85,7 @@ const PrimaryNav = StackNavigator({
   ContactProfile: { screen: ContactProfile },
   BlockContactSearch: { screen: BlockContactSearch },
   SlackScreen: { screen: SlackScreen },
+  ChannelRoom: { screen: ChannelScreen },
   ChatMenu: { screen: ChatMenuScreen },
   DappStore: { screen: DappStore },
   DappData: { screen: DappData },

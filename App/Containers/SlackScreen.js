@@ -49,7 +49,8 @@ class SlackScreen extends React.Component {
       this.name = params.name
       this.id = params.id
       this.msgAddress = params.msgAddress
-      this.delegate = params.delegate
+      // this.delegate = params.delegate
+      this.delegate = true
 
       this.userId = props.userData.username
       this.amaCmds = new AmaCommands(this.userId, this.id)
@@ -167,36 +168,62 @@ class SlackScreen extends React.Component {
   }
   onLongPress = (context, currentMessage) => {
     if (context) {
-      const options = [
-        'Answer Question',
-        'Delete Question',
-        'Cancel',
-      ];
-      const destructiveButtonIndex = options.length - 1;
-      context.actionSheet().showActionSheetWithOptions({
-        options,
-        destructiveButtonIndex,
-      },
-      (buttonIndex) => {
-        switch (buttonIndex) {
-          case 0: {
-            this.setState({
-              currentMessage
-            })
-            this.slideAnimationDialog.show()
-            break;
+      if (currentMessage.answer) {
+        const options = [
+          'Delete Answer',
+          'Cancel',
+        ];
+        const destructiveButtonIndex = options.length - 1;
+        context.actionSheet().showActionSheetWithOptions({
+          options,
+          destructiveButtonIndex,
+        },
+        (buttonIndex) => {
+          switch (buttonIndex) {
+            case 0:
+              this.setState({
+                showAlert: true,
+                alertTitle: 'AMA Admin',
+                alertMessage: 'Do you want to delete the answer?',
+                alertOption: 'Delete',
+                currentMessage
+              })
+              break;
           }
-          case 1:
-            this.setState({
-              showAlert: true,
-              alertTitle: 'AMA Admin',
-              alertMessage: 'Do you want to delete the question?',
-              alertOption: 'Delete',
-              currentMessage
-            })
-            break;
-        }
-      });
+        });
+      }
+      else {
+        const options = [
+          'Answer Question',
+          'Delete Question',
+          'Cancel',
+        ];
+        const destructiveButtonIndex = options.length - 1;
+        context.actionSheet().showActionSheetWithOptions({
+          options,
+          destructiveButtonIndex,
+        },
+        (buttonIndex) => {
+          switch (buttonIndex) {
+            case 0: {
+              this.setState({
+                currentMessage
+              })
+              this.slideAnimationDialog.show()
+              break;
+            }
+            case 1:
+              this.setState({
+                showAlert: true,
+                alertTitle: 'AMA Admin',
+                alertMessage: 'Do you want to delete the question?',
+                alertOption: 'Delete',
+                currentMessage
+              })
+              break;
+          }
+        });
+      }
     }
   }
   answerQuestion = (answer) => {
@@ -205,6 +232,11 @@ class SlackScreen extends React.Component {
   }
   deleteQuestion = () => {
     const stringifiedCmd = this.amaCmds.questionDelete(this.state.currentMessage._id)
+    this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+    this.setState({showAlert: false})
+  }
+  deleteAnswer = () => {
+    const stringifiedCmd = this.amaCmds.answerDelete(this.state.currentMessage._id)
     this.props.handleOutgoingMessage(stringifiedCmd, undefined);
     this.setState({showAlert: false})
   }
@@ -234,6 +266,7 @@ class SlackScreen extends React.Component {
         text: questionData.question.text,
         createdAt: Date.now(),
         score: questionData.score,
+        answer: false,
         user: {
           _id: questionData.question_id,
           name: questionData.question.author,
@@ -246,6 +279,7 @@ class SlackScreen extends React.Component {
           _id: answer.answer_id,
           text: answer.text,
           createdAt: Date.now(),
+          answer: true,
           user: {
             _id: answer.answer_id,
             name: answer.author,
@@ -297,7 +331,10 @@ class SlackScreen extends React.Component {
             this.setState({showAlert: false})
           }}
           onConfirmPressed={() => {
-            this.deleteQuestion()
+            if (this.state.currentMessage.answer)
+              this.deleteAnswer()
+            else
+              this.deleteQuestion()
           }}
         />
       )
