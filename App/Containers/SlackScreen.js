@@ -241,14 +241,14 @@ class SlackScreen extends React.Component {
         }
       }
       amaMsgs.push(msg)
-      for (const response of questionData.responses) {
+      for (const answer of questionData.answers) {
         const resp = {
-          _id: response.answer_id,
-          text: response.text,
+          _id: answer.answer_id,
+          text: answer.text,
           createdAt: Date.now(),
           user: {
-            _id: response.answer_id,
-            name: response.author,
+            _id: answer.answer_id,
+            name: answer.author,
             avatar: demoIcon,
           }
         }
