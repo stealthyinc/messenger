@@ -846,14 +846,42 @@ export class MessagingEngine extends EventEmitterAdapter {
             owner = (this.userId === ownerId)
           }
         } catch (error) {
-          console.log(`INFO(${method}): ${error}.`)
+          console.log(`WARNING(${method}): failed to read channel owner information.\n${error}.`)
         }
 
-        // TODO: failing being the owner, fetch the delegates.json and see if we're
-        //       a delegate.
-        // if (!owner) {
-        //   // TODO: time-permitting
-        // }
+        // If we're not the channel owner, see if we're a delegate?
+        //
+        if (!owner) {
+          let delegateDataArr = []
+          try {
+            const delegateDataStr = await this.io.robustRemoteRead(contact.id, 'delegates.json')
+            delegateDataArr = JSON.parse(delegateDataStr)
+          } catch (error) {
+            console.log(`WARNING(${method}): failed to read channel delegate information.\n${error}`)
+          }
+
+          const pkLen = this.publicKey.length
+          if (pkLen > 4) {
+            const pkLast4 = this.publicKey.substr(pkLen-4, pkLen)
+
+            for (const delegateData of delegateDataArr) {
+              if (!delegateData.hasOwnProperty(pkLast4)) {
+                continue
+              }
+
+              try {
+                const delegateUserId =
+                  await utils.decryptObj(this.privateKey, delegateData[pkLast4], true)
+                if (this.userId === delegateUserId) {
+                  delegate = true
+                  break
+                }
+              } catch (error) {
+                // Suppress (might be last 4 digit of pk colissions).
+              }
+            }
+          }
+        }
         administrable = (owner || delegate)
         console.log(`INFO(${method}): administrable = ${administrable}`)
       }

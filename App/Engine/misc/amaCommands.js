@@ -82,6 +82,15 @@ export default class AmaCommands {
     return AmaCommands.cmdToText('answerCreate', obj)
   }
 
+  answerDelete(anAnswerId) {
+    const obj = {
+      ama_id: this.amaId,
+      answer_id: anAnswerId
+    }
+
+    return AmaCommands.cmdToText('answerDelete', obj)
+  }
+
   userBlock(aUserId) {
     const obj = {
       user_id: aUserId
@@ -115,10 +124,6 @@ export default class AmaCommands {
   }
 
   answerEdit(answerId) {
-    // TODO
-  }
-
-  answerDelete(answerId) {
     // TODO
   }
 
