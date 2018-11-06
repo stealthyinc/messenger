@@ -281,7 +281,13 @@ module.exports = class GaiaIO extends BaseIO {
               if (!content || content.includes('<Error><Code>BlobNotFound')) {
                 resolve(undefined)
               } else {
-                resolve(JSON.parse(content))
+                try {
+                  const obj = JSON.parse(content)
+                  resolve(obj)
+                } catch (error) {
+                  console.log(`ERROR(GaiaIO::_read_iOS): Error parsing read content:\n${content}\n${error}\n`)
+                  reject(error)
+                }
               }
             } else {
               reject(error)
