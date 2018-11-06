@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Platform, ActivityIndicator, StyleSheet } from 'react-native';
+import { Dimensions, Keyboard, View, Text, TouchableOpacity, Platform, ActivityIndicator, StyleSheet } from 'react-native';
 import PropTypes from 'prop-types';
 import { GiftedChat } from 'react-native-gifted-chat';
 import emojiUtils from 'emoji-utils';
@@ -25,6 +25,7 @@ import { Container, Header, Content, Item, Form, Textarea } from 'native-base';
 import { Button, Icon } from 'react-native-elements'
 
 const slideAnimation = new SlideAnimation({ slideFrom: 'bottom' });
+const { width, height } = Dimensions.get('window')
 
 class SlackScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -125,6 +126,31 @@ class SlackScreen extends React.Component {
       ].reverse(),
     })
     this.props.navigation.setParams({ navigation: this.props.navigation });
+  }
+  componentDidMount() {
+    Keyboard.addListener('keyboardDidShow', this._keyboardDidShow)
+    Keyboard.addListener('keyboardDidHide', this._keyboardDidHide)
+  }
+
+  _keyboardDidShow = () => {
+    this.setState({
+        dialogStyle: {
+            top: -1 * (width / 4),
+            borderRadius: 20,
+            padding: 10,
+            overflow: 'hidden',
+        },
+    })
+  }
+
+  _keyboardDidHide = () => {
+    this.setState({
+        dialogStyle: {
+            borderRadius: 20,
+            padding: 10,
+            overflow: 'hidden',
+        },
+    })
   }
   onSend(messages = []) {
     this.setState(previousState => ({
@@ -368,6 +394,7 @@ class SlackScreen extends React.Component {
     return (
       <View style={{flex:1}}>
         <PopupDialog
+          dialogStyle={this.state.dialogStyle}
           dialogTitle={<DialogTitle title="AMA Answer" />}
           ref={(popupDialog) => {
             this.slideAnimationDialog = popupDialog;

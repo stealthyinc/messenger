@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Image, Modal, Keyboard, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, WebView, View, Text, ActivityIndicator } from 'react-native'
+import { Dimensions, Keyboard, Platform, Image, Modal, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, WebView, View, Text, ActivityIndicator } from 'react-native'
 import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button, Icon } from 'react-native-elements'
@@ -31,6 +31,7 @@ const utils = require('./../Engine/misc/utils.js');
 
 const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js');
 const slideAnimation = new SlideAnimation({ slideFrom: 'bottom' });
+const { width, height } = Dimensions.get('window')
 
 class ChannelScreen extends Component {
   static navigationOptions = ({ navigation }) => {
@@ -210,6 +211,31 @@ class ChannelScreen extends Component {
   componentWillUnmount() {
     this._isMounted = false;
     this.props.handleContactClick()
+  }
+  componentDidMount() {
+    Keyboard.addListener('keyboardDidShow', this._keyboardDidShow)
+    Keyboard.addListener('keyboardDidHide', this._keyboardDidHide)
+  }
+
+  _keyboardDidShow = () => {
+    this.setState({
+        dialogStyle: {
+            top: -1 * (width / 4),
+            borderRadius: 20,
+            padding: 10,
+            overflow: 'hidden',
+        },
+    })
+  }
+
+  _keyboardDidHide = () => {
+    this.setState({
+        dialogStyle: {
+            borderRadius: 20,
+            padding: 10,
+            overflow: 'hidden',
+        },
+    })
   }
   setupMessages = (inputMessages) => {
     let messages = []
@@ -511,6 +537,7 @@ class ChannelScreen extends Component {
                 side='bottom'
               >
                 <PopupDialog
+                  dialogStyle={this.state.dialogStyle}
                   dialogTitle={<DialogTitle align="left" title="Set your AMA Topic" />}
                   ref={(popupDialog) => {
                     this.slideAnimationDialog = popupDialog;

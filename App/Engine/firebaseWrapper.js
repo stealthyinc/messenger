@@ -42,11 +42,11 @@ class FirebaseWrapper {
   }
 
   async subscribeToTopic(topicname) {
-    firebase.messaging().subscribeToTopic(topicName);
+    firebase.messaging().subscribeToTopic(topicname);
   }
 
   async unsubscribeFromTopic(topicname) {
-    firebase.messaging().unsubscribeFromTopic(topicName);
+    firebase.messaging().unsubscribeFromTopic(topicname);
   }
 
   async setFirebasePermissions() {
