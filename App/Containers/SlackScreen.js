@@ -426,7 +426,7 @@ class SlackScreen extends React.Component {
           }}
           placeholder='Ask a question...'
           onLongPress={(this.delegate) ? this.onLongPress : null}
-          // renderMessage={this.renderMessage}
+          renderMessage={this.renderMessage}
           renderAvatar={this.renderAvatar}
           // onPressAvatar={(this.delegate) ? (user) => this.showActionSheet(user) : null}
           onPressAvatar={(this.delegate) ? (user) => {
