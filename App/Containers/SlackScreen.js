@@ -74,6 +74,7 @@ class SlackScreen extends React.Component {
       alertOption: '',
       currentMessage: '',
       user: '',
+      showAvatarAlert: false,
       amaAnswer: '',
       newContent: true,
     }
@@ -258,6 +259,8 @@ class SlackScreen extends React.Component {
 
     const {
       showAlert,
+      user,
+      showAvatarAlert,
       alertTitle,
       alertMessage,
       alertOption,
@@ -295,6 +298,31 @@ class SlackScreen extends React.Component {
           }}
           onConfirmPressed={() => {
             this.deleteQuestion()
+          }}
+        />
+      )
+    }
+    else if (showAvatarAlert) {
+      return (
+        <AwesomeAlert
+          show={true}
+          showProgress={false}
+          title="Block User"
+          message={`Do you want to block: ${user.name}`}
+          closeOnTouchOutside={false}
+          closeOnHardwareBackPress={true}
+          showCancelButton={true}
+          showConfirmButton={true}
+          cancelText="Cancel"
+          confirmText="Block"
+          cancelButtonColor="#DD6B55"
+          confirmButtonColor="#34bbed"
+          onCancelPressed={() => {
+            this.setState({showAvatarAlert: false, user: ''})
+          }}
+          onConfirmPressed={() => {
+            const stringifiedCmd = this.amaCmds.userBlock(user.name)
+            this.props.handleOutgoingMessage(stringifiedCmd, undefined);
           }}
         />
       )
@@ -343,14 +371,14 @@ class SlackScreen extends React.Component {
             </Content>
           </Container>
         </PopupDialog>
-        <ActionSheet
+        {/*<ActionSheet
           ref={o => this.ActionSheet = o}
           title={`Would you like to block the user?`}
           options={['Block', 'Cancel']}
           cancelButtonIndex={1}
           destructiveButtonIndex={0}
           onPress={(this.delegate) ? (index) => this.handleUserActionSheet(index) : null}
-        />
+        />*/}
         {/*{refreshButton}*/}
         <GiftedChat
           messages={amaMsgs}
@@ -362,7 +390,10 @@ class SlackScreen extends React.Component {
           onLongPress={(this.delegate) ? this.onLongPress : null}
           renderMessage={this.renderMessage}
           renderAvatar={this.renderAvatar}
-          onPressAvatar={(this.delegate) ? (user) => this.showActionSheet(user) : null}
+          // onPressAvatar={(this.delegate) ? (user) => this.showActionSheet(user) : null}
+          onPressAvatar={(this.delegate) ? (user) => {
+            this.setState({showAvatarAlert: true, user})
+          } : null}
         />
       </View>
     );
