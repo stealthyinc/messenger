@@ -84,8 +84,13 @@ class ConversationScreen extends React.Component {
       const theNextActiveContactId = id;
       const theNextActiveContact = contactMgr.getContact(theNextActiveContactId);
       this.props.handleContactClick(theNextActiveContact);
+      this.protocol = (theNextActiveContact) ?
+        utils.isChannelOrAma(theNextActiveContact.protocol) : false
+      if (this.protocol)
+        this.props.navigation.navigate('ChannelRoom')
+      else
+        this.props.navigation.navigate('ChatRoom')
     }
-    this.props.navigation.navigate('ChatRoom')
   }
   deleteRow(data, secId, rowId, rowMap) {
     const { contactMgr } = this.props

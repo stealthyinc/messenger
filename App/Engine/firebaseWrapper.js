@@ -41,6 +41,14 @@ class FirebaseWrapper {
     await firebase.database().ref(path).set(data)
   }
 
+  async subscribeToTopic(topicname) {
+    firebase.messaging().subscribeToTopic(topicName);
+  }
+
+  async unsubscribeFromTopic(topicname) {
+    firebase.messaging().unsubscribeFromTopic(topicName);
+  }
+
   async setFirebasePermissions() {
     const enabled = await firebase.messaging().hasPermission();
     if (enabled) {
