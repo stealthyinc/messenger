@@ -16,6 +16,26 @@ export default class AmaCommands {
     return AmaCommands.cmdToText('amaCreate', obj)
   }
 
+  // TODO: refactor command strings into an array / data structure for DRY and
+  //       ability to modify cmd prefix etc.
+  //
+  static isAmaCommand(text) {
+    return text && (
+        text.includes('/amaCreate') ||
+        text.includes('/questionCreate') ||
+        text.includes('/questionDelete') ||
+        text.includes('/questionUpvote') ||
+        text.includes('/questionUnvote') ||
+        text.includes('/answerCreate') ||
+        text.includes('/answerEdit') ||
+        text.includes('/answerDelete') ||
+        text.includes('/userBlock') ||
+        text.includes('/userUnblock') ||
+        text.includes('/delegateAdd') ||
+        text.includes('/delegateDelete')
+      )
+  }
+
   questionCreate(text) {
     const obj = {
       ama_id: this.amaId,

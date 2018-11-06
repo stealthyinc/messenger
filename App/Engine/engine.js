@@ -42,6 +42,8 @@ const { Discovery } = require('./misc/discovery.js')
 
 const common = require('./../common.js');
 
+import AmaCommands from './misc/amaCommands.js'
+
 import API from './../Services/Api'
 const api = API.create()
 
@@ -1074,8 +1076,14 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.contactMgr.setPublicKey(outgoingUserId, outgoingPublicKey);
     }
 
+    let displayInConversation = true
     const chatMsg = new ChatMessage();
     if (text) {
+      // TODO: Change ama commands to use JSON directly (not type TEXT_JSON, but
+      //       a new message type called JSON that is not directly supported for
+      //       display so we don't need to rely on this workaround).
+      displayInConversation = !AmaCommands.isAmaCommand(text)
+
       chatMsg.init(this.userId, outgoingUserId, this._getNewMessageId(), text,
                    Date.now());
     } else {  // json
@@ -1089,15 +1097,18 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.discovery.inviteContact(outgoingPublicKey);
     }
 
-    this.conversations.addMessage(chatMsg);
-    this._writeConversations();
+    if (displayInConversation) {
+      this.conversations.addMessage(chatMsg);
+      this._writeConversations();
 
-    this.contactMgr.moveContactToTop(outgoingUserId);
-    this.contactMgr.setSummary(outgoingUserId, ChatMessage.getSummary(chatMsg));
-    this._writeContactList(this.contactMgr.getAllContacts());
 
-    this.updateContactMgr();
-    this.updateMessages(outgoingUserId);
+      this.contactMgr.moveContactToTop(outgoingUserId);
+      this.contactMgr.setSummary(outgoingUserId, ChatMessage.getSummary(chatMsg));
+      this._writeContactList(this.contactMgr.getAllContacts());
+
+      this.updateContactMgr();
+      this.updateMessages(outgoingUserId);
+    }
   }
 
   // SO MUCH TODO TODO TODO
