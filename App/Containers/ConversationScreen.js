@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux'
-import { ActivityIndicator, AsyncStorage, View, ListView, StyleSheet, TouchableOpacity, NativeModules } from 'react-native';
+import { AsyncStorage, View, ListView, StyleSheet, TouchableOpacity, NativeModules } from 'react-native';
 import TouchableRow from './contacts/Row';
 import TwitterShareModal from '../Components/TwitterShareModal'
 import Footer from './contacts/Footer';
@@ -13,10 +13,12 @@ import TwitterShareActions, { TwitterShareSelectors } from '../Redux/TwitterShar
 import { shareOnTwitter } from 'react-native-social-share';
 const utils = require('./../Engine/misc/utils.js');
 import QRCode from 'react-native-qrcode';
-
+import DiscoverScreen from './DiscoverScreen'
 import defaultProfile from '../Images/defaultProfile.png'
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
 const common = require('./../common.js');
+import Drawer from 'react-native-drawer'
+import Spinner from 'react-native-loading-spinner-overlay';
 
 const styles = StyleSheet.create({
   container: {
@@ -59,12 +61,15 @@ class ConversationScreen extends React.Component {
     this.state = {
       basic: true,
       listViewData: [],
-      loaded: false
+      loaded: false,
+      drawerOpen: false,
+      showSpinner: true
     };
   }
   async componentWillMount() {
     const { userData, token, publicKey } = this.props
     this.props.navigation.setParams({ navigation: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
+    this.setState({showSpinner: true})
   }
   componentWillReceiveProps(nextProps) {
     const { contactMgr, engineInit, navigation } = nextProps
@@ -84,6 +89,7 @@ class ConversationScreen extends React.Component {
       const theNextActiveContactId = id;
       const theNextActiveContact = contactMgr.getContact(theNextActiveContactId);
       this.props.handleContactClick(theNextActiveContact);
+      this.setState({showSpinner: false})
       this.protocol = (theNextActiveContact) ?
         utils.isChannelOrAma(theNextActiveContact.protocol) : false
       if (this.protocol)
@@ -92,10 +98,22 @@ class ConversationScreen extends React.Component {
         this.props.navigation.navigate('ChatRoom')
     }
   }
-  deleteRow(data, secId, rowId, rowMap) {
+  muteRow = (data, secId, rowId, rowMap) => {
+    const deleteContactId = data.id;
+    //check for channel and subscribe
+    //today this is only a .stealthy.id
+    if (deleteContactId.indexOf('.stealthy.id') > -1) {
+      firebaseInstance.unsubscribeFromTopic(deleteContactId);
+    }
+  }
+  deleteRow = (data, secId, rowId, rowMap) => {
     const { contactMgr } = this.props
     const deleteContactId = data.id;
     const deleteContact = contactMgr.getContact(deleteContactId);
+    //check for channel and subscribe
+    //today this is only a .stealthy.id
+    if (deleteContactId.indexOf('.stealthy.id') > -1)
+      firebaseInstance.unsubscribeFromTopic(deleteContactId);
     this.props.handleDeleteContact(deleteContact);
     rowMap[`${secId}${rowId}`].props.closeRow();
     const newData = [...this.state.listViewData];
@@ -114,14 +132,28 @@ class ConversationScreen extends React.Component {
       this.props.updateUserSettings('twitterShare')
     })
   }
+  toggleDrawer = () => {
+    if (this.state.drawerOpen)
+      this.closeDrawer()
+    else
+      this.openDrawer()
+  };
+  closeDrawer = () => {
+    this._drawer.close()
+  };
+  openDrawer = () => {
+    this._drawer.open()
+  };
   render() {
     const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
     const { contactMgr, activateShare, userData, userSettings, engineInit } = this.props
     const activeContact = (contactMgr) ? contactMgr.getActiveContact() : undefined
     if (!contactMgr || activeContact || !engineInit) {
-      return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View>
+      return (
+        <Spinner visible={this.state.showSpinner} textContent={'Loading contacts...'} textStyle={{color: '#FFF'}} />
+      )
     }
-    else if (activateShare && !userSettings.twitterShare) {
+    if (activateShare && !userSettings.twitterShare) {
       return (
         <TwitterShareModal 
         shareDecline={() => {
@@ -131,46 +163,87 @@ class ConversationScreen extends React.Component {
         shareSuccess={this.sendToTwitter}/>
       )
     }
-    return (
-      <Container style={{backgroundColor: 'white'}}>
-        <Content>
-          <List
-            removeClippedSubviews={false}
-            dataSource={this.ds.cloneWithRows(this.state.listViewData)}
-            renderRow={item =>
-              <ListItem style={{marginLeft: 5}} avatar onPress={this.contactSelected.bind(this, item.id)}>
-                <Left>
-                  {(item.base64 || item.image) ? (<Thumbnail square source={{ uri: (item.base64) ? item.base64 : item.image }} />)
-                  : 
-                  (<QRCode
-                    value={item.id}
-                    size={55}
-                    bgColor='black'
-                    fgColor='white'
-                  />) 
-                }
-                </Left>
-                <Body>
-                  <Text style={{fontWeight: 'bold', fontSize: 18}}>{(item.title) ? item.title : item.id}</Text>
-                  <Text note>{item.summary}</Text>
-                </Body>
-                {(item.unread > 0) ? <Right>
-                  <Badge style={{ backgroundColor: 'red' }}>
-                    <Text style={{color: 'white'}}>{item.unread}</Text>
-                  </Badge>
-                </Right> : null}
-              </ListItem>}
-            renderRightHiddenRow={(data, secId, rowId, rowMap) =>
-              <Button full danger onPress={_ => this.deleteRow(data, secId, rowId, rowMap)}>
-                <Icon active name="trash" />
-              </Button>}
-            rightOpenValue={-75}
-          />
-        </Content>
-      </Container>
-    );
+    else {
+      return (
+        <Drawer
+          ref={(ref) => this._drawer = ref}
+          type="overlay"
+          tapToClose={true}
+          openDrawerOffset={0.07} // 20% gap on the right side of drawer
+          panCloseMask={0.2}
+          closedDrawerOffset={-3}
+          styles={drawerStyles}
+          tweenHandler={(ratio) => ({
+            main: { opacity:(2-ratio)/2 }
+          })}
+          content={
+            <DiscoverScreen closeDrawer={this.closeDrawer} />
+          }
+          onOpen={() => {
+            this.setState({drawerOpen: true})
+          }}
+          onClose={() => {
+            this.setState({drawerOpen: false})
+          }}
+          side='bottom'
+        >
+          <Container style={{backgroundColor: 'white'}}>
+            <Content>
+              <Button onPress={() => this.openDrawer()} iconLeft block success style={{borderRadius: 5, borderWidth: 2, borderColor: 'grey'}}>
+                <Icon name='ios-radio' />
+                <Icon />
+                <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>Add Channels</Text>
+              </Button>
+              <List
+                removeClippedSubviews={false}
+                dataSource={this.ds.cloneWithRows(this.state.listViewData)}
+                renderRow={item =>
+                  <ListItem style={{marginLeft: 5}} avatar onPress={this.contactSelected.bind(this, item.id)}>
+                    <Left>
+                      {(item.base64 || item.image) ? (<Thumbnail square source={{ uri: (item.base64) ? item.base64 : item.image }} />)
+                      : 
+                      (<QRCode
+                        value={item.id}
+                        size={55}
+                        bgColor='black'
+                        fgColor='white'
+                      />) 
+                    }
+                    </Left>
+                    <Body>
+                      <Text style={{fontWeight: 'bold', fontSize: 18}}>{(item.title) ? item.title : item.id}</Text>
+                      <Text note>{item.summary}</Text>
+                    </Body>
+                    {(item.unread > 0) ? <Right>
+                      <Badge style={{ backgroundColor: 'red' }}>
+                        <Text style={{color: 'white'}}>{item.unread}</Text>
+                      </Badge>
+                    </Right> : null}
+                  </ListItem>}
+                renderLeftHiddenRow={(data) =>
+                  <Button full warning onPress={_ => this.muteRow(data)}>
+                    <Icon active name="notifications-off" />
+                  </Button>}
+                leftOpenValue={75}
+                renderRightHiddenRow={(data, secId, rowId, rowMap) =>
+                  <Button full danger onPress={_ => this.deleteRow(data, secId, rowId, rowMap)}>
+                    <Icon active name="trash" />
+                  </Button>}
+                rightOpenValue={-75}
+              />
+            </Content>
+          </Container>
+        </Drawer>
+      );
+    }
   }
 }
+
+const drawerStyles = {
+  drawer: { shadowColor: '#000000', shadowOpacity: 0.8, shadowRadius: 3},
+  main: {paddingLeft: 3},
+}
+
 
 const mapStateToProps = (state) => {
   return {

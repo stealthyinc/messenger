@@ -8,7 +8,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import SlackMessage from './chat/SlackMessage';
 import AwesomeAlert from 'react-native-awesome-alerts';
-import ActionSheet from 'react-native-actionsheet'
 // import PopupDialog from '../Components/PopupDialog';
 import Avatar from './chat/SlackAvatar';
 import { Toast } from 'native-base';
@@ -23,6 +22,7 @@ import PopupDialog, {
 } from 'react-native-popup-dialog';
 import { Container, Header, Content, Item, Form, Textarea } from 'native-base';
 import { Button, Icon } from 'react-native-elements'
+import { shareOnTwitter } from 'react-native-social-share';
 
 const slideAnimation = new SlideAnimation({ slideFrom: 'bottom' });
 const { width, height } = Dimensions.get('window')
@@ -127,31 +127,6 @@ class SlackScreen extends React.Component {
     })
     this.props.navigation.setParams({ navigation: this.props.navigation });
   }
-  componentDidMount() {
-    Keyboard.addListener('keyboardDidShow', this._keyboardDidShow)
-    Keyboard.addListener('keyboardDidHide', this._keyboardDidHide)
-  }
-
-  _keyboardDidShow = () => {
-    this.setState({
-        dialogStyle: {
-            top: -1 * (width / 4),
-            borderRadius: 20,
-            padding: 10,
-            overflow: 'hidden',
-        },
-    })
-  }
-
-  _keyboardDidHide = () => {
-    this.setState({
-        dialogStyle: {
-            borderRadius: 20,
-            padding: 10,
-            overflow: 'hidden',
-        },
-    })
-  }
   onSend(messages = []) {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
@@ -184,16 +159,13 @@ class SlackScreen extends React.Component {
       />
     )
   }
-  showActionSheet = (user) => {
-    this.setState({ user })
-    this.ActionSheet.show()
-  }
   questionUpvote = (questionId) => {
     const stringifiedCmd = this.amaCmds.questionUpvote(questionId)
     this.props.handleOutgoingMessage(stringifiedCmd, undefined);
   }
   onLongPress = (context, currentMessage) => {
     if (context) {
+      const tweetText = `"${currentMessage.text}" by ${currentMessage.user.name} in ${this.name}. Join the AMA at www.stealthy.im`
       if (currentMessage.answer) {
         const options = [
           'Delete Answer',
@@ -219,36 +191,77 @@ class SlackScreen extends React.Component {
         });
       }
       else {
-        const options = [
-          'Answer Question',
-          'Delete Question',
-          'Cancel',
-        ];
-        const destructiveButtonIndex = options.length - 1;
-        context.actionSheet().showActionSheetWithOptions({
-          options,
-          destructiveButtonIndex,
-        },
-        (buttonIndex) => {
-          switch (buttonIndex) {
-            case 0: {
-              this.setState({
-                currentMessage
-              })
-              this.slideAnimationDialog.show()
-              break;
+        if (this.delegate) {
+          const options = [
+            'Answer Question',
+            'Tweet Question',
+            'Delete Question',
+            'Cancel',
+          ];
+          const destructiveButtonIndex = options.length - 1;
+          context.actionSheet().showActionSheetWithOptions({
+            options,
+            destructiveButtonIndex,
+          },
+          (buttonIndex) => {
+            switch (buttonIndex) {
+              case 0: {
+                this.setState({
+                  currentMessage
+                })
+                this.slideAnimationDialog.show()
+                break;
+              }
+              case 1: {
+                shareOnTwitter({
+                    'text': tweetText,
+                  },
+                  (results) => {
+                    console.log(results);
+                    if (results === "not_available") {
+                      alert ("Twitter not found on your device")
+                    }
+                  }
+                )
+                break;
+              }
+              case 2:
+                this.setState({
+                  showAlert: true,
+                  alertTitle: 'AMA Admin',
+                  alertMessage: 'Do you want to delete the question?',
+                  alertOption: 'Delete',
+                  currentMessage
+                })
+                break;
             }
-            case 1:
-              this.setState({
-                showAlert: true,
-                alertTitle: 'AMA Admin',
-                alertMessage: 'Do you want to delete the question?',
-                alertOption: 'Delete',
-                currentMessage
-              })
-              break;
-          }
-        });
+          });
+        }
+        else {
+          const options = [
+            'Tweet Question',
+            'Cancel',
+          ];
+          const destructiveButtonIndex = options.length - 1;
+          context.actionSheet().showActionSheetWithOptions({
+            options,
+            destructiveButtonIndex,
+          },
+          (buttonIndex) => {
+            switch (buttonIndex) {
+              case 0: {
+                shareOnTwitter({
+                    'text': tweetText,
+                  },
+                  (results) => {
+                    console.log(results);
+                  }
+                )
+                break;
+              }
+            }
+          });          
+        }
       }
     }
   }
@@ -268,15 +281,6 @@ class SlackScreen extends React.Component {
   }
   closeDialog = () => {
     this.setState({ showDialog: false })
-  }
-  handleUserActionSheet = (index) => {
-    switch (index) {
-      case 0: {
-        const stringifiedCmd = this.amaCmds.userBlock(this.state.user.name)
-        this.props.handleOutgoingMessage(stringifiedCmd, undefined);
-        break;
-      }
-    }
   }
   render() {
     if (!this.props.amaData)
@@ -394,7 +398,12 @@ class SlackScreen extends React.Component {
     return (
       <View style={{flex:1}}>
         <PopupDialog
-          dialogStyle={this.state.dialogStyle}
+          dialogStyle={{
+            top: -1 * (width / 3),
+            borderRadius: 20,
+            padding: 10,
+            overflow: 'hidden',
+          }}
           dialogTitle={<DialogTitle title="AMA Answer" />}
           ref={(popupDialog) => {
             this.slideAnimationDialog = popupDialog;
@@ -411,6 +420,7 @@ class SlackScreen extends React.Component {
                 buttonStyle={{backgroundColor: '#DD6B55'}}
                 onPress={() => {
                   this.slideAnimationDialog.dismiss();
+                  Keyboard.dismiss()
                 }}>
               </Button>,
               <Button
@@ -421,8 +431,11 @@ class SlackScreen extends React.Component {
                 style={{paddingBottom: 20}}
                 buttonStyle={{backgroundColor: '#34bbed'}}
                 onPress={() => {
-                  this.slideAnimationDialog.dismiss();
-                  this.answerQuestion(this.state.amaAnswer)
+                  if (this.state.amaAnswer) {
+                    this.slideAnimationDialog.dismiss();
+                    this.answerQuestion(this.state.amaAnswer)
+                    Keyboard.dismiss()
+                  }
                 }}>
               </Button>
             </View>
@@ -436,14 +449,6 @@ class SlackScreen extends React.Component {
             </Content>
           </Container>
         </PopupDialog>
-        {/*<ActionSheet
-          ref={o => this.ActionSheet = o}
-          title={`Would you like to block the user?`}
-          options={['Block', 'Cancel']}
-          cancelButtonIndex={1}
-          destructiveButtonIndex={0}
-          onPress={(this.delegate) ? (index) => this.handleUserActionSheet(index) : null}
-        />*/}
         {/*{refreshButton}*/}
         <GiftedChat
           messages={amaMsgs}
@@ -452,8 +457,8 @@ class SlackScreen extends React.Component {
             _id: this.userId
           }}
           placeholder='Ask a question...'
-          onLongPress={(this.delegate) ? this.onLongPress : null}
-          // renderMessage={this.renderMessage}
+          onLongPress={this.onLongPress}
+          renderMessage={this.renderMessage}
           renderAvatar={this.renderAvatar}
           // onPressAvatar={(this.delegate) ? (user) => this.showActionSheet(user) : null}
           onPressAvatar={(this.delegate) ? (user) => {

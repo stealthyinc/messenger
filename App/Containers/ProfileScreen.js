@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, AsyncStorage, Image, View, StyleSheet, TouchableOpacity, NativeModules, StatusBar, Platform } from 'react-native';
+import { AsyncStorage, Image, View, StyleSheet, TouchableOpacity, NativeModules, StatusBar, Platform } from 'react-native';
 import { Avatar, Card, Button, Text, Icon, Overlay } from 'react-native-elements'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux'
@@ -9,6 +9,7 @@ import { shareOnTwitter } from 'react-native-social-share';
 import Communications from 'react-native-communications';
 import ActionSheet from 'react-native-actionsheet'
 import QRCode from 'react-native-qrcode';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 const utils = require('./../Engine/misc/utils.js');
 
@@ -36,20 +37,18 @@ class ProfileScreen extends React.Component {
       }
     };
   }
-
   constructor(props) {
     super(props);
     this.state = {
       showToast: false,
       showQR: false,
-      isVisible: false
+      isVisible: false,
+      logout: false,
     }
   }
-
   componentWillMount() {
     this.props.navigation.setParams({ showOverlay: this.showOverlay });
   }
-
   showOverlay = () => {
     this.setState({isVisible: !this.state.isVisible})
   }
@@ -62,7 +61,7 @@ class ProfileScreen extends React.Component {
     if (!userProfile) {
       return (
         <View style={styles.containerEmpty}>
-          <ActivityIndicator size="large" color="#34bbed"/>
+          <Spinner visible={!userProfile} textContent={'Loading Profile...'} textStyle={{color: '#FFF'}} />
           <StatusBar barStyle="default" />
         </View>
       );
@@ -111,6 +110,7 @@ class ProfileScreen extends React.Component {
     )
     return (
       <View style={styles.container}>
+        <Spinner visible={this.state.logout} textContent={'Logging out...'} textStyle={{color: '#FFF'}} />
         <View style={{flex: flex}} />
         <View style={{flex: 60, alignItems: 'center'}}>
           {avatarSize}
@@ -188,7 +188,10 @@ class ProfileScreen extends React.Component {
             title='Share On'
           />
           <Button
-            onPress={this.props.screenProps.logout}
+            onPress={() => {
+              this.setState({logout: true})
+              this.props.screenProps.logout()
+            }}
             icon={{name: 'launch', color: 'white'}}
             buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#34bbed'}}
             textStyle={{ fontSize: 18, fontWeight: "900", color: "white"}}

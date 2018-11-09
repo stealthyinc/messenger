@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import Spinner from 'react-native-loading-spinner-overlay';
 
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 const common = require('./../common.js');
@@ -78,7 +79,7 @@ class AuthLoadingScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#34bbed"/>
+        <Spinner visible={true} textContent={'Loading contacts...'} textStyle={{color: '#FFF'}} />
         <StatusBar barStyle="default" />
       </View>
     );

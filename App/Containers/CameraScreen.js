@@ -13,6 +13,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import AwesomeAlert from 'react-native-awesome-alerts';
 import { Text, Divider } from 'react-native-elements'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import Spinner from 'react-native-loading-spinner-overlay';
 
 // Styles
 import styles from './Styles/CameraScreenStyle'
@@ -37,6 +38,7 @@ class CameraScreen extends Component {
     super(props);
     this.state = {
       showAlert: false,
+      showSpinner: false,
       data: null
     }
   }
@@ -44,9 +46,10 @@ class CameraScreen extends Component {
     this.props.navigation.setParams({ navigation: this.props.navigation });
   }
   render() {
-    const {showAlert, data} = this.state
+    const {showAlert, showSpinner, data} = this.state
     return (
       <View style={styles.container}>
+        <Spinner visible={showSpinner} textContent={'Adding contact...'} textStyle={{color: '#FFF'}} />
         <AwesomeAlert
           show={showAlert}
           showProgress={false}
@@ -61,7 +64,10 @@ class CameraScreen extends Component {
           cancelButtonColor="#DD6B55"
           confirmButtonColor="#34bbed"
           onCancelPressed={() => this.props.navigation.goBack()}
-          onConfirmPressed={() => this.props.addContactId(data)}
+          onConfirmPressed={() => {
+            this.setState({showAlert: false, showSpinner: true})
+            this.props.addContactId(data)
+          }}
         />
         {!showAlert ? (<RNCamera
             ref={ref => {

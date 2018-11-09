@@ -8,6 +8,7 @@ import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import Communications from 'react-native-communications';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FIcon from 'react-native-vector-icons/dist/FontAwesome';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import {
   ActivityIndicator,
@@ -103,12 +104,16 @@ class BlockContactSearch extends Component {
       title: name
     }
     this.props.addNewContact(contact, true)
+    this.setState({showAdding: true}); 
   }
   createListItem(contact) {
     const { payload, error } = this.props
     const { showNothing, showAdding, showLoading } = this.state
     if (showNothing) {
       return <ListItem>{null}</ListItem>
+    }
+    else if (showAdding) {
+      return <Spinner visible={showAdding} textContent={'Adding contact...'} textStyle={{color: '#FFF'}} />
     }
     else if (payload && payload.length) {
       return payload.map((item, i) => (
@@ -124,7 +129,7 @@ class BlockContactSearch extends Component {
     else if (showLoading) {
       setTimeout(() => {
         this.setState({showLoading: false})
-      }, 3000);
+      }, 5000);
       return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View>
     }
     else {

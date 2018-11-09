@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  ActivityIndicator, 
   AsyncStorage,
   StyleSheet,
   Text,
@@ -15,6 +14,7 @@ import {
 import { Icon, Button, Overlay, SocialIcon } from 'react-native-elements'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import Spinner from 'react-native-loading-spinner-overlay';
 
 const common = require('./../common.js');
 const utils = require('./../Engine/misc/utils.js');
@@ -41,9 +41,8 @@ class SignInScreen extends React.Component {
     };
   }
   render() {
-    const activityIndicator = (this.props.spinner) ? <ActivityIndicator size="large" color="#34bbed"/> : null
     const oldPad = utils.is_oldPad()
-    const marginBottom = (this.props.spinner) ? 40 : (oldPad) ? 50 : 80
+    const marginBottom = (oldPad) ? 50 : 80
     if (this.state.error) {
       return (
           <AwesomeAlert
@@ -87,7 +86,6 @@ class SignInScreen extends React.Component {
             title={(oldPad) ? "Login" : "Blockstack Login"}
             textStyle={{ fontSize: 18, fontWeight: "900", color: "#34bbed"}}
             icon={{name: 'input', color: "#34bbed"}}
-            disabled={this.props.spinner}
             buttonStyle={{
               marginLeft: 20,
               width: (oldPad) ? 150 : 200,
@@ -108,13 +106,12 @@ class SignInScreen extends React.Component {
           <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: (oldPad) ? 50 : 80, marginTop: 5 }}>Hi Stealthy 👋</Text>
         </View>
         <Text style={{ fontWeight: 'bold', fontSize: (oldPad) ? 20 : 24, color: 'grey', marginBottom }}>Decentralized Communication</Text>
-        {activityIndicator}
+        <Spinner visible={this.props.spinner} textContent={'Signing In...'} textStyle={{color: '#FFF'}} />
         <Button
           onPress={this._signInAsync}
           title="Create Account"
           textStyle={{ fontSize: 18, fontWeight: "900", color: "white"}}
           icon={{name: 'create', color: "white"}}
-          disabled={this.props.spinner}
           buttonStyle={{
             backgroundColor: "#34bbed",
             width: 180,
@@ -128,7 +125,6 @@ class SignInScreen extends React.Component {
         <Button
           onPress={() => Linking.openURL('https://www.youtube.com/watch?v=V9-egxTCFFE').catch(err => console.error('An error occurred', err))}
           title="Watch Demo"
-          disabled={this.props.spinner}
           textStyle={{ fontSize: 18, fontWeight: "900", color: "black"}}
           icon={{name: 'featured-video', color: "black"}}
           buttonStyle={{

@@ -27,21 +27,21 @@ const styles = StyleSheet.create({
 });
 
 class DiscoverScreen extends Component {
-  static navigationOptions = ({ navigation }) => {
-    const params = navigation.state.params || {};
-    return {
-      headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Channels</Text>,
-      headerRight: (
-        <TouchableOpacity onPress={() => console.log("Public Channels")} style={{marginRight: 10}}>
-          <Ionicons name="ios-help-buoy" size={30} color='white'/>
-        </TouchableOpacity>
-      ),
-      headerTintColor: 'white',
-      headerStyle: {
-        backgroundColor: '#34bbed'
-      }
-    }
-  };
+  // static navigationOptions = ({ navigation }) => {
+  //   const params = navigation.state.params || {};
+  //   return {
+  //     headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Channels</Text>,
+  //     headerRight: (
+  //       <TouchableOpacity onPress={() => console.log("Public Channels")} style={{marginRight: 10}}>
+  //         <Ionicons name="ios-help-buoy" size={30} color='white'/>
+  //       </TouchableOpacity>
+  //     ),
+  //     headerTintColor: 'white',
+  //     headerStyle: {
+  //       backgroundColor: '#34bbed'
+  //     }
+  //   }
+  // };
   constructor (props) {
     super(props)
     this.ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
@@ -55,9 +55,9 @@ class DiscoverScreen extends Component {
     this.numContacts = (props.contactMgr) ?
       (props.contactMgr.getAllContacts().length) : 0;
   }
-  componentWillMount() {
-    this.props.navigation.setParams({ navigation: this.props.navigation });
-  }
+  // componentWillMount() {
+  //   this.props.navigation.setParams({ navigation: this.props.navigation });
+  // }
   componentWillReceiveProps(nextProps) {
     const method = 'DiscoverScreen::componentWillReceiveProps'
 
@@ -86,8 +86,9 @@ class DiscoverScreen extends Component {
       // this.props.navigation.navigate('ChatRoom')
       // const params = {id: channelId}
       const params = {id: ''}
-      this.props.pushToChannel('Messages', params)
+      // this.props.pushToChannel('Messages', params)
       this.props.setContactAdded(false)
+      this.props.closeDrawer()
     }
     else if (contactMgr && this.state.channels.length === 0) {
       let channels = {}
@@ -104,6 +105,7 @@ class DiscoverScreen extends Component {
           channels,
           showLoading: false
         })
+        this.props.closeDrawer()
       })
       .catch(error => {
         console.log("Firebase Error", error)
@@ -128,7 +130,7 @@ class DiscoverScreen extends Component {
   }
   render () {
     if (this.state.showLoading || this.state.channelClicked) {
-      return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View>
+      return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#FFF"/></View>
     }
     else {
       return (

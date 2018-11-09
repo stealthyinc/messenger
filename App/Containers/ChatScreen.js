@@ -1,11 +1,11 @@
 import React, { Component } from 'react'
-import { Platform, Image, Modal, Keyboard, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, WebView, View, Text, ActivityIndicator } from 'react-native'
+import { Platform, Image, Modal, Keyboard, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, WebView, View, Text } from 'react-native'
 import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button, Icon } from 'react-native-elements'
 import Drawer from 'react-native-drawer'
 import ControlPanel from './ControlPanel'
-import dismissKeyboard from 'dismissKeyboard';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import AmaCommands from '../Engine/misc/amaCommands.js'
 
@@ -688,11 +688,7 @@ class ChatScreen extends Component {
                   onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
                 />
               </Drawer>
-            )
-            :
-            (<View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
-              <ActivityIndicator size="large" color="#34bbed"/>
-            </View>)
+            ) : <Spinner visible={!this.activeContact} textContent={'Loading content...'} textStyle={{color: '#FFF'}} />
           }
       </View>
     );

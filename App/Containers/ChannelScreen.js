@@ -5,7 +5,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button, Icon } from 'react-native-elements'
 import Drawer from 'react-native-drawer'
 import ControlPanel from './ControlPanel'
-import dismissKeyboard from 'dismissKeyboard';
 
 import AmaCommands from '../Engine/misc/amaCommands.js'
 
@@ -16,6 +15,7 @@ import PopupDialog, {
 import { Container, Header, Content, Item, Form, Textarea, Toast } from 'native-base';
 
 // Styles
+import ActionSheet from 'react-native-actionsheet'
 import emojiUtils from 'emoji-utils';
 import SlackMessage from './chat/SlackMessage';
 import styles from './Styles/ChatStyle'
@@ -70,7 +70,8 @@ class ChannelScreen extends Component {
       sharedUrl: '',
       drawerOpen: false,
       drawerDisabled: false,
-      inputText: ''
+      inputText: '',
+      user: '',
     };
 
     this._isMounted = false;
@@ -123,7 +124,8 @@ class ChannelScreen extends Component {
       name,
       userImage
     }
-    // firebaseInstance.subscribeToTopic(username);
+    //user added to the channel notification topic
+    firebaseInstance.subscribeToTopic(username);
     const { contactMgr } = this.props
     const activeContact = (contactMgr && contactMgr.getActiveContact()) ?
       contactMgr.getActiveContact() : undefined
@@ -211,31 +213,6 @@ class ChannelScreen extends Component {
   componentWillUnmount() {
     this._isMounted = false;
     this.props.handleContactClick()
-  }
-  componentDidMount() {
-    Keyboard.addListener('keyboardDidShow', this._keyboardDidShow)
-    Keyboard.addListener('keyboardDidHide', this._keyboardDidHide)
-  }
-
-  _keyboardDidShow = () => {
-    this.setState({
-        dialogStyle: {
-            top: -1 * (width / 4),
-            borderRadius: 20,
-            padding: 10,
-            overflow: 'hidden',
-        },
-    })
-  }
-
-  _keyboardDidHide = () => {
-    this.setState({
-        dialogStyle: {
-            borderRadius: 20,
-            padding: 10,
-            overflow: 'hidden',
-        },
-    })
   }
   setupMessages = (inputMessages) => {
     let messages = []
@@ -396,14 +373,16 @@ class ChannelScreen extends Component {
       >
         <Ionicons name="ios-radio" size={28} color='#34bbed' />
       </TouchableOpacity>
-    ) : (
-      <TouchableOpacity
-        style={[styles.chatContainer, this.props.containerStyle]}
-        onPress={() => this.toggleDrawer()}
-      >
-        <Ionicons name="ios-compass" size={28} color='#34bbed' />
-      </TouchableOpacity>
-    )
+    ) : null
+    //disabling this for v1.7
+    // (
+    //   <TouchableOpacity
+    //     style={[styles.chatContainer, this.props.containerStyle]}
+    //     onPress={() => this.toggleDrawer()}
+    //   >
+    //     <Ionicons name="ios-compass" size={28} color='#34bbed' />
+    //   </TouchableOpacity>
+    // )
   }
   renderFooter = (props) => {
     if (this.state.typingText) {
@@ -460,6 +439,8 @@ class ChannelScreen extends Component {
     this._giftedChat.textInput.focus()
   };
   setCustomText = (inputText) => {
+    //turning this off for v1.7
+    return
     if (this.protocol && inputText && (inputText[0] === '@' || inputText[0] === '/') && inputText.length < 2) {
       this.openDrawer()
     }
@@ -485,18 +466,30 @@ class ChannelScreen extends Component {
       <SlackMessage {...props} messageTextStyle={messageTextStyle} />
     );
   }
-  renderBubble = (props) => {
-    return (
-      <Bubble
-        {...props}
-        wrapperStyle={{
-          left: {
-            backgroundColor: '#f0f0f0',
-          }
-        }}
-      />
-    );
+  handleUserActionSheet = (index) => {
+    switch (index) {
+      case 0: {
+        this.props.addContactId(this.state.user.name)
+        break;
+      }
+    }
   }
+  showActionSheet = (user) => {
+    this.setState({ user })
+    this.ActionSheet.show()
+  }
+  // renderBubble = (props) => {
+  //   return (
+  //     <Bubble
+  //       {...props}
+  //       wrapperStyle={{
+  //         left: {
+  //           backgroundColor: '#f0f0f0',
+  //         }
+  //       }}
+  //     />
+  //   );
+  // }
   render() {
     const amaButton = (this.amaTitleIndex[this.state.amaTitle]) ? (
       <Button
@@ -514,110 +507,119 @@ class ChannelScreen extends Component {
       <View id='GiftedChatContainer'
            style={{flex: 1,
                    backgroundColor: 'white'}}>
-          {(this.activeContact) ?
-            (
-              <Drawer
-                ref={(ref) => this._drawer = ref}
-                type="overlay"
-                styles={drawerStyles}
-                tapToClose={true}
-                closedDrawerOffset={-3}
-                tweenHandler={(ratio) => ({
-                  main: { opacity:(2-ratio)/2 }
-                })}
-                content={
-                  <ControlPanel addToInput={this.addToInput} closeDrawer={this.closeDrawer} />
-                }
-                onOpen={() => {
-                  this.setState({drawerOpen: true})
-                }}
-                onClose={() => {
-                  this.setState({drawerOpen: false})
-                }}
-                side='bottom'
-              >
-                <PopupDialog
-                  dialogStyle={this.state.dialogStyle}
-                  dialogTitle={<DialogTitle align="left" title="Set your AMA Topic" />}
-                  ref={(popupDialog) => {
-                    this.slideAnimationDialog = popupDialog;
-                  }}
-                  dialogAnimation={slideAnimation}
-                  actions={[
-                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                      <Button
-                        key="button-2"
-                        raised
-                        title='Close'
-                        leftIcon={{name: 'close'}}
-                        style={{paddingBottom: 20}}
-                        buttonStyle={{backgroundColor: '#DD6B55'}}
-                        onPress={() => {
-                          this.slideAnimationDialog.dismiss();
-                        }}>
-                      </Button>,
-                      <Button
-                        key="button-1"
-                        raised
-                        title='Submit'
-                        leftIcon={{name: 'check'}}
-                        style={{paddingBottom: 20}}
-                        buttonStyle={{backgroundColor: '#34bbed'}}
-                        onPress={() => {
-                          this.slideAnimationDialog.dismiss();
-                          const stringifiedCmd = AmaCommands.amaCreate(this.state.amaAnswer)
-                          this.props.handleOutgoingMessage(stringifiedCmd, undefined);
-                          this.setState({amaTitle: this.state.amaAnswer})
-                        }}>
-                      </Button>
-                    </View>
-                  ]}
-                >
-                  <Container>
-                    <Content padder>
-                      <Form>
-                        <Textarea onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})} rowSpan={5} bordered placeholder="Enter a AMA Topic" />
-                      </Form>
-                    </Content>
-                  </Container>
-                </PopupDialog>
-                {amaButton}
-                <GiftedChat
-                  ref={(ref) => this._giftedChat = ref}
-                  messages={this.state.messages}
-                  onSend={this.onSend}
-                  loadEarlier={this.state.loadEarlier}
-                  onLoadEarlier={this.onLoadEarlier}
-                  onPressAvatar={(this.protocol) ? (user) => Toast.show({
-                    text: user._id,
-                    buttonText: "Close",
-                    type: "success"
-                  }) : () => this.props.navigation.navigate('ContactProfile')}
-                  isLoadingEarlier={this.state.isLoadingEarlier}
-                  user={{
-                    _id: this.state.author.username, // sent messages should have same user._id
-                  }}
-                  text={this.state.inputText}
-                  renderBubble={this.renderBubble}
-                  renderActions={(!disableAmaFeatures) ? this.renderCustomActions : null}
-                  renderMessage={this.renderMessage}
-                  renderFooter={this.renderFooter}
-                  maxInputLength={240}
-                  renderInputToolbar={this.renderInputToolbar}
-                  parsePatterns={(linkStyle) => [
-                    { pattern: /AMA:.*\n\n.*/, style: linkStyle, onPress: this.onPressAma },
-                  ]}
-                  onInputTextChanged={text => this.setCustomText(text)}
-                  textInputProps={{editable: (!disableAmaFeatures)}}
-                  onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
-                />
-              </Drawer>
-            )
-            :
-            (<View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
-              <ActivityIndicator size="large" color="#34bbed"/>
-            </View>)
+        <Drawer
+          ref={(ref) => this._drawer = ref}
+          type="overlay"
+          styles={drawerStyles}
+          tapToClose={true}
+          closedDrawerOffset={-3}
+          tweenHandler={(ratio) => ({
+            main: { opacity:(2-ratio)/2 }
+          })}
+          content={
+            <ControlPanel addToInput={this.addToInput} closeDrawer={this.closeDrawer} />
           }
+          onOpen={() => {
+            this.setState({drawerOpen: true})
+          }}
+          onClose={() => {
+            this.setState({drawerOpen: false})
+          }}
+          side='bottom'
+        >
+          <PopupDialog
+            dialogKey="goWay"
+            dialogStyle={{
+              top: -1 * (width / 3),
+              borderRadius: 20,
+              padding: 10,
+              overflow: 'hidden',
+            }}
+            dialogTitle={<DialogTitle align="left" title="Set your AMA Topic" />}
+            ref={(popupDialog) => {
+              this.slideAnimationDialog = popupDialog;
+            }}
+            dialogAnimation={slideAnimation}
+            actions={[
+              <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Button
+                  key="button-2"
+                  raised
+                  title='Close'
+                  leftIcon={{name: 'close'}}
+                  style={{paddingBottom: 20}}
+                  buttonStyle={{backgroundColor: '#DD6B55'}}
+                  onPress={() => {
+                    this.slideAnimationDialog.dismiss();
+                    Keyboard.dismiss()
+                  }}>
+                </Button>,
+                <Button
+                  key="button-1"
+                  raised
+                  title='Submit'
+                  leftIcon={{name: 'check'}}
+                  style={{paddingBottom: 20}}
+                  buttonStyle={{backgroundColor: '#34bbed'}}
+                  onPress={() => {
+                    if (this.state.amaAnswer) {
+                      this.slideAnimationDialog.dismiss();
+                      Keyboard.dismiss()
+                      const stringifiedCmd = AmaCommands.amaCreate(this.state.amaAnswer)
+                      this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+                      this.setState({amaTitle: this.state.amaAnswer})
+                    }
+                  }}>
+                </Button>
+              </View>
+            ]}
+          >
+            <Container>
+              <Content padder>
+                <Form>
+                  <Textarea onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})} rowSpan={5} bordered placeholder="Enter a AMA Topic" />
+                </Form>
+              </Content>
+            </Container>
+          </PopupDialog>
+          {amaButton}
+          <ActionSheet
+            ref={o => this.ActionSheet = o}
+            title={`Would you like to add this user?`}
+            options={['Add', 'Cancel']}
+            cancelButtonIndex={1}
+            destructiveButtonIndex={1}
+            onPress={(index) => this.handleUserActionSheet(index)}
+          />
+          <GiftedChat
+            ref={(ref) => this._giftedChat = ref}
+            messages={this.state.messages}
+            onSend={this.onSend}
+            loadEarlier={this.state.loadEarlier}
+            onLoadEarlier={this.onLoadEarlier}
+            onPressAvatar={(this.protocol) ? (user) => this.showActionSheet(user)
+             : () => this.props.navigation.navigate('ContactProfile')}
+            isLoadingEarlier={this.state.isLoadingEarlier}
+            user={{
+              _id: this.state.author.username, // sent messages should have same user._id
+            }}
+            showAvatarForEveryMessage={true}
+            renderAvatarOnTop={true}
+            text={this.state.inputText}
+            renderBubble={this.renderBubble}
+            renderActions={(!disableAmaFeatures) ? this.renderCustomActions : null}
+            renderMessage={this.renderMessage}
+            renderFooter={this.renderFooter}
+            maxInputLength={240}
+            renderInputToolbar={this.renderInputToolbar}
+            parsePatterns={(linkStyle) => [
+              { pattern: /AMA:.*\n\n.*/, style: linkStyle, onPress: this.onPressAma },
+            ]}
+            onInputTextChanged={text => this.setCustomText(text)}
+            textInputProps={{editable: (!disableAmaFeatures)}}
+            onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
+          />
+        </Drawer>
       </View>
     );
   }
@@ -643,6 +645,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    addContactId: (id) => dispatch(EngineActions.addContactId(id)),
     shareInit: () => dispatch(TwitterShareActions.shareInit()),
     handleOutgoingMessage: (text, json) => dispatch(EngineActions.setOutgoingMessage(text, json)),
     sendAmaInfo: (msgAddress, amaId) => dispatch(EngineActions.sendAmaInfo(msgAddress, amaId)),
