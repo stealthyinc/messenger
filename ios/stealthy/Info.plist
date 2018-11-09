@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Stealthy needs to access your cameral roll to post photos</string>
-	<key>NSCameraUsageDescription</key>
-	<string>QR Code scanner needs to use camera</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -21,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.6</string>
+	<string>1.7</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -46,7 +42,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>4</string>
+	<string>2</string>
 	<key>FIREBASE_ANALYTICS_COLLECTION_DEACTIVATED</key>
 	<true/>
 	<key>LSApplicationCategoryType</key>
@@ -68,10 +64,14 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>QR Code scanner needs to use camera</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>We only use your location when the app is running to help you send a map location to your friends.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We only use your location when the app is running to help you send a map location to your friends.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Stealthy needs to access your cameral roll to post photos</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Entypo.ttf</string>

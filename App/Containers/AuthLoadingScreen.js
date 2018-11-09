@@ -67,6 +67,10 @@ class AuthLoadingScreen extends React.Component {
     // const userData = (utils.isAndroid()) ?
     //   undefined : JSON.parse(await AsyncStorage.getItem('userData'));
     const userData = JSON.parse(await AsyncStorage.getItem('userData'))
+    const channels = JSON.parse(await AsyncStorage.getItem('channels'))
+    if (channels)
+      this.props.setChannelsData(channels)
+    
     if (!userData) {
       this.props.navigation.navigate('Auth');
     }
@@ -79,7 +83,6 @@ class AuthLoadingScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Spinner visible={true} textContent={'Loading contacts...'} textStyle={{color: '#FFF'}} />
         <StatusBar barStyle="default" />
       </View>
     );
@@ -101,6 +104,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    setChannelsData: (channels) => dispatch(EngineActions.setChannelsData(channels))
   }
 }
 

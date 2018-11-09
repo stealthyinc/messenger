@@ -43,6 +43,7 @@ const { Types, Creators } = createActions({
   setAmaData: ['amaData'],
   setAmaStatus: ['amaStatus'],
   sendAmaInfo: ['msgAddress', 'amaId'],
+  setChannelsData: ['channels'],
 })
 
 export const EngineTypes = Types
@@ -73,6 +74,7 @@ export const INITIAL_STATE = Immutable({
   id: '',
   amaData: undefined,
   amaStatus: undefined,
+  channels: null,
 })
 
 /* ------------- Selectors ------------- */
@@ -97,6 +99,7 @@ export const EngineSelectors = {
   getSignInPending: state => state.engine.signInPending,
   getAmaData: state => state.engine.amaData,
   getAmaStatus: state => state.engine.amaStatus,
+  getChannelsData: state => state.engine.channels,
 }
 
 /* ------------- Reducers ------------- */
@@ -208,6 +211,11 @@ export const setAmaStatus = (state, { amaStatus }) => {
   return state.merge({ amaStatus })
 }
 
+// got new channels from firebase
+export const setChannelsData = (state, { channels }) => {
+  return state.merge({ channels })
+}
+
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -233,4 +241,5 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_SESSION]: setSession,
   [Types.SET_ENGINE_FAULT]: setEngineFault,
   [Types.RESTART_ENGINE]: restartEngine,
+  [Types.SET_CHANNELS_DATA]: setChannelsData,
 })

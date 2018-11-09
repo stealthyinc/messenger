@@ -58,6 +58,22 @@ class DiscoverScreen extends Component {
   // componentWillMount() {
   //   this.props.navigation.setParams({ navigation: this.props.navigation });
   // }
+  componentWillMount() {
+    let channels = {}
+    if (this.props.channels) {
+      for (let ch in this.props.channels) {
+        console.log("PBJ INFO", ch, this.props.channels[ch])
+        const {id} = this.props.channels[ch]
+        const exists = this.props.contactMgr.isExistingContactId(id)
+        if (!exists)
+          channels[ch] = this.props.channels[ch]
+      }
+      this.setState({
+        channels,
+        showLoading: false
+      })
+    }
+  }
   componentWillReceiveProps(nextProps) {
     const method = 'DiscoverScreen::componentWillReceiveProps'
 
@@ -89,27 +105,6 @@ class DiscoverScreen extends Component {
       // this.props.pushToChannel('Messages', params)
       this.props.setContactAdded(false)
       this.props.closeDrawer()
-    }
-    else if (contactMgr && this.state.channels.length === 0) {
-      let channels = {}
-      firebaseInstance.getFirebaseRef('/global/public_channel_v2_0/auto').once('value')
-      .then(snapshot => {
-        snapshot.forEach(childSnapshot => {
-          const name = childSnapshot.key
-          const channel = childSnapshot.val()
-          const exists = contactMgr.isExistingContactId(channel.id)
-          if (!exists)
-            channels[name] = channel
-        })
-        this.setState({
-          channels,
-          showLoading: false
-        })
-        this.props.closeDrawer()
-      })
-      .catch(error => {
-        console.log("Firebase Error", error)
-      })
     }
   }
   contactSelected = (data, secId, rowId, rowMap) => {
@@ -171,8 +166,8 @@ class DiscoverScreen extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    contactMgr: EngineSelectors.getContactMgr(state),
     contactAdded: EngineSelectors.getContactAdded(state),
+    channels: EngineSelectors.getChannelsData(state),
   }
 }
 

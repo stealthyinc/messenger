@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux'
-import { AsyncStorage, View, ListView, StyleSheet, TouchableOpacity, NativeModules } from 'react-native';
+import { ActivityIndicator, AsyncStorage, View, ListView, StyleSheet, TouchableOpacity, NativeModules } from 'react-native';
 import TouchableRow from './contacts/Row';
 import TwitterShareModal from '../Components/TwitterShareModal'
 import Footer from './contacts/Footer';
@@ -148,12 +148,27 @@ class ConversationScreen extends React.Component {
     const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
     const { contactMgr, activateShare, userData, userSettings, engineInit } = this.props
     const activeContact = (contactMgr) ? contactMgr.getActiveContact() : undefined
-    if (!contactMgr || activeContact || !engineInit) {
+    const channelButton = (this.state.drawerOpen) ? (
+      <Button onPress={() => this.openDrawer()} iconLeft block danger style={{borderRadius: 5, borderWidth: 2, borderColor: 'grey'}}>
+        <Icon name='ios-arrow-down' />
+        <Icon />
+        <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>Cancel</Text>
+      </Button>
+    ) : (
+      <Button onPress={() => this.openDrawer()} iconLeft block success style={{borderRadius: 5, borderWidth: 2, borderColor: 'grey'}}>
+        <Icon name='ios-radio' />
+        <Icon />
+        <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>Add Channels</Text>
+      </Button>
+    )
+    // console.log(`INFO:  spinner ${!!this.state.showSpinner}  |  conMgr ${!!contactMgr}  |  actCtc ${!!activeContact}  |  engIni ${!!engineInit}`)
+    if (!engineInit) {
+      // console.log('INFO: spinner should show')
       return (
-        <Spinner visible={this.state.showSpinner} textContent={'Loading contacts...'} textStyle={{color: '#FFF'}} />
+        <Spinner key="convSpinner" visible={this.state.showSpinner} textContent={'Loading contacts...'} textStyle={{color: '#FFF'}} />
       )
     }
-    if (activateShare && !userSettings.twitterShare) {
+    else if (activateShare && !userSettings.twitterShare) {
       return (
         <TwitterShareModal 
         shareDecline={() => {
@@ -177,7 +192,7 @@ class ConversationScreen extends React.Component {
             main: { opacity:(2-ratio)/2 }
           })}
           content={
-            <DiscoverScreen closeDrawer={this.closeDrawer} />
+            <DiscoverScreen contactMgr={contactMgr} closeDrawer={this.closeDrawer} />
           }
           onOpen={() => {
             this.setState({drawerOpen: true})
@@ -189,11 +204,7 @@ class ConversationScreen extends React.Component {
         >
           <Container style={{backgroundColor: 'white'}}>
             <Content>
-              <Button onPress={() => this.openDrawer()} iconLeft block success style={{borderRadius: 5, borderWidth: 2, borderColor: 'grey'}}>
-                <Icon name='ios-radio' />
-                <Icon />
-                <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>Add Channels</Text>
-              </Button>
+              {channelButton}
               <List
                 removeClippedSubviews={false}
                 dataSource={this.ds.cloneWithRows(this.state.listViewData)}

@@ -168,10 +168,23 @@ class SignInScreen extends React.Component {
     });
     return;
   };
+  _getChannelsData = async () => {
+    let channels = {}
+    firebaseInstance.getFirebaseRef('/global/public_channel_v2_0/auto').once('value')
+    .then(snapshot => {
+      snapshot.forEach(childSnapshot => {
+        const name = childSnapshot.key
+        const channel = childSnapshot.val()
+        channels[name] = channel
+      })
+      AsyncStorage.setItem('channels', JSON.stringify(channels));
+      this.props.setChannelsData(channels)
+    })
+  }
   _signInAsync = async () => {
     this.props.setSignInPending(true)
     const method = 'SignInScreen::_signInAsync'
-
+    this._getChannelsData()
     const {BlockstackNativeModule} = NativeModules;
     const baseUrl = "https://www.stealthy.im"
 
@@ -239,6 +252,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     setSignInPending: (flag) => dispatch(EngineActions.setSignInPending(flag)),
+    setChannelsData: (channels) => dispatch(EngineActions.setChannelsData(channels))
     // setEngineFault: (flag) => dispatch(EngineActions.setEngineFault(flag)),
   }
 }
