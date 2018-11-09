@@ -106,7 +106,6 @@ class SignInScreen extends React.Component {
           <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: (oldPad) ? 50 : 80, marginTop: 5 }}>Hi Stealthy 👋</Text>
         </View>
         <Text style={{ fontWeight: 'bold', fontSize: (oldPad) ? 20 : 24, color: 'grey', marginBottom }}>Decentralized Communication</Text>
-        <Spinner visible={this.props.spinner} textContent={'Signing In...'} textStyle={{color: '#FFF'}} />
         <Button
           onPress={this._signInAsync}
           title="Create Account"
