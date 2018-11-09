@@ -86,6 +86,7 @@ class SignInScreen extends React.Component {
             title={(oldPad) ? "Login" : "Blockstack Login"}
             textStyle={{ fontSize: 18, fontWeight: "900", color: "#34bbed"}}
             icon={{name: 'input', color: "#34bbed"}}
+            disabled={this.props.spinner}
             buttonStyle={{
               marginLeft: 20,
               width: (oldPad) ? 150 : 200,
@@ -111,6 +112,7 @@ class SignInScreen extends React.Component {
           title="Create Account"
           textStyle={{ fontSize: 18, fontWeight: "900", color: "white"}}
           icon={{name: 'create', color: "white"}}
+          disabled={this.props.spinner}
           buttonStyle={{
             backgroundColor: "#34bbed",
             width: 180,
@@ -126,6 +128,7 @@ class SignInScreen extends React.Component {
           title="Watch Demo"
           textStyle={{ fontSize: 18, fontWeight: "900", color: "black"}}
           icon={{name: 'featured-video', color: "black"}}
+          disabled={this.props.spinner}
           buttonStyle={{
             backgroundColor: "white",
             width: 180,
