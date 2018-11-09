@@ -15,6 +15,7 @@ import demoIcon from '../Images/democ1.png';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 import AmaCommands from '../Engine/misc/amaCommands.js'
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import PopupDialog, {
   DialogTitle,
@@ -79,6 +80,7 @@ class SlackScreen extends React.Component {
       showAvatarAlert: false,
       amaAnswer: '',
       newContent: true,
+      showSpinner: false,
     }
   }
   componentWillReceiveProps(nextProps) {
@@ -130,6 +132,7 @@ class SlackScreen extends React.Component {
   onSend(messages = []) {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
+      showSpinner: true
     }))
     const { text } = messages[0]
     const stringifiedCmd = this.amaCmds.questionCreate(text)
@@ -330,6 +333,7 @@ class SlackScreen extends React.Component {
       alertOption,
       showDialog,
       newContent,
+      showSpinner
     } = this.state
     const refreshButton = (newContent) ? (
       <Button
@@ -395,8 +399,14 @@ class SlackScreen extends React.Component {
         />
       )
     }
+    else if (showSpinner) {
+      setTimeout(() => {
+        this.setState({showSpinner: false})
+      }, 2000);
+    }
     return (
       <View style={{flex:1}}>
+        <Spinner key="convSpinner" visible={showSpinner} textContent={'Processing ...'} textStyle={{color: '#FFF'}} />
         <PopupDialog
           dialogStyle={{
             top: -1 * (width / 3),

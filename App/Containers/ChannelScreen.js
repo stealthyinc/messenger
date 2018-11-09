@@ -5,6 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button, Icon } from 'react-native-elements'
 import Drawer from 'react-native-drawer'
 import ControlPanel from './ControlPanel'
+import Spinner from 'react-native-loading-spinner-overlay';
 
 import AmaCommands from '../Engine/misc/amaCommands.js'
 
@@ -72,6 +73,7 @@ class ChannelScreen extends Component {
       drawerDisabled: false,
       inputText: '',
       user: '',
+      showSpinner: false,
     };
 
     this._isMounted = false;
@@ -503,10 +505,16 @@ class ChannelScreen extends Component {
       />
     ) : null
     const disableAmaFeatures = this.isAma && !this.delegate
+    if (this.state.showSpinner) {
+      setTimeout(() => {
+        this.setState({showSpinner: false})
+      }, 3000);
+    }
     return (
       <View id='GiftedChatContainer'
            style={{flex: 1,
                    backgroundColor: 'white'}}>
+        <Spinner key="convSpinner" visible={this.state.showSpinner} textContent={'Processing ...'} textStyle={{color: '#FFF'}} />
         <Drawer
           ref={(ref) => this._drawer = ref}
           type="overlay"
@@ -567,7 +575,7 @@ class ChannelScreen extends Component {
                       Keyboard.dismiss()
                       const stringifiedCmd = AmaCommands.amaCreate(this.state.amaAnswer)
                       this.props.handleOutgoingMessage(stringifiedCmd, undefined);
-                      this.setState({amaTitle: this.state.amaAnswer})
+                      this.setState({amaTitle: this.state.amaAnswer, showSpinner: true})
                     }
                   }}>
                 </Button>
