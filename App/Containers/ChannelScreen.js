@@ -442,10 +442,9 @@ class ChannelScreen extends Component {
   };
   setCustomText = (inputText) => {
     //turning this off for v1.7
-    return
-    if (this.protocol && inputText && (inputText[0] === '@' || inputText[0] === '/') && inputText.length < 2) {
-      this.openDrawer()
-    }
+    // if (this.protocol && inputText && (inputText[0] === '@' || inputText[0] === '/') && inputText.length < 2) {
+    //   this.openDrawer()
+    // }
     this.setState({inputText})
   }
   addToInput = (text) => {
