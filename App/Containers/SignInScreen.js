@@ -14,7 +14,6 @@ import {
 import { Icon, Button, Overlay, SocialIcon } from 'react-native-elements'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
-import Spinner from 'react-native-loading-spinner-overlay';
 
 const common = require('./../common.js');
 const utils = require('./../Engine/misc/utils.js');
@@ -86,7 +85,6 @@ class SignInScreen extends React.Component {
             title={(oldPad) ? "Login" : "Blockstack Login"}
             textStyle={{ fontSize: 18, fontWeight: "900", color: "#34bbed"}}
             icon={{name: 'input', color: "#34bbed"}}
-            disabled={this.props.spinner}
             buttonStyle={{
               marginLeft: 20,
               width: (oldPad) ? 150 : 200,
@@ -112,7 +110,6 @@ class SignInScreen extends React.Component {
           title="Create Account"
           textStyle={{ fontSize: 18, fontWeight: "900", color: "white"}}
           icon={{name: 'create', color: "white"}}
-          disabled={this.props.spinner}
           buttonStyle={{
             backgroundColor: "#34bbed",
             width: 180,
@@ -128,7 +125,6 @@ class SignInScreen extends React.Component {
           title="Watch Demo"
           textStyle={{ fontSize: 18, fontWeight: "900", color: "black"}}
           icon={{name: 'featured-video', color: "black"}}
-          disabled={this.props.spinner}
           buttonStyle={{
             backgroundColor: "white",
             width: 180,
@@ -151,6 +147,7 @@ class SignInScreen extends React.Component {
         // this.props.setEngineFault(true)
         this.setState({error: true, errorText: 'User data not found. Please ensure you have a valid Blockstack username. E-mail support@stealthy.im for further help.'})
         this.props.setSignInPending(false)
+        this.props.setSpinnerData(false, '')
       } else {
         BlockstackNativeModule.getPublicKeyFromPrivate(
           userData['privateKey'], async (error, publicKey) => {
@@ -159,6 +156,7 @@ class SignInScreen extends React.Component {
               // this.props.setEngineFault(true)
               this.setState({error: true, errorText: 'Failed to get public key from private.'})
               this.props.setSignInPending(false)
+              this.props.setSpinnerData(false, '')
             }
             else {
               userData['appPublicKey'] = publicKey;
@@ -184,6 +182,7 @@ class SignInScreen extends React.Component {
     })
   }
   _signInAsync = async () => {
+    this.props.setSpinnerData(true, 'Signing in...')
     this.props.setSignInPending(true)
     const method = 'SignInScreen::_signInAsync'
     this._getChannelsData()
@@ -211,6 +210,7 @@ class SignInScreen extends React.Component {
       } catch (error) {
         this.props.setSignInPending(false)
         throw utils.fmtErrorStr('Failed to sign in to Blockstack.', method, error)
+        this.props.setSpinnerData(false, '')
       }
 
       try {
@@ -219,6 +219,7 @@ class SignInScreen extends React.Component {
       } catch (error) {
         this.props.setSignInPending(false)
         throw utils.fmtErrorStr('Failed to get public key.', method, error)
+        this.props.setSpinnerData(false, '')
       }
 
       AsyncStorage.setItem('userData', JSON.stringify(userData));
@@ -230,6 +231,7 @@ class SignInScreen extends React.Component {
         }
         else {
           this.props.setSignInPending(false)
+          this.props.setSpinnerData(false, '')
         }
       });
     }
@@ -254,7 +256,8 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     setSignInPending: (flag) => dispatch(EngineActions.setSignInPending(flag)),
-    setChannelsData: (channels) => dispatch(EngineActions.setChannelsData(channels))
+    setChannelsData: (channels) => dispatch(EngineActions.setChannelsData(channels)),
+    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),
     // setEngineFault: (flag) => dispatch(EngineActions.setEngineFault(flag)),
   }
 }

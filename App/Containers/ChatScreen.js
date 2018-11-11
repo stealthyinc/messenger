@@ -5,7 +5,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button, Icon } from 'react-native-elements'
 import Drawer from 'react-native-drawer'
 import ControlPanel from './ControlPanel'
-import Spinner from 'react-native-loading-spinner-overlay';
 
 import AmaCommands from '../Engine/misc/amaCommands.js'
 
@@ -589,107 +588,103 @@ class ChatScreen extends Component {
       <View id='GiftedChatContainer'
            style={{flex: 1,
                    backgroundColor: 'white'}}>
-          {(this.activeContact) ?
-            (
-              <Drawer
-                ref={(ref) => this._drawer = ref}
-                type="overlay"
-                styles={drawerStyles}
-                tapToClose={true}
-                closedDrawerOffset={-3}
-                tweenHandler={(ratio) => ({
-                  main: { opacity:(2-ratio)/2 }
-                })}
-                content={
-                  <ControlPanel addToInput={this.addToInput} closeDrawer={this.closeDrawer} />
-                }
-                onOpen={() => {
-                  this.setState({drawerOpen: true})
-                }}
-                onClose={() => {
-                  this.setState({drawerOpen: false})
-                }}
-                side='bottom'
-              >
-                <PopupDialog
-                  dialogTitle={<DialogTitle align="left" title="Set your AMA Topic" />}
-                  ref={(popupDialog) => {
-                    this.slideAnimationDialog = popupDialog;
-                  }}
-                  dialogAnimation={slideAnimation}
-                  actions={[
-                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                      <Button
-                        key="button-2"
-                        raised
-                        title='Close'
-                        leftIcon={{name: 'close'}}
-                        style={{paddingBottom: 20}}
-                        buttonStyle={{backgroundColor: '#DD6B55'}}
-                        onPress={() => {
-                          this.slideAnimationDialog.dismiss();
-                        }}>
-                      </Button>,
-                      <Button
-                        key="button-1"
-                        raised
-                        title='Submit'
-                        leftIcon={{name: 'check'}}
-                        style={{paddingBottom: 20}}
-                        buttonStyle={{backgroundColor: '#34bbed'}}
-                        onPress={() => {
-                          this.slideAnimationDialog.dismiss();
-                          const stringifiedCmd = AmaCommands.amaCreate(this.state.amaAnswer)
-                          this.props.handleOutgoingMessage(stringifiedCmd, undefined);
-                          this.setState({amaTitle: this.state.amaAnswer})
-                        }}>
-                      </Button>
-                    </View>
-                  ]}
-                >
-                  <Container>
-                    <Content padder>
-                      <Form>
-                        <Textarea onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})} rowSpan={5} bordered placeholder="Enter a AMA Topic" />
-                      </Form>
-                    </Content>
-                  </Container>
-                </PopupDialog>
-                {amaButton}
-                <GiftedChat
-                  ref={(ref) => this._giftedChat = ref}
-                  messages={this.state.messages}
-                  onSend={this.onSend}
-                  loadEarlier={this.state.loadEarlier}
-                  onLoadEarlier={this.onLoadEarlier}
-                  onPressAvatar={(this.protocol) ? (user) => Toast.show({
-                    text: user._id,
-                    buttonText: "Close",
-                    type: "success"
-                  }) : () => this.props.navigation.navigate('ContactProfile')}
-                  isLoadingEarlier={this.state.isLoadingEarlier}
-                  user={{
-                    _id: this.state.author.username, // sent messages should have same user._id
-                  }}
-                  text={this.state.inputText}
-                  renderActions={(!disableAmaFeatures) ? this.renderCustomActions : null}
-                  renderBubble={this.renderBubble}
-                  renderSystemMessage={this.renderSystemMessage}
-                  renderMessageImage={this.renderCustomView}
-                  renderFooter={this.renderFooter}
-                  maxInputLength={240}
-                  renderInputToolbar={this.renderInputToolbar}
-                  parsePatterns={(linkStyle) => [
-                    { type: 'url', style: linkStyle, onPress: this.onPressUrl },
-                    { pattern: /AMA:.*\n\n.*/, style: linkStyle, onPress: this.onPressAma },
-                  ]}
-                  onInputTextChanged={text => this.setCustomText(text)}
-                  textInputProps={{editable: (!disableAmaFeatures)}}
-                  onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
-                />
-              </Drawer>
-            ) : <Spinner visible={!this.activeContact} textContent={'Loading content...'} textStyle={{color: '#FFF'}} />
-          }
+          <Drawer
+            ref={(ref) => this._drawer = ref}
+            type="overlay"
+            styles={drawerStyles}
+            tapToClose={true}
+            closedDrawerOffset={-3}
+            tweenHandler={(ratio) => ({
+              main: { opacity:(2-ratio)/2 }
+            })}
+            content={
+              <ControlPanel addToInput={this.addToInput} closeDrawer={this.closeDrawer} />
+            }
+            onOpen={() => {
+              this.setState({drawerOpen: true})
+            }}
+            onClose={() => {
+              this.setState({drawerOpen: false})
+            }}
+            side='bottom'
+          >
+            <PopupDialog
+              dialogTitle={<DialogTitle align="left" title="Set your AMA Topic" />}
+              ref={(popupDialog) => {
+                this.slideAnimationDialog = popupDialog;
+              }}
+              dialogAnimation={slideAnimation}
+              actions={[
+                <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                  <Button
+                    key="button-2"
+                    raised
+                    title='Close'
+                    leftIcon={{name: 'close'}}
+                    style={{paddingBottom: 20}}
+                    buttonStyle={{backgroundColor: '#DD6B55'}}
+                    onPress={() => {
+                      this.slideAnimationDialog.dismiss();
+                    }}>
+                  </Button>,
+                  <Button
+                    key="button-1"
+                    raised
+                    title='Submit'
+                    leftIcon={{name: 'check'}}
+                    style={{paddingBottom: 20}}
+                    buttonStyle={{backgroundColor: '#34bbed'}}
+                    onPress={() => {
+                      this.slideAnimationDialog.dismiss();
+                      const stringifiedCmd = AmaCommands.amaCreate(this.state.amaAnswer)
+                      this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+                      this.setState({amaTitle: this.state.amaAnswer})
+                    }}>
+                  </Button>
+                </View>
+              ]}
+            >
+              <Container>
+                <Content padder>
+                  <Form>
+                    <Textarea onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})} rowSpan={5} bordered placeholder="Enter a AMA Topic" />
+                  </Form>
+                </Content>
+              </Container>
+            </PopupDialog>
+            {amaButton}
+            <GiftedChat
+              ref={(ref) => this._giftedChat = ref}
+              messages={this.state.messages}
+              onSend={this.onSend}
+              loadEarlier={this.state.loadEarlier}
+              onLoadEarlier={this.onLoadEarlier}
+              onPressAvatar={(this.protocol) ? (user) => Toast.show({
+                text: user._id,
+                buttonText: "Close",
+                type: "success"
+              }) : () => this.props.navigation.navigate('ContactProfile')}
+              isLoadingEarlier={this.state.isLoadingEarlier}
+              user={{
+                _id: this.state.author.username, // sent messages should have same user._id
+              }}
+              text={this.state.inputText}
+              renderActions={(!disableAmaFeatures) ? this.renderCustomActions : null}
+              renderBubble={this.renderBubble}
+              renderSystemMessage={this.renderSystemMessage}
+              renderMessageImage={this.renderCustomView}
+              renderFooter={this.renderFooter}
+              maxInputLength={240}
+              renderInputToolbar={this.renderInputToolbar}
+              parsePatterns={(linkStyle) => [
+                { type: 'url', style: linkStyle, onPress: this.onPressUrl },
+                { pattern: /AMA:.*\n\n.*/, style: linkStyle, onPress: this.onPressAma },
+              ]}
+              onInputTextChanged={text => this.setCustomText(text)}
+              textInputProps={{editable: (!disableAmaFeatures)}}
+              onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
+            />
+          </Drawer>
       </View>
     );
   }

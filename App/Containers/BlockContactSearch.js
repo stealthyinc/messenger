@@ -8,7 +8,6 @@ import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import Communications from 'react-native-communications';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FIcon from 'react-native-vector-icons/dist/FontAwesome';
-import Spinner from 'react-native-loading-spinner-overlay';
 
 import {
   ActivityIndicator,
@@ -78,6 +77,7 @@ class BlockContactSearch extends Component {
         this.props.navigation.goBack();
       }
       this.props.setContactAdded(false)
+      this.props.setSpinnerData(false, '')
     }
   }
   parseContact(item) {
@@ -104,16 +104,13 @@ class BlockContactSearch extends Component {
       title: name
     }
     this.props.addNewContact(contact, true)
-    this.setState({showAdding: true}); 
+    this.props.setSpinnerData(true, 'Adding contact...')
   }
   createListItem(contact) {
     const { payload, error } = this.props
     const { showNothing, showAdding, showLoading } = this.state
     if (showNothing) {
       return <ListItem>{null}</ListItem>
-    }
-    else if (showAdding) {
-      return <Spinner visible={showAdding} textContent={'Adding contact...'} textStyle={{color: '#FFF'}} />
     }
     else if (payload && payload.length) {
       return payload.map((item, i) => (
@@ -215,6 +212,7 @@ const mapDispatchToProps = (dispatch) => {
     addNewContact: (contact, flag) => dispatch(EngineActions.addNewContact(contact, flag)),
     setContactAdded: (flag) => dispatch(EngineActions.setContactAdded(flag)),
     setActiveContact: (contact) => dispatch(EngineActions.setActiveContact(contact)),
+    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),
   }
 }
 

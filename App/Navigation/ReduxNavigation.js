@@ -14,6 +14,7 @@ const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
 import RNExitApp from 'react-native-exit-app';
 import chatIcon from '../Images/blue512.png';
 import AwesomeAlert from 'react-native-awesome-alerts';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 class ReduxNavigation extends React.Component {
   constructor(props) {
@@ -297,6 +298,7 @@ class ReduxNavigation extends React.Component {
     }
     return (
       <Root>
+        <Spinner visible={this.props.spinnerFlag} textContent={this.props.spinnerMessage} textStyle={{color: '#FFF'}} />
         <AppNavigation
           screenProps={{logout: () => this.___startLogOutSequence(), authWork: (userData) => this._authWork(userData)}}
           navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root') })}
@@ -309,6 +311,8 @@ class ReduxNavigation extends React.Component {
 const mapStateToProps = (state) => {
   return {
     nav: state.nav,
+    spinnerFlag: EngineSelectors.getSpinnerFlag(state),
+    spinnerMessage: EngineSelectors.getSpinnerMessage(state),
     contactMgr: EngineSelectors.getContactMgr(state),
     publicKey: EngineSelectors.getPublicKey(state),
     engineFault: EngineSelectors.getEngineFault(state),

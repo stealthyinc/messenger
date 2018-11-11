@@ -15,7 +15,6 @@ import demoIcon from '../Images/democ1.png';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 
 import AmaCommands from '../Engine/misc/amaCommands.js'
-import Spinner from 'react-native-loading-spinner-overlay';
 
 import PopupDialog, {
   DialogTitle,
@@ -80,7 +79,6 @@ class SlackScreen extends React.Component {
       showAvatarAlert: false,
       amaAnswer: '',
       newContent: true,
-      showSpinner: false,
     }
   }
   componentWillReceiveProps(nextProps) {
@@ -129,11 +127,17 @@ class SlackScreen extends React.Component {
     })
     this.props.navigation.setParams({ navigation: this.props.navigation });
   }
+  processMessage() {
+    this.props.setSpinnerData(true, 'Processing...')
+    setTimeout(() => {
+      this.props.setSpinnerData(false, '')
+    }, 3000);
+  }
   onSend(messages = []) {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
-      showSpinner: true
     }))
+    this.processMessage()
     const { text } = messages[0]
     const stringifiedCmd = this.amaCmds.questionCreate(text)
     this.fetchAmaData = true
@@ -165,6 +169,7 @@ class SlackScreen extends React.Component {
   questionUpvote = (questionId) => {
     const stringifiedCmd = this.amaCmds.questionUpvote(questionId)
     this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+    this.processMessage()
   }
   onLongPress = (context, currentMessage) => {
     if (context) {
@@ -271,16 +276,25 @@ class SlackScreen extends React.Component {
   answerQuestion = (answer) => {
     const stringifiedCmd = this.amaCmds.answerCreate(this.state.currentMessage._id, answer)
     this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+    this.processMessage()
   }
   deleteQuestion = () => {
     const stringifiedCmd = this.amaCmds.questionDelete(this.state.currentMessage._id)
     this.props.handleOutgoingMessage(stringifiedCmd, undefined);
     this.setState({showAlert: false})
+    this.processMessage()
   }
   deleteAnswer = () => {
     const stringifiedCmd = this.amaCmds.answerDelete(this.state.currentMessage._id)
     this.props.handleOutgoingMessage(stringifiedCmd, undefined);
     this.setState({showAlert: false})
+    this.processMessage()
+  }
+  blockUser = () => {
+    const stringifiedCmd = this.amaCmds.userBlock(this.state.user.name)
+    this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+    this.setState({showAvatarAlert: false, user: ''})
+    this.processMessage()
   }
   closeDialog = () => {
     this.setState({ showDialog: false })
@@ -323,7 +337,6 @@ class SlackScreen extends React.Component {
       }
     }
     amaMsgs.reverse()
-
     const {
       showAlert,
       user,
@@ -333,7 +346,6 @@ class SlackScreen extends React.Component {
       alertOption,
       showDialog,
       newContent,
-      showSpinner
     } = this.state
     const refreshButton = (newContent) ? (
       <Button
@@ -391,22 +403,12 @@ class SlackScreen extends React.Component {
           onCancelPressed={() => {
             this.setState({showAvatarAlert: false, user: ''})
           }}
-          onConfirmPressed={() => {
-            const stringifiedCmd = this.amaCmds.userBlock(user.name)
-            this.props.handleOutgoingMessage(stringifiedCmd, undefined);
-            this.setState({showAvatarAlert: false, user: ''})
-          }}
+          onConfirmPressed={() => this.blockUser()}
         />
       )
     }
-    else if (showSpinner) {
-      setTimeout(() => {
-        this.setState({showSpinner: false})
-      }, 2000);
-    }
     return (
       <View style={{flex:1}}>
-        <Spinner key="convSpinner" visible={showSpinner} textContent={'Processing ...'} textStyle={{color: '#FFF'}} />
         <PopupDialog
           dialogStyle={{
             top: -1 * (width / 3),
@@ -493,6 +495,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     handleOutgoingMessage: (text, json) => dispatch(EngineActions.setOutgoingMessage(text, json)),
     sendAmaInfo: (msgAddress, amaId) => dispatch(EngineActions.sendAmaInfo(msgAddress, amaId)),
+    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),
   }
 }
 

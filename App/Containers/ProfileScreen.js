@@ -9,7 +9,6 @@ import { shareOnTwitter } from 'react-native-social-share';
 import Communications from 'react-native-communications';
 import ActionSheet from 'react-native-actionsheet'
 import QRCode from 'react-native-qrcode';
-import Spinner from 'react-native-loading-spinner-overlay';
 
 const utils = require('./../Engine/misc/utils.js');
 
@@ -43,7 +42,6 @@ class ProfileScreen extends React.Component {
       showToast: false,
       showQR: false,
       isVisible: false,
-      logout: false,
     }
   }
   componentWillMount() {
@@ -58,14 +56,8 @@ class ProfileScreen extends React.Component {
   render() {
     console.log('ProfileScreen render')
     const { userProfile, userData, userSettings } = this.props
-    if (!userProfile) {
-      return (
-        <View style={styles.containerEmpty}>
-          <Spinner visible={!userProfile} textContent={'Loading Profile...'} textStyle={{color: '#FFF'}} />
-          <StatusBar barStyle="default" />
-        </View>
-      );
-    }
+    if (!userProfile)
+      return null
     const { discovery, notifications, heartbeat, webrtc, analytics } = userSettings
     const { profile, base64 } = userProfile
     const { username } = userData
@@ -110,7 +102,6 @@ class ProfileScreen extends React.Component {
     )
     return (
       <View style={styles.container}>
-        <Spinner visible={this.state.logout} textContent={'Logging out...'} textStyle={{color: '#FFF'}} />
         <View style={{flex: flex}} />
         <View style={{flex: 60, alignItems: 'center'}}>
           {avatarSize}
@@ -189,7 +180,7 @@ class ProfileScreen extends React.Component {
           />
           <Button
             onPress={() => {
-              this.setState({logout: true})
+              this.props.setSpinnerData(true, 'Logging out...')
               this.props.screenProps.logout()
             }}
             icon={{name: 'launch', color: 'white'}}
@@ -254,6 +245,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     updateUserSettings: (radio) => dispatch(EngineActions.updateUserSettings(radio)),
+    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),
   }
 }
 

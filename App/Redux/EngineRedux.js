@@ -44,6 +44,7 @@ const { Types, Creators } = createActions({
   setAmaStatus: ['amaStatus'],
   sendAmaInfo: ['msgAddress', 'amaId'],
   setChannelsData: ['channels'],
+  setSpinnerData: ['spinnerFlag', 'spinnerMessage'],
 })
 
 export const EngineTypes = Types
@@ -75,6 +76,8 @@ export const INITIAL_STATE = Immutable({
   amaData: undefined,
   amaStatus: undefined,
   channels: null,
+  spinnerFlag: false,
+  spinnerMessage: '',
 })
 
 /* ------------- Selectors ------------- */
@@ -100,6 +103,8 @@ export const EngineSelectors = {
   getAmaData: state => state.engine.amaData,
   getAmaStatus: state => state.engine.amaStatus,
   getChannelsData: state => state.engine.channels,
+  getSpinnerFlag: state => state.engine.spinnerFlag,
+  getSpinnerMessage: state => state.engine.spinnerMessage,
 }
 
 /* ------------- Reducers ------------- */
@@ -148,7 +153,7 @@ export const setActiveUserProfile = (state, { activeUserProfile }) => {
 
 // engine intialized
 export const setEngineInitial = (state, { engineInit }) => {
-  return state.merge({ engineInit })
+  return state.merge({ engineInit, spinnerFlag: false, spinnerMessage: '' })
 }
 
 // set contact manager
@@ -216,6 +221,11 @@ export const setChannelsData = (state, { channels }) => {
   return state.merge({ channels })
 }
 
+// set Spinner Data
+export const setSpinnerData = (state, { spinnerFlag, spinnerMessage }) => {
+  return state.merge({ spinnerFlag, spinnerMessage })
+}
+
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -242,4 +252,5 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_ENGINE_FAULT]: setEngineFault,
   [Types.RESTART_ENGINE]: restartEngine,
   [Types.SET_CHANNELS_DATA]: setChannelsData,
+  [Types.SET_SPINNER_DATA]: setSpinnerData,
 })

@@ -18,7 +18,6 @@ import defaultProfile from '../Images/defaultProfile.png'
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
 const common = require('./../common.js');
 import Drawer from 'react-native-drawer'
-import Spinner from 'react-native-loading-spinner-overlay';
 
 const styles = StyleSheet.create({
   container: {
@@ -62,14 +61,13 @@ class ConversationScreen extends React.Component {
       basic: true,
       listViewData: [],
       loaded: false,
-      drawerOpen: false,
-      showSpinner: true
+      drawerOpen: false
     };
+    this.props.setSpinnerData(true, 'Loading contacts...')
   }
   async componentWillMount() {
     const { userData, token, publicKey } = this.props
     this.props.navigation.setParams({ navigation: this.props.navigation, sendMessage: this.sendTestMessageToFirebase });
-    this.setState({showSpinner: true})
   }
   componentWillReceiveProps(nextProps) {
     const { contactMgr, engineInit, navigation } = nextProps
@@ -89,7 +87,6 @@ class ConversationScreen extends React.Component {
       const theNextActiveContactId = id;
       const theNextActiveContact = contactMgr.getContact(theNextActiveContactId);
       this.props.handleContactClick(theNextActiveContact);
-      this.setState({showSpinner: false})
       this.protocol = (theNextActiveContact) ?
         utils.isChannelOrAma(theNextActiveContact.protocol) : false
       if (this.protocol)
@@ -161,24 +158,31 @@ class ConversationScreen extends React.Component {
         <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>Add Channels</Text>
       </Button>
     )
+    // if (!engineInit) {
+    //   this.props.setSpinnerData(true, 'Loading contacts...')
+    // }
+    // else {
+    //   this.props.setSpinnerData(false, '')
+    // }
     // console.log(`INFO:  spinner ${!!this.state.showSpinner}  |  conMgr ${!!contactMgr}  |  actCtc ${!!activeContact}  |  engIni ${!!engineInit}`)
-    if (!engineInit) {
+    // if (!contactMgr || activeContact || !engineInit) {
       // console.log('INFO: spinner should show')
-      return (
-        <Spinner key="convSpinner" visible={this.state.showSpinner} textContent={'Loading contacts...'} textStyle={{color: '#FFF'}} />
-      )
-    }
-    else if (activateShare && !userSettings.twitterShare) {
+      // return (
+      //   <Spinner key="convSpinner" visible={this.state.showSpinner} textContent={'Loading contacts...'} textStyle={{color: '#FFF'}} />
+      // )
+      // this.props.setSpinnerData(true, 'Loading contacts...')
+    // }
+    if (activateShare && !userSettings.twitterShare) {
       return (
         <TwitterShareModal 
         shareDecline={() => {
-          this.props.shareDecline
+          this.props.shareDecline()
           this.props.updateUserSettings('twitterShare')
         }}
         shareSuccess={this.sendToTwitter}/>
       )
     }
-    else {
+    else if (engineInit) {
       return (
         <Drawer
           ref={(ref) => this._drawer = ref}
@@ -247,6 +251,7 @@ class ConversationScreen extends React.Component {
         </Drawer>
       );
     }
+    return null
   }
 }
 
@@ -276,6 +281,7 @@ const mapDispatchToProps = (dispatch) => {
     handleDeleteContact: (contact) => dispatch(EngineActions.handleDeleteContact(contact)),
     handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
     updateUserSettings: (radio) => dispatch(EngineActions.updateUserSettings(radio)),
+    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),
   }
 }
 

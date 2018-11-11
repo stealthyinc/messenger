@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
-import Spinner from 'react-native-loading-spinner-overlay';
 
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 const common = require('./../common.js');
@@ -104,7 +103,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setChannelsData: (channels) => dispatch(EngineActions.setChannelsData(channels))
+    setChannelsData: (channels) => dispatch(EngineActions.setChannelsData(channels)),
+    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),
   }
 }
 
