@@ -33,6 +33,10 @@ class FirebaseWrapper {
     this.notificationDisplayedListener();
   }
 
+  getFirebaseAnalytics() {
+    return firebase.analytics();
+  }
+
   getFirebaseRef(path) {
     return firebase.database().ref(path);
   }

@@ -1,35 +1,27 @@
 import { Analytics } from 'aws-amplify';
-import Gun from 'gun/gun.js' // or use the minified version 'gun/gun.min.js'
-var gun = new Gun ({
-  peers: 'https://gun-stealthy-db.herokuapp.com/',
-  radisk: false,
-  localStorage: false,
-  file: 'data.json',
-  s3: {
-    key: 'AKIAJUW4IWSRN5VM4TFQ', // AWS Access Key
-    secret: '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', // AWS Secret Token
-    bucket: 'gunstealthydata' // The bucket you want to save into
-  }
-})
 const MAX_QUEUE = 100;
+const { firebaseInstance } = require('./Engine/firebaseWrapper.js')
 
 class Anonalytics {
   constructor(publicKey = undefined) {
     this.publicKey = publicKey;
+    this.firAnalytics = firebaseInstance.getFirebaseAnalytics()
     if (process.env.NODE_ENV === 'production') {
-      Analytics.enable();
+      this.aeEnable()
     }
     else {
-      Analytics.disable();
+      this.aeDisable()
     }
   }
 
-  aeEnable() {
+  aeEnable = () => {
     Analytics.enable()
+    this.firAnalytics.setAnalyticsCollectionEnabled(true)
   }
 
-  aeDisable() {
+  aeDisable = () => {
     Analytics.disable()
+    this.firAnalytics.setAnalyticsCollectionEnabled(false)
   }
 
   // Homepage Events:
@@ -156,38 +148,23 @@ class Anonalytics {
         const AWS_LIMIT = 1000;
         const d = new Date();
         const dateStamp = d.toDateString();
+        this.firAnalytics.setUserId(this.publicKey)
         if (aString) {
           let awsCleanString = (aString.length >= AWS_LIMIT) ?
             aString.substring(0, AWS_LIMIT -2) :
             aString;
           Analytics.record({name: anEventName, attributes: {data: awsCleanString, id: this.publicKey, dateStamp}});
-          gun.get('analytics').get(this.publicKey).get(eventTimeMs).put({name: anEventName, attributes: {data: awsCleanString, id: this.publicKey, dateStamp}}, function(ack) {
-            if (ack.err) {
-              console.log("GUN", ack.err)
-            }
-            console.log("GUN Success")
-          });
+          this.firAnalytics.logEvent(anEventName, {attributes: {data: awsCleanString, id: this.publicKey, dateStamp}})
         }
         else {
           Analytics.record({name: anEventName, attributes: {id: this.publicKey, dateStamp}});
-          gun.get('analytics').get(this.publicKey).get(eventTimeMs).put({name: anEventName, attributes: {id: this.publicKey, dateStamp}}, function(ack) {
-            if (ack.err) {
-              console.log("GUN", ack.err)
-            }
-            console.log("GUN Success")
-          });
+          this.firAnalytics.logEvent(anEventName, {attributes: {id: this.publicKey, dateStamp}})
         }
-        gun.get('analytics').get(this.publicKey).once(function(analytics){
-          console.log("GUN Analytics1", analytics)
-        })
-        gun.get('analytics').get(this.publicKey).get(eventTimeMs).once(function(analytics){
-          console.log("GUN Analytics2", analytics)
-        })
       }
     }
     catch (error) {
       const eventTimeMs = Date.now();
-      gun.get('error').get(eventTimeMs).put({error});
+      this.firAnalytics.logEvent('error', error)
     }
   }
 }

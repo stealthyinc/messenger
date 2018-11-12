@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Dimensions, Keyboard, Platform, Image, Modal, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, WebView, View, Text, ActivityIndicator } from 'react-native'
+import { TextInput, Dimensions, Keyboard, Platform, Image, Modal, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, WebView, View, Text, ActivityIndicator } from 'react-native'
 import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button, Icon } from 'react-native-elements'
@@ -168,30 +168,7 @@ class ChannelScreen extends Component {
         const msg = messages[idx]
         const { author } = msg
         if (author !== this.state.author.username) {
-          const { body, time, image, contentType } = msg
-          let url, press, gimage
-          if (contentType === 'TEXT') {
-            text = body
-            url = ''
-            gimage = ''
-          }
-          else if (contentType === 'TEXT_JSON') {
-            text = body.text
-            //
-            // Handle AMA message objects
-            if (body.type === 'public ama 1.0') {
-              text = body.title + '\n' +
-                     '\n' +
-                     '(' + body.status + ')'
-              this.amaTitleIndex[body.title] = {
-                id: body.ama_id,
-                msgAddress: msg.msgAddress,
-              }
-            }
-            //
-            url = body.url
-            gimage = body.image
-          }
+          const { url, gimage, text } = this.parseJargon(msg)
           const newMessage = {
             _id: Math.round(Math.random() * 1000000),
             text,
@@ -214,6 +191,34 @@ class ChannelScreen extends Component {
     this._isMounted = false;
     this.props.handleContactClick()
   }
+  parseJargon = (message) => {
+    const { body, time, image, contentType } = message
+    let url, gimage, text
+    if (contentType === 'TEXT') {
+      text = body
+      url = ''
+      gimage = ''
+    }
+    else if (contentType === 'TEXT_JSON') {
+      text = body.text
+      //
+      // Handle AMA message objects
+      if (body.type === 'public ama 1.0') {
+        text = body.title + '\n' +
+               '\n' +
+               '(' + body.status + ')'
+        this.amaTitleIndex[body.title] = {
+          id: body.ama_id,
+          msgAddress: message.msgAddress,
+        }
+        this.state.amaTitle = body.title
+      }
+      //
+      url = body.url
+      gimage = body.image
+    }
+    return { url, gimage, text }
+  }
   setupMessages = (inputMessages) => {
     let messages = []
     let { description, id } = this.activeContact
@@ -221,29 +226,7 @@ class ChannelScreen extends Component {
       const { author, body, time, image, state, contentType } = message
       const sent = (state === MESSAGE_STATE.SENT_OFFLINE || state === MESSAGE_STATE.SENT_REALTIME || state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
       const received = (state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
-      let gtext, url, gimage, press
-      if (contentType === 'TEXT') {
-        text = body
-        url = ''
-        gimage = ''
-      }
-      else if (contentType === 'TEXT_JSON') {
-        text = body.text
-        //
-        // Handle AMA message objects
-        if (body.type === 'public ama 1.0') {
-          text = body.title + '\n' +
-                 '\n' +
-                 '(' + body.status + ')'
-          this.amaTitleIndex[body.title] = {
-            id: body.ama_id,
-            msgAddress: message.msgAddress,
-          }
-        }
-        //
-        url = body.url
-        gimage = body.image
-      }
+      const { url, gimage, text } = this.parseJargon(message)
       if (author === id) {
         if (this.protocol) {
           const newText = text
@@ -369,7 +352,10 @@ class ChannelScreen extends Component {
     return (this.isAma) ? (
       <TouchableOpacity
         style={[styles.chatContainer, this.props.containerStyle]}
-        onPress={() => this.slideAnimationDialog.show()}
+        onPress={() => {
+          this.textInput.focus()
+          this.slideAnimationDialog.show()
+        }}
       >
         <Ionicons name="ios-radio" size={28} color='#34bbed' />
       </TouchableOpacity>
@@ -566,7 +552,7 @@ class ChannelScreen extends Component {
                       Keyboard.dismiss()
                       const stringifiedCmd = AmaCommands.amaCreate(this.state.amaAnswer)
                       this.props.handleOutgoingMessage(stringifiedCmd, undefined);
-                      this.setState({amaTitle: this.state.amaAnswer})
+                      this.setState({amaTitle: this.state.amaAnswer, amaAnswer: ''})
                       this.props.setSpinnerData(true, 'Processing...')
                       setTimeout(() => {
                         this.props.setSpinnerData(false, '')
@@ -580,7 +566,12 @@ class ChannelScreen extends Component {
             <Container>
               <Content padder>
                 <Form>
-                  <Textarea onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})} rowSpan={5} bordered placeholder="Enter a AMA Topic" />
+                  <TextInput 
+                    ref={o => this.textInput = o}
+                    onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})} 
+                    bordered 
+                    placeholder="Enter a AMA Topic" 
+                  />
                 </Form>
               </Content>
             </Container>

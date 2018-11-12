@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dimensions, Keyboard, View, Text, TouchableOpacity, Platform, ActivityIndicator, StyleSheet } from 'react-native';
+import { TextInput, Dimensions, Keyboard, View, Text, TouchableOpacity, Platform, ActivityIndicator, StyleSheet } from 'react-native';
 import PropTypes from 'prop-types';
 import { GiftedChat } from 'react-native-gifted-chat';
 import emojiUtils from 'emoji-utils';
@@ -217,6 +217,7 @@ class SlackScreen extends React.Component {
                 this.setState({
                   currentMessage
                 })
+                this.textInput.focus()
                 this.slideAnimationDialog.show()
                 break;
               }
@@ -276,6 +277,7 @@ class SlackScreen extends React.Component {
   answerQuestion = (answer) => {
     const stringifiedCmd = this.amaCmds.answerCreate(this.state.currentMessage._id, answer)
     this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+    this.setState({amaAnswer: ''})
     this.processMessage()
   }
   deleteQuestion = () => {
@@ -456,7 +458,12 @@ class SlackScreen extends React.Component {
           <Container>
             <Content padder>
               <Form>
-                <Textarea onChangeText={(amaAnswer) => this.setState({amaAnswer})} rowSpan={5} bordered placeholder="Type AMA Answer..." />
+                <TextInput 
+                  ref={o => this.textInput = o}
+                  onChangeText={(amaAnswer) => this.setState({amaAnswer})} 
+                  bordered 
+                  placeholder="Type AMA Answer..." 
+                />
               </Form>
             </Content>
           </Container>
