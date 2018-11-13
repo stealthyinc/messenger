@@ -125,7 +125,7 @@ class ChannelScreen extends Component {
       userImage
     }
     //user added to the channel notification topic
-    firebaseInstance.subscribeToTopic(username);
+    // firebaseInstance.subscribeToTopic(username);
     const { contactMgr } = this.props
     const activeContact = (contactMgr && contactMgr.getActiveContact()) ?
       contactMgr.getActiveContact() : undefined
@@ -166,7 +166,7 @@ class ChannelScreen extends Component {
       let newMessages = [];
       for (const idx = messages.length-numNewMsgs; idx < messages.length; idx++) {
         const msg = messages[idx]
-        const { author } = msg
+        const { author, image } = msg
         if (author !== this.state.author.username) {
           const { url, gimage, text, time } = this.parseJargon(msg)
           const newMessage = {

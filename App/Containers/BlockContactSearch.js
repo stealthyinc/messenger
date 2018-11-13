@@ -8,6 +8,7 @@ import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import Communications from 'react-native-communications';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FIcon from 'react-native-vector-icons/dist/FontAwesome';
+const utils = require('./../Engine/misc/utils.js');
 
 import {
   ActivityIndicator,
@@ -70,8 +71,14 @@ class BlockContactSearch extends Component {
     if (contactMgr && contactMgr.getAllContacts().length > this.numContacts) {
       this.numContacts = contactMgr.getAllContacts().length;
       this.props.navigation.goBack();
-      if (contactMgr.getActiveContact()) {
-        this.props.navigation.navigate('ChatRoom')
+      const theNextActiveContact = contactMgr.getActiveContact()
+      this.protocol = (theNextActiveContact) ?
+        utils.isChannelOrAma(theNextActiveContact.protocol) : false
+      if (theNextActiveContact) {
+        if (this.protocol)
+          this.props.navigation.navigate('ChannelRoom')
+        else
+          this.props.navigation.navigate('ChatRoom')
       }
       else {
         this.props.navigation.goBack();
