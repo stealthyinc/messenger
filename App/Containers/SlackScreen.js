@@ -217,7 +217,6 @@ class SlackScreen extends React.Component {
                 this.setState({
                   currentMessage
                 })
-                this.textInput.focus()
                 this.slideAnimationDialog.show()
                 break;
               }
@@ -458,8 +457,8 @@ class SlackScreen extends React.Component {
           <Container>
             <Content padder>
               <Form>
-                <TextInput 
-                  ref={o => this.textInput = o}
+                <Textarea
+                  rowSpan={5}  
                   onChangeText={(amaAnswer) => this.setState({amaAnswer})} 
                   bordered 
                   placeholder="Type AMA Answer..." 

@@ -14,7 +14,7 @@ export default TabNavigator(
     // Channels: { screen: DiscoverScreen },
     Messages: { screen: ConversationScreen },
     // Wallet: { screen: WalletScreen },
-    dApps: { screen: DappStore },
+    // dApps: { screen: DappStore },
     Profile: { screen: ProfileScreen },
   },
   {

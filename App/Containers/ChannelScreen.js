@@ -45,8 +45,8 @@ class ChannelScreen extends Component {
       headerTitle: params.name,
       headerRight: (
         // <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
-        <TouchableOpacity onPress={() => params.navigation.navigate("ContactProfile")} style={{marginRight: 10}}>
-          <Ionicons name="ios-contact" size={28} color='white'/>
+        <TouchableOpacity onPress={() => alert('Public Unencrypted Channels')} style={{marginRight: 10}}>
+          <Ionicons name="ios-help-buoy" size={28} color='white'/>
         </TouchableOpacity>
       ),
       headerTintColor: 'white',
@@ -168,7 +168,7 @@ class ChannelScreen extends Component {
         const msg = messages[idx]
         const { author } = msg
         if (author !== this.state.author.username) {
-          const { url, gimage, text } = this.parseJargon(msg)
+          const { url, gimage, text, time } = this.parseJargon(msg)
           const newMessage = {
             _id: Math.round(Math.random() * 1000000),
             text,
@@ -217,16 +217,16 @@ class ChannelScreen extends Component {
       url = body.url
       gimage = body.image
     }
-    return { url, gimage, text }
+    return { url, gimage, text, time }
   }
   setupMessages = (inputMessages) => {
     let messages = []
     let { description, id } = this.activeContact
     for (const message of inputMessages) {
-      const { author, body, time, image, state, contentType } = message
+      const { author, body, image, state, contentType } = message
       const sent = (state === MESSAGE_STATE.SENT_OFFLINE || state === MESSAGE_STATE.SENT_REALTIME || state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
       const received = (state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
-      const { url, gimage, text } = this.parseJargon(message)
+      const { url, gimage, text, time } = this.parseJargon(message)
       if (author === id) {
         if (this.protocol) {
           const newText = text
@@ -353,7 +353,6 @@ class ChannelScreen extends Component {
       <TouchableOpacity
         style={[styles.chatContainer, this.props.containerStyle]}
         onPress={() => {
-          this.textInput.focus()
           this.slideAnimationDialog.show()
         }}
       >
@@ -566,8 +565,8 @@ class ChannelScreen extends Component {
             <Container>
               <Content padder>
                 <Form>
-                  <TextInput 
-                    ref={o => this.textInput = o}
+                  <Textarea
+                    rowSpan={5}  
                     onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})} 
                     bordered 
                     placeholder="Enter a AMA Topic" 
