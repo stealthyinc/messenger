@@ -353,7 +353,7 @@ class ChannelScreen extends Component {
       <TouchableOpacity
         style={[styles.chatContainer, this.props.containerStyle]}
         onPress={() => {
-          this.slideAnimationDialog.show()
+          this.setState({visible: true})
         }}
       >
         <Ionicons name="ios-radio" size={28} color='#34bbed' />
@@ -500,9 +500,7 @@ class ChannelScreen extends Component {
             overflow: 'hidden',
           }}
           dialogTitle={<DialogTitle key='dpdialog' align="left" title="Set your AMA Topic" />}
-          ref={(popupDialog) => {
-            this.slideAnimationDialog = popupDialog;
-          }}
+          visible={this.state.visible}
           dialogAnimation={slideAnimation}
           actions={[
             <View key='vpdialog' style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -514,7 +512,7 @@ class ChannelScreen extends Component {
                 style={{paddingBottom: 20}}
                 buttonStyle={{backgroundColor: '#DD6B55'}}
                 onPress={() => {
-                  this.slideAnimationDialog.dismiss();
+                  this.setState({visible: false})
                   Keyboard.dismiss()
                 }}>
               </Button>,
@@ -527,7 +525,7 @@ class ChannelScreen extends Component {
                 buttonStyle={{backgroundColor: '#34bbed'}}
                 onPress={() => {
                   if (this.state.amaAnswer) {
-                    this.slideAnimationDialog.dismiss();
+                    this.setState({visible: false})
                     Keyboard.dismiss()
                     const stringifiedCmd = AmaCommands.amaCreate(this.state.amaAnswer)
                     this.props.handleOutgoingMessage(stringifiedCmd, undefined);

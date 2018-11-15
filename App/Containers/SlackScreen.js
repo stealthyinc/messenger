@@ -217,7 +217,7 @@ class SlackScreen extends React.Component {
                 this.setState({
                   currentMessage
                 })
-                this.slideAnimationDialog.show()
+                this.setState({visible: true})
                 break;
               }
               case 1: {
@@ -299,6 +299,10 @@ class SlackScreen extends React.Component {
   }
   closeDialog = () => {
     this.setState({ showDialog: false })
+  }
+  onPressUrl = (url) => {
+    this.props.setDappUrl(url)
+    this.props.navigation.navigate('DappScreen')
   }
   render() {
     if (!this.props.amaData)
@@ -404,6 +408,9 @@ class SlackScreen extends React.Component {
           onCancelPressed={() => {
             this.setState({showAvatarAlert: false, user: ''})
           }}
+          parsePatterns={(linkStyle) => [
+            { type: 'url', style: linkStyle, onPress: this.onPressUrl },
+          ]}
           onConfirmPressed={() => this.blockUser()}
         />
       )
@@ -417,10 +424,8 @@ class SlackScreen extends React.Component {
             padding: 10,
             overflow: 'hidden',
           }}
+          visible={this.state.visible}
           dialogTitle={<DialogTitle title="AMA Answer" />}
-          ref={(popupDialog) => {
-            this.slideAnimationDialog = popupDialog;
-          }}
           dialogAnimation={slideAnimation}
           actions={[
             <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -432,7 +437,7 @@ class SlackScreen extends React.Component {
                 style={{paddingBottom: 20}}
                 buttonStyle={{backgroundColor: '#DD6B55'}}
                 onPress={() => {
-                  this.slideAnimationDialog.dismiss();
+                  this.setState({visible: false})
                   Keyboard.dismiss()
                 }}>
               </Button>,
@@ -445,7 +450,7 @@ class SlackScreen extends React.Component {
                 buttonStyle={{backgroundColor: '#34bbed'}}
                 onPress={() => {
                   if (this.state.amaAnswer) {
-                    this.slideAnimationDialog.dismiss();
+                    this.setState({visible: false})
                     this.answerQuestion(this.state.amaAnswer)
                     Keyboard.dismiss()
                   }
@@ -499,6 +504,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    setDappUrl: (dappUrl) => dispatch(DappActions.setDappUrl(dappUrl)),
     handleOutgoingMessage: (text, json) => dispatch(EngineActions.setOutgoingMessage(text, json)),
     sendAmaInfo: (msgAddress, amaId, amaUserId) => dispatch(EngineActions.sendAmaInfo(msgAddress, amaId, amaUserId)),
     setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),

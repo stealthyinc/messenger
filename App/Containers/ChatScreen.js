@@ -3,8 +3,6 @@ import { Platform, Image, Modal, Keyboard, StyleSheet, ScrollView, TouchableOpac
 import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Button, Icon } from 'react-native-elements'
-import Drawer from 'react-native-drawer'
-import ControlPanel from './ControlPanel'
 
 import { Container, Header, Content, Item, Form, Textarea, Toast } from 'native-base';
 
@@ -395,20 +393,6 @@ class ChatScreen extends Component {
     this.props.setDappUrl(url)
     this.props.navigation.navigate('DappScreen')
   }
-  toggleDrawer = () => {
-    if (this.state.drawerOpen)
-      this.closeDrawer()
-    else
-      this.openDrawer()
-  };
-  closeDrawer = () => {
-    this._drawer.close()
-    this._giftedChat.textInput.focus()
-  };
-  openDrawer = () => {
-    this._drawer.open()
-    this._giftedChat.textInput.focus()
-  };
   setCustomText = (inputText) => {
     this.setState({inputText})
   }
@@ -459,52 +443,31 @@ class ChatScreen extends Component {
       <View id='GiftedChatContainer'
            style={{flex: 1,
                    backgroundColor: 'white'}}>
-        <Drawer
-          ref={(ref) => this._drawer = ref}
-          type="overlay"
-          styles={drawerStyles}
-          tapToClose={true}
-          closedDrawerOffset={-3}
-          tweenHandler={(ratio) => ({
-            main: { opacity:(2-ratio)/2 }
-          })}
-          content={
-            <ControlPanel addToInput={this.addToInput} closeDrawer={this.closeDrawer} />
-          }
-          onOpen={() => {
-            this.setState({drawerOpen: true})
+        <GiftedChat
+          ref={(ref) => this._giftedChat = ref}
+          messages={this.state.messages}
+          onSend={this.onSend}
+          loadEarlier={this.state.loadEarlier}
+          onLoadEarlier={this.onLoadEarlier}
+          onPressAvatar={() => this.props.navigation.navigate('ContactProfile')}
+          isLoadingEarlier={this.state.isLoadingEarlier}
+          user={{
+            _id: this.state.author.username, // sent messages should have same user._id
           }}
-          onClose={() => {
-            this.setState({drawerOpen: false})
-          }}
-          side='bottom'
-        >
-          <GiftedChat
-            ref={(ref) => this._giftedChat = ref}
-            messages={this.state.messages}
-            onSend={this.onSend}
-            loadEarlier={this.state.loadEarlier}
-            onLoadEarlier={this.onLoadEarlier}
-            onPressAvatar={() => this.props.navigation.navigate('ContactProfile')}
-            isLoadingEarlier={this.state.isLoadingEarlier}
-            user={{
-              _id: this.state.author.username, // sent messages should have same user._id
-            }}
-            text={this.state.inputText}
-            renderActions={this.renderCustomActions}
-            renderBubble={this.renderBubble}
-            renderSystemMessage={this.renderSystemMessage}
-            renderMessageImage={this.renderCustomView}
-            renderFooter={this.renderFooter}
-            maxInputLength={240}
-            renderInputToolbar={this.renderInputToolbar}
-            parsePatterns={(linkStyle) => [
-              { type: 'url', style: linkStyle, onPress: this.onPressUrl },
-            ]}
-            onInputTextChanged={text => this.setCustomText(text)}
-            onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
-          />
-        </Drawer>
+          text={this.state.inputText}
+          renderActions={this.renderCustomActions}
+          renderBubble={this.renderBubble}
+          renderSystemMessage={this.renderSystemMessage}
+          renderMessageImage={this.renderCustomView}
+          renderFooter={this.renderFooter}
+          maxInputLength={240}
+          renderInputToolbar={this.renderInputToolbar}
+          parsePatterns={(linkStyle) => [
+            { type: 'url', style: linkStyle, onPress: this.onPressUrl },
+          ]}
+          onInputTextChanged={text => this.setCustomText(text)}
+          onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
+        />
       </View>
     );
   }
