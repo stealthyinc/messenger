@@ -332,9 +332,9 @@ class ChatScreen extends Component {
     return (
       <TouchableOpacity
         style={[styles.chatContainer, this.props.containerStyle]}
-        onPress={() => this.toggleDrawer()}
+        onPress={() => this.props.navigation.navigate('DappData')}
       >
-        <Ionicons name="ios-compass" size={28} color='#34bbed' />
+        <Ionicons name="ios-aperture" size={28} color='#34bbed' />
       </TouchableOpacity>
     )
   }
