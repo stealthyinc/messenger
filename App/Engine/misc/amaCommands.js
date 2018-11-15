@@ -72,6 +72,24 @@ export default class AmaCommands {
     return AmaCommands.cmdToText('questionUnvote', obj)
   }
 
+  questionPin(aQuestionId) {
+    const obj = {
+      ama_id: this.amaId,
+      question_id: aQuestionId
+    }
+
+    return AmaCommands.cmdToText('questionPin', obj)
+  }
+
+  questionUnpin(aQuestionId) {
+    const obj = {
+      ama_id: this.amaId,
+      question_id: aQuestionId
+    }
+
+    return AmaCommands.cmdToText('questionUnpin', obj)
+  }
+
   answerCreate(aQuestionId, text) {
     const obj = {
       ama_id: this.amaId,
