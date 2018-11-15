@@ -89,7 +89,7 @@ class SlackScreen extends React.Component {
     //   if (this.lastFetch !== nextProps.amaStatus.updateTime) {
     //     this.fetchAmaData = false
     //     this.lastFetch = nextProps.amaStatus.updateTime
-    //     this.props.sendAmaInfo(this.msgAddress, this.id)
+    //     this.props.sendAmaInfo(this.msgAddress, this.id, this.userId)
     //   }
     // }
     //
