@@ -108,8 +108,8 @@ android {
         applicationId "com.stealthy"
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 24
-        versionName "1.0"
+        versionCode 1
+        versionName "1.7"
         multiDexEnabled true
         ndk {
             abiFilters "armeabi-v7a", "x86"
@@ -145,7 +145,7 @@ android {
 }
 
 dependencies {
-    compile project(':react-native-camera')
+    implementation project(':react-native-camera')
     implementation project(':rn-fetch-blob')
     implementation project(':react-native-exit-app')
     implementation project(':react-native-social-share')

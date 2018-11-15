@@ -1588,7 +1588,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   async _addDefaultChannels() {
     const method = `engine::_addDefaultChannels`
-    const defaultChannelIds = ['hello.stealthy.id']
+    const defaultChannelIds = ['hello.stealthy.id', 'ama.stealthy.id']
 
     for (const channelId of defaultChannelIds) {
       if (this.contactMgr.isExistingContactId(channelId)) {
@@ -1618,7 +1618,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     console.log(`INFO(${method}): msgAddress=${msgAddress}, amaId=${amaId}`)
     if (msgAddress && amaId) {
-      const idWorkaround = 'startupschool.stealthy.id'
+      const idWorkaround = 'ama.stealthy.id'
       const amaFilePath = ChannelServicesV2.getAmaFilePath(msgAddress)
       const amaDataStringified = await this.io.robustRemoteRead(idWorkaround, amaFilePath)
       let amaData = {}

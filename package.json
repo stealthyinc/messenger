@@ -56,7 +56,7 @@
     "react-native-loading-spinner-overlay": "^1.0.1",
     "react-native-modal": "^7.0.0",
     "react-native-photo-browser": "^0.4.0",
-    "react-native-popup-dialog": "^0.15.1",
+    "react-native-popup-dialog": "^0.16.3",
     "react-native-qrcode": "^0.2.7",
     "react-native-social-share": "^1.6.1",
     "react-native-swipeout": "^2.3.3",

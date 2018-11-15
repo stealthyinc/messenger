@@ -11,6 +11,7 @@ const paths = [
 const findPath = url => paths.find(path => path.path.test(url));
 
 export default (url, store) => {
+  if (!url) return;
   const pathObject = findPath(url);
   
   if (!pathObject) return;

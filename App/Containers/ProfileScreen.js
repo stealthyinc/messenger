@@ -25,11 +25,11 @@ class ProfileScreen extends React.Component {
     return {
       headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Profile</Text>,
       headerBackTitle: 'Back',
-      headerRight: (
-        <TouchableOpacity onPress={() => params.showOverlay()} style={{marginRight: 10}}>
-          <Ionicons name="ios-information-circle" size={30} color='white'/>
-        </TouchableOpacity>
-      ),
+      // headerRight: (
+      //   <TouchableOpacity onPress={() => params.showOverlay()} style={{marginRight: 10}}>
+      //     <Ionicons name="ios-information-circle" size={30} color='white'/>
+      //   </TouchableOpacity>
+      // ),
       headerTintColor: 'white',
       headerStyle: {
         backgroundColor: '#34bbed'

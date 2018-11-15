@@ -221,9 +221,15 @@ class SignInScreen extends React.Component {
         throw utils.fmtErrorStr('Failed to get public key.', method, error)
         this.props.setSpinnerData(false, '')
       }
-
-      AsyncStorage.setItem('userData', JSON.stringify(userData));
-      this.props.screenProps.authWork(userData)
+      if (userData.username === "null") {
+        this.setState({error: true, errorText: 'User data not found. Please ensure you have a valid Blockstack username. E-mail support@stealthy.im for further help.'})
+      }
+      else {
+        AsyncStorage.setItem('userData', JSON.stringify(userData));
+        this.props.screenProps.authWork(userData)
+      }
+      this.props.setSignInPending(false)
+      this.props.setSpinnerData(false, '')
     } else if (utils.is_iOS()) {
       await BlockstackNativeModule.signIn(`${baseUrl}/redirect.html`, baseUrl, null, (error, events) => {
         if (!error) {

@@ -23,6 +23,7 @@ import java.util.List;
 import io.invertase.firebase.auth.RNFirebaseAuthPackage;
 import io.invertase.firebase.messaging.RNFirebaseMessagingPackage;
 import io.invertase.firebase.database.RNFirebaseDatabasePackage;
+import io.invertase.firebase.analytics.RNFirebaseAnalyticsPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -48,6 +49,7 @@ public class MainApplication extends Application implements ReactApplication {
             new RNFirebaseMessagingPackage(),
             new RNFirebaseDatabasePackage(),
             new RNFirebaseNotificationsPackage(),
+            new RNFirebaseAnalyticsPackage(),
             new VectorIconsPackage()
       );
     }

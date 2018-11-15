@@ -8,7 +8,7 @@ class FirebaseWrapper {
     if (!firebase.auth().currentUser) {
       firebase.auth().signInAnonymouslyAndRetrieveData()
     }
-    this.notifications = true
+    this.notification = true
     this.discovery = true
     this.multisession = true
   }

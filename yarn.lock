@@ -8186,6 +8186,12 @@ react-native-firebase@^4.3.8:
     postinstall-build "^5.0.1"
     prop-types "^15.6.1"
 
+react-native-general-siblings@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-general-siblings/-/react-native-general-siblings-1.0.0.tgz#fe19d2fb589fd482bedcf5e725d3855060c7febd"
+  dependencies:
+    static-container "^1.0.0"
+
 react-native-gifted-chat@^0.4.3:
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/react-native-gifted-chat/-/react-native-gifted-chat-0.4.3.tgz#25b4da866c802e407c06e589495f421f7dcdf70a"
@@ -8260,12 +8266,13 @@ react-native-photo-browser@^0.4.0:
     prop-types "15.5.10"
     react-native-progress "^3.2.0"
 
-react-native-popup-dialog@^0.15.1:
-  version "0.15.1"
-  resolved "https://registry.yarnpkg.com/react-native-popup-dialog/-/react-native-popup-dialog-0.15.1.tgz#f0a46bbef997d617c92c1bd102b02ba5e97400eb"
+react-native-popup-dialog@^0.16.3:
+  version "0.16.3"
+  resolved "https://registry.yarnpkg.com/react-native-popup-dialog/-/react-native-popup-dialog-0.16.3.tgz#e5f448a3de33ac3e4a87fab68a177662094be1ed"
   dependencies:
     babel-plugin-flow-react-proptypes "^9.1.1"
     prop-types "^15.6.0"
+    react-native-general-siblings "^1.0.0"
 
 react-native-progress@^3.2.0:
   version "3.5.0"
@@ -9441,6 +9448,10 @@ standard@10.0.2:
     eslint-plugin-react "~6.10.0"
     eslint-plugin-standard "~3.0.1"
     standard-engine "~7.0.0"
+
+static-container@^1.0.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/static-container/-/static-container-1.2.0.tgz#1c6e92b869da47d32abe47f45f50bf39661d9c2f"
 
 static-extend@^0.1.1:
   version "0.1.2"

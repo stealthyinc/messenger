@@ -491,128 +491,107 @@ class ChannelScreen extends Component {
       <View id='GiftedChatContainer'
            style={{flex: 1,
                    backgroundColor: 'white'}}>
-        <Drawer
-          ref={(ref) => this._drawer = ref}
-          type="overlay"
-          styles={drawerStyles}
-          tapToClose={true}
-          closedDrawerOffset={-3}
-          tweenHandler={(ratio) => ({
-            main: { opacity:(2-ratio)/2 }
-          })}
-          content={
-            <ControlPanel addToInput={this.addToInput} closeDrawer={this.closeDrawer} />
-          }
-          onOpen={() => {
-            this.setState({drawerOpen: true})
+        <PopupDialog
+          dialogKey="goWay"
+          dialogStyle={{
+            top: -1 * (width / 3),
+            borderRadius: 20,
+            padding: 10,
+            overflow: 'hidden',
           }}
-          onClose={() => {
-            this.setState({drawerOpen: false})
+          dialogTitle={<DialogTitle key='dpdialog' align="left" title="Set your AMA Topic" />}
+          ref={(popupDialog) => {
+            this.slideAnimationDialog = popupDialog;
           }}
-          side='bottom'
-        >
-          <PopupDialog
-            dialogKey="goWay"
-            dialogStyle={{
-              top: -1 * (width / 3),
-              borderRadius: 20,
-              padding: 10,
-              overflow: 'hidden',
-            }}
-            dialogTitle={<DialogTitle align="left" title="Set your AMA Topic" />}
-            ref={(popupDialog) => {
-              this.slideAnimationDialog = popupDialog;
-            }}
-            dialogAnimation={slideAnimation}
-            actions={[
-              <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Button
-                  key="button-2"
-                  raised
-                  title='Close'
-                  leftIcon={{name: 'close'}}
-                  style={{paddingBottom: 20}}
-                  buttonStyle={{backgroundColor: '#DD6B55'}}
-                  onPress={() => {
+          dialogAnimation={slideAnimation}
+          actions={[
+            <View key='vpdialog' style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+              <Button
+                key="button-2"
+                raised
+                title='Close'
+                leftIcon={{name: 'close'}}
+                style={{paddingBottom: 20}}
+                buttonStyle={{backgroundColor: '#DD6B55'}}
+                onPress={() => {
+                  this.slideAnimationDialog.dismiss();
+                  Keyboard.dismiss()
+                }}>
+              </Button>,
+              <Button
+                key="button-1"
+                raised
+                title='Submit'
+                leftIcon={{name: 'check'}}
+                style={{paddingBottom: 20}}
+                buttonStyle={{backgroundColor: '#34bbed'}}
+                onPress={() => {
+                  if (this.state.amaAnswer) {
                     this.slideAnimationDialog.dismiss();
                     Keyboard.dismiss()
-                  }}>
-                </Button>,
-                <Button
-                  key="button-1"
-                  raised
-                  title='Submit'
-                  leftIcon={{name: 'check'}}
-                  style={{paddingBottom: 20}}
-                  buttonStyle={{backgroundColor: '#34bbed'}}
-                  onPress={() => {
-                    if (this.state.amaAnswer) {
-                      this.slideAnimationDialog.dismiss();
-                      Keyboard.dismiss()
-                      const stringifiedCmd = AmaCommands.amaCreate(this.state.amaAnswer)
-                      this.props.handleOutgoingMessage(stringifiedCmd, undefined);
-                      this.setState({amaTitle: this.state.amaAnswer, amaAnswer: ''})
-                      this.props.setSpinnerData(true, 'Processing...')
-                      setTimeout(() => {
-                        this.props.setSpinnerData(false, '')
-                      }, 3000);
-                    }
-                  }}>
-                </Button>
-              </View>
-            ]}
-          >
-            <Container>
-              <Content padder>
-                <Form>
-                  <Textarea
-                    rowSpan={5}  
-                    onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})} 
-                    bordered 
-                    placeholder="Enter a AMA Topic" 
-                  />
-                </Form>
-              </Content>
-            </Container>
-          </PopupDialog>
-          {amaButton}
-          <ActionSheet
-            ref={o => this.ActionSheet = o}
-            title={`Would you like to add this user?`}
-            options={['Add', 'Cancel']}
-            cancelButtonIndex={1}
-            destructiveButtonIndex={1}
-            onPress={(index) => this.handleUserActionSheet(index)}
-          />
-          <GiftedChat
-            ref={(ref) => this._giftedChat = ref}
-            messages={this.state.messages}
-            onSend={this.onSend}
-            loadEarlier={this.state.loadEarlier}
-            onLoadEarlier={this.onLoadEarlier}
-            onPressAvatar={(this.protocol) ? (user) => this.showActionSheet(user)
-             : () => this.props.navigation.navigate('ContactProfile')}
-            isLoadingEarlier={this.state.isLoadingEarlier}
-            user={{
-              _id: this.state.author.username, // sent messages should have same user._id
-            }}
-            showAvatarForEveryMessage={true}
-            renderAvatarOnTop={true}
-            text={this.state.inputText}
-            renderBubble={this.renderBubble}
-            renderActions={(!disableAmaFeatures) ? this.renderCustomActions : null}
-            renderMessage={this.renderMessage}
-            renderFooter={this.renderFooter}
-            maxInputLength={240}
-            renderInputToolbar={this.renderInputToolbar}
-            parsePatterns={(linkStyle) => [
-              { pattern: /AMA:.*\n\n.*/, style: linkStyle, onPress: this.onPressAma },
-            ]}
-            onInputTextChanged={text => this.setCustomText(text)}
-            textInputProps={{editable: (!disableAmaFeatures)}}
-            onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
-          />
-        </Drawer>
+                    const stringifiedCmd = AmaCommands.amaCreate(this.state.amaAnswer)
+                    this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+                    this.setState({amaTitle: this.state.amaAnswer, amaAnswer: ''})
+                    this.props.setSpinnerData(true, 'Processing...')
+                    setTimeout(() => {
+                      this.props.setSpinnerData(false, '')
+                    }, 3000);
+                  }
+                }}>
+              </Button>
+            </View>
+          ]}
+        >
+          <Container>
+            <Content padder>
+              <Form>
+                <Textarea
+                  rowSpan={5}  
+                  onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})} 
+                  bordered 
+                  placeholder="Enter a AMA Topic" 
+                />
+              </Form>
+            </Content>
+          </Container>
+        </PopupDialog>
+        {amaButton}
+        <ActionSheet
+          ref={o => this.ActionSheet = o}
+          title={`Would you like to add this user?`}
+          options={['Add', 'Cancel']}
+          cancelButtonIndex={1}
+          destructiveButtonIndex={1}
+          onPress={(index) => this.handleUserActionSheet(index)}
+        />
+        <GiftedChat
+          ref={(ref) => this._giftedChat = ref}
+          messages={this.state.messages}
+          onSend={this.onSend}
+          loadEarlier={this.state.loadEarlier}
+          onLoadEarlier={this.onLoadEarlier}
+          onPressAvatar={(this.protocol) ? (user) => this.showActionSheet(user)
+           : () => this.props.navigation.navigate('ContactProfile')}
+          isLoadingEarlier={this.state.isLoadingEarlier}
+          user={{
+            _id: this.state.author.username, // sent messages should have same user._id
+          }}
+          showAvatarForEveryMessage={true}
+          renderAvatarOnTop={true}
+          text={this.state.inputText}
+          renderBubble={this.renderBubble}
+          renderActions={(!disableAmaFeatures) ? this.renderCustomActions : null}
+          renderMessage={this.renderMessage}
+          renderFooter={this.renderFooter}
+          maxInputLength={240}
+          renderInputToolbar={this.renderInputToolbar}
+          parsePatterns={(linkStyle) => [
+            { pattern: /AMA:.*\n\n.*/, style: linkStyle, onPress: this.onPressAma },
+          ]}
+          onInputTextChanged={text => this.setCustomText(text)}
+          textInputProps={{editable: (!disableAmaFeatures)}}
+          onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
+        />
       </View>
     );
   }

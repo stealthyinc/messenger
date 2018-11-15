@@ -6,12 +6,6 @@ import { Button, Icon } from 'react-native-elements'
 import Drawer from 'react-native-drawer'
 import ControlPanel from './ControlPanel'
 
-import AmaCommands from '../Engine/misc/amaCommands.js'
-
-import PopupDialog, {
-  DialogTitle,
-  SlideAnimation,
-} from 'react-native-popup-dialog';
 import { Container, Header, Content, Item, Form, Textarea, Toast } from 'native-base';
 
 // Styles
@@ -27,7 +21,6 @@ const common = require('./../common.js');
 const utils = require('./../Engine/misc/utils.js');
 
 const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js');
-const slideAnimation = new SlideAnimation({ slideFrom: 'bottom' });
 
 class ChatScreen extends Component {
   static navigationOptions = ({ navigation }) => {
@@ -39,12 +32,12 @@ class ChatScreen extends Component {
         </TouchableOpacity>
       ),
       headerTitle: params.name,
-      headerRight: (
-        // <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
-        <TouchableOpacity onPress={() => params.navigation.navigate("ContactProfile")} style={{marginRight: 10}}>
-          <Ionicons name="ios-contact" size={28} color='white'/>
-        </TouchableOpacity>
-      ),
+      // headerRight: (
+      //   // <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
+      //   <TouchableOpacity onPress={() => params.navigation.navigate("ContactProfile")} style={{marginRight: 10}}>
+      //     <Ionicons name="ios-contact" size={28} color='white'/>
+      //   </TouchableOpacity>
+      // ),
       headerTintColor: 'white',
       headerStyle: {
         backgroundColor: '#34bbed'
@@ -75,11 +68,6 @@ class ChatScreen extends Component {
     this.publicKey = undefined
     this.displayname = ''
     this.delegate = true
-
-    // Stores AMA id values for each
-    // AMA title (used to pass id in for navigation):
-    //
-    this.amaTitleIndex = {}
   }
   configWithActiveContact = (anActiveContact, administrable=false, force=false, callSetState=false) => {
     const method = 'ChatScreen::configWithActiveContact'
@@ -95,7 +83,6 @@ class ChatScreen extends Component {
 
     this.activeContact = anActiveContact
     this.publicKey = (this.activeContact) ? this.activeContact.publicKey : undefined
-    this.isAma = utils.isAma(this.activeContact.protocol)
 
     const notificationPath = common.getDbNotificationPath(anActiveContact.publicKey)
     firebaseInstance.getFirebaseRef(`${notificationPath}/token`).once('value')
@@ -110,10 +97,6 @@ class ChatScreen extends Component {
         }
       }
     });
-    this.protocol = (this.activeContact) ?
-      utils.isChannelOrAma(this.activeContact.protocol) : false
-    console.log(`DEBUG(${method}): this.protocol = ${this.protocol}, this.activeContact.protocol = ${this.activeContact.protocol}.`)
-
     console.log(`INFO(${method}): check #2 anActiveContact=${anActiveContact}`)
     console.log(`INFO(${method}): check #2 anActiveContact=${anActiveContact}`)
     this.displayname = (anActiveContact.title) ? anActiveContact.title : anActiveContact.id
@@ -216,18 +199,6 @@ class ChatScreen extends Component {
           }
           else if (contentType === 'TEXT_JSON') {
             text = body.text
-            //
-            // Handle AMA message objects
-            if (body.type === 'public ama 1.0') {
-              text = body.title + '\n' +
-                     '\n' +
-                     '(' + body.status + ')'
-              this.amaTitleIndex[body.title] = {
-                id: body.ama_id,
-                msgAddress: msg.msgAddress,
-              }
-            }
-            //
             url = body.url
             gimage = body.image
           }
@@ -268,34 +239,10 @@ class ChatScreen extends Component {
       }
       else if (contentType === 'TEXT_JSON') {
         text = body.text
-        //
-        // Handle AMA message objects
-        if (body.type === 'public ama 1.0') {
-          text = body.title + '\n' +
-                 '\n' +
-                 '(' + body.status + ')'
-          this.amaTitleIndex[body.title] = {
-            id: body.ama_id,
-            msgAddress: message.msgAddress,
-          }
-        }
-        //
         url = body.url
         gimage = body.image
       }
       if (author === id) {
-        if (this.protocol) {
-          const newText = text
-          const index = newText.indexOf(' says: ')
-          author = newText.substring(0, index)
-          if (author) {
-            text = newText.substring(index+7)
-            if (this.protocol)
-              image = ''
-            name = ''
-            description = author
-          }
-        }
         messages.push({
           _id: Math.round(Math.random() * 1000000),
           text,
@@ -371,36 +318,9 @@ class ChatScreen extends Component {
     this.props.shareInit()
   }
   onReceive = (newMessages) => {
-    //hack to show the generated id instead of stealthy all the time
-    let updatedMessages = []
-    if (this.protocol) {
-      for (let message of newMessages) {
-        let {text, user, createdAt, _id} = message
-        const index = text.indexOf(' says: ')
-        let newId = ''
-        let newText = text
-        if (index > -1) {
-          newId = text.substring(0, index)
-          newText = text.substring(index+7)
-          user.avatar = ''
-          user.name = newId
-          user._id = newId
-        }
-        let crap = {
-          user,
-          text: newText,
-          createdAt,
-          _id,
-        }
-        updatedMessages.push(crap)
-      }
-    }
-    else {
-      updatedMessages = newMessages
-    }
     this.setState((previousState) => {
       return {
-        messages: GiftedChat.append(previousState.messages, updatedMessages),
+        messages: GiftedChat.append(previousState.messages, newMessages),
       };
     });
   }
@@ -409,21 +329,7 @@ class ChatScreen extends Component {
     this.setState({modalVisible: flag})
   }
   renderCustomActions = (props) => {
-    return (!this.protocol) ? (
-      <TouchableOpacity
-        style={[styles.chatContainer, this.props.containerStyle]}
-        onPress={() => this.props.navigation.navigate('DappData')}
-      >
-        <Ionicons name="ios-aperture" size={28} color='#34bbed' />
-      </TouchableOpacity>
-    ) : (this.isAma) ? (
-      <TouchableOpacity
-        style={[styles.chatContainer, this.props.containerStyle]}
-        onPress={() => this.slideAnimationDialog.show()}
-      >
-        <Ionicons name="ios-radio" size={28} color='#34bbed' />
-      </TouchableOpacity>
-    ) : (
+    return (
       <TouchableOpacity
         style={[styles.chatContainer, this.props.containerStyle]}
         onPress={() => this.toggleDrawer()}
@@ -489,26 +395,6 @@ class ChatScreen extends Component {
     this.props.setDappUrl(url)
     this.props.navigation.navigate('DappScreen')
   }
-  onPressAma = (amaname) => {
-    if (amaname) {
-      // Strip out anything after the first linefeed ('\n'):
-      const amaNameFirstLineMatch = amaname.match(/[^\n]*/)
-      if (amaNameFirstLineMatch.length >= 1) {
-        const amaNameFirstLine = amaNameFirstLineMatch[0]
-        const idInformation = this.amaTitleIndex[amaNameFirstLine]
-        const id = (idInformation) ? idInformation.id : undefined
-        const msgAddress = (idInformation) ? idInformation.msgAddress : undefined
-        this.props.navigation.navigate('SlackScreen',
-          {
-            name: amaNameFirstLine,
-            id,
-            msgAddress,
-            delegate: this.delegate
-          })
-        this.props.sendAmaInfo(msgAddress, id)
-      }
-    }
-  }
   toggleDrawer = () => {
     if (this.state.drawerOpen)
       this.closeDrawer()
@@ -524,9 +410,6 @@ class ChatScreen extends Component {
     this._giftedChat.textInput.focus()
   };
   setCustomText = (inputText) => {
-    if (this.protocol && inputText && (inputText[0] === '@' || inputText[0] === '/') && inputText.length < 2) {
-      this.openDrawer()
-    }
     this.setState({inputText})
   }
   addToInput = (text) => {
@@ -572,119 +455,56 @@ class ChatScreen extends Component {
         </View>
       )
     }
-    const amaButton = (this.amaTitleIndex[this.state.amaTitle]) ? (
-      <Button
-        raised
-        color='green'
-        buttonStyle={{backgroundColor: '#b37ccf'}}
-        textStyle={{ fontSize: 24, fontWeight: "900", color: "white"}}
-        title={this.state.amaTitle}
-        onPress={() => this.onPressAma(this.state.amaTitle)}
-        icon={{size: 28, type: 'font-awesome', name: 'bullhorn', color: 'white'}}
-      />
-    ) : null
-    const disableAmaFeatures = this.isAma && !this.delegate
     return (
       <View id='GiftedChatContainer'
            style={{flex: 1,
                    backgroundColor: 'white'}}>
-          <Drawer
-            ref={(ref) => this._drawer = ref}
-            type="overlay"
-            styles={drawerStyles}
-            tapToClose={true}
-            closedDrawerOffset={-3}
-            tweenHandler={(ratio) => ({
-              main: { opacity:(2-ratio)/2 }
-            })}
-            content={
-              <ControlPanel addToInput={this.addToInput} closeDrawer={this.closeDrawer} />
-            }
-            onOpen={() => {
-              this.setState({drawerOpen: true})
+        <Drawer
+          ref={(ref) => this._drawer = ref}
+          type="overlay"
+          styles={drawerStyles}
+          tapToClose={true}
+          closedDrawerOffset={-3}
+          tweenHandler={(ratio) => ({
+            main: { opacity:(2-ratio)/2 }
+          })}
+          content={
+            <ControlPanel addToInput={this.addToInput} closeDrawer={this.closeDrawer} />
+          }
+          onOpen={() => {
+            this.setState({drawerOpen: true})
+          }}
+          onClose={() => {
+            this.setState({drawerOpen: false})
+          }}
+          side='bottom'
+        >
+          <GiftedChat
+            ref={(ref) => this._giftedChat = ref}
+            messages={this.state.messages}
+            onSend={this.onSend}
+            loadEarlier={this.state.loadEarlier}
+            onLoadEarlier={this.onLoadEarlier}
+            onPressAvatar={() => this.props.navigation.navigate('ContactProfile')}
+            isLoadingEarlier={this.state.isLoadingEarlier}
+            user={{
+              _id: this.state.author.username, // sent messages should have same user._id
             }}
-            onClose={() => {
-              this.setState({drawerOpen: false})
-            }}
-            side='bottom'
-          >
-            <PopupDialog
-              dialogTitle={<DialogTitle align="left" title="Set your AMA Topic" />}
-              ref={(popupDialog) => {
-                this.slideAnimationDialog = popupDialog;
-              }}
-              dialogAnimation={slideAnimation}
-              actions={[
-                <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                  <Button
-                    key="button-2"
-                    raised
-                    title='Close'
-                    leftIcon={{name: 'close'}}
-                    style={{paddingBottom: 20}}
-                    buttonStyle={{backgroundColor: '#DD6B55'}}
-                    onPress={() => {
-                      this.slideAnimationDialog.dismiss();
-                    }}>
-                  </Button>,
-                  <Button
-                    key="button-1"
-                    raised
-                    title='Submit'
-                    leftIcon={{name: 'check'}}
-                    style={{paddingBottom: 20}}
-                    buttonStyle={{backgroundColor: '#34bbed'}}
-                    onPress={() => {
-                      this.slideAnimationDialog.dismiss();
-                      const stringifiedCmd = AmaCommands.amaCreate(this.state.amaAnswer)
-                      this.props.handleOutgoingMessage(stringifiedCmd, undefined);
-                      this.setState({amaTitle: this.state.amaAnswer})
-                    }}>
-                  </Button>
-                </View>
-              ]}
-            >
-              <Container>
-                <Content padder>
-                  <Form>
-                    <Textarea onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})} rowSpan={5} bordered placeholder="Enter a AMA Topic" />
-                  </Form>
-                </Content>
-              </Container>
-            </PopupDialog>
-            {amaButton}
-            <GiftedChat
-              ref={(ref) => this._giftedChat = ref}
-              messages={this.state.messages}
-              onSend={this.onSend}
-              loadEarlier={this.state.loadEarlier}
-              onLoadEarlier={this.onLoadEarlier}
-              onPressAvatar={(this.protocol) ? (user) => Toast.show({
-                text: user._id,
-                buttonText: "Close",
-                type: "success"
-              }) : () => this.props.navigation.navigate('ContactProfile')}
-              isLoadingEarlier={this.state.isLoadingEarlier}
-              user={{
-                _id: this.state.author.username, // sent messages should have same user._id
-              }}
-              text={this.state.inputText}
-              renderActions={(!disableAmaFeatures) ? this.renderCustomActions : null}
-              renderBubble={this.renderBubble}
-              renderSystemMessage={this.renderSystemMessage}
-              renderMessageImage={this.renderCustomView}
-              renderFooter={this.renderFooter}
-              maxInputLength={240}
-              renderInputToolbar={this.renderInputToolbar}
-              parsePatterns={(linkStyle) => [
-                { type: 'url', style: linkStyle, onPress: this.onPressUrl },
-                { pattern: /AMA:.*\n\n.*/, style: linkStyle, onPress: this.onPressAma },
-              ]}
-              onInputTextChanged={text => this.setCustomText(text)}
-              textInputProps={{editable: (!disableAmaFeatures)}}
-              onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
-            />
-          </Drawer>
+            text={this.state.inputText}
+            renderActions={this.renderCustomActions}
+            renderBubble={this.renderBubble}
+            renderSystemMessage={this.renderSystemMessage}
+            renderMessageImage={this.renderCustomView}
+            renderFooter={this.renderFooter}
+            maxInputLength={240}
+            renderInputToolbar={this.renderInputToolbar}
+            parsePatterns={(linkStyle) => [
+              { type: 'url', style: linkStyle, onPress: this.onPressUrl },
+            ]}
+            onInputTextChanged={text => this.setCustomText(text)}
+            onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
+          />
+        </Drawer>
       </View>
     );
   }
@@ -712,7 +532,6 @@ const mapDispatchToProps = (dispatch) => {
   return {
     shareInit: () => dispatch(TwitterShareActions.shareInit()),
     handleOutgoingMessage: (text, json) => dispatch(EngineActions.setOutgoingMessage(text, json)),
-    sendAmaInfo: (msgAddress, amaId) => dispatch(EngineActions.sendAmaInfo(msgAddress, amaId)),
     sendNotification: (token, publicKey, bearerToken) => dispatch(EngineActions.sendNotification(token, publicKey, bearerToken)),
     handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),
     updateContactPubKey: (aContactId) => dispatch(EngineActions.updateContactPubKey(aContactId)),

@@ -62,7 +62,7 @@ class DiscoverScreen extends Component {
     let channels = {}
     if (this.props.channels) {
       for (let ch in this.props.channels) {
-        console.log("PBJ INFO", ch, this.props.channels[ch])
+        // console.log("PBJ INFO", ch, this.props.channels[ch])
         const {id} = this.props.channels[ch]
         const exists = this.props.contactMgr.isExistingContactId(id)
         if (!exists)
