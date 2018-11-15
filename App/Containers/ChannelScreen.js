@@ -405,7 +405,7 @@ class ChannelScreen extends Component {
             msgAddress,
             delegate: this.delegate
           })
-        this.props.sendAmaInfo(msgAddress, id)
+        this.props.sendAmaInfo(msgAddress, id, this.activeContact.id)
       }
     }
   }
@@ -544,10 +544,10 @@ class ChannelScreen extends Component {
             <Content padder>
               <Form>
                 <Textarea
-                  rowSpan={5}  
-                  onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})} 
-                  bordered 
-                  placeholder="Enter a AMA Topic" 
+                  rowSpan={5}
+                  onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})}
+                  bordered
+                  placeholder="Enter a AMA Topic"
                 />
               </Form>
             </Content>
@@ -618,7 +618,7 @@ const mapDispatchToProps = (dispatch) => {
     addContactId: (id) => dispatch(EngineActions.addContactId(id)),
     shareInit: () => dispatch(TwitterShareActions.shareInit()),
     handleOutgoingMessage: (text, json) => dispatch(EngineActions.setOutgoingMessage(text, json)),
-    sendAmaInfo: (msgAddress, amaId) => dispatch(EngineActions.sendAmaInfo(msgAddress, amaId)),
+    sendAmaInfo: (msgAddress, amaId, amaUserId) => dispatch(EngineActions.sendAmaInfo(msgAddress, amaId, amaUserId)),
     sendNotification: (token, publicKey, bearerToken) => dispatch(EngineActions.sendNotification(token, publicKey, bearerToken)),
     handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),
     updateContactPubKey: (aContactId) => dispatch(EngineActions.updateContactPubKey(aContactId)),
