@@ -96,7 +96,7 @@ class SlackScreen extends React.Component {
     if (nextProps.amaStatus && nextProps.amaStatus.updateTime) {
       if (this.lastFetch !== nextProps.amaStatus.updateTime) {
         this.lastFetch = nextProps.amaStatus.updateTime
-        this.props.sendAmaInfo(this.msgAddress, this.id)
+        this.props.sendAmaInfo(this.msgAddress, this.id, this.userId)
       }
     }
   }
@@ -268,7 +268,7 @@ class SlackScreen extends React.Component {
                 break;
               }
             }
-          });          
+          });
         }
       }
     }
@@ -458,10 +458,10 @@ class SlackScreen extends React.Component {
             <Content padder>
               <Form>
                 <Textarea
-                  rowSpan={5}  
-                  onChangeText={(amaAnswer) => this.setState({amaAnswer})} 
-                  bordered 
-                  placeholder="Type AMA Answer..." 
+                  rowSpan={5}
+                  onChangeText={(amaAnswer) => this.setState({amaAnswer})}
+                  bordered
+                  placeholder="Type AMA Answer..."
                 />
               </Form>
             </Content>
@@ -500,7 +500,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     handleOutgoingMessage: (text, json) => dispatch(EngineActions.setOutgoingMessage(text, json)),
-    sendAmaInfo: (msgAddress, amaId) => dispatch(EngineActions.sendAmaInfo(msgAddress, amaId)),
+    sendAmaInfo: (msgAddress, amaId, amaUserId) => dispatch(EngineActions.sendAmaInfo(msgAddress, amaId, amaUserId)),
     setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),
   }
 }

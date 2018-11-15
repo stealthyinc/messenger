@@ -232,9 +232,8 @@ function* handleMobileBackground() {
 }
 
 function* fetchAmaData(action) {
-  const { msgAddress, amaId } = action
-  console.log('AC AMA fetch test:', msgAddress, amaId)
-  EngineInstance.fetchAmaData(msgAddress, amaId)
+  const { msgAddress, amaId, amaUserId } = action
+  EngineInstance.fetchAmaData(msgAddress, amaId, amaUserId)
 }
 
 function* getToken() {

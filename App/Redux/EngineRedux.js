@@ -42,7 +42,7 @@ const { Types, Creators } = createActions({
   setSignInPending: ['flag'],
   setAmaData: ['amaData'],
   setAmaStatus: ['amaStatus'],
-  sendAmaInfo: ['msgAddress', 'amaId'],
+  sendAmaInfo: ['msgAddress', 'amaId', 'amaUserId'],
   setChannelsData: ['channels'],
   setSpinnerData: ['spinnerFlag', 'spinnerMessage'],
 })
