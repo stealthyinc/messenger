@@ -302,6 +302,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
       // AMA specific
       this.offlineMsgSvc.on('ama updated', (amaData) => {
+        this.annotateAmaData(amaData)
         this.emit('me-ama-status-change', amaData)
       })
     }
@@ -1691,6 +1692,17 @@ export class MessagingEngine extends EventEmitterAdapter {
         // Suppress
       }
 
+      this.annotateAmaData(amaData)
+
+      this.emit('me-update-ama-data', amaData)
+    } else {
+      this.emit('me-update-ama-data', {})
+    }
+  }
+
+  annotateAmaData(amaData) {
+    if (amaData && amaData.id) {
+      const amaId = amaData.id
       // Merge in locally stored voting data
       if (this.amaData.amaVoting.hasOwnProperty(amaId)) {
         const itemVoteIdArr = this.amaData.amaVoting[amaId]
@@ -1704,10 +1716,6 @@ export class MessagingEngine extends EventEmitterAdapter {
           }
         }
       }
-
-      this.emit('me-update-ama-data', amaData)
-    } else {
-      this.emit('me-update-ama-data', {})
     }
   }
 }
