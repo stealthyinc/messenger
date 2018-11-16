@@ -36,6 +36,18 @@ export default class AmaCommands {
       )
   }
 
+  static getQuestionUpvoteObj(text) {
+    if (text && text.includes('/questionUpvote')) {
+      const strJson = text.replace('/questionUpvote ', '')
+      try {
+        return JSON.parse(strJson)
+      } catch(error) {
+        console.log(`WARNING(AmaCommands::getQuestionUpvoteId): problem extracting ama and question id.\n${error}`)
+      }
+    }
+    return undefined
+  }
+
   questionCreate(text) {
     const obj = {
       ama_id: this.amaId,

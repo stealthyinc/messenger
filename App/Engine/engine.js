@@ -95,6 +95,15 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     this.indexIntegrations = {}
 
+    // Simple dictionary of amaId to array of voted question Ids.
+    // e.g. for ama 001, an upvote of question 123 would look like:
+    //   {
+    //     001: [123]
+    //   }
+    this.amaData = {
+      amaVoting: {}
+    }
+
     // This member determines behavior on read failures (prevents data loss
     // from clobbering write on failure)
     this.newUser = undefined
@@ -133,6 +142,27 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.emit('me-close-contact-search', true);
   }
 
+  async readAmaData() {
+    try {
+      const encAmaData = await this.io.robustLocalRead(this.userId, 'ama-data.json')
+      const amaData = await this.decryptObj(this.privateKey, encAmaData, true)
+      if (amaData) {
+        console.log(`INFO(MessagingEngine::readAmaData): setting amaData from stored data.`)
+        this.amaData = amaData
+      }
+    } catch(error) {
+      console.log(`ERROR(MessagingEngine::readAmaData): failed to read or decrypt ama-data.json.\n${error}`)
+    }
+  }
+
+  async writeAmaData() {
+    try {
+      const encAmaData = await utils.encryptObj(this.publicKey, this.amaData, true)
+      await this.io.robustLocalWrite(this.userId, 'ama-data.json', encAmaData)
+    } catch (error) {
+      console.log(`ERROR(MessagingEngine::writeAmaData): failed to write or encrypt amaData.\n${error}`)
+    }
+  }
   //
   // API Integration Interface
   // ////////////////////////////////////////////////////////////////////////////
@@ -410,6 +440,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     console.log(`INFO(${method}): engine initialized. Emitting me-initialized event.`)
     this.emit('me-initialized', true)
 
+    this.readAmaData()
 
     // Integrations load on start in the background. Might need to queue these and
     // add a busy/working block to prevent multiple read requests:
@@ -1115,13 +1146,15 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.contactMgr.setPublicKey(outgoingUserId, outgoingPublicKey);
     }
 
+    let amaCommand = false
     let displayInConversation = true
     const chatMsg = new ChatMessage();
     if (text) {
       // TODO: Change ama commands to use JSON directly (not type TEXT_JSON, but
       //       a new message type called JSON that is not directly supported for
       //       display so we don't need to rely on this workaround).
-      displayInConversation = !AmaCommands.isAmaCommand(text)
+      amaCommand = AmaCommands.isAmaCommand(text)
+      displayInConversation = !amaCommand
 
       chatMsg.init(this.userId, outgoingUserId, this._getNewMessageId(), text,
                    Date.now());
@@ -1134,6 +1167,27 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.anonalytics.aeMessageSent();
     if (this.discovery) {
       this.discovery.inviteContact(outgoingPublicKey);
+    }
+
+    if (amaCommand) {
+      // See if it's a question upvote and record this information to prevent the UI from
+      // allowing re-upvoting
+      const amaObj = AmaCommands.getQuestionUpvoteObj(text)
+      if (amaObj) {
+        const amaId = parseInt(amaObj.ama_id)
+        const questionId = parseInt(amaObj.question_id)
+
+        if (!this.amaData.amaVoting.hasOwnProperty(amaId)) {
+          this.amaData.amaVoting[amaId] = []
+        }
+        if (!this.amaData.amaVoting[amaId].includes(questionId)) {
+          this.amaData.amaVoting[amaId].push(questionId)
+
+          // No need to block on this write
+          this.writeAmaData()
+        }
+      }
+      // TODO: save this in a file somewhere
     }
 
     if (displayInConversation) {
@@ -1636,6 +1690,21 @@ export class MessagingEngine extends EventEmitterAdapter {
       } catch (error) {
         // Suppress
       }
+
+      // Merge in locally stored voting data
+      if (this.amaData.amaVoting.hasOwnProperty(amaId)) {
+        const itemVoteIdArr = this.amaData.amaVoting[amaId]
+        // TODO: consider deleting votes for questions that have been deleted
+        for (const itemVote of itemVoteIdArr) {
+          for (const question of amaData.ama) {
+            if (question.question_id === itemVote) {
+              question.voted = true
+              break
+            }
+          }
+        }
+      }
+
       this.emit('me-update-ama-data', amaData)
     } else {
       this.emit('me-update-ama-data', {})
