@@ -10,6 +10,7 @@ import AmaCommands from '../Engine/misc/amaCommands.js'
 
 import PopupDialog, {
   DialogTitle,
+  DialogButton,
   SlideAnimation,
 } from 'react-native-popup-dialog';
 import { Container, Header, Content, Item, Form, Textarea, Toast } from 'native-base';
@@ -493,6 +494,8 @@ class ChannelScreen extends Component {
                    backgroundColor: 'white'}}>
         <PopupDialog
           dialogKey="goWay"
+          height={0.4}
+          width={0.9}
           dialogStyle={{
             top: -1 * (width / 3),
             borderRadius: 20,
@@ -503,48 +506,46 @@ class ChannelScreen extends Component {
           visible={this.state.visible}
           dialogAnimation={slideAnimation}
           actions={[
-            <View key='vpdialog' style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-              <Button
-                key="button-2"
-                raised
-                title='Close'
-                leftIcon={{name: 'close'}}
-                style={{paddingBottom: 20}}
-                buttonStyle={{backgroundColor: '#DD6B55'}}
-                onPress={() => {
+            <DialogButton
+              key="button-2"
+              text='Close'
+              align='left'
+              bordered={true}
+              style={{paddingBottom: 20, backgroundColor: '#DD6B55'}}
+              textStyle={{color: 'white'}}
+              onPress={() => {
+                this.setState({visible: false})
+                Keyboard.dismiss()
+              }}>
+            </DialogButton>,
+            <DialogButton
+              key="button-1"
+              text='Submit'
+              align='right'
+              bordered={true}
+              style={{paddingBottom: 20, backgroundColor: '#34bbed'}}
+              textStyle={{color: 'white'}}
+              onPress={() => {
+                if (this.state.amaAnswer) {
                   this.setState({visible: false})
                   Keyboard.dismiss()
-                }}>
-              </Button>,
-              <Button
-                key="button-1"
-                raised
-                title='Submit'
-                leftIcon={{name: 'check'}}
-                style={{paddingBottom: 20}}
-                buttonStyle={{backgroundColor: '#34bbed'}}
-                onPress={() => {
-                  if (this.state.amaAnswer) {
-                    this.setState({visible: false})
-                    Keyboard.dismiss()
-                    const stringifiedCmd = AmaCommands.amaCreate(this.state.amaAnswer)
-                    this.props.handleOutgoingMessage(stringifiedCmd, undefined);
-                    this.setState({amaTitle: this.state.amaAnswer, amaAnswer: ''})
-                    this.props.setSpinnerData(true, 'Processing...')
-                    setTimeout(() => {
-                      this.props.setSpinnerData(false, '')
-                    }, 3000);
-                  }
-                }}>
-              </Button>
-            </View>
+                  const stringifiedCmd = AmaCommands.amaCreate(this.state.amaAnswer)
+                  this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+                  this.setState({amaTitle: this.state.amaAnswer, amaAnswer: ''})
+                  this.props.setSpinnerData(true, 'Processing...')
+                  setTimeout(() => {
+                    this.props.setSpinnerData(false, '')
+                  }, 3000);
+                }
+              }}>
+            </DialogButton>
           ]}
         >
           <Container>
             <Content padder>
               <Form>
                 <Textarea
-                  rowSpan={5}
+                  rowSpan={7}
                   onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})}
                   bordered
                   placeholder="Enter a AMA Topic"
