@@ -51,8 +51,8 @@ class SlackScreen extends React.Component {
       this.name = params.name
       this.id = params.id
       this.msgAddress = params.msgAddress
-      // this.delegate = params.delegate
-      this.delegate = true
+      this.delegate = params.delegate
+      // this.delegate = true
 
       this.userId = props.userData.username
       this.amaUserId = props.amaStatus.contactId
@@ -81,6 +81,7 @@ class SlackScreen extends React.Component {
       showAvatarAlert: false,
       amaAnswer: '',
       newContent: true,
+      visible: false
     }
   }
   componentWillReceiveProps(nextProps) {
@@ -165,8 +166,19 @@ class SlackScreen extends React.Component {
       <Avatar
         {...props}
         questionUpvote={this.questionUpvote}
+        upvoteRegistered={this.upvoteRegistered}
       />
     )
+  }
+  upvoteRegistered = (questionId) => {
+    for (const questionData of this.props.amaData.ama) {
+      // this is what i'm looking for
+      // const { voted } = questionData
+      let voted = true
+      if (!voted)
+        return false
+      return voted
+    }    
   }
   questionUpvote = (questionId) => {
     const stringifiedCmd = this.amaCmds.questionUpvote(questionId)
@@ -369,6 +381,7 @@ class SlackScreen extends React.Component {
       alertOption,
       showDialog,
       newContent,
+      visible
     } = this.state
     const refreshButton = (newContent) ? (
       <Button
@@ -444,7 +457,7 @@ class SlackScreen extends React.Component {
             padding: 10,
             overflow: 'hidden',
           }}
-          visible={this.state.visible}
+          visible={visible}
           dialogTitle={<DialogTitle title="AMA Answer" />}
           dialogAnimation={slideAnimation}
           actions={[
