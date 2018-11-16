@@ -45,14 +45,13 @@ export default class Avatar extends React.PureComponent {
       return this.props.renderAvatar(avatarProps);
     }
     const voted = this.props.upvoteRegistered(this.props.currentMessage._id)
-    const fontSize = (voted) ? 20 : 14
-    const marginTop = (voted) ? 5 : 0
+    const color = (voted) ? 'grey' : 'green'
     const votes = (!this.props.currentMessage.user.avatar) ? (
       <View style={{marginRight: 10}}>
-        {(voted) ? null : (<TouchableOpacity onPress={() => this.props.questionUpvote(this.props.currentMessage._id)}>
-          <Ionicons name="ios-arrow-dropup" size={30} color='green'/>
-        </TouchableOpacity>)}
-        <Text style={{textAlign: 'center', fontSize, marginTop}}>{this.props.currentMessage.score}</Text>
+        <TouchableOpacity disabled={voted} onPress={() => this.props.questionUpvote(this.props.currentMessage._id)}>
+          <Ionicons name="ios-arrow-dropup" size={30} color={color}/>
+        </TouchableOpacity>
+        <Text style={{textAlign: 'center', fontSize: 14}}>{this.props.currentMessage.score}</Text>
       </View>
     ) : <View style={{margin: 20}} />
     return (
