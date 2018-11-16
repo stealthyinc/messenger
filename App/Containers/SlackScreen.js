@@ -173,11 +173,13 @@ class SlackScreen extends React.Component {
   upvoteRegistered = (questionId) => {
     for (const questionData of this.props.amaData.ama) {
       // this is what i'm looking for
-      const { voted } = questionData
-      if (!voted)
-        return false
-      return voted
-    }
+      const { question_id, voted } = questionData
+      if (question_id === questionId) {
+        if (!voted)
+          return false
+        return voted
+      }
+    }    
   }
   questionUpvote = (questionId) => {
     const stringifiedCmd = this.amaCmds.questionUpvote(questionId)
