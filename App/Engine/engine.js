@@ -989,7 +989,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.updateMessages(activeUser ? activeUser.id : undefined);
   }
 
-  handleRadio (e, { name }) {
+  handleRadio = async (e, { name }) => {
     if (name === 'twitterShare') {
       this.settings.twitterShare = !this.settings.twitterShare;
       this.anonalytics.aeSettings(`twitterShare:${this.settings.twitterShare}`);
@@ -1006,9 +1006,18 @@ export class MessagingEngine extends EventEmitterAdapter {
         this.anonalytics.aeDisable();
       }
     } else if (name === 'notifications') {
-      if (this.settings.notifications)
-        firebaseInstance.disableNotifications()
-      this.settings.notifications = !this.settings.notifications;
+      const notificationPath = common.getDbNotificationPath(this.publicKey)
+      await firebaseInstance.getFirebaseRef(`${notificationPath}`).once('value')
+      .then((snapshot) => {
+        const token = snapshot.child('token').val()
+        if (this.settings.notifications) {
+          firebaseInstance.getFirebaseRef(`${notificationPath}`).set({token, enabled: false})
+        }
+        else {
+          firebaseInstance.getFirebaseRef(`${notificationPath}`).set({token, enabled: true})
+        }
+        this.settings.notifications = !this.settings.notifications;
+      });
       // this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`);
     } else if (name === 'search') {
       this.settings.search = !this.settings.search;

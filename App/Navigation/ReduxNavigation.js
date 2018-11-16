@@ -161,7 +161,7 @@ class ReduxNavigation extends React.Component {
     // console.log("firebase token readback", token)
     const { publicKey } =  this.props
     const notificationPath = common.getDbNotificationPath(publicKey)
-    firebaseInstance.setFirebaseData(notificationPath, {token})
+    firebaseInstance.setFirebaseData(notificationPath, {token, enabled: true})
     this.props.dispatch(EngineActions.setToken(token))
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'App' })
   }

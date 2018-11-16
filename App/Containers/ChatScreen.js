@@ -52,6 +52,7 @@ class ChatScreen extends Component {
       isLoadingEarlier: false,
       activeContact: null,
       token: '',
+      enabled: false,
       publicKey: '',
       modalVisible: false,
       sharedUrl: '',
@@ -83,14 +84,16 @@ class ChatScreen extends Component {
     this.publicKey = (this.activeContact) ? this.activeContact.publicKey : undefined
 
     const notificationPath = common.getDbNotificationPath(anActiveContact.publicKey)
-    firebaseInstance.getFirebaseRef(`${notificationPath}/token`).once('value')
+    firebaseInstance.getFirebaseRef(`${notificationPath}`).once('value')
     .then((snapshot) => {
       if (snapshot.val()) {
         if (!callSetState) {
-          this.state.token = snapshot.val()
+          this.state.token = snapshot.child('token').val()
+          this.state.enabled = snapshot.child('enabled').val()
         } else {
           this.setState({
-            token: snapshot.val()
+            token: snapshot.child('token').val(),
+            enabled: snapshot.child('enabled').val()
           })
         }
       }
@@ -295,9 +298,9 @@ class ChatScreen extends Component {
     }, 1000); // simulating network
   }
   onSend = (messages = [], json) => {
-    const { token } = this.state
+    const { token, enabled } = this.state
     const { publicKey, bearerToken } = this.props
-    if (token) {
+    if (token && enabled) {
       this.props.sendNotification(token, publicKey, bearerToken)
     }
     const {text, gtext, image, url} = messages[0]

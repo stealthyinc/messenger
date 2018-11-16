@@ -241,11 +241,13 @@ class SlackScreen extends React.Component {
                 const stringifiedCmd = this.amaCmds.questionPin(currentMessage._id)
                 this.props.handleOutgoingMessage(stringifiedCmd, undefined);
                 this.processMessage()
+                break
               }
               case 3: {
                 const stringifiedCmd = this.amaCmds.questionUnpin(currentMessage._id)
                 this.props.handleOutgoingMessage(stringifiedCmd, undefined);
                 this.processMessage()
+                break
               }
               case 4:
                 this.setState({
