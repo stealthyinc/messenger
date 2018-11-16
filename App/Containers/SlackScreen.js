@@ -204,6 +204,8 @@ class SlackScreen extends React.Component {
           const options = [
             'Answer Question',
             'Tweet Question',
+            'Pin Question',
+            'Unpin Questin',
             'Delete Question',
             'Cancel',
           ];
@@ -234,7 +236,17 @@ class SlackScreen extends React.Component {
                 )
                 break;
               }
-              case 2:
+              case 2: {
+                const stringifiedCmd = this.amaCmds.questionPin(currentMessage._id)
+                this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+                this.processMessage()
+              }
+              case 3: {
+                const stringifiedCmd = this.amaCmds.questionUnpin(currentMessage._id)
+                this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+                this.processMessage()
+              }
+              case 4:
                 this.setState({
                   showAlert: true,
                   alertTitle: 'AMA Admin',

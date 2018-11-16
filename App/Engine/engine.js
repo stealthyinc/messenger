@@ -1006,6 +1006,8 @@ export class MessagingEngine extends EventEmitterAdapter {
         this.anonalytics.aeDisable();
       }
     } else if (name === 'notifications') {
+      if (this.settings.notifications)
+        firebaseInstance.disableNotifications()
       this.settings.notifications = !this.settings.notifications;
       // this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`);
     } else if (name === 'search') {
