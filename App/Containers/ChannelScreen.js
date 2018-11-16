@@ -73,6 +73,7 @@ class ChannelScreen extends Component {
       drawerDisabled: false,
       inputText: '',
       user: '',
+      visible: false
     };
 
     this._isMounted = false;
@@ -80,7 +81,7 @@ class ChannelScreen extends Component {
     this.activeContact = undefined;
     this.publicKey = undefined
     this.displayname = ''
-    this.delegate = true
+    this.delegate = false
 
     // Stores AMA id values for each
     // AMA title (used to pass id in for navigation):
@@ -297,9 +298,9 @@ class ChannelScreen extends Component {
   onSend = (messages = [], json) => {
     const { token } = this.state
     const { publicKey, bearerToken } = this.props
-    if (token) {
-      this.props.sendNotification(token, publicKey, bearerToken)
-    }
+    // if (token) {
+    //   this.props.sendNotification(token, publicKey, bearerToken)
+    // }
     const {text, gtext, image, url} = messages[0]
     if (image && url) {
       this.props.handleOutgoingMessage(undefined, messages[0])
