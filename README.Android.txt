@@ -1,3 +1,5 @@
+Running Android in Studio With a Debugger
+********************************************************************************
 1. To get Android working, open a separate terminal in this directory. Then run the metro bundler:
         npm run start
 
@@ -9,3 +11,10 @@
 
 If you need to paste things into the emulator and the paste operation is doing strange things, use this command:
         - adb shell input text "<some text>"
+
+
+Running Android from the Command Line 
+********************************************************************************
+From the stealthyMobile folder:
+        react-native run-android
+(Doesn't work from another folder)
