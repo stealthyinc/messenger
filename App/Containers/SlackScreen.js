@@ -55,6 +55,7 @@ class SlackScreen extends React.Component {
       this.delegate = true
 
       this.userId = props.userData.username
+      this.amaUserId = props.amaStatus.contactId
       this.amaCmds = new AmaCommands(this.userId, this.id)
       //
       // Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav
@@ -97,7 +98,7 @@ class SlackScreen extends React.Component {
     if (nextProps.amaStatus && nextProps.amaStatus.updateTime) {
       if (this.lastFetch !== nextProps.amaStatus.updateTime) {
         this.lastFetch = nextProps.amaStatus.updateTime
-        this.props.sendAmaInfo(this.msgAddress, this.id, this.userId)
+        this.props.sendAmaInfo(this.msgAddress, this.id, this.amaUserId)
       }
     }
   }
@@ -325,36 +326,38 @@ class SlackScreen extends React.Component {
 
     // Convert AMA JSON to GC compat. JSON:
     const amaMsgs = []
-    for (const questionData of this.props.amaData.ama) {
-      const msg = {
-        _id: questionData.question_id,
-        text: questionData.question.text,
-        createdAt: Date.now(),
-        score: questionData.score,
-        answer: false,
-        user: {
+    if (this.props.amaData.ama) {
+      for (const questionData of this.props.amaData.ama) {
+        const msg = {
           _id: questionData.question_id,
-          name: questionData.question.author,
-          avatar: '',
-        }
-      }
-      amaMsgs.push(msg)
-      for (const answer of questionData.answers) {
-        const resp = {
-          _id: answer.answer_id,
-          text: answer.text,
+          text: questionData.question.text,
           createdAt: Date.now(),
-          answer: true,
+          score: questionData.score,
+          answer: false,
           user: {
-            _id: answer.answer_id,
-            name: answer.author,
-            avatar: demoIcon,
+            _id: questionData.question_id,
+            name: questionData.question.author,
+            avatar: '',
           }
         }
-        amaMsgs.push(resp)
+        amaMsgs.push(msg)
+        for (const answer of questionData.answers) {
+          const resp = {
+            _id: answer.answer_id,
+            text: answer.text,
+            createdAt: Date.now(),
+            answer: true,
+            user: {
+              _id: answer.answer_id,
+              name: answer.author,
+              avatar: demoIcon,
+            }
+          }
+          amaMsgs.push(resp)
+        }
       }
+      amaMsgs.reverse()
     }
-    amaMsgs.reverse()
     const {
       showAlert,
       user,
