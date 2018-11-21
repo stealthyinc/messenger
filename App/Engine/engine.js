@@ -145,7 +145,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   async readAmaData() {
     try {
       const encAmaData = await this.io.robustLocalRead(this.userId, 'ama-data.json')
-      const amaData = await this.decryptObj(this.privateKey, encAmaData, true)
+      const amaData = await utils.decryptObj(this.privateKey, encAmaData, true)
       if (amaData) {
         console.log(`INFO(MessagingEngine::readAmaData): setting amaData from stored data.`)
         this.amaData = amaData
@@ -1164,15 +1164,10 @@ export class MessagingEngine extends EventEmitterAdapter {
                    Date.now(), MESSAGE_TYPE.TEXT_JSON)
     }
 
-    this._sendOutgoingMessageOffline(chatMsg);
-    this.anonalytics.aeMessageSent();
-    if (this.discovery) {
-      this.discovery.inviteContact(outgoingPublicKey);
-    }
-
     if (amaCommand) {
       // See if it's a question upvote and record this information to prevent the UI from
       // allowing re-upvoting
+      //
       const amaObj = AmaCommands.getQuestionUpvoteObj(text)
       if (amaObj) {
         const amaId = parseInt(amaObj.ama_id)
@@ -1188,7 +1183,18 @@ export class MessagingEngine extends EventEmitterAdapter {
           this.writeAmaData()
         }
       }
-      // TODO: save this in a file somewhere
+
+      if (utils.isAndroid()) {
+        const androidText = AmaCommands.getAndroidCmdTextWorkaround(text)
+        chatMsg.content = androidText
+      }
+    }
+
+
+    this._sendOutgoingMessageOffline(chatMsg);
+    this.anonalytics.aeMessageSent();
+    if (this.discovery) {
+      this.discovery.inviteContact(outgoingPublicKey);
     }
 
     if (displayInConversation) {

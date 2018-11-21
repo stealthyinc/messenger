@@ -55,7 +55,6 @@ class SlackScreen extends React.Component {
       // this.delegate = true
 
       this.userId = props.userData.username
-      this.amaUserId = props.amaStatus.contactId
       this.amaCmds = new AmaCommands(this.userId, this.id)
       //
       // Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav Prabhaav
@@ -99,7 +98,8 @@ class SlackScreen extends React.Component {
     if (nextProps.amaStatus && nextProps.amaStatus.updateTime) {
       if (this.lastFetch !== nextProps.amaStatus.updateTime) {
         this.lastFetch = nextProps.amaStatus.updateTime
-        this.props.sendAmaInfo(this.msgAddress, this.id, this.amaUserId)
+        const amaUserId = nextProps.amaStatus.contactId
+        this.props.sendAmaInfo(this.msgAddress, this.id, amaUserId)
       }
     }
   }
@@ -179,7 +179,7 @@ class SlackScreen extends React.Component {
           return false
         return voted
       }
-    }    
+    }
   }
   questionUpvote = (questionId) => {
     const stringifiedCmd = this.amaCmds.questionUpvote(questionId)

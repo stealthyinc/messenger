@@ -8,6 +8,57 @@ export default class AmaCommands {
     return `/${command} ${JSON.stringify(obj)}`
   }
 
+  static textToCmdObj(text) {
+    let cmdObj = {}
+    if (!text) {
+      return cmdObj
+    }
+
+    const tokenizedContent = text.match(/^(\/[^ ]*) (.*)/)
+    if (tokenizedContent.length < 3) {
+      return cmdObj
+    }
+
+    cmdObj.cmd = tokenizedContent[1]
+    try {
+      cmdObj.props = JSON.parse(tokenizedContent[2])
+    } catch (error) {
+      console.log(`WARNING(AmaCommands::textToCmdObj): ${error}.`)
+      cmdObj.props = undefined
+    }
+
+    return cmdObj
+  }
+
+  // Also if we're on Android, escape the stringified JSON in the command to prevent
+  // Android evaluation from removing '\' characters. For example, this:
+  //
+  //   {"blah": "foo", "obj": "/cmd {\"ama_id\": \"123132\"}"}
+  //
+  // became this without our code here:
+  //
+  //   {"blah": "foo", "obj": "/cmd {"ama_id": "123132"}"}
+  //
+  // which would cause a JSON parse on 'obj' to fail.
+  //
+  // TODO: ideally we would transmit the message as JSON_DATA, but we're out
+  //       of time.
+  //
+  static getAndroidCmdTextWorkaround(cmdText) {
+    const cmdObj = AmaCommands.textToCmdObj(cmdText)
+
+    try {
+      let strObj = JSON.stringify(cmdObj.props)
+      let androidStrObj = strObj.replace(/\"/g, '\\"')
+
+      return `${cmdObj.cmd} ${androidStrObj}`
+    } catch (error) {
+      console.log(`WARNING(AmaCommands::getAndroidCmdTextWorkaround): ${error}`)
+    }
+
+    return undefined
+  }
+
   static amaCreate(aTitle) {
     const obj = {
       title: aTitle
