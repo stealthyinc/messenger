@@ -219,7 +219,7 @@ class SlackScreen extends React.Component {
             'Answer Question',
             'Tweet Question',
             'Pin Question',
-            'Unpin Questin',
+            'Unpin Question',
             'Delete Question',
             'Cancel',
           ];
@@ -339,9 +339,15 @@ class SlackScreen extends React.Component {
               <ActivityIndicator size="large" color="#34bbed"/>
             </View>)
 
-    // Convert AMA JSON to GC compat. JSON:
+    // Convert AMA JSON to GC compatible JSON. Also, check to see if user is a
+    // responder and update delegate setting appropriately.
     const amaMsgs = []
     if (this.props.amaData.ama) {
+      if (this.props.amaData.responders &&
+          this.props.amaData.responders.includes(this.userId)) {
+        this.delegate = true
+      }
+
       for (const questionData of this.props.amaData.ama) {
         const msg = {
           _id: questionData.question_id,

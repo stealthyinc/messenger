@@ -73,10 +73,18 @@ export default class AmaCommands {
   static isAmaCommand(text) {
     return text && (
         text.includes('/amaCreate') ||
+        text.includes('/amaOpen') ||
+        text.includes('/amaPause') ||
+        text.includes('/amaClose') ||
+        text.includes('/amaDelete') ||
+        text.includes('/responderAdd') ||
+        text.includes('/responderDelete') ||
         text.includes('/questionCreate') ||
         text.includes('/questionDelete') ||
         text.includes('/questionUpvote') ||
         text.includes('/questionUnvote') ||
+        text.includes('/questionPin') ||
+        text.includes('/questionUnpin') ||
         text.includes('/answerCreate') ||
         text.includes('/answerEdit') ||
         text.includes('/answerDelete') ||
