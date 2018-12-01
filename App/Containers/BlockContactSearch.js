@@ -92,26 +92,36 @@ class BlockContactSearch extends Component {
     const { contactMgr } = this.props
     if (contactMgr.isExistingContactId(fullyQualifiedName)) {
       this.props.navigation.goBack()
-      this.props.navigation.navigate('ChatRoom')
+      const theNextActiveContactId = fullyQualifiedName;
+      const theNextActiveContact = contactMgr.getContact(theNextActiveContactId);
+      this.props.handleContactClick(theNextActiveContact);
+      this.protocol = (theNextActiveContact) ?
+        utils.isChannelOrAma(theNextActiveContact.protocol) : false
+      if (this.protocol)
+        this.props.navigation.navigate('ChannelRoom')
+      else
+        this.props.navigation.navigate('ChatRoom')
+      // this.props.navigation.navigate('ChatRoom')
     }
+    else {
+      // TODO: look at merging this with code that handles engine query to bs endpoint
+      //       (api.getUserProfile call results)
+      // For now, if no avatarUrl, make it undefined (pbj sets an image automatically)
+      const { image, name, description } = profile
+      const userImage = (image && image[0] &&
+                         'contentUrl' in image[0]) ?
+                        image[0]['contentUrl'] : undefined
 
-    // TODO: look at merging this with code that handles engine query to bs endpoint
-    //       (api.getUserProfile call results)
-    // For now, if no avatarUrl, make it undefined (pbj sets an image automatically)
-    const { image, name, description } = profile
-    const userImage = (image && image[0] &&
-                       'contentUrl' in image[0]) ?
-                      image[0]['contentUrl'] : undefined
-
-    const contact = {
-      description,
-      id: fullyQualifiedName,
-      image: userImage,
-      key: Date.now(),
-      title: name
+      const contact = {
+        description,
+        id: fullyQualifiedName,
+        image: userImage,
+        key: Date.now(),
+        title: name
+      }
+      this.props.addNewContact(contact, true)
+      this.props.setSpinnerData(true, 'Adding contact...')
     }
-    this.props.addNewContact(contact, true)
-    this.props.setSpinnerData(true, 'Adding contact...')
   }
   createListItem(contact) {
     const { payload, error } = this.props
@@ -217,6 +227,7 @@ const mapDispatchToProps = (dispatch) => {
     request: (data) => dispatch(BlockstackContactsActions.blockstackContactsRequest({data})),
     clear: () => dispatch(BlockstackContactsActions.blockstackContactsFailure()),
     addNewContact: (contact, flag) => dispatch(EngineActions.addNewContact(contact, flag)),
+    handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
     setContactAdded: (flag) => dispatch(EngineActions.setContactAdded(flag)),
     setActiveContact: (contact) => dispatch(EngineActions.setActiveContact(contact)),
     setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),

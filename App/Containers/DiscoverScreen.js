@@ -58,22 +58,6 @@ class DiscoverScreen extends Component {
   // componentWillMount() {
   //   this.props.navigation.setParams({ navigation: this.props.navigation });
   // }
-  componentWillMount() {
-    let channels = {}
-    if (this.props.channels) {
-      for (let ch in this.props.channels) {
-        // console.log("PBJ INFO", ch, this.props.channels[ch])
-        const {id} = this.props.channels[ch]
-        const exists = this.props.contactMgr.isExistingContactId(id)
-        if (!exists)
-          channels[ch] = this.props.channels[ch]
-      }
-      this.setState({
-        channels,
-        showLoading: false
-      })
-    }
-  }
   componentWillReceiveProps(nextProps) {
     const method = 'DiscoverScreen::componentWillReceiveProps'
 
@@ -119,12 +103,27 @@ class DiscoverScreen extends Component {
     let newData = this.state.channels;
     delete newData[rowId]
     this.setState({ channelClicked: true, channelId: data.id, channels: newData })
+    firebaseInstance.subscribeToTopic(data.id)
     // AC: Begin debug output
     console.log(`INFO(${method}): called setState channelClicked-->true for ${data.id}`)
     // AC: End debug output
   }
   render () {
-    if (this.state.showLoading || this.state.channelClicked) {
+    let channels = {}
+    if (this.props.channels) {
+      for (let ch in this.props.channels) {
+        // console.log("PBJ INFO", ch, this.props.channels[ch])
+        const {id} = this.props.channels[ch]
+        const exists = this.props.contactMgr.isExistingContactId(id)
+        if (!exists)
+          channels[ch] = this.props.channels[ch]
+      }
+      // this.setState({
+      //   channels,
+      //   showLoading: false
+      // })
+    }
+    if (this.state.channelClicked) {
       return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#FFF"/></View>
     }
     else {
@@ -133,7 +132,7 @@ class DiscoverScreen extends Component {
           <Content>
             <List
               removeClippedSubviews={false}
-              dataSource={this.ds.cloneWithRows(this.state.channels)}
+              dataSource={this.ds.cloneWithRows(channels)}
               renderRow={(item, secId, rowId, rowMap) =>
                 <View>
                   <ListItem style={{marginLeft: 5}} avatar onPress={_ => this.contactSelected(item, secId, rowId, rowMap)}>
