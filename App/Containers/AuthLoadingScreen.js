@@ -40,9 +40,18 @@ class AuthLoadingScreen extends React.Component {
       if (!hasSession) {
         const baseUrl = "https://www.stealthy.im"
 
+        // Unfortunately this doesn't seem to work, so we've hard-coded some
+        // stuff from @Friedger into the Kotlin that gets called by the
+        // BlockstackNativeModule createSession code.
+        //
         const config = {
           appDomain: `${baseUrl}`,
-          redirectUrl: `${baseUrl}/redirectAndroid/index.html`,
+          redirectUrl: `/redirectAndroid/index.html`,
+          redirectPath: `/redirectAndroid/index.html`,
+          // redirectUrl: `${baseUrl}/redirectAndroid/index.html`,
+          // redirectPath: `${baseUrl}/redirectAndroid/index.html`,
+          // redirectUrl: `${baseUrl}/redirect.html`,
+          // redirectUrl: 'https://flamboyant-darwin-d11c17.netlify.com/',
           scopes:["store_write", "publish_data"]
         }
 
@@ -69,7 +78,7 @@ class AuthLoadingScreen extends React.Component {
     const channels = JSON.parse(await AsyncStorage.getItem('channels'))
     if (channels)
       this.props.setChannelsData(channels)
-    
+
     if (!userData) {
       this.props.navigation.navigate('Auth');
     }

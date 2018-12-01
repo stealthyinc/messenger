@@ -100,6 +100,14 @@ def enableSeparateBuildPerCPUArchitecture = false
  */
 def enableProguardInReleaseBuilds = false
 
+/**
+ *  From: https://jitpack.io/docs/
+ *  Prevent caching
+ */
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 android {
     compileSdkVersion 27
     buildToolsVersion '27.0.3'
@@ -174,7 +182,9 @@ dependencies {
 // AC's replacement of the blockstack android SDK which exposes getPublicKeyFromPrivate (done
 // via AC's git hub and jitpack.io):
 //    implementation "com.github.blockstack:blockstack-android:-SNAPSHOT"
-    implementation "com.github.AC-FTW:blockstack-android:-SNAPSHOT"
+//    implementation "com.github.AC-FTW:blockstack-android:-SNAPSHOT"
+//    implementation 'com.github.AC-FTW:blockstack-android:develop-SNAPSHOT'
+    implementation "com.github.AC-FTW:blockstack-android:7618079"
     implementation "com.facebook.react:react-native:+"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }

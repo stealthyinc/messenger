@@ -1184,10 +1184,10 @@ export class MessagingEngine extends EventEmitterAdapter {
         }
       }
 
-      if (utils.isAndroid()) {
-        const androidText = AmaCommands.getAndroidCmdTextWorkaround(text)
-        chatMsg.content = androidText
-      }
+      // if (utils.isAndroid()) {
+      //   const androidText = AmaCommands.getAndroidCmdTextWorkaround(text)
+      //   chatMsg.content = androidText
+      // }
     }
 
 

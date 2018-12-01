@@ -7,6 +7,7 @@ import com.facebook.react.bridge.*
 import org.blockstack.android.sdk.*
 import java.net.URI
 
+import android.preference.PreferenceManager
 
 class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -57,17 +58,44 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
             } else {
                 "$appDomain/redirect"
             }
-            val config = BlockstackConfig(URI(appDomain), URI(redirectUrl), URI(manifestUrl), scopes)
+            // val config = BlockstackConfig(URI(appDomain), redirectUrl, manifestUrl, scopes)
+
+            // @Friedger rolled this for us on Slack and mentioned it works, so skipping all the fun above
+            // and commenting out the config def'n above:
+            val config = "https://www.stealthy.im"
+                           .toBlockstackConfig(
+                                   redirectPath = "/redirectAndroid/index.html",
+                                   scopes = kotlin.arrayOf(org.blockstack.android.sdk.Scope.StoreWrite,
+                                                           org.blockstack.android.sdk.Scope.PublishData))
 
             activity.runOnUiThread {
                 Log.d("BlockstackNativeModule", "create session")
-                session = BlockstackSession(activity, config) {
-                    Log.d("BlockstackNativeModule", "created session")
-                    val map = Arguments.createMap()
-                    map.putBoolean("loaded", true)
-                    promise.resolve(map)
-                    currentSession = session
-                }
+
+//                val nameLookupUrl = "https://core.blockstack.org/v1/names/"
+//                val sessionStore: ISessionStore = SessionStore(PreferenceManager.getDefaultSharedPreferences(activity))
+//                val executor: Executor = AndroidExecutor(activity!!)
+//                val scriptRepo = AndroidScriptRepo(activity)
+
+//                session = BlockstackSession(activity,
+//                                            config,
+//                                            nameLookupUrl,
+//                                            sessionStore,
+//                                            executor,
+//                                            scriptRepo)
+                session = BlockstackSession(activity, config)
+                currentSession = session
+                Log.d("BlockstackNativeModule", "created session")
+                val map = Arguments.createMap()
+                map.putBoolean("loaded", true)
+                promise.resolve(map)
+
+//                session = BlockstackSession(activity, config) {
+//                    Log.d("BlockstackNativeModule", "created session")
+//                    val map = Arguments.createMap()
+//                    map.putBoolean("loaded", true)
+//                    promise.resolve(map)
+//                    currentSession = session
+//                }
             }
         } else {
             promise.reject(IllegalStateException("must be called from an Activity that implements ConfigProvider"))
@@ -80,7 +108,8 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
             BlockstackNativeModule.currentSignInPromise = promise
             getReactApplicationContext().currentActivity!!.runOnUiThread {
                 session.redirectUserToSignIn {
-                    // never called
+                    // Error callback
+                    Log.d("BlockstackNativeModule", "redirectUserToSignIn has failed ...")
                 }
             }
         }
@@ -90,11 +119,16 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
     fun signUserOut(promise: Promise) {
         if (session.loaded) {
            getReactApplicationContext().currentActivity!!.runOnUiThread {
-               session.signUserOut {
-                   val map = Arguments.createMap()
-                   map.putBoolean("signedOut", true)
-                   promise.resolve(map)
-               }
+               session.signUserOut()
+               val map = Arguments.createMap()
+               map.putBoolean("signedOut", true)
+               promise.resolve(map)
+
+//               session.signUserOut {
+//                   val map = Arguments.createMap()
+//                   map.putBoolean("signedOut", true)
+//                   promise.resolve(map)
+//               }
            }
         }
     }
@@ -120,14 +154,22 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
         if (canUseBlockstack()) {
             reactApplicationContext.currentActivity!!.runOnUiThread {
                 val options = CryptoOptions(publicKey = publicKey)
-                session.encryptContent(content, options) { cipherResult ->
-                    if (cipherResult.hasValue) {
-                        val cipher = cipherResult.value!!
-                        promise.resolve(cipher.json.toString())
-                    } else {
-                        promise.reject("0", cipherResult.error)
-                    }
+                val cipherResult = session.encryptContent(content,options)
+                if (cipherResult.hasValue) {
+                    val cipher = cipherResult.value!!
+                    promise.resolve(cipher.json.toString())
+                } else {
+                    promise.reject("0", cipherResult.error)
                 }
+
+//                session.encryptContent(content, options) { cipherResult ->
+//                    if (cipherResult.hasValue) {
+//                        val cipher = cipherResult.value!!
+//                        promise.resolve(cipher.json.toString())
+//                    } else {
+//                        promise.reject("0", cipherResult.error)
+//                    }
+//                }
             }
         }
     }
@@ -136,15 +178,27 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
     fun decryptContent(privateKey: String, cipherObjectStr: String, promise: Promise) {
         if (canUseBlockstack()) {
             reactApplicationContext.currentActivity!!.runOnUiThread {
+                // The next var is needed due to an API change Blockstack added described as:
+                //   @binary flag indicating whether a ByteArray or String was encrypted
+                //
+                val binary = false
                 val options = CryptoOptions(privateKey = privateKey)
-                session.decryptContent(cipherObjectStr, options) { plainContentResult ->
-                    if (plainContentResult.hasValue) {
-                        val plainContent:String = plainContentResult.value as String
-                        promise.resolve(plainContent)
-                    } else {
-                        promise.reject("0", plainContentResult.error)
-                    }
+                val plainContentResult = session.decryptContent(cipherObjectStr, binary, options)
+                if (plainContentResult.hasValue) {
+                    val plainContent:String = plainContentResult.value as String
+                    promise.resolve(plainContent)
+                } else {
+                    promise.reject("0", plainContentResult.error)
                 }
+
+//                session.decryptContent(cipherObjectStr, binary, options) { plainContentResult ->
+//                    if (plainContentResult.hasValue) {
+//                        val plainContent:String = plainContentResult.value as String
+//                        promise.resolve(plainContent)
+//                    } else {
+//                        promise.reject("0", plainContentResult.error)
+//                    }
+//                }
             }
         }
     }
@@ -200,4 +254,3 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
         var currentSignInPromise: Promise? = null
     }
 }
-

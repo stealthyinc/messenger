@@ -206,8 +206,9 @@ module.exports = class GaiaIO extends BaseIO {
         // which fails when you read it back. To fix that we make it so that the
         // backslashes are included in the write.
         //
-        const stringifiedDataWorkaround = stringifiedData.replace(/\"/g, '\\"')
-        return BlockstackNativeModule.putFile(filePath, stringifiedDataWorkaround, {encrypt: false})
+        // const stringifiedDataWorkaround = stringifiedData.replace(/\"/g, '\\"')
+        // return BlockstackNativeModule.putFile(filePath, stringifiedDataWorkaround, {encrypt: false})
+        return BlockstackNativeModule.putFile(filePath, stringifiedData, {encrypt: false})
       } else {  // Web
         return putFile(filePath, JSON.stringify(data), {encrypt: false})
         .then(() => {
