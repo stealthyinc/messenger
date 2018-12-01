@@ -217,6 +217,12 @@ class ReduxNavigation extends React.Component {
         this.props.dispatch(EngineActions.clearUserData(this.publicKey));
       }
 
+      // unsubscribe from all channels
+      for (let ch in this.props.channels) {
+        const {id} = this.props.channels[ch]
+        firebaseInstance.unsubscribeFromTopic(id);
+      }
+
       await AsyncStorage.clear();
       const { token } = this.props
       AsyncStorage.setItem('token', token);
@@ -319,6 +325,7 @@ const mapStateToProps = (state) => {
     engineShutdown: EngineSelectors.getEngineShutdown(state),
     userData: EngineSelectors.getUserData(state),
     token: EngineSelectors.getToken(state),
+    channels: EngineSelectors.getChannelsData(state),
   }
 }
 

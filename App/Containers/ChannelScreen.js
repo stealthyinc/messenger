@@ -134,7 +134,7 @@ class ChannelScreen extends Component {
     const administrable = (activeContact && contactMgr.isAdministrable(activeContact.id)) ? true : false
     if (activeContact) {
       this.configWithActiveContact(activeContact, administrable)
-      firebaseInstance.subscribeToTopic(activeContact.id);
+      // firebaseInstance.subscribeToTopic(activeContact.id);
       const { messages } = this.props;
       if (messages) {
         this.state.messages = this.setupMessages(messages).reverse();
