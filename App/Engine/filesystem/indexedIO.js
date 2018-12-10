@@ -141,6 +141,7 @@ class IndexedIO {
     const method = 'IndexedIO::_writeSharedIndex'
     const sharedIndexFilePath = IndexedIO._getSharedIndexPath(dirPath);
 
+    this.logger(`DEBUG(${method}): encrypting shared index.`)
     let sharedIndexData = undefined
     try {
       sharedIndexData = await utils.encryptObj(someonesPubKey, indexData, this.useEncryption)
@@ -148,13 +149,16 @@ class IndexedIO {
       throw utils.fmtErrorStr(`encrypting data to write to shared index ${sharedIndexFilePath}.`,
         method, error)
     }
+    this.logger(`DEBUG(${method}): encrypting shared index complete.`)
 
+    this.logger(`DEBUG(${method}): writing shared index ${sharedIndexFilePath}.`)
     try {
       await this.ioInst.writeLocalFile(this.userId, sharedIndexFilePath, sharedIndexData)
     } catch (error) {
       throw utils.fmtErrorStr(`writing shared index ${sharedIndexFilePath}.`,
         method, error)
     }
+    this.logger(`DEBUG(${method}): writing shared index ${sharedIndexFilePath} complete.`)
   }
 
   static _logIndex(logger, indexData) {
@@ -247,6 +251,7 @@ class IndexedIO {
 
     const indexFilePath = IndexedIO._getIndexPath(dirPath);
 
+    this.logger(`DEBUG(${method}): encrypting local index.`)
     let writeData = undefined
     try {
       writeData = await utils.encryptObj(this.publicKey, indexData, this.useEncryption)
@@ -254,21 +259,27 @@ class IndexedIO {
       throw utils.fmtErrorStr(`failed to encrypt data for index ${indexFilePath}.`,
         method, error)
     }
+    this.logger(`DEBUG(${method}): encrypting local index complete.`)
 
+    this.logger(`DEBUG(${method}): writing local index ${indexFilePath}.`)
     try {
       await this.ioInst.writeLocalFile(this.userId, indexFilePath, writeData)
     } catch (error) {
       throw utils.fmtErrorStr(`failed to write index ${indexFilePath}.`,
         method, error)
     }
+    this.logger(`DEBUG(${method}): writing local index ${indexFilePath} complete.`)
+
 
     if (someonesPubKey) {
+      this.logger(`DEBUG(${method}): writing shared index.`)
       try {
         await this._writeSharedIndex(dirPath, indexData, someonesPubKey);
       } catch (error) {
         throw utils.fmtErrorStr(`failed to write shared index to dir ${dirPath}.`,
           method, error)
       }
+      this.logger(`DEBUG(${method}): writing shared index complete.`)
     }
 
     // IndexedIO._logIndex(this.logger, indexData);
@@ -328,6 +339,7 @@ class IndexedIO {
     const fileName = this._pathTail(filePath);
     const time = Date.now();
 
+    this.logger(`DEBUG(${method}): reading local index - ${path}`)
     let indexData = undefined;
     try {
       indexData = await this.readLocalIndex(path);
@@ -335,6 +347,7 @@ class IndexedIO {
       throw utils.fmtErrorStr(`fetching index file trying to write ${filePath}`,
         method, error)
     }
+    this.logger(`DEBUG(${method}): reading local index - ${path} complete.`)
 
     const sanoIndexData = IndexedIO._sanitizeIndexData(indexData);
     if (fileName in sanoIndexData.deleted) {
@@ -342,13 +355,16 @@ class IndexedIO {
     }
     sanoIndexData.active[fileName] = { time };
 
+    this.logger(`DEBUG(${method}): writing local index - ${path}`)
     try {
       await this.seqWriteLocalIndex(path, sanoIndexData, someonesPubKey);
     } catch (error) {
       throw utils.fmtErrorStr(`writing index file for ${filePath}.`,
         method, error)
     }
+    this.logger(`DEBUG(${method}): writing local index - ${path} complete.`)
 
+    this.logger(`DEBUG(${method}): encrypting outgoing message.`)
     let encData = undefined
     const encKey = (someonesPubKey) || this.publicKey;
     try {
@@ -357,16 +373,22 @@ class IndexedIO {
       throw utils.fmtErrorStr(`encrypting data to write to ${path}.`,
         method, error)
     }
+    this.logger(`DEBUG(${method}): encrypting outgoing message complete.`)
 
+    this.logger(`DEBUG(${method}): writing local file ${filePath}.`)
     try {
       await this.ioInst.writeLocalFile(this.userId, filePath, encData);
     } catch (error) {
       throw utils.fmtErrorStr(`writing file ${filePath}.`, method, error)
     }
+    this.logger(`DEBUG(${method}): writing local file ${filePath} complete.`)
 
+    this.logger(`DEBUG(${method}): delaying.`)
     if (ENABLE_SEQ_WR_RD_DLY) {
       await utils.resolveAfterMilliseconds(50);
     }
+    this.logger(`DEBUG(${method}): delaying complete.`)
+
   }
 
   // TODO: deleteLocalDir, deleteLocalFiles, and deleteLocalFile all use the

@@ -838,12 +838,12 @@ export class MessagingEngine extends EventEmitterAdapter {
   async handleContactAdd(contact, makeActiveContact=true) {
     const method = 'MessagingEngine::handleContactAdd'
 
-    console.log(`DEBUG(${method}): starting contact add for ${contact.id}.`)
+    this.logger(`DEBUG(${method}): starting contact add for ${contact.id}.`)
     if (this.anonalytics) {
       this.anonalytics.aeContactAdded();
     }
 
-    console.log(`DEBUG(${method}): fetching public key ...`)
+    this.logger(`DEBUG(${method}): fetching public key ...`)
     let publicKey = contact.publicKey
     if (!publicKey) {
       try {
@@ -858,7 +858,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     let protocol = undefined
     let administrable = false
     if (ENABLE_CHANNELS_V2_0) {
-      console.log(`DEBUG(${method}): fetching channel protocol ...`)
+      this.logger(`DEBUG(${method}): fetching channel protocol ...`)
       protocol = await this._fetchProtocol(contact.id)
       isChannel = utils.isChannelOrAma(protocol)
 
@@ -919,14 +919,14 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     }
 
-    console.log(`DEBUG(${method}): adding new contact ${contact.id} to contact manager ...`)
+    this.logger(`DEBUG(${method}): adding new contact ${contact.id} to contact manager ...`)
     await this.contactMgr.addNewContact(contact, contact.id, publicKey, makeActiveContact);
     // We do the next part here to minimize the reading delay on protocol so that
     // when the contact is added and inserted into the offline messaging service, the
     // protocol and administrability are known and set.
     if (ENABLE_CHANNELS_V2_0) {
       if (protocol) {
-        console.log(`DEBUG(${method}): setting channel protocol ...`)
+        this.logger(`DEBUG(${method}): setting channel protocol ...`)
         this.contactMgr.setProtocol(contact.id, protocol)
       }
       if (administrable) {
@@ -935,17 +935,17 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
 
-    console.log(`DEBUG(${method}): writing contact list (non blocking) ...`)
+    this.logger(`DEBUG(${method}): writing contact list (non blocking) ...`)
     this._writeContactList(this.contactMgr.getContacts());
 
-    console.log(`DEBUG(${method}): creating conversation ...`)
+    this.logger(`DEBUG(${method}): creating conversation ...`)
     this.conversations.createConversation(contact.id);
 
-    console.log(`DEBUG(${method}): writing conversations (non blocking) ...`)
+    this.logger(`DEBUG(${method}): writing conversations (non blocking) ...`)
     this._writeConversations();
 
     if (ENABLE_CHANNELS_V2_0 && isChannel) {
-      console.log(`DEBUG(${method}): setting channel address in offline msg svc ...`)
+      this.logger(`DEBUG(${method}): setting channel address in offline msg svc ...`)
       let msgAddress = {
         outerFolderNumber: 0,
         innerFolderNumber: 0,
@@ -956,7 +956,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       // Automatically send a message invite for channels that are added
       // -- this is used to increment/decrement the number of people in the room.
       //
-      console.log(`DEBUG(${method}): db invite contact (member incr, blocking) ...`)
+      this.logger(`DEBUG(${method}): db invite contact (member incr, blocking) ...`)
       try {
         await this.discovery.inviteContact(publicKey)
       } catch (error) {
@@ -965,7 +965,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     }
 
-    console.log(`DEBUG(${method}): updating contacts in offline messaging service ...`)
+    this.logger(`DEBUG(${method}): updating contacts in offline messaging service ...`)
     this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
 
     // IMPORTANT (even for Prabhaav):
@@ -973,13 +973,13 @@ export class MessagingEngine extends EventEmitterAdapter {
     //   contact length changed to navigate to the ChatScreen. If you
     //   update messages last, it navigates to a screen with the wrong
     //   messages.
-    console.log(`DEBUG(${method}): updating messages (sends event 'me-update-messages') ...`)
+    this.logger(`DEBUG(${method}): updating messages (sends event 'me-update-messages') ...`)
     this.updateMessages(contact.id);
 
-    console.log(`DEBUG(${method}): updating contact manager (sends event 'me-update-contactmgr') ...`)
+    this.logger(`DEBUG(${method}): updating contact manager (sends event 'me-update-contactmgr') ...`)
     this.updateContactMgr();
 
-    console.log(`DEBUG(${method}): close contact search (sends event 'me-close-contact-search') ...`)
+    this.logger(`DEBUG(${method}): close contact search (sends event 'me-close-contact-search') ...`)
     this.closeContactSearch();
 
     // Fast read of messages from contact (in case we're at the start or middle of a polling delay):

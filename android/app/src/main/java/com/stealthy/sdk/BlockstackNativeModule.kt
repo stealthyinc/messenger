@@ -58,8 +58,9 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
             } else {
                 "$appDomain/redirect"
             }
-            // val config = BlockstackConfig(URI(appDomain), redirectUrl, manifestUrl, scopes)
 
+            // val config = BlockstackConfig(URI(appDomain), redirectUrl, manifestUrl, scopes)
+            //
             // @Friedger rolled this for us on Slack and mentioned it works, so skipping all the fun above
             // and commenting out the config def'n above:
             val config = "https://www.stealthy.im"
@@ -70,32 +71,12 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
 
             activity.runOnUiThread {
                 Log.d("BlockstackNativeModule", "create session")
-
-//                val nameLookupUrl = "https://core.blockstack.org/v1/names/"
-//                val sessionStore: ISessionStore = SessionStore(PreferenceManager.getDefaultSharedPreferences(activity))
-//                val executor: Executor = AndroidExecutor(activity!!)
-//                val scriptRepo = AndroidScriptRepo(activity)
-
-//                session = BlockstackSession(activity,
-//                                            config,
-//                                            nameLookupUrl,
-//                                            sessionStore,
-//                                            executor,
-//                                            scriptRepo)
                 session = BlockstackSession(activity, config)
                 currentSession = session
                 Log.d("BlockstackNativeModule", "created session")
                 val map = Arguments.createMap()
                 map.putBoolean("loaded", true)
                 promise.resolve(map)
-
-//                session = BlockstackSession(activity, config) {
-//                    Log.d("BlockstackNativeModule", "created session")
-//                    val map = Arguments.createMap()
-//                    map.putBoolean("loaded", true)
-//                    promise.resolve(map)
-//                    currentSession = session
-//                }
             }
         } else {
             promise.reject(IllegalStateException("must be called from an Activity that implements ConfigProvider"))
@@ -123,12 +104,6 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
                val map = Arguments.createMap()
                map.putBoolean("signedOut", true)
                promise.resolve(map)
-
-//               session.signUserOut {
-//                   val map = Arguments.createMap()
-//                   map.putBoolean("signedOut", true)
-//                   promise.resolve(map)
-//               }
            }
         }
     }
@@ -161,15 +136,6 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
                 } else {
                     promise.reject("0", cipherResult.error)
                 }
-
-//                session.encryptContent(content, options) { cipherResult ->
-//                    if (cipherResult.hasValue) {
-//                        val cipher = cipherResult.value!!
-//                        promise.resolve(cipher.json.toString())
-//                    } else {
-//                        promise.reject("0", cipherResult.error)
-//                    }
-//                }
             }
         }
     }
@@ -190,15 +156,6 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
                 } else {
                     promise.reject("0", plainContentResult.error)
                 }
-
-//                session.decryptContent(cipherObjectStr, binary, options) { plainContentResult ->
-//                    if (plainContentResult.hasValue) {
-//                        val plainContent:String = plainContentResult.value as String
-//                        promise.resolve(plainContent)
-//                    } else {
-//                        promise.reject("0", plainContentResult.error)
-//                    }
-//                }
             }
         }
     }
