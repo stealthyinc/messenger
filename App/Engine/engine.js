@@ -39,6 +39,7 @@ const constants = require('./misc/constants.js');
 const { ContactManager } = require('./messaging/contactManager.js');
 
 const { Discovery } = require('./misc/discovery.js')
+const { Timer } = require('./misc/timer.js');
 
 const common = require('./../common.js');
 
@@ -84,6 +85,8 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     this.settings = constants.defaultSettings
     this.contactMgr = undefined;
+
+    this.myTimer = new Timer('Enter MessagingEngine Ctor')
 
     this.userId = undefined;
 
@@ -230,6 +233,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     if (initWithFetchedData || !userId) {
       return
     }
+    this.myTimer.logEvent('Enter componentDidMountWork')
 
     this.userId = userId;
     this._configureIO()
@@ -242,6 +246,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   //
   async _initWithContacts(contactArr) {
     const method = 'engine::_initWithContacts'
+    this.myTimer.logEvent('Enter _initWithContacts')
 
     // In mobile we don't force an active contact
     const forceActiveContact = false
@@ -440,6 +445,8 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     console.log(`INFO(${method}): engine initialized. Emitting me-initialized event.`)
     this.emit('me-initialized', true)
+    this.myTimer.logEvent('Enter _initWithContacts (emit me-initialized)')
+    console.log(this.myTimer.getEvents())
 
     this.readAmaData()
 
@@ -457,6 +464,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   }
 
   async _configureIO() {
+    this.myTimer.logEvent('Enter _configureIO')
     this.io = (ENABLE_GAIA) ?
       new GaiaIO(this.logger, LOG_GAIAIO) :
       new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO);
@@ -477,6 +485,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   // our data back, finding it mismatches. Otherwise we assume things are good to go.
   async _mobileGaiaTest() {
     const method = 'engine::_mobileGaiaTest'
+    this.myTimer.logEvent('Enter _mobileGaiaTest')
 
     const testFilePath = 'mobileGaiaTest.txt'
     const testValue = `${Date.now()}_${(Math.random()*100000)}`
@@ -503,6 +512,8 @@ export class MessagingEngine extends EventEmitterAdapter {
   //         and all three null/not present, then decide first time user)
   async _fetchUserSettings() {
     const method = 'engine.js::_fetchUserSettings'
+    this.myTimer.logEvent('Enter _fetchUserSettings')
+
     let encSettingsData = undefined
     try {
       encSettingsData = await this.io.robustLocalRead(this.userId, 'settings.json')
@@ -566,6 +577,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   async _fetchDataAndCompleteInit() {
     const method = 'engine.js::_fetchDataAndCompleteInit'
+    this.myTimer.logEvent('Enter _fetchDataAndCompleteInit')
 
     if (!this.anonalytics) {
       this.anonalytics = new Anonalytics(this.publicKey);
