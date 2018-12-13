@@ -246,7 +246,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   //
   async _initWithContacts(contactArr) {
     const method = 'engine::_initWithContacts'
-    this.myTimer.logEvent('Enter _initWithContacts')
+    this.myTimer.logEvent('_initWithContacts    (Entered)')
 
     // In mobile we don't force an active contact
     const forceActiveContact = false
@@ -379,6 +379,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
     this.offlineMsgSvc.startRecvService();
+    this.myTimer.logEvent('_initWithContacts    (after startRecvService)')
 
 
     // Update the summaries for all contacts.
@@ -416,7 +417,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.updateMessages(activeContactId);
     }
     this.updateContactMgr();
-
+    this.myTimer.logEvent('_initWithContacts    (after updateContactMgr)')
 
     // Setup Discovery services:
     if (this.settings.discovery) {
@@ -427,15 +428,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
       this.discovery.monitorInvitations()
     }
-
-
-    // Add the default channels if we are a first time user
-    //  - TODO: mechanism to tie this into settings or firebase (i.e. added
-    //          channels once)  This would catch folks like Justin.
-    if ((ENABLE_CHANNELS_V2_0 && this.newUser) || process.env.NODE_ENV === 'development') {
-      await this._addDefaultChannels()
-    }
-
+    this.myTimer.logEvent('_initWithContacts    (after monitorInvitations)')
 
     // Indicate to FB that we've completed init and are no longer a first time user
     // (used to handle IO errors specially)
@@ -445,10 +438,18 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     console.log(`INFO(${method}): engine initialized. Emitting me-initialized event.`)
     this.emit('me-initialized', true)
-    this.myTimer.logEvent('Enter _initWithContacts (emit me-initialized)')
+    this.myTimer.logEvent('_initWithContacts    (emit me-initialized)')
     console.log(this.myTimer.getEvents())
 
-    this.readAmaData()
+
+    // Add the default channels if we are a first time user
+    //  - TODO: mechanism to tie this into settings or firebase (i.e. added
+    //          channels once)  This would catch folks like Justin.
+    if ((ENABLE_CHANNELS_V2_0 && this.newUser) || process.env.NODE_ENV === 'development') {
+      await this._addDefaultChannels()
+      this.readAmaData()
+    }
+    this.myTimer.logEvent('_initWithContacts    (after _addDefaultChannels)')
 
     // Integrations load on start in the background. Might need to queue these and
     // add a busy/working block to prevent multiple read requests:
