@@ -149,12 +149,18 @@ class BlockstackNativeModule(reactContext: ReactApplicationContext) : ReactConte
                 //
                 val binary = false
                 val options = CryptoOptions(privateKey = privateKey)
-                val plainContentResult = session.decryptContent(cipherObjectStr, binary, options)
-                if (plainContentResult.hasValue) {
-                    val plainContent:String = plainContentResult.value as String
-                    promise.resolve(plainContent)
-                } else {
-                    promise.reject("0", plainContentResult.error)
+                try {
+                    val plainContentResult = session.decryptContent(cipherObjectStr, binary, options)
+                    if (plainContentResult.hasValue) {
+                        val plainContent: String = plainContentResult.value as String
+                        promise.resolve(plainContent)
+                    } else {
+                        promise.reject("0", plainContentResult.error)
+                    }
+                } catch (t: Throwable) {
+                    // Suppress decryption throw (use case: trying to decrypt content
+                    // that may or may not be the user's).
+                    promise.reject("0", t.message)
                 }
             }
         }

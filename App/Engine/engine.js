@@ -61,7 +61,7 @@ let ENCRYPT_SETTINGS = true;
 let STEALTHY_PAGE = 'LOCALHOST';
 //
 // Logging Scopes
-const LOG_GAIAIO = false;
+const LOG_GAIAIO = true;
 const LOG_OFFLINEMESSAGING = false;
 //
 const ENABLE_AMA = true
@@ -439,7 +439,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     console.log(`INFO(${method}): engine initialized. Emitting me-initialized event.`)
     this.emit('me-initialized', true)
     this.myTimer.logEvent('_initWithContacts    (emit me-initialized)')
-    console.log(this.myTimer.getEvents())
+    this.logger(this.myTimer.getEvents())
 
 
     // Add the default channels if we are a first time user
@@ -449,7 +449,6 @@ export class MessagingEngine extends EventEmitterAdapter {
       await this._addDefaultChannels()
       this.readAmaData()
     }
-    this.myTimer.logEvent('_initWithContacts    (after _addDefaultChannels)')
 
     // Integrations load on start in the background. Might need to queue these and
     // add a busy/working block to prevent multiple read requests:
@@ -578,7 +577,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   async _fetchDataAndCompleteInit() {
     const method = 'engine.js::_fetchDataAndCompleteInit'
-    this.myTimer.logEvent('Enter _fetchDataAndCompleteInit')
+    this.myTimer.logEvent('_fetchDataAndCompleteInit    (Enter)')
 
     if (!this.anonalytics) {
       this.anonalytics = new Anonalytics(this.publicKey);
@@ -588,18 +587,23 @@ export class MessagingEngine extends EventEmitterAdapter {
     // in mobile the app token is undefined (in web it is the value of 'app' in the query string)
     const appToken = undefined
     this.anonalytics.aeLoginContext(utils.getAppContext(appToken));
+    this.myTimer.logEvent('_fetchDataAndCompleteInit    (Anonalytics operations complete)')
 
     this.idxIo = new IndexedIO(this.logger, this.io, this.userId,
                                this.privateKey, this.publicKey, ENCRYPT_INDEXED_IO);
 
     await this.io.writeLocalFile(this.userId, 'pk.txt', this.publicKey);
+    this.myTimer.logEvent('_fetchDataAndCompleteInit    (Wrote pk.txt)')
+
     await this.writeSettings(this.settings)
+    this.myTimer.logEvent('_fetchDataAndCompleteInit    (Wrote settings.json)')
 
     let contactArr = [];
     let contactsData = undefined
     try {
       const maxAttempts = 5
       contactsData = await this.io.robustLocalRead(this.userId, 'contacts.json', maxAttempts)
+      this.myTimer.logEvent('_fetchDataAndCompleteInit    (After successfully reading contacts.json)')
     } catch(error) {
       // TODO:
       //   - safe encrypt thie contacts data
@@ -609,6 +613,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       const errMsg = `WARNING(${method}): failure to fetch contacts from GAIA.\n${error}`
       console.log(errMsg)
     }
+    this.myTimer.logEvent('_fetchDataAndCompleteInit    (After attempting to read contacts.json)')
 
     if (contactsData) {
       try {
@@ -620,6 +625,7 @@ export class MessagingEngine extends EventEmitterAdapter {
         console.log(errMsg)
       }
     }
+    this.myTimer.logEvent('_fetchDataAndCompleteInit    (After decrypting contacts.json data)')
 
     this._initWithContacts(contactArr)
   }
