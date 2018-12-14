@@ -14,7 +14,7 @@ Android Download: https://play.google.com/store/apps/details?id=com.stealthy
 
 | Public Channels | Add Channel Contact | Delete Channel |
 | --- | --- | --- |
-| ![Public Channels](https://media.giphy.com/media/4TbiamWqId0BdcOQ99/giphy.gif) | ![Add Channel Contact](https://media.giphy.com/media/TgIPej6l3sPfaYZ512/giphy.gif) | ![Add Channel Contact](https://media.giphy.com/media/1YiyKkkVJjJsit7VnE/giphy.gif) |
+| ![Public Channels](https://media.giphy.com/media/4TbiamWqId0BdcOQ99/giphy.gif) | ![Add Channel Contact](https://media.giphy.com/media/TgIPej6l3sPfaYZ512/giphy.gif) | ![Delete Channel](https://media.giphy.com/media/1YiyKkkVJjJsit7VnE/giphy.gif) |
 
 | Add AMA Channel | Ask AMA Question | AMA Actions |
 | --- | --- | --- |
