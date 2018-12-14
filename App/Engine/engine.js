@@ -39,6 +39,7 @@ const constants = require('./misc/constants.js');
 const { ContactManager } = require('./messaging/contactManager.js');
 
 const { Discovery } = require('./misc/discovery.js')
+const { Timer } = require('./misc/timer.js');
 
 const common = require('./../common.js');
 
@@ -60,7 +61,7 @@ let ENCRYPT_SETTINGS = true;
 let STEALTHY_PAGE = 'LOCALHOST';
 //
 // Logging Scopes
-const LOG_GAIAIO = false;
+const LOG_GAIAIO = true;
 const LOG_OFFLINEMESSAGING = false;
 //
 const ENABLE_AMA = true
@@ -84,6 +85,8 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     this.settings = constants.defaultSettings
     this.contactMgr = undefined;
+
+    this.myTimer = new Timer('Enter MessagingEngine Ctor')
 
     this.userId = undefined;
 
@@ -230,6 +233,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     if (initWithFetchedData || !userId) {
       return
     }
+    this.myTimer.logEvent('Enter componentDidMountWork')
 
     this.userId = userId;
     this._configureIO()
@@ -242,6 +246,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   //
   async _initWithContacts(contactArr) {
     const method = 'engine::_initWithContacts'
+    this.myTimer.logEvent('_initWithContacts    (Entered)')
 
     // In mobile we don't force an active contact
     const forceActiveContact = false
@@ -374,6 +379,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
     this.offlineMsgSvc.startRecvService();
+    this.myTimer.logEvent('_initWithContacts    (after startRecvService)')
 
 
     // Update the summaries for all contacts.
@@ -411,7 +417,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.updateMessages(activeContactId);
     }
     this.updateContactMgr();
-
+    this.myTimer.logEvent('_initWithContacts    (after updateContactMgr)')
 
     // Setup Discovery services:
     if (this.settings.discovery) {
@@ -422,15 +428,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
       this.discovery.monitorInvitations()
     }
-
-
-    // Add the default channels if we are a first time user
-    //  - TODO: mechanism to tie this into settings or firebase (i.e. added
-    //          channels once)  This would catch folks like Justin.
-    if ((ENABLE_CHANNELS_V2_0 && this.newUser) || process.env.NODE_ENV === 'development') {
-      await this._addDefaultChannels()
-    }
-
+    this.myTimer.logEvent('_initWithContacts    (after monitorInvitations)')
 
     // Indicate to FB that we've completed init and are no longer a first time user
     // (used to handle IO errors specially)
@@ -440,8 +438,17 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     console.log(`INFO(${method}): engine initialized. Emitting me-initialized event.`)
     this.emit('me-initialized', true)
+    this.myTimer.logEvent('_initWithContacts    (emit me-initialized)')
+    this.logger(this.myTimer.getEvents())
 
-    this.readAmaData()
+
+    // Add the default channels if we are a first time user
+    //  - TODO: mechanism to tie this into settings or firebase (i.e. added
+    //          channels once)  This would catch folks like Justin.
+    if ((ENABLE_CHANNELS_V2_0 && this.newUser) || process.env.NODE_ENV === 'development') {
+      await this._addDefaultChannels()
+      this.readAmaData()
+    }
 
     // Integrations load on start in the background. Might need to queue these and
     // add a busy/working block to prevent multiple read requests:
@@ -457,6 +464,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   }
 
   async _configureIO() {
+    this.myTimer.logEvent('Enter _configureIO')
     this.io = (ENABLE_GAIA) ?
       new GaiaIO(this.logger, LOG_GAIAIO) :
       new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO);
@@ -477,6 +485,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   // our data back, finding it mismatches. Otherwise we assume things are good to go.
   async _mobileGaiaTest() {
     const method = 'engine::_mobileGaiaTest'
+    this.myTimer.logEvent('Enter _mobileGaiaTest')
 
     const testFilePath = 'mobileGaiaTest.txt'
     const testValue = `${Date.now()}_${(Math.random()*100000)}`
@@ -503,6 +512,8 @@ export class MessagingEngine extends EventEmitterAdapter {
   //         and all three null/not present, then decide first time user)
   async _fetchUserSettings() {
     const method = 'engine.js::_fetchUserSettings'
+    this.myTimer.logEvent('Enter _fetchUserSettings')
+
     let encSettingsData = undefined
     try {
       encSettingsData = await this.io.robustLocalRead(this.userId, 'settings.json')
@@ -566,6 +577,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   async _fetchDataAndCompleteInit() {
     const method = 'engine.js::_fetchDataAndCompleteInit'
+    this.myTimer.logEvent('_fetchDataAndCompleteInit    (Enter)')
 
     if (!this.anonalytics) {
       this.anonalytics = new Anonalytics(this.publicKey);
@@ -575,18 +587,23 @@ export class MessagingEngine extends EventEmitterAdapter {
     // in mobile the app token is undefined (in web it is the value of 'app' in the query string)
     const appToken = undefined
     this.anonalytics.aeLoginContext(utils.getAppContext(appToken));
+    this.myTimer.logEvent('_fetchDataAndCompleteInit    (Anonalytics operations complete)')
 
     this.idxIo = new IndexedIO(this.logger, this.io, this.userId,
                                this.privateKey, this.publicKey, ENCRYPT_INDEXED_IO);
 
     await this.io.writeLocalFile(this.userId, 'pk.txt', this.publicKey);
+    this.myTimer.logEvent('_fetchDataAndCompleteInit    (Wrote pk.txt)')
+
     await this.writeSettings(this.settings)
+    this.myTimer.logEvent('_fetchDataAndCompleteInit    (Wrote settings.json)')
 
     let contactArr = [];
     let contactsData = undefined
     try {
       const maxAttempts = 5
       contactsData = await this.io.robustLocalRead(this.userId, 'contacts.json', maxAttempts)
+      this.myTimer.logEvent('_fetchDataAndCompleteInit    (After successfully reading contacts.json)')
     } catch(error) {
       // TODO:
       //   - safe encrypt thie contacts data
@@ -596,6 +613,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       const errMsg = `WARNING(${method}): failure to fetch contacts from GAIA.\n${error}`
       console.log(errMsg)
     }
+    this.myTimer.logEvent('_fetchDataAndCompleteInit    (After attempting to read contacts.json)')
 
     if (contactsData) {
       try {
@@ -607,6 +625,7 @@ export class MessagingEngine extends EventEmitterAdapter {
         console.log(errMsg)
       }
     }
+    this.myTimer.logEvent('_fetchDataAndCompleteInit    (After decrypting contacts.json data)')
 
     this._initWithContacts(contactArr)
   }
