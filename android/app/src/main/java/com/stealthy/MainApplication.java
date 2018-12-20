@@ -12,14 +12,6 @@ import com.github.wumke.RNExitApp.RNExitAppPackage;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
 import org.reactnative.camera.RNCameraPackage;
 import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
-import org.reactnative.camera.RNCameraPackage;
-import com.RNFetchBlob.RNFetchBlobPackage;
-import com.oblador.vectoricons.VectorIconsPackage;
-import com.barefootcoders.android.react.KDSocialShare.KDSocialShare;
-import io.invertase.firebase.RNFirebasePackage;
-import com.github.wumke.RNExitApp.RNExitAppPackage;
-import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
-import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
 import io.invertase.firebase.notifications.RNFirebaseNotificationsPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -53,20 +45,12 @@ public class MainApplication extends Application implements ReactApplication {
             new ReactNativeConfigPackage(),
             new RNCameraPackage(),
             new RNBackgroundFetchPackage(),
-            new RNCameraPackage(),
-            new RNFetchBlobPackage(),
-            new RNExitAppPackage(),
-            new KDSocialShare(),
             new BlockstackPackage(),
-            new RNBackgroundFetchPackage(),
-            new ReactNativeConfigPackage(),
-            new RNFirebasePackage(),
             new RNFirebaseAuthPackage(),
             new RNFirebaseMessagingPackage(),
             new RNFirebaseDatabasePackage(),
             new RNFirebaseNotificationsPackage(),
-            new RNFirebaseAnalyticsPackage(),
-            new VectorIconsPackage()
+            new RNFirebaseAnalyticsPackage()
       );
     }
 

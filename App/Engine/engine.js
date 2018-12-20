@@ -1679,7 +1679,8 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   async _addDefaultChannels() {
     const method = `engine::_addDefaultChannels`
-    const defaultChannelIds = ['hello.stealthy.id', 'ama.stealthy.id']
+    // const defaultChannelIds = ['hello.stealthy.id', 'ama.stealthy.id']
+    const defaultChannelIds = ['hello.stealthy.id']
 
     for (const channelId of defaultChannelIds) {
       if (this.contactMgr.isExistingContactId(channelId)) {
