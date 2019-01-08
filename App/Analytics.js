@@ -1,4 +1,3 @@
-import { Analytics } from 'aws-amplify';
 const MAX_QUEUE = 100;
 const { firebaseInstance } = require('./Engine/firebaseWrapper.js')
 
@@ -15,12 +14,10 @@ class Anonalytics {
   }
 
   aeEnable = () => {
-    Analytics.enable()
     this.firAnalytics.setAnalyticsCollectionEnabled(true)
   }
 
   aeDisable = () => {
-    Analytics.disable()
     this.firAnalytics.setAnalyticsCollectionEnabled(false)
   }
 
@@ -153,11 +150,9 @@ class Anonalytics {
           let awsCleanString = (aString.length >= AWS_LIMIT) ?
             aString.substring(0, AWS_LIMIT -2) :
             aString;
-          Analytics.record({name: anEventName, attributes: {data: awsCleanString, id: this.publicKey, dateStamp}});
           this.firAnalytics.logEvent(anEventName, {attributes: {data: awsCleanString, id: this.publicKey, dateStamp}})
         }
         else {
-          Analytics.record({name: anEventName, attributes: {id: this.publicKey, dateStamp}});
           this.firAnalytics.logEvent(anEventName, {attributes: {id: this.publicKey, dateStamp}})
         }
       }

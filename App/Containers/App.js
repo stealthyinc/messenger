@@ -7,10 +7,6 @@ import createStore from '../Redux'
 import { AppState, AsyncStorage, PushNotificationIOS, Platform, Linking } from 'react-native'
 import LinkRoutes from './LinkRoutes';
 import EngineActions from '../Redux/EngineRedux'
-import Amplify, { Analytics } from 'aws-amplify';
-import aws_exports from '../../aws-exports';
-
-Amplify.configure(aws_exports);
 
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 

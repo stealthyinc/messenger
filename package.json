@@ -26,8 +26,6 @@
   "dependencies": {
     "apisauce": "^0.14.2",
     "assign-deep": "^0.4.7",
-    "aws-amplify": "^0.4.8",
-    "aws-amplify-react-native": "^1.0.6",
     "emoji-utils": "^1.0.1",
     "format-json": "^1.0.3",
     "gun": "^0.9.99997",

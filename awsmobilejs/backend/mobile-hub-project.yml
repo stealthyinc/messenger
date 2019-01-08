@@ -1,8 +1,0 @@
---- !com.amazonaws.mobilehub.v0.Project 
-features:
-  mobile-analytics: !com.amazonaws.mobilehub.v0.Pinpoint 
-    components:
-      analytics: !com.amazonaws.mobilehub.v0.PinpointAnalytics {}
-  sign-in: !com.amazonaws.mobilehub.v0.SignIn {}
-name: stealthyMobileTest
-region: us-west-2
