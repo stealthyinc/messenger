@@ -1,5 +1,7 @@
-const BaseIO = require('./baseIO.js');
-const utils = require('./../misc//utils.js');
+import { NativeModules } from 'react-native'
+import API from './../../Services/Api'
+const BaseIO = require('./baseIO.js')
+const utils = require('./../misc//utils.js')
 
 // TODO: this code needs a serious cleanup. Issues include:
 //       - inconsistent / improper error handling between sequential and async calls
@@ -9,26 +11,24 @@ const utils = require('./../misc//utils.js');
 
 // TODO: need a way of switching putFile/getFile for putRawFile/getRawFile for
 //       different build targets
-import { NativeModules } from 'react-native';
-const BlockstackNativeModule = NativeModules.BlockstackNativeModule;
-const {getRawFile, putRawFile} = BlockstackNativeModule;
+const BlockstackNativeModule = NativeModules.BlockstackNativeModule
+const {getRawFile, putRawFile} = BlockstackNativeModule
 
-import API from './../../Services/Api'
 const api = API.create()
 const gaia = API.Gaia()
 
-const NAME_ENDPOINT = 'https://core.blockstack.org/v1/names';
-const ENABLE_IOS_LOOKUP_WORKAROUND = true;
+const NAME_ENDPOINT = 'https://core.blockstack.org/v1/names'
+// const ENABLE_IOS_LOOKUP_WORKAROUND = true
 
 module.exports = class GaiaIO extends BaseIO {
-  constructor(logger,
+  constructor (logger,
               logOutput = false) {
-    super();
+    super()
 
-    utils.throwIfUndef('logger', logger);
+    utils.throwIfUndef('logger', logger)
 
-    this.logger = logger;
-    this.logOutput = logOutput;
+    this.logger = logger
+    this.logOutput = logOutput
 
     // Hub Cache stores hub urls for each user's application. The structure
     // looks like this:
@@ -40,27 +40,27 @@ module.exports = class GaiaIO extends BaseIO {
     //    },
     //    ...
     //  }
-    this.hubCache = {};
-  }
-
-  log(...args) {
-    if (this.logOutput) {
-      this.logger(...args);
-    }
-  }
-
-  clearHubCache() {
     this.hubCache = {}
   }
 
-  setHubCacheEntry(aUserName, anAppUrl, hubUrl) {
+  log (...args) {
+    if (this.logOutput) {
+      this.logger(...args)
+    }
+  }
+
+  clearHubCache () {
+    this.hubCache = {}
+  }
+
+  setHubCacheEntry (aUserName, anAppUrl, hubUrl) {
     if (!this.hubCache.hasOwnProperty(aUserName)) {
       this.hubCache[aUserName] = {}
     }
     this.hubCache[aUserName][anAppUrl] = hubUrl
   }
 
-  getHubCacheEntry(aUserName, anAppUrl) {
+  getHubCacheEntry (aUserName, anAppUrl) {
     if (this.hubCache.hasOwnProperty(aUserName)) {
       const userHubCache = this.hubCache[aUserName]
       if (userHubCache && userHubCache.hasOwnProperty(anAppUrl)) {
@@ -70,7 +70,7 @@ module.exports = class GaiaIO extends BaseIO {
     return undefined
   }
 
-  hasHubCacheEntry(aUserName, anAppUrl) {
+  hasHubCacheEntry (aUserName, anAppUrl) {
     if (this.getHubCacheEntry(aUserName, anAppUrl)) {
       return true
     }
@@ -83,7 +83,7 @@ module.exports = class GaiaIO extends BaseIO {
   // Attempts to read a file three times with an exponential delay between
   // attempts, plus jitter. Thank Jude Nelson for the idea based on the workings
   // of ethernet.
-  async robustLocalRead(userId, filePath, maxAttempts=3, initialDelayMs=50) {
+  async robustLocalRead (userId, filePath, maxAttempts = 3, initialDelayMs = 50) {
     const method = 'ChannelEngineV2::robustLocalRead'
 
     let attempt = 0
@@ -95,7 +95,7 @@ module.exports = class GaiaIO extends BaseIO {
       } catch (error) {
         this.log(`INFO(${method}):\n  - Attempt number ${attempt} failed.\n  - Reason: ${error}.\n`)
         if (attempt < maxAttempts) {
-          delayMs = delayMs * Math.pow(2, (attempt-1)) + Math.floor(Math.random()*delayMs)
+          delayMs = delayMs * Math.pow(2, (attempt - 1)) + Math.floor(Math.random() * delayMs)
           this.log(`  - Waiting ${delayMs} milliseconds before next attempt.`)
           await utils.resolveAfterMilliseconds(delayMs)
         }
@@ -106,7 +106,7 @@ module.exports = class GaiaIO extends BaseIO {
     throw `ERROR(${method}): failed to read ${filePath} after ${maxAttempts} attempts.`
   }
 
-  async robustRemoteRead(userId, filePath, maxAttempts=3, initialDelayMs=50) {
+  async robustRemoteRead (userId, filePath, maxAttempts = 3, initialDelayMs = 50) {
     const method = 'engine::robustRemoteRead'
 
     let attempt = 0
@@ -118,7 +118,7 @@ module.exports = class GaiaIO extends BaseIO {
       } catch (error) {
         this.log(`INFO(${method}):\n  - Attempt number ${attempt} failed.\n  - Reason: ${error}.\n`)
         if (attempt < maxAttempts) {
-          delayMs = delayMs * Math.pow(2, (attempt-1)) + Math.floor(Math.random()*delayMs)
+          delayMs = delayMs * Math.pow(2, (attempt - 1)) + Math.floor(Math.random() * delayMs)
           this.log(`  - Waiting ${delayMs} milliseconds before next attempt.`)
           await utils.resolveAfterMilliseconds(delayMs)
         }
@@ -129,7 +129,7 @@ module.exports = class GaiaIO extends BaseIO {
     throw `ERROR(${method}): failed to read ${userId}//${filePath} after ${maxAttempts} attempts.`
   }
 
-  async robustLocalWrite(userId, filePath, fileContent, maxAttempts=3, initialDelayMs=50) {
+  async robustLocalWrite (userId, filePath, fileContent, maxAttempts = 3, initialDelayMs = 50) {
     const method = 'ChannelEngineV2::robustLocalWrite'
 
     let attempt = 0
@@ -141,7 +141,7 @@ module.exports = class GaiaIO extends BaseIO {
       } catch (error) {
         this.log(`INFO(${method}):\n  - Attempt number ${attempt} failed.\n  - Reason: ${error}.\n`)
         if (attempt < maxAttempts) {
-          delayMs = delayMs * Math.pow(2, (attempt-1)) + Math.floor(Math.random()*delayMs)
+          delayMs = delayMs * Math.pow(2, (attempt - 1)) + Math.floor(Math.random() * delayMs)
           this.log(`  - Waiting ${delayMs} milliseconds before next attempt.`)
           await utils.resolveAfterMilliseconds(delayMs)
         }
@@ -152,47 +152,46 @@ module.exports = class GaiaIO extends BaseIO {
     throw `ERROR(${method}): failed to write to ${filePath} after ${maxAttempts} attempts.`
   }
 
-  writeLocalFile(localUser, filename, data) {
-    utils.throwIfUndef('localUser', localUser);
-    utils.throwIfUndef('filenname', filename);
+  writeLocalFile (localUser, filename, data) {
+    utils.throwIfUndef('localUser', localUser)
+    utils.throwIfUndef('filenname', filename)
     // data might be undefined or null.
 
-    return this._write(localUser, filename, data);
+    return this._write(localUser, filename, data)
   }
 
-  readLocalFile(localUser, filename) {
-    utils.throwIfUndef('localUser', localUser);
-    utils.throwIfUndef('filenname', filename);
+  readLocalFile (localUser, filename) {
+    utils.throwIfUndef('localUser', localUser)
+    utils.throwIfUndef('filenname', filename)
 
-    return this._read(localUser, filename);
+    return this._read(localUser, filename)
   }
 
-  deleteLocalFile(localUser, filename) {
-    utils.throwIfUndef('localUser', localUser);
-    utils.throwIfUndef('filenname', filename);
+  deleteLocalFile (localUser, filename) {
+    utils.throwIfUndef('localUser', localUser)
+    utils.throwIfUndef('filenname', filename)
 
-    return this._delete(filename);
+    return this._delete(filename)
   }
 
-  readRemoteFile(username, filename) {
-    utils.throwIfUndef('username', username);
-    utils.throwIfUndef('filenname', filename);
+  readRemoteFile (username, filename) {
+    utils.throwIfUndef('username', username)
+    utils.throwIfUndef('filenname', filename)
 
-    return this._read(username, filename);
+    return this._read(username, filename)
   }
 
-  _write(username, filePath, data) {
-    this.log(`Writing data to ${username}'s GAIA in: '${filePath}'`);
+  _write (username, filePath, data) {
+    this.log(`Writing data to ${username}'s GAIA in: '${filePath}'`)
     try {
       if (utils.is_iOS()) {
         // TODO: modify Blockstack -> RCT to use promises instead of completion
         return new Promise((resolve, reject) => {
-
           putRawFile(filePath, JSON.stringify(data), (error) => {
             if (error) {
-              reject(error);
+              reject(error)
             } else {
-              resolve();
+              resolve()
             }
           })
         })
@@ -212,26 +211,24 @@ module.exports = class GaiaIO extends BaseIO {
       } else {  // Web
         return putFile(filePath, JSON.stringify(data), {encrypt: false})
         .then(() => {
-          this.log(`Success writing ${filePath} to ${username}'s GAIA.`);
+          this.log(`Success writing ${filePath} to ${username}'s GAIA.`)
           // this.logger('   Wrote:');
           // this.logger(JSON.stringify(data));
-          return;
         })
         .catch((error) => {
-          this.logger(`ERROR(gaiaIO::_write): writing ${filePath} to ${username}'s GAIA.\n${error}`);
+          this.logger(`ERROR(gaiaIO::_write): writing ${filePath} to ${username}'s GAIA.\n${error}`)
           // this.logger('   Attempting to write:');
           // this.logger(JSON.stringify(data));
-          return;
-        });
+        })
       }
     } catch (err) {
-      this.logger(`ERROR(gaiaIO::_write): unable to write ${username}'s file ${filename}. ${err}`);
-      return undefined;
+      this.logger(`ERROR(gaiaIO::_write): unable to write ${username}'s file ${filename}. ${err}`)
+      return undefined
     }
   }
 
-  _readWeb(username, filePath) {
-    const options = { username, zoneFileLookupURL: NAME_ENDPOINT, decrypt: false };
+  _readWeb (username, filePath) {
+    const options = { username, zoneFileLookupURL: NAME_ENDPOINT, decrypt: false }
 
     return getFile(filePath, options)
     .then((data) => {
@@ -239,10 +236,10 @@ module.exports = class GaiaIO extends BaseIO {
     })
     .catch((error) => {
       throw `ERROR(gaiaIO::_readWeb): reading ${filePath} from ${username}'s GAIA.\n${error}`
-    });
+    })
   }
 
-  getGaiaHubUrl(aUserName, anAppUrl='https://www.stealthy.im' , useCache=true) {
+  getGaiaHubUrl (aUserName, anAppUrl = 'https://www.stealthy.im', useCache = true) {
     return new Promise((resolve, reject) => {
       if (!aUserName) {
         reject('aUserName is not defined')
@@ -272,7 +269,7 @@ module.exports = class GaiaIO extends BaseIO {
   //   - paradigms (i.e. try/catch & .catch)
   //   - TODO: modify Blockstack -> RCT to use promises instead of completion.
   //
-  _read_iOS(username, filePath) {
+  _read_iOS (username, filePath) {
     return new Promise((resolve, reject) => {
       this.getGaiaHubUrl(username)
       .then((gaiaHubPath) => {
@@ -308,7 +305,7 @@ module.exports = class GaiaIO extends BaseIO {
   // necessitated this method which does a simple http get on any user's GAIA.
   // Caching is used to improve performance by reducing GAIA lookups.
   // Very similar to _read_iOS above, but without call to native swift getRawFile
-  _readAndroid(username, filePath) {
+  _readAndroid (username, filePath) {
     return new Promise((resolve, reject) => {
       this.getGaiaHubUrl(username)
       .then((gaiaHubPath) => {
@@ -335,8 +332,8 @@ module.exports = class GaiaIO extends BaseIO {
     })
   }
 
-  _read(username, filePath) {
-    this.log(`Reading from ${username}'s GAIA in '${filePath}'`);
+  _read (username, filePath) {
+    this.log(`Reading from ${username}'s GAIA in '${filePath}'`)
     if (utils.is_iOS()) {
       return this._read_iOS(username, filePath)
     } else if (utils.isAndroid()) {
@@ -381,14 +378,14 @@ module.exports = class GaiaIO extends BaseIO {
     }
   }
 
-  _delete(filePath) {
-    utils.throwIfUndef('filePath', filePath);
+  _delete (filePath) {
+    utils.throwIfUndef('filePath', filePath)
 
-    this.log(`Deleting ${filePath}`);
-    return this._write('', filePath, {});
+    this.log(`Deleting ${filePath}`)
+    return this._write('', filePath, {})
   }
 
-  readPartnerAppFile(aUserName, aFilePath, anAppUrl) {
+  readPartnerAppFile (aUserName, aFilePath, anAppUrl) {
     const method = 'gaiaIO.js::readPartnerAppFile'
     console.log(`DEBUG(${method}): Reading ${aFilePath} from ${aUserName}'s ${anAppUrl} GAIA.`)
 
@@ -412,7 +409,7 @@ module.exports = class GaiaIO extends BaseIO {
                 resolve(content)
               }
             } else {
-              reject(error);
+              reject(error)
             }
           })
         } else {
@@ -424,4 +421,4 @@ module.exports = class GaiaIO extends BaseIO {
       })
     })
   }
-};
+}

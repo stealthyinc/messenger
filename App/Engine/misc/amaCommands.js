@@ -1,14 +1,14 @@
 export default class AmaCommands {
-  constructor(aUserId, amaId) {
+  constructor (aUserId, amaId) {
     this.userId = aUserId
     this.amaId = amaId
   }
 
-  static cmdToText(command, obj) {
+  static cmdToText (command, obj) {
     return `/${command} ${JSON.stringify(obj)}`
   }
 
-  static textToCmdObj(text) {
+  static textToCmdObj (text) {
     let cmdObj = {}
     if (!text) {
       return cmdObj
@@ -44,7 +44,7 @@ export default class AmaCommands {
   // TODO: ideally we would transmit the message as JSON_DATA, but we're out
   //       of time.
   //
-  static getAndroidCmdTextWorkaround(cmdText) {
+  static getAndroidCmdTextWorkaround (cmdText) {
     const cmdObj = AmaCommands.textToCmdObj(cmdText)
 
     try {
@@ -59,7 +59,7 @@ export default class AmaCommands {
     return undefined
   }
 
-  static amaCreate(aTitle) {
+  static amaCreate (aTitle) {
     const obj = {
       title: aTitle
     }
@@ -70,7 +70,7 @@ export default class AmaCommands {
   // TODO: refactor command strings into an array / data structure for DRY and
   //       ability to modify cmd prefix etc.
   //
-  static isAmaCommand(text) {
+  static isAmaCommand (text) {
     return text && (
         text.includes('/amaCreate') ||
         text.includes('/amaOpen') ||
@@ -95,19 +95,19 @@ export default class AmaCommands {
       )
   }
 
-  static getQuestionUpvoteObj(text) {
+  static getQuestionUpvoteObj (text) {
     if (text && text.includes('/questionUpvote')) {
       const strJson = text.replace('/questionUpvote ', '')
       try {
         return JSON.parse(strJson)
-      } catch(error) {
+      } catch (error) {
         console.log(`WARNING(AmaCommands::getQuestionUpvoteId): problem extracting ama and question id.\n${error}`)
       }
     }
     return undefined
   }
 
-  questionCreate(text) {
+  questionCreate (text) {
     const obj = {
       ama_id: this.amaId,
       text: text
@@ -116,7 +116,7 @@ export default class AmaCommands {
     return AmaCommands.cmdToText('questionCreate', obj)
   }
 
-  questionDelete(aQuestionId) {
+  questionDelete (aQuestionId) {
     const obj = {
       ama_id: this.amaId,
       question_id: aQuestionId
@@ -125,7 +125,7 @@ export default class AmaCommands {
     return AmaCommands.cmdToText('questionDelete', obj)
   }
 
-  questionUpvote(aQuestionId) {
+  questionUpvote (aQuestionId) {
     const obj = {
       ama_id: this.amaId,
       question_id: aQuestionId
@@ -134,7 +134,7 @@ export default class AmaCommands {
     return AmaCommands.cmdToText('questionUpvote', obj)
   }
 
-  questionUnvote(aQuestionId) {
+  questionUnvote (aQuestionId) {
     const obj = {
       ama_id: this.amaId,
       question_id: aQuestionId
@@ -143,7 +143,7 @@ export default class AmaCommands {
     return AmaCommands.cmdToText('questionUnvote', obj)
   }
 
-  questionPin(aQuestionId) {
+  questionPin (aQuestionId) {
     const obj = {
       ama_id: this.amaId,
       question_id: aQuestionId
@@ -152,7 +152,7 @@ export default class AmaCommands {
     return AmaCommands.cmdToText('questionPin', obj)
   }
 
-  questionUnpin(aQuestionId) {
+  questionUnpin (aQuestionId) {
     const obj = {
       ama_id: this.amaId,
       question_id: aQuestionId
@@ -161,7 +161,7 @@ export default class AmaCommands {
     return AmaCommands.cmdToText('questionUnpin', obj)
   }
 
-  answerCreate(aQuestionId, text) {
+  answerCreate (aQuestionId, text) {
     const obj = {
       ama_id: this.amaId,
       question_id: aQuestionId,
@@ -171,7 +171,7 @@ export default class AmaCommands {
     return AmaCommands.cmdToText('answerCreate', obj)
   }
 
-  answerDelete(anAnswerId) {
+  answerDelete (anAnswerId) {
     const obj = {
       ama_id: this.amaId,
       answer_id: anAnswerId
@@ -180,7 +180,7 @@ export default class AmaCommands {
     return AmaCommands.cmdToText('answerDelete', obj)
   }
 
-  userBlock(aUserId) {
+  userBlock (aUserId) {
     const obj = {
       user_id: aUserId
     }
@@ -188,7 +188,7 @@ export default class AmaCommands {
     return AmaCommands.cmdToText('userBlock', obj)
   }
 
-  delegateAdd(aUserId) {
+  delegateAdd (aUserId) {
     const obj = {
       ama_id: this.amaId,
       user_id: aUserId
@@ -197,7 +197,7 @@ export default class AmaCommands {
     return AmaCommands.cmdToText('delegateAdd', obj)
   }
 
-  delegateDelete(aUserId) {
+  delegateDelete (aUserId) {
     const obj = {
       ama_id: this.amaId,
       user_id: aUserId
@@ -207,16 +207,16 @@ export default class AmaCommands {
   }
 
   // Stretch / Future:
-  //////////////////////////////////////////////////////////////////////////////
-  objectPin() {
+  /// ///////////////////////////////////////////////////////////////////////////
+  objectPin () {
     // TODO
   }
 
-  answerEdit(answerId) {
+  answerEdit (answerId) {
     // TODO
   }
 
-  userUnblock(aUserId) {
+  userUnblock (aUserId) {
     // TODO
   }
 }

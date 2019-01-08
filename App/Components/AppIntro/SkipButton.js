@@ -5,10 +5,10 @@ import {
   TouchableOpacity,
   Animated,
   Platform
-} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+} from 'react-native'
+import Ionicons from 'react-native-vector-icons/Ionicons'
 
-export const SkipButton = (Platform.OS === 'ios') ? (({
+export const SkipButton = (Platform.OS === 'ios') ? ({
   styles, onSkipBtnClick, isSkipBtnShow,
   leftTextColor,
   skipBtnLabel,
@@ -20,9 +20,9 @@ export const SkipButton = (Platform.OS === 'ios') ? (({
       transform: [{
         translateX: skipFadeOpacity.interpolate({
           inputRange: [0, 1],
-          outputRange: [0, 15],
-        }),
-      }],
+          outputRange: [0, 15]
+        })
+      }]
     }]}
     >
       <TouchableOpacity
@@ -34,7 +34,7 @@ export const SkipButton = (Platform.OS === 'ios') ? (({
       </TouchableOpacity>
     </Animated.View>
   )
-}) : (({
+} : ({
   styles, onSkipBtnClick, isSkipBtnShow,
   leftTextColor,
   skipBtnLabel,
@@ -42,16 +42,16 @@ export const SkipButton = (Platform.OS === 'ios') ? (({
 }) => {
   return (
     <View style={[styles.btnContainer, {
-        paddingBottom: 5,
-        opacity: isSkipBtnShow ? 1 : 0,
-      }]}>
+      paddingBottom: 5,
+      opacity: isSkipBtnShow ? 1 : 0
+    }]}>
       <TouchableOpacity
         style={styles.full}
         onPress={isSkipBtnShow ? () => onSkipBtnClick() : null}>
-        <Ionicons name="ios-fastforward" size={32} style={{ color: leftTextColor, marginRight: 10 }}/>
+        <Ionicons name='ios-fastforward' size={32} style={{ color: leftTextColor, marginRight: 10 }} />
       </TouchableOpacity>
     </View>
   )
-})
+}
 
 export default SkipButton

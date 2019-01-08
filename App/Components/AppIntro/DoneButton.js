@@ -5,10 +5,10 @@ import {
   TouchableOpacity,
   Animated,
   Platform
-} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+} from 'react-native'
+import Ionicons from 'react-native-vector-icons/Ionicons'
 
-export const DoneButton = (Platform.OS === 'ios') ? (({
+export const DoneButton = (Platform.OS === 'ios') ? ({
   styles, onDoneBtnClick, onNextBtnClick,
   rightTextColor, isDoneBtnShow,
   doneBtnLabel, nextBtnLabel,
@@ -21,9 +21,9 @@ export const DoneButton = (Platform.OS === 'ios') ? (({
         transform: [{
           translateX: skipFadeOpacity.interpolate({
             inputRange: [0, 1],
-            outputRange: [0, 20],
-          }),
-        }],
+            outputRange: [0, 20]
+          })
+        }]
       }]}
       >
         <View style={styles.full}>
@@ -36,35 +36,35 @@ export const DoneButton = (Platform.OS === 'ios') ? (({
       </Animated.View>
       <Animated.View style={[styles.full, { height: 0 }, { opacity: nextOpacity }]}>
         <TouchableOpacity style={styles.full}
-          onPress={ isDoneBtnShow ? onDoneBtnClick : onNextBtnClick}>
-         <Text style={[styles.nextButtonText, { color: rightTextColor, marginLeft: 40 }]}>
-          {nextBtnLabel}
-        </Text>
+          onPress={isDoneBtnShow ? onDoneBtnClick : onNextBtnClick}>
+          <Text style={[styles.nextButtonText, { color: rightTextColor, marginLeft: 40 }]}>
+            {nextBtnLabel}
+          </Text>
         </TouchableOpacity>
       </Animated.View>
     </View>
   )
-}) : (({
+} : ({
   styles, onDoneBtnClick, onNextBtnClick,
   rightTextColor, isDoneBtnShow,
-  doneBtnLabel, nextBtnLabel,
+  doneBtnLabel, nextBtnLabel
 }) => {
   return (
     <View style={[styles.btnContainer, { height: 0, paddingBottom: 5 }]}>
       <TouchableOpacity style={styles.full}
-        onPress={ isDoneBtnShow ? onDoneBtnClick : onNextBtnClick}
+        onPress={isDoneBtnShow ? onDoneBtnClick : onNextBtnClick}
       >
-       {isDoneBtnShow ? (
-          <Ionicons name="ios-arrow-dropright" size={32} style={{ color: rightTextColor }}/>
+        {isDoneBtnShow ? (
+          <Ionicons name='ios-arrow-dropright' size={32} style={{ color: rightTextColor }} />
         ) : (
           <Text style={[styles.nextButtonText, { color: rightTextColor, marginLeft: 40 }]}>
-           {nextBtnLabel}
+            {nextBtnLabel}
           </Text>
         )
       }
       </TouchableOpacity>
     </View>
   )
-})
+}
 
 export default DoneButton

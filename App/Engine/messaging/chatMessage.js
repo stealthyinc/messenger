@@ -8,8 +8,8 @@ const MESSAGE_TYPE = {
   DATA: 2,
   RECEIPT: 3,
   SCREEN_SHARE_SDP: 4,
-  TEXT_JSON: 5,
-};
+  TEXT_JSON: 5
+}
 
 // RECEIVED is not used in the UI, but is used by the core to perform message
 //          deletion.
@@ -21,23 +21,23 @@ const MESSAGE_STATE = {
   SENT_REALTIME: 'sentRealtime',
   SENT_OFFLINE: 'sentOffline',
   RECEIVED: 'received',
-  SEEN: 'seen',
-};
+  SEEN: 'seen'
+}
 
 class ChatMessage {
-  constructor() {
-    this.from = undefined;
-    this.to = undefined;
-    this.id = undefined;
-    this.content = undefined;
+  constructor () {
+    this.from = undefined
+    this.to = undefined
+    this.id = undefined
+    this.content = undefined
 
-    this.time = undefined;
+    this.time = undefined
     // this.timeRcvd = timeRcvd;
-    this.sent = undefined;
-    this.seen = undefined;
-    this.type = undefined;
+    this.sent = undefined
+    this.seen = undefined
+    this.type = undefined
 
-    this.msgState = MESSAGE_STATE.UNDEFINED;
+    this.msgState = MESSAGE_STATE.UNDEFINED
 
     this.channel = {
       msgAddress: undefined,
@@ -45,7 +45,7 @@ class ChatMessage {
     }
   }
 
-  init(
+  init (
     from = undefined,
     to = undefined,
     id = undefined,
@@ -57,7 +57,7 @@ class ChatMessage {
     type = MESSAGE_TYPE.TEXT,
     sent = false,
     seen = false,
-    msgState = MESSAGE_STATE.UNDEFINED,
+    msgState = MESSAGE_STATE.UNDEFINED
     // gaia=undefined,  // i.e. is stored? (archived is taken below)
     //
     // Future (XMPP):
@@ -66,32 +66,32 @@ class ChatMessage {
     // delay=undefined,
     // archived=undefined,
   ) {
-    this.from = from;
-    this.to = to;
-    this.id = id;
-    this.content = content;
+    this.from = from
+    this.to = to
+    this.id = id
+    this.content = content
 
-    this.time = time;
+    this.time = time
     // this.timeRcvd = timeRcvd;
-    this.sent = sent;
-    this.seen = seen;
-    this.type = type;
+    this.sent = sent
+    this.seen = seen
+    this.type = type
 
-    this.msgState = msgState;
+    this.msgState = msgState
   }
 
-  clone(aChatMessage) {
-    this.from = aChatMessage.from;
-    this.to = aChatMessage.to;
-    this.id = aChatMessage.id;
-    this.content = aChatMessage.content;
+  clone (aChatMessage) {
+    this.from = aChatMessage.from
+    this.to = aChatMessage.to
+    this.id = aChatMessage.id
+    this.content = aChatMessage.content
 
-    this.time = aChatMessage.time;
-    this.sent = aChatMessage.sent;
-    this.seen = aChatMessage.seen;
-    this.type = aChatMessage.type;
+    this.time = aChatMessage.time
+    this.sent = aChatMessage.sent
+    this.seen = aChatMessage.seen
+    this.type = aChatMessage.type
 
-    this.msgState = aChatMessage.msgState;
+    this.msgState = aChatMessage.msgState
 
     try {
       if (aChatMessage.channel) {
@@ -105,7 +105,7 @@ class ChatMessage {
 
   // Static b/c our code doesn't know if this has been deserialized (JSON.parsed)
   // and without functions
-  static getSummary(aChatMessage) {
+  static getSummary (aChatMessage) {
     if (aChatMessage) {
       if (aChatMessage.type === MESSAGE_TYPE.TEXT) {
         return aChatMessage.content
@@ -118,7 +118,7 @@ class ChatMessage {
     return ''
   }
 
-  static getType(aChatMessage) {
+  static getType (aChatMessage) {
     for (const key in MESSAGE_TYPE) {
       if (MESSAGE_TYPE[key] === aChatMessage.type) {
         return key
@@ -128,7 +128,7 @@ class ChatMessage {
     return undefined
   }
 
-  static setChannelData(aChatMsg, msgAddress, from) {
+  static setChannelData (aChatMsg, msgAddress, from) {
     if (aChatMsg) {
       if (!aChatMsg.channel) {
         aChatMsg.channel = {}
@@ -140,4 +140,4 @@ class ChatMessage {
   }
 }
 
-module.exports = { MESSAGE_TYPE, MESSAGE_STATE, ChatMessage };
+module.exports = { MESSAGE_TYPE, MESSAGE_STATE, ChatMessage }

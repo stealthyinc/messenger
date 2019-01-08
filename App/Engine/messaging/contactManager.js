@@ -1,9 +1,9 @@
-const utils = require('./../misc/utils.js');
-const constants = require('./../misc/constants.js');
-const statusIndicators = constants.statusIndicators;
+const utils = require('./../misc/utils.js')
+const constants = require('./../misc/constants.js')
+const statusIndicators = constants.statusIndicators
 const RNFetchBlob = require('rn-fetch-blob').default
-const SUMMARY_LEN = 27;
-const LEAN_PLUGIN = false;
+const SUMMARY_LEN = 27
+const LEAN_PLUGIN = false
 // import defaultProfile from '../Images/defaultProfile.png'
 
 // The format of the elements in contactArr (TODO: a class or something appropriate)
@@ -29,23 +29,23 @@ data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAxwAAAMcCAMAAADt2VM6AAAAGXRFWHRTb2
 // re-using / connecting existing objects (b/c we wouldn't want an activeContact
 // that is not contained in the contactArr).
 class ContactManager {
-  constructor(forceActiveContact=true) {
-    this.contactArr = [];
-    this.activeContact = undefined;
-    this.pluginMode = false;
-    this.dropDownContacts = [];
-    this.forceActiveContact = forceActiveContact;
+  constructor (forceActiveContact = true) {
+    this.contactArr = []
+    this.activeContact = undefined
+    this.pluginMode = false
+    this.dropDownContacts = []
+    this.forceActiveContact = forceActiveContact
   }
 
-  clone = (aContactManager) =>{
+  clone = (aContactManager) => {
     if (aContactManager) {
-      const contactArr = aContactManager.getAllContacts();
-      const activeContact = aContactManager.getActiveContact();
+      const contactArr = aContactManager.getAllContacts()
+      const activeContact = aContactManager.getActiveContact()
 
-      this.pluginMode = aContactManager.isPlugin();
-      this.forceActiveContact = aContactManager.forceActiveContact;
+      this.pluginMode = aContactManager.isPlugin()
+      this.forceActiveContact = aContactManager.forceActiveContact
 
-      this.initFromArray(contactArr, activeContact);
+      this.initFromArray(contactArr, activeContact)
     }
   }
 
@@ -56,10 +56,10 @@ class ContactManager {
       for (const contact of aContactArr) {
         // Don't clear unread--it's confusing users into thinking they haven't lost info.
         // contact.unread = 0;
-        contact.time = '';
-        contact.timeMs = '';
+        contact.time = ''
+        contact.timeMs = ''
       }
-      this.initFromArray(aContactArr);
+      this.initFromArray(aContactArr)
     }
   }
 
@@ -67,28 +67,28 @@ class ContactManager {
     if (aContactArr && (aContactArr.length > 0)) {
       // Clone and then copy the contact array, but eliminate duplicate
       // contacts.
-      const tempContactArr = utils.deepCopyObj(aContactArr);
+      const tempContactArr = utils.deepCopyObj(aContactArr)
       for (const aContact of tempContactArr) {
         if (aContact.timeMs === undefined) {
-          aContact.timeMs = '';
+          aContact.timeMs = ''
         }
         if (ContactManager._getContactForId(aContact.id, this.contactArr)) {
           // TODO: throw / warn if duplicate detected.
-          continue;
+          continue
         }
-        this.contactArr.push(aContact);
+        this.contactArr.push(aContact)
       }
 
       if (activeContact) {
         // Find the cloned active contact object and assign it.
         for (const contact of this.contactArr) {
           if (contact.id === activeContact.id) {
-            this.activeContact = contact;
-            break;
+            this.activeContact = contact
+            break
           }
         }
       } else if (this.forceActiveContact) {
-        this.activeContact = this.contactArr[0];
+        this.activeContact = this.contactArr[0]
       }
       this.dropDownContacts = this.initContactDetailsForDropDown()
     }
@@ -96,31 +96,30 @@ class ContactManager {
 
   initContactDetailsForDropDown = () => {
     const myContactArr = this.getAllContacts()
-    const activeContact = this.getActiveContact();
+    const activeContact = this.getActiveContact()
     let contacts = []
-    let key = 0;
+    let key = 0
     for (const contact of myContactArr) {
-      let name = contact.id;
+      let name = contact.id
       if (contact.title) {
-        const idx = contact.title.indexOf(' ');
-        name = (idx > -1) ?
-          contact.title.substr(0, idx) : contact.title;
+        const idx = contact.title.indexOf(' ')
+        name = (idx > -1)
+          ? contact.title.substr(0, idx) : contact.title
       }
-      const text = name;
-      const value = contact.id;
+      const text = name
+      const value = contact.id
       const image = {
         avatar: true,
         src: contact.image
       }
       if (activeContact && activeContact.id === contact.id) {
         contacts.unshift({key, text, value, image, contact, name})
-      }
-      else {
+      } else {
         contacts.push({key, text, value, image, contact, name})
       }
-      key += 1;
+      key += 1
     }
-    return contacts;
+    return contacts
   }
 //
 //
@@ -128,15 +127,15 @@ class ContactManager {
 // //////////////////////////////////////////////////////////////////////////////
 //
   isPlugin = () => {
-    return this.pluginMode;
+    return this.pluginMode
   }
 
   setPlugInMode = (aUserId) => {
-    const plugInContact = this.getContact(aUserId);
+    const plugInContact = this.getContact(aUserId)
     if (plugInContact) {
-      this.pluginMode = true;
-      this.activeContact = plugInContact;
-      return;
+      this.pluginMode = true
+      this.activeContact = plugInContact
+      return
     }
 
     throw `ERROR: user ID undefined in contact manager plug in mode.`
@@ -148,68 +147,68 @@ class ContactManager {
 //
   setAllContactsStatus = (aStatus = statusIndicators.offline) => {
     for (const contact of this.contactArr) {
-      contact.status = aStatus;
+      contact.status = aStatus
     }
   }
 
   getContacts = () => {
     if (this.pluginMode && LEAN_PLUGIN) {
-      return (this.activeContact) ? [this.activeContact] : [];
+      return (this.activeContact) ? [this.activeContact] : []
     }
 
-    return this.contactArr;
+    return this.contactArr
   }
 
   getAllContacts = () => {
-    return this.contactArr;
+    return this.contactArr
   }
 
   setContacts = (aContactArr) => {
-    this.contactArr = (aContactArr) || [];
+    this.contactArr = (aContactArr) || []
   }
 
   getContactIds = () => {
     if (this.pluginMode && LEAN_PLUGIN) {
-      return (this.activeContact) ? [this.activeContact.id] : [];
+      return (this.activeContact) ? [this.activeContact.id] : []
     }
 
-    const userIds = [];
+    const userIds = []
     for (const contact of this.contactArr) {
-      userIds.push(contact.id);
+      userIds.push(contact.id)
     }
-    return userIds;
+    return userIds
   }
 
   getAllContactIds = () => {
-    const userIds = [];
+    const userIds = []
     for (const contact of this.contactArr) {
-      userIds.push(contact.id);
+      userIds.push(contact.id)
     }
-    return userIds;
+    return userIds
   }
 
   getDropDownContacts = () => {
     // This probably needs an update method (i.e. if a contact is added through
     // discovery after dropDownContacts is initialized).
-    return this.dropDownContacts;
+    return this.dropDownContacts
   }
 
   // aPKMask is the last 4 hex digits of a contact's PK
   getContactsWithMatchingPKMask = (aPKMask) => {
-    const matchingContacts = [];
+    const matchingContacts = []
     for (const contact of this.contactArr) {
-      const pk = contact.publicKey;
+      const pk = contact.publicKey
       if (!pk) {
-        continue;
+        continue
       }
 
-      const pkLast4 = pk.substr(pk.length - 4);
-      if (aPKMask == pkLast4) {
-        matchingContacts.push(contact);
+      const pkLast4 = pk.substr(pk.length - 4)
+      if (aPKMask === pkLast4) {
+        matchingContacts.push(contact)
       }
     }
 
-    return matchingContacts;
+    return matchingContacts
   }
 
 //
@@ -218,20 +217,20 @@ class ContactManager {
 // //////////////////////////////////////////////////////////////////////////////
 //
   getActiveContact = () => {
-    return this.activeContact;
+    return this.activeContact
   }
 
   setActiveContact = (aContact) => {
-    this.activeContact = aContact;
+    this.activeContact = aContact
   }
 
   isActiveContactId = (aContactId) => {
     if (aContactId) {
       if (this.activeContact) {
-        return (aContactId === this.activeContact.id);
+        return (aContactId === this.activeContact.id)
       }
     }
-    return false;
+    return false
   }
 
   isExistingContactId = (aContactId) => {
@@ -255,20 +254,20 @@ class ContactManager {
   }
 
   addNewContact = async (aContact, id, publicKey, makeActiveContact = true) => {
-    const newContact = utils.deepCopyObj(aContact);
-    newContact.id = id;
-    newContact.publicKey = publicKey;
+    const newContact = utils.deepCopyObj(aContact)
+    newContact.id = id
+    newContact.publicKey = publicKey
 
     // Defaults:
-    newContact.summary = '';
-    newContact.time = '';
-    newContact.unread = 0;
+    newContact.summary = ''
+    newContact.time = ''
+    newContact.unread = 0
     newContact.base64 = ''
     if (newContact.image) {
       try {
         const headers = {}
         const res = await RNFetchBlob.fetch('GET', newContact.image, headers)
-        if (res && res.info() && (res.info().status == 200)) {
+        if (res && res.info() && (res.info().status === 200)) {
           newContact.base64 = 'data:image/png;base64,' + res.base64()
         } else {  // handle other status codes
           newContact.base64 = defaultImage
@@ -278,7 +277,7 @@ class ContactManager {
       }
     }
 
-    this.addContact(newContact, makeActiveContact);
+    this.addContact(newContact, makeActiveContact)
   }
 
   addContact = (aContact, makeActiveContact = true) => {
@@ -286,24 +285,24 @@ class ContactManager {
       // Check to see if we already have this contact, if so, issue an info message.
       if (this.getContact(aContact.id)) {
         // TODO: info message.
-        return;
+        return
       }
 
-      this.contactArr.splice(0, 0, aContact);
+      this.contactArr.splice(0, 0, aContact)
 
       if (makeActiveContact) {
-        this.activeContact = aContact;
+        this.activeContact = aContact
       }
 
-      this.dropDownContacts = this.initContactDetailsForDropDown();
+      this.dropDownContacts = this.initContactDetailsForDropDown()
     }
   }
 
   getContact = (aContactId) => {
     if (aContactId) {
-      return ContactManager._getContactForId(aContactId, this.contactArr);
+      return ContactManager._getContactForId(aContactId, this.contactArr)
     }
-    return undefined;
+    return undefined
   }
 
   getContactWithPublicKey = (aPublicKey) => {
@@ -318,25 +317,25 @@ class ContactManager {
 
   deleteContact = (aContact) => {
     if (aContact) {
-      const thisMemContact = this.getContact(aContact.id);
+      const thisMemContact = this.getContact(aContact.id)
       if (thisMemContact) {
-        const idx = this.contactArr.indexOf(thisMemContact);
-        const deletingActiveContact = (this.activeContact) ?
-          (thisMemContact.id === this.activeContact.id) : false;
+        const idx = this.contactArr.indexOf(thisMemContact)
+        const deletingActiveContact = (this.activeContact)
+          ? (thisMemContact.id === this.activeContact.id) : false
 
         if (idx !== -1) {
-          const newContactArr = this.contactArr.slice();
-          newContactArr.splice(idx, 1);
+          const newContactArr = this.contactArr.slice()
+          newContactArr.splice(idx, 1)
 
           if (deletingActiveContact) {
             if (newContactArr.length > 0) {
-              this.activeContact = newContactArr[0];
+              this.activeContact = newContactArr[0]
             } else {
-              this.activeContact = undefined;
+              this.activeContact = undefined
             }
           }
 
-          this.contactArr = newContactArr;
+          this.contactArr = newContactArr
         }
       }
     }
@@ -344,37 +343,37 @@ class ContactManager {
 
   hasPublicKey = (aContact = this.activeContact) => {
     if (aContact) {
-      return (aContact.publicKey) ? (aContact.publicKey !== '') : false;
+      return (aContact.publicKey) ? (aContact.publicKey !== '') : false
     }
 
-    return false;
+    return false
   }
 
   getPublicKey = (aContactId) => {
     if (aContactId) {
       const contact =
-        ContactManager._getContactForId(aContactId, this.contactArr);
+        ContactManager._getContactForId(aContactId, this.contactArr)
 
       if (contact) {
-        return contact.publicKey;
+        return contact.publicKey
       }
     }
 
-    return '';
+    return ''
   }
 
   getTimeMs = (aContactId) => {
     if (aContactId) {
       const contact =
-        ContactManager._getContactForId(aContactId, this.contactArr);
+        ContactManager._getContactForId(aContactId, this.contactArr)
 
       if (contact &&
           contact.hasOwnProperty('timeMs')) {
-        return contact.timeMs;
+        return contact.timeMs
       }
     }
 
-    return undefined;
+    return undefined
   }
 
   getProtocol = (aContactId) => {
@@ -392,32 +391,32 @@ class ContactManager {
   }
 
   setPublicKey = (aContactId, aPublicKey) => {
-    this._setterWithChecks(aContactId, 'publicKey', aPublicKey);
+    this._setterWithChecks(aContactId, 'publicKey', aPublicKey)
   }
 
   setStatus = (aContactId, aStatus) => {
-    this._setterWithChecks(aContactId, 'status', aStatus);
+    this._setterWithChecks(aContactId, 'status', aStatus)
   }
 
   setSummary = (aContactId, aSummaryStr) => {
-    const summaryStr = ContactManager._getTruncatedMessage(aSummaryStr);
-    this._setterWithChecks(aContactId, 'summary', summaryStr);
+    const summaryStr = ContactManager._getTruncatedMessage(aSummaryStr)
+    this._setterWithChecks(aContactId, 'summary', summaryStr)
   }
 
   setTime = (aContactId, aTimeStr) => {
-    this._setterWithChecks(aContactId, 'time', aTimeStr);
+    this._setterWithChecks(aContactId, 'time', aTimeStr)
   }
 
   setTimeMs = (aContactId, theTimeSinceOnlineMs) => {
     if (theTimeSinceOnlineMs) {
-      this._setterWithChecks(aContactId, 'timeMs', theTimeSinceOnlineMs);
+      this._setterWithChecks(aContactId, 'timeMs', theTimeSinceOnlineMs)
     } else {
-      this._setterWithChecks(aContactId, 'timeMs', '');
+      this._setterWithChecks(aContactId, 'timeMs', '')
     }
   }
 
   setProtocol = (aContactId, aProtocol) => {
-    const protocol = (aProtocol) ? aProtocol : ''
+    const protocol = (aProtocol) || ''
     this._setterWithChecks(aContactId, 'protocol', protocol)
   }
 
@@ -431,127 +430,126 @@ class ContactManager {
   incrementUnread = (aContactId) => {
     if (aContactId) {
       const contact =
-        ContactManager._getContactForId(aContactId, this.contactArr);
+        ContactManager._getContactForId(aContactId, this.contactArr)
 
       if (contact) {
         if (contact.hasOwnProperty('unread')) {
-          contact.unread += 1;
+          contact.unread += 1
         } else {
-          contact.unread = 1;
+          contact.unread = 1
         }
       }
     }
   }
 
   setUnread = (aContactId, anUnreadCount) => {
-    this._setterWithChecks(aContactId, 'unread', anUnreadCount);
+    this._setterWithChecks(aContactId, 'unread', anUnreadCount)
   }
 
   clearUnread = (aContactId) => {
-    this._setterWithChecks(aContactId, 'unread', 0);
+    this._setterWithChecks(aContactId, 'unread', 0)
   }
 
   getAllUnread = () => {
-    let unreadCount = 0;
+    let unreadCount = 0
 
     for (const contact of this.contactArr) {
       if (contact && contact.hasOwnProperty('unread')) {
-        unreadCount += contact.unread;
+        unreadCount += contact.unread
       }
     }
 
-    return unreadCount;
+    return unreadCount
   }
 
   moveContactToTop = (aContactId) => {
     if (aContactId) {
-      let index;
+      let index
       for (index in this.contactArr) {
         if (aContactId === this.contactArr[index].id) {
-          break;
+          break
         }
       }
 
       if ((index !== undefined) || (index !== 0)) {
-        const contactToMoveToTop = this.contactArr.splice(index, 1);
-        this.contactArr.splice(0, 0, contactToMoveToTop[0]);
+        const contactToMoveToTop = this.contactArr.splice(index, 1)
+        this.contactArr.splice(0, 0, contactToMoveToTop[0])
       }
     }
   }
 
   _setterWithChecks = (aContactId, aPropName, aValue) => {
     if (aContactId && aPropName) {
-      const contact = this.getContact(aContactId);
+      const contact = this.getContact(aContactId)
 
       if (contact) {
-        contact[aPropName] = aValue;
+        contact[aPropName] = aValue
       }
     }
   }
 
-  static _getContactForId(aContactId, aContactArr) {
+  static _getContactForId (aContactId, aContactArr) {
     for (const contact of aContactArr) {
       if (contact.id === aContactId) {
-        return contact;
+        return contact
       }
     }
-    return undefined;
+    return undefined
   }
 
-  static getContactTimeStr(aTimeInMs) {
+  static getContactTimeStr (aTimeInMs) {
     if (aTimeInMs && aTimeInMs === '') {
-      return '...';
+      return '...'
     }
     if (aTimeInMs && (aTimeInMs > 0)) {
-      const timeInSeconds = Math.floor(aTimeInMs / 1000);
-      const timeInMinutes = Math.floor(timeInSeconds / 60);
-      const timeInHours = Math.floor(timeInMinutes / 60);
-      const timeInDays = Math.floor(timeInHours / 24);
+      const timeInSeconds = Math.floor(aTimeInMs / 1000)
+      const timeInMinutes = Math.floor(timeInSeconds / 60)
+      const timeInHours = Math.floor(timeInMinutes / 60)
+      const timeInDays = Math.floor(timeInHours / 24)
       if ((timeInDays > 0) && (timeInDays < 7)) {
-        return `present ${timeInDays} day(s) ago.`;
+        return `present ${timeInDays} day(s) ago.`
       } else if ((timeInDays > 7)) {
-        return 'present a week or more ago.';
+        return 'present a week or more ago.'
       } else if (timeInHours > 0) {
-        return `present ${timeInHours} hour(s) ago.`;
+        return `present ${timeInHours} hour(s) ago.`
       } else if (timeInMinutes > 1) {
-        return `present ${timeInMinutes} minute(s) ago.`;
+        return `present ${timeInMinutes} minute(s) ago.`
       }
-      return 'available.';
+      return 'available.'
     }
 
-    return '...';
+    return '...'
   }
 
-  static _getTruncatedMessage(aMessageStr) {
+  static _getTruncatedMessage (aMessageStr) {
     if (aMessageStr) {
       if (aMessageStr.length > SUMMARY_LEN) {
-        return (`${aMessageStr.substring(0, SUMMARY_LEN)} ...`);
+        return (`${aMessageStr.substring(0, SUMMARY_LEN)} ...`)
       }
-      return aMessageStr;
+      return aMessageStr
     }
-    return '';
+    return ''
   }
 
-  static buildContactFromQueryResult(aQueryResult, profileQuery, theirUserId, theirPublicKey) {
-    let contact = undefined
+  static buildContactFromQueryResult (aQueryResult, profileQuery, theirUserId, theirPublicKey) {
+    let contact
 
     if (aQueryResult &&
         'data' in aQueryResult &&
         profileQuery in aQueryResult['data']) {
-
       // Oddly, fullyQualifiedName doesn't always appear in the data that is returned.
       const {profile} = aQueryResult['data'][profileQuery]
 
       if (profile && theirUserId) {
-        const description = ('description' in profile) ?
-                            profile['description'] : ''
+        const description = ('description' in profile)
+                            ? profile['description'] : ''
 
         const imageURL = ('image' in profile &&
                           profile['image'][0] &&
                           'contentUrl' in profile['image'][0] &&
                           'name' in profile['image'][0] &&
-                          profile['image'][0]['name'] == 'avatar') ?
-                         profile['image'][0]['contentUrl'] : undefined
+                          profile['image'][0]['name'] === 'avatar')
+                         ? profile['image'][0]['contentUrl'] : undefined
 
         const title = ('name' in profile) ? profile['name'] : ''
 
@@ -572,7 +570,6 @@ class ContactManager {
 
     return contact
   }
-
 }
 
-module.exports = { ContactManager };
+module.exports = { ContactManager }

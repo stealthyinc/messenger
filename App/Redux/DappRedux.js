@@ -1,7 +1,7 @@
 import { createReducer, createActions } from 'reduxsauce'
 import Immutable from 'seamless-immutable'
 
-const utils = require('./../Engine/misc/utils.js');
+const utils = require('./../Engine/misc/utils.js')
 
 /* ------------- Types and Action Creators ------------- */
 
@@ -11,7 +11,7 @@ const { Types, Creators } = createActions({
   setDappData: ['dapp', 'data'],
   setDappError: ['dappError'],
   setDappMessage: ['dappMessage'],
-  refreshIntegrationData: [''],
+  refreshIntegrationData: ['']
 })
 
 export const DappTypes = Types
@@ -24,7 +24,7 @@ export const INITIAL_STATE = Immutable({
   dapp: '',
   dappUrl: '',
   dappData: null,
-  dappMessage: null,
+  dappMessage: null
 })
 
 /* ------------- Selectors ------------- */
@@ -34,7 +34,7 @@ export const DappSelectors = {
   getDappUrl: state => state.dapp.dappUrl,
   getDappData: state => state.dapp.dappData,
   getDappError: state => state.dapp.dappError,
-  getDappMessage: state => state.dapp.dappMessage,
+  getDappMessage: state => state.dapp.dappMessage
 }
 
 /* ------------- Reducers ------------- */
@@ -86,5 +86,5 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_DAPP_URL]: setDappUrl,
   [Types.SET_DAPP_DATA]: setDappData,
   [Types.SET_DAPP_ERROR]: setDappError,
-  [Types.SET_DAPP_MESSAGE]: setDappMessage,
+  [Types.SET_DAPP_MESSAGE]: setDappMessage
 })

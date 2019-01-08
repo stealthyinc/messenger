@@ -4,28 +4,28 @@ import { addNavigationHelpers } from 'react-navigation'
 import { createReduxBoundAddListener } from 'react-navigation-redux-helpers'
 import { connect } from 'react-redux'
 import AppNavigation from './AppNavigation'
-import { Root } from "native-base";
-import { Button } from 'react-native-elements'
-import BackgroundFetch from "react-native-background-fetch";
+import { Root } from 'native-base'
+import BackgroundFetch from 'react-native-background-fetch'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
-const common = require('./../common.js');
+import RNExitApp from 'react-native-exit-app'
+import chatIcon from '../Images/blue512.png'
+import AwesomeAlert from 'react-native-awesome-alerts'
+import Spinner from 'react-native-loading-spinner-overlay'
+
+const common = require('./../common.js')
 const utils = require('./../Engine/misc/utils.js')
-const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
-import RNExitApp from 'react-native-exit-app';
-import chatIcon from '../Images/blue512.png';
-import AwesomeAlert from 'react-native-awesome-alerts';
-import Spinner from 'react-native-loading-spinner-overlay';
+const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 
 class ReduxNavigation extends React.Component {
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
     this.state = {
       fbListner: false,
-      isConnected: true,
+      isConnected: true
     }
     this.publicKey = undefined
     this.ref = undefined
-    this.shutDownSignOut = false;
+    this.shutDownSignOut = false
   }
   componentWillMount () {
     if (!utils.is_iOS()) {
@@ -46,44 +46,43 @@ class ReduxNavigation extends React.Component {
       stopOnTerminate: false,   // <-- Android-only,
       startOnBoot: true         // <-- Android-only
     }, () => {
-      console.log("[js] Received background-fetch event");
+      console.log('[js] Received background-fetch event')
       // Required: Signal completion of your task to native code
       // If you fail to do this, the OS can terminate your app
       // or assign battery-blame for consuming too much background-time
       this.props.dispatch(EngineActions.backgroundRefresh())
-      BackgroundFetch.finish(BackgroundFetch.FETCH_RESULT_NEW_DATA);
+      BackgroundFetch.finish(BackgroundFetch.FETCH_RESULT_NEW_DATA)
       if (Platform.OS === 'ios') {
-        const number = this.props.contactMgr.getAllUnread()
-        if (number > 100)
-          number = 99
+        let number = this.props.contactMgr.getAllUnread()
+        if (number > 100) { number = 99 }
         PushNotificationIOS.setApplicationIconBadgeNumber(number)
       }
     }, (error) => {
-      console.log("[js] RNBackgroundFetch failed to start");
-    });
+      console.log('[js] RNBackgroundFetch failed to start')
+    })
 
     // Optional: Query the authorization status.
     BackgroundFetch.status((status) => {
-      switch(status) {
+      switch (status) {
         case BackgroundFetch.STATUS_RESTRICTED:
-          console.log("BackgroundFetch restricted");
-          break;
+          console.log('BackgroundFetch restricted')
+          break
         case BackgroundFetch.STATUS_DENIED:
-          console.log("BackgroundFetch denied");
-          break;
+          console.log('BackgroundFetch denied')
+          break
         case BackgroundFetch.STATUS_AVAILABLE:
-          console.log("BackgroundFetch is enabled");
-          break;
+          console.log('BackgroundFetch is enabled')
+          break
       }
-    });
+    })
   }
 
-  componentDidMount() {
-    NetInfo.isConnected.addEventListener('connectionChange', this.handleConnectivityChange);
+  componentDidMount () {
+    NetInfo.isConnected.addEventListener('connectionChange', this.handleConnectivityChange)
   }
 
   handleConnectivityChange = isConnected => {
-    this.setState({ isConnected });
+    this.setState({ isConnected })
   };
 
   componentWillReceiveProps (nextProps) {
@@ -98,7 +97,7 @@ class ReduxNavigation extends React.Component {
     if (!utils.is_iOS()) {
       BackHandler.removeEventListener('hardwareBackPress')
     }
-    NetInfo.isConnected.removeEventListener('connectionChange', this.handleConnectivityChange);
+    NetInfo.isConnected.removeEventListener('connectionChange', this.handleConnectivityChange)
   }
 
   _authWork = async (userData) => {
@@ -117,56 +116,53 @@ class ReduxNavigation extends React.Component {
     this.shutDownSignOut = false
     this.publicKey = userData['appPublicKey']
     this.props.dispatch(EngineActions.setPublicKey(this.publicKey))
-    const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(this.publicKey));
+    const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(this.publicKey))
 
     console.log(`INFO(ReduxNavigation::_authWork): reading session.`)
     return ref.once('value')
     .then(snapshot => {
       console.log(`INFO(ReduxNavigation::_authWork): AFTER reading session.`)
       if (!snapshot.exists() || snapshot.val() === 'none') {
-        //signin screen
-        ref.set(common.getSessionId());
+        // signin screen
+        ref.set(common.getSessionId())
         this._setupVars(userData, common.getSessionId())
-        this.___installSessionLossListener();
-      }
-      else if (snapshot.exists() && (snapshot.val() === common.getSessionId())) {
-        //authloading screen
+        this.___installSessionLossListener()
+      } else if (snapshot.exists() && (snapshot.val() === common.getSessionId())) {
+        // authloading screen
         this._setupVars(userData, common.getSessionId())
-        this.___installSessionLossListener();
+        this.___installSessionLossListener()
       } else {
         if (SKIP_SESSION_BLOCK_PAGE_FOR_DEV) {
-          ref.set(common.getSessionId());
+          ref.set(common.getSessionId())
           this._setupVars(userData, common.getSessionId())
-          this.___installSessionLossListener();
+          this.___installSessionLossListener()
         } else {
           this.props.dispatch(EngineActions.setSession(snapshot.val()))
           this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Block' })
         }
       }
-      return
     })
     .catch(error => {
       console.log(`ERROR(ReduxNavigation::_authWork): ${error}`)
-      return
     })
   }
   _setupVars = async (userData, session) => {
     this.props.dispatch(EngineActions.setSession(session))
     this.props.dispatch(EngineActions.setUserData(userData))
-    const userProfile = JSON.parse(await AsyncStorage.getItem('userProfile'));
+    const userProfile = JSON.parse(await AsyncStorage.getItem('userProfile'))
     if (userProfile) {
       this.props.dispatch(EngineActions.setUserProfile(userProfile))
     }
     const token = await AsyncStorage.getItem('token')
     // console.log("firebase token readback", token)
-    const { publicKey } =  this.props
+    const { publicKey } = this.props
     const notificationPath = common.getDbNotificationPath(publicKey)
     firebaseInstance.setFirebaseData(notificationPath, {token, enabled: true})
     this.props.dispatch(EngineActions.setToken(token))
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'App' })
   }
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 //  Begin #FearThis: - Changes can result in loss of time, efficiency, users, &
 //                     data.
 //
@@ -181,17 +177,17 @@ class ReduxNavigation extends React.Component {
 //  has occured, we then do UI cleanup and clearing of user data / async storage
 //  before signing out of blockstack.
 //
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 
   ___startLogOutSequence = async () => {
     const method = 'ReduxNavigation::___startLogOutSequence'
     if (this.ref) {
-      this.ref.off();
-      this.ref = undefined;
+      this.ref.off()
+      this.ref = undefined
     }
     this.props.dispatch(EngineActions.initShutdown())
 
-    const TIMEOUT_BEFORE_SHUTDOWN_MS = 6 * 1000;
+    const TIMEOUT_BEFORE_SHUTDOWN_MS = 6 * 1000
     try {
       await utils.resolveAfterMilliseconds(TIMEOUT_BEFORE_SHUTDOWN_MS)
     } catch (error) {
@@ -210,24 +206,24 @@ class ReduxNavigation extends React.Component {
 
   ___finishLogOutSequence = async () => {
     if (!this.shutDownSignOut) {
-      this.shutDownSignOut = true;
+      this.shutDownSignOut = true
 
       if (this.publicKey) {
         firebaseInstance.setFirebaseData(common.getDbSessionPath(this.publicKey), common.NO_SESSION)
-        this.props.dispatch(EngineActions.clearUserData(this.publicKey));
+        this.props.dispatch(EngineActions.clearUserData(this.publicKey))
       }
 
       // unsubscribe from all channels
       for (let ch in this.props.channels) {
         const {id} = this.props.channels[ch]
-        firebaseInstance.unsubscribeFromTopic(id);
+        firebaseInstance.unsubscribeFromTopic(id)
       }
 
-      await AsyncStorage.clear();
+      await AsyncStorage.clear()
       const { token } = this.props
-      AsyncStorage.setItem('token', token);
+      AsyncStorage.setItem('token', token)
 
-      const {BlockstackNativeModule} = NativeModules;
+      const {BlockstackNativeModule} = NativeModules
       if (utils.is_iOS()) {
         await BlockstackNativeModule.signOut()
       } else if (utils.isAndroid()) {
@@ -237,17 +233,14 @@ class ReduxNavigation extends React.Component {
       }
       this.publicKey = undefined
 
-      if (utils.is_iOS())
-        this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' })
-      else
-        RNExitApp.exitApp();
+      if (utils.is_iOS()) { this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' }) } else { RNExitApp.exitApp() }
     }
   }
 
   ___installSessionLossListener = () => {
     if (this.publicKey && !this.ref) {
       const sessionPath = common.getDbSessionPath(this.publicKey)
-      this.ref = firebaseInstance.getFirebaseRef(sessionPath);
+      this.ref = firebaseInstance.getFirebaseRef(sessionPath)
 
       this.ref.on('value', (childSnapshot) => {
         const session = childSnapshot.val()
@@ -258,10 +251,9 @@ class ReduxNavigation extends React.Component {
     }
   }
 
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 //  End #FearThis
-////////////////////////////////////////////////////////////////////////////////
-
+/// /////////////////////////////////////////////////////////////////////////////
 
   render () {
     if (this.props.engineFault) {
@@ -270,16 +262,16 @@ class ReduxNavigation extends React.Component {
         <AwesomeAlert
           show={this.props.engineFault}
           showProgress={false}
-          title="Stealthy Error"
-          message="Engine in a bad state"
+          title='Stealthy Error'
+          message='Engine in a bad state'
           closeOnTouchOutside={false}
           closeOnHardwareBackPress={false}
-          showCancelButton={true}
-          showConfirmButton={true}
-          cancelText="Restart Engine"
-          confirmText="Logout"
-          cancelButtonColor="#34bbed"
-          confirmButtonColor="#DD6B55"
+          showCancelButton
+          showConfirmButton
+          cancelText='Restart Engine'
+          confirmText='Logout'
+          cancelButtonColor='#34bbed'
+          confirmButtonColor='#DD6B55'
           onCancelPressed={() => {
             this.props.dispatch(EngineActions.restartEngine(this.props.userData))
           }}
@@ -288,8 +280,7 @@ class ReduxNavigation extends React.Component {
           }}
         />
       )
-    }
-    else if (!this.state.isConnected) {
+    } else if (!this.state.isConnected) {
       return (
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
           <Image
@@ -307,7 +298,7 @@ class ReduxNavigation extends React.Component {
         <Spinner visible={this.props.spinnerFlag} textContent={this.props.spinnerMessage} textStyle={{color: '#FFF'}} />
         <AppNavigation
           screenProps={{logout: () => this.___startLogOutSequence(), authWork: (userData) => this._authWork(userData)}}
-          navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root') })}
+          navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root')})}
         />
       </Root>
     )
@@ -325,7 +316,7 @@ const mapStateToProps = (state) => {
     engineShutdown: EngineSelectors.getEngineShutdown(state),
     userData: EngineSelectors.getUserData(state),
     token: EngineSelectors.getToken(state),
-    channels: EngineSelectors.getChannelsData(state),
+    channels: EngineSelectors.getChannelsData(state)
   }
 }
 

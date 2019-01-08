@@ -1,27 +1,19 @@
-import React from 'react';
-import { AsyncStorage, Image, View, StyleSheet, TouchableOpacity, NativeModules, StatusBar, Platform } from 'react-native';
-import { Avatar, Card, Button, Text, Icon, Overlay } from 'react-native-elements'
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import React from 'react'
+import { View, StyleSheet, Platform } from 'react-native'
+import { Avatar, Button, Text, Icon } from 'react-native-elements'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
-import { Toast } from 'native-base';
-import { shareOnTwitter } from 'react-native-social-share';
-import Communications from 'react-native-communications';
+import { Toast } from 'native-base'
+import { shareOnTwitter } from 'react-native-social-share'
+import Communications from 'react-native-communications'
 import ActionSheet from 'react-native-actionsheet'
-import QRCode from 'react-native-qrcode';
+import QRCode from 'react-native-qrcode'
 
-const utils = require('./../Engine/misc/utils.js');
-
-const common = require('./../common.js');
-
-const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
-
-import defaultProfile from '../Images/defaultProfile.png'
-import chatIcon from '../Images/blue512.png';
+const utils = require('./../Engine/misc/utils.js')
 
 class ProfileScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
-    const params = navigation.state.params || {};
+    // const params = navigation.state.params || {}
     return {
       headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Profile</Text>,
       headerBackTitle: 'Back',
@@ -34,18 +26,18 @@ class ProfileScreen extends React.Component {
       headerStyle: {
         backgroundColor: '#34bbed'
       }
-    };
+    }
   }
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
     this.state = {
       showToast: false,
       showQR: false,
-      isVisible: false,
+      isVisible: false
     }
   }
-  componentWillMount() {
-    this.props.navigation.setParams({ showOverlay: this.showOverlay });
+  componentWillMount () {
+    this.props.navigation.setParams({ showOverlay: this.showOverlay })
   }
   showOverlay = () => {
     this.setState({isVisible: !this.state.isVisible})
@@ -53,18 +45,17 @@ class ProfileScreen extends React.Component {
   showActionSheet = () => {
     this.ActionSheet.show()
   }
-  render() {
+  render () {
     console.log('ProfileScreen render')
     const { userProfile, userData, userSettings } = this.props
-    if (!userProfile)
-      return null
-    const { discovery, notifications, heartbeat, webrtc, analytics } = userSettings
+    if (!userProfile) { return null }
+    const { discovery, notifications, analytics } = userSettings
     const { profile, base64 } = userProfile
     const { username } = userData
-    const { name, image } = profile
-    const fullName = (name) ? name : null
+    const { name } = profile
+    const fullName = (name) || null
     const shareText = 'You can securely message me at: ' + username + ' on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im'
-    const shareText1 = 'Come chat with me on Stealthy.IM! Add me: ' + username
+    // const shareText1 = 'Come chat with me on Stealthy.IM! Add me: ' + username
     const oldPad = utils.is_oldPad()
     const margin = (oldPad) ? 20 : 30
     const marginTop = (oldPad) ? 0 : 15
@@ -75,27 +66,27 @@ class ProfileScreen extends React.Component {
     const { showQR } = this.state
     // const qrText = "http://facebook.github.io/react-native/"
     const avatarSize = (showQR || !base64) ? (
-        <QRCode
-          value={qrText}
-          size={160}
-          bgColor='black'
-          fgColor='white'
+      <QRCode
+        value={qrText}
+        size={160}
+        bgColor='black'
+        fgColor='white'
         />
       ) : (oldPad || (Platform.OS !== 'ios')) ? (
-      <Avatar
-        large
-        rounded
-        source={{uri: base64}}
-        onPress={() => console.log("Works!")}
-        activeOpacity={0.7}
-        containerStyle={{marginBottom: 5}}
+        <Avatar
+          large
+          rounded
+          source={{uri: base64}}
+          onPress={() => console.log('Works!')}
+          activeOpacity={0.7}
+          containerStyle={{marginBottom: 5}}
       />
     ) : (
       <Avatar
         xlarge
         rounded
         source={{uri: base64}}
-        onPress={() => console.log("Works!")}
+        onPress={() => console.log('Works!')}
         activeOpacity={0.7}
         containerStyle={{marginBottom: 15}}
       />
@@ -119,7 +110,8 @@ class ProfileScreen extends React.Component {
                   text: (showQR) ? 'Hide QR Code' : 'Show QR Code',
                   duration: 1500
                 })
-                this.setState({showQR: !showQR})}
+                this.setState({showQR: !showQR})
+              }
               } />
             <Icon
               reverse
@@ -131,7 +123,8 @@ class ProfileScreen extends React.Component {
                   text: (discovery) ? 'Discovery Setting Disabled!' : 'Discovery Setting Enabled!',
                   duration: 1500
                 })
-                this.props.updateUserSettings('discovery')}
+                this.props.updateUserSettings('discovery')
+              }
               } />
             <Icon
               reverse
@@ -143,39 +136,41 @@ class ProfileScreen extends React.Component {
                   text: (notifications) ? 'Notifications Setting Disabled!' : 'Notifications Setting Enabled!',
                   duration: 1500
                 })
-                this.props.updateUserSettings('notifications')}
+                this.props.updateUserSettings('notifications')
+              }
               } />
-              <Icon
-                reverse
-                name='pie-chart'
-                type='font-awesome'
-                color={(analytics) ? '#34bbed' : 'grey'}
-                onPress={() => {
-                  Toast.show({
-                    text: (analytics) ? 'Analytics Setting Disabled!' : 'Analytics Setting Enabled!',
-                    duration: 1500
-                  })
-                  this.props.updateUserSettings('analytics')}
+            <Icon
+              reverse
+              name='pie-chart'
+              type='font-awesome'
+              color={(analytics) ? '#34bbed' : 'grey'}
+              onPress={() => {
+                Toast.show({
+                  text: (analytics) ? 'Analytics Setting Disabled!' : 'Analytics Setting Enabled!',
+                  duration: 1500
+                })
+                this.props.updateUserSettings('analytics')
+              }
                 } />
-              {/*<Icon
+            {/* <Icon
                 reverse
                 name='twitter'
                 type='font-awesome'
                 color='#34bbed'
-                onPress={() => 
+                onPress={() =>
                   shareOnTwitter({
                     'text': shareText,
                   },
                   (results) => {
                     console.log(results);
                   }
-              )} />*/}
+              )} /> */}
           </View>
           <Button
             onPress={this.showActionSheet}
             icon={{name: 'share', color: 'white'}}
             buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 180, height: 50, backgroundColor: '#34bbed'}}
-            textStyle={{ fontSize: 18, fontWeight: "900", color: "white"}}
+            textStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
             title='Share On'
           />
           <Button
@@ -185,7 +180,7 @@ class ProfileScreen extends React.Component {
             }}
             icon={{name: 'launch', color: 'white'}}
             buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#34bbed'}}
-            textStyle={{ fontSize: 18, fontWeight: "900", color: "white"}}
+            textStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
             title='Log Out'
           />
         </View>
@@ -196,26 +191,24 @@ class ProfileScreen extends React.Component {
           options={['Tweet your ID', 'Invite via SMS', 'Email Contacts', 'Cancel']}
           cancelButtonIndex={3}
           destructiveButtonIndex={3}
-          onPress={(index) => { 
+          onPress={(index) => {
             if (index === 0) {
               shareOnTwitter({
-                    'text': shareText,
-                  },
+                'text': shareText
+              },
                   (results) => {
-                    console.log(results);
+                    console.log(results)
                   }
               )
-            }
-            else if (index === 1) {
+            } else if (index === 1) {
               Communications.textWithoutEncoding(null, `Add me on Stealthy IM: ${username}. Download Stealthy here: http://onelink.to/5krfsk`)
-            }
-            else if (index === 2) {
-              Communications.email([''],null,null,`Add me on Stealthy IM: ${username}`,'Download Stealthy here: http://onelink.to/5krfsk')
+            } else if (index === 2) {
+              Communications.email([''], null, null, `Add me on Stealthy IM: ${username}`, 'Download Stealthy here: http://onelink.to/5krfsk')
             }
           }}
         />
       </View>
-    );
+    )
   }
 }
 
@@ -223,29 +216,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   containerEmpty: {
     flex: 1,
     paddingTop: 100,
     backgroundColor: 'white',
-    alignItems: 'center',
+    alignItems: 'center'
   }
-});
+})
 
 const mapStateToProps = (state) => {
   return {
     userProfile: EngineSelectors.getUserProfile(state),
     publicKey: EngineSelectors.getPublicKey(state),
     userData: EngineSelectors.getUserData(state),
-    userSettings: EngineSelectors.getUserSettings(state),
+    userSettings: EngineSelectors.getUserSettings(state)
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
     updateUserSettings: (radio) => dispatch(EngineActions.updateUserSettings(radio)),
-    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),
+    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message))
   }
 }
 

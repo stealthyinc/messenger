@@ -1,6 +1,5 @@
 // a library to wrap and simplify api calls
 import apisauce from 'apisauce'
-const utils = require('./../Engine/misc/utils.js');
 import RNFetchBlob from 'rn-fetch-blob'
 
 // our "constructor"
@@ -47,11 +46,11 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   // Replacing it with the method below
   const getUserProfile = async (aUserName, anAppUrl = 'https://www.stealthy.im') => {
     const methodName = 'Api::getUserProfile'
-    let profileData = undefined
+    let profileData
     try {
       let preTranslatedProfileData = await getProfileFromNameSearch(aUserName, anAppUrl)
       profileData = await translateProfileData(aUserName, preTranslatedProfileData)
-    } catch(err) {
+    } catch (err) {
       throw `ERROR(${methodName}): failed to get profile data from name search.\n${err}`
     }
     return profileData
@@ -100,16 +99,16 @@ const create = (baseURL = 'https://core.blockstack.org') => {
       profileTranslation.data[aUserId] = {}
       profileTranslation.data[aUserId]['profile'] = theProfileData
       const image = theProfileData.image
-      const userImage = (image && image[0] && image[0].contentUrl) ?
-      image[0].contentUrl : undefined
+      const userImage = (image && image[0] && image[0].contentUrl)
+      ? image[0].contentUrl : undefined
       if (userImage) {
         await RNFetchBlob.fetch('GET', userImage, {
           // more headers  ..
         })
         .then((res) => {
-          let status = res.info().status;
-          
-          if(status == 200) {
+          let status = res.info().status
+
+          if (status === 200) {
             // the conversion is done in native code
             let base64Str = res.base64()
             // the following conversions are done in js, it's SYNC
@@ -118,7 +117,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
             profileTranslation.data[aUserId]['base64'] = 'data:image/png;base64,' + base64Str
           } else {
             // handle other status codes
-            profileTranslation.data[aUserId]['base64'] = ""
+            profileTranslation.data[aUserId]['base64'] = ''
           }
         })
         // Something went wrong:
@@ -126,13 +125,11 @@ const create = (baseURL = 'https://core.blockstack.org') => {
           // error handling
         })
         return profileTranslation
-      }
-      else {
-        profileTranslation.data[aUserId]['base64'] = ""
+      } else {
+        profileTranslation.data[aUserId]['base64'] = ''
         return profileTranslation
       }
-    }
-    else {
+    } else {
       return undefined
     }
   }
@@ -145,13 +142,13 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   //   - we return the specific user's gaia hub for specified app
   const getUserGaiaNS = async (aUserName, anAppUrl = 'https://www.stealthy.im') => {
     const methodName = 'Api::getUserGaiaNS'
-    let profileData = undefined
+    let profileData
     try {
       profileData = await getProfileFromNameSearch(aUserName, anAppUrl)
       const appUrl = profileData.apps[anAppUrl]
       console.log(`DEBUG(api.js::getUserGaiaNS): gaia app bucket = ${appUrl}`)
       return appUrl
-    } catch(err) {
+    } catch (err) {
       throw `ERROR(${methodName}): failed to get profile data from name search.\n${err}`
     }
   }
@@ -177,7 +174,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   const getProfileFromNameSearch = async (aUserName) => {
     const methodName = 'Api.js::getProfileFromNameSearch'
 
-    let nameResult= undefined
+    let nameResult
     try {
       nameResult = await api.get(`v1/names/${aUserName}`)
     } catch (err1) {
@@ -195,7 +192,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
       }
     }
 
-    let zonefileUrlMess = undefined
+    let zonefileUrlMess
     try {
       zonefileUrlMess = nameResult.data.zonefile
     } catch (err) {
@@ -209,7 +206,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
       throw `ERROR(${methodName}): unable to parse profile URL from zonefile data.`
     }
 
-    let profileUrlResult = undefined
+    let profileUrlResult
     try {
       profileUrlResult = await api.get(profileUrl)
     } catch (err1) {
@@ -226,7 +223,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
         }
       }
     }
-    let profileData = undefined
+    let profileData
     if (!profileUrlResult.problem) {
       try {
         profileData = profileUrlResult.data[0].decodedToken.payload.claim
@@ -259,7 +256,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   }
 }
 
-const Gaia = (gaiaHubUrl='https://gaia.blockstack.org') => {
+const Gaia = (gaiaHubUrl = 'https://gaia.blockstack.org') => {
   const api = apisauce.create({
     baseURL: gaiaHubUrl,
     headers: {'Cache-Control': 'no-cache'},
@@ -270,7 +267,7 @@ const Gaia = (gaiaHubUrl='https://gaia.blockstack.org') => {
   const getFileMultiPlayer = async (aUrlPath) => {
     const cleanUrlPath = aUrlPath.replace(`${gaiaHubUrl}/`, '')
 
-    let result = undefined
+    let result
     try {
       result = await api.get(cleanUrlPath)
     } catch (err1) {
@@ -279,7 +276,7 @@ const Gaia = (gaiaHubUrl='https://gaia.blockstack.org') => {
       } catch (err2) {
         try {
           result = await api.get(cleanUrlPath)
-        } catch(err3) {
+        } catch (err3) {
           throw `ERROR(Api::gaiaMultiPlayerGetFile::getFileFromUrlPath): get failed from ${gaiaHubUrl}/${aUrlPath}`
         }
       }
@@ -300,7 +297,7 @@ const getAccessToken = (baseURL) => {
     // here are some default headers
     headers: {
       'Cache-Control': 'no-cache',
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
     // 10 second timeout...
     timeout: 10000
@@ -320,7 +317,7 @@ const checkAccessToken = (baseURL) => {
     // here are some default headers
     headers: {
       'Cache-Control': 'no-cache',
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
     // 10 second timeout...
     timeout: 10000
@@ -367,17 +364,17 @@ const notification = (baseURL, token, pk, bearerToken) => {
       'Authorization': `Bearer ${bearerToken}`
     },
     data: {
-      "message": {
-        "notification": {
-          "title": "New Message",
+      'message': {
+        'notification': {
+          'title': 'New Message'
         },
-        "data": {
-          "pk": pk
+        'data': {
+          'pk': pk
         },
-        "apns": {
-          "payload": {"aps":{"badge":1,"sound":"default"}}
+        'apns': {
+          'payload': {'aps': {'badge': 1, 'sound': 'default'}}
         },
-        "token" : token
+        'token': token
       }
     },
     // 10 second timeout...
@@ -414,7 +411,7 @@ const notification = (baseURL, token, pk, bearerToken) => {
   //
   return {
     // a list of the API functions from step 2
-    send,
+    send
   }
 }
 

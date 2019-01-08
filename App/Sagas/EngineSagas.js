@@ -10,19 +10,19 @@
 *    you'll need to define a constant in that file.
 *************************************************************/
 import { eventChannel } from 'redux-saga'
-import { apply, call, fork, put, select, take, takeLatest, takeEvery } from 'redux-saga/effects'
+import { call, fork, put, select, take, takeLatest, takeEvery } from 'redux-saga/effects'
 import EngineActions, { EngineSelectors, EngineTypes } from '../Redux/EngineRedux'
 import DappActions, { DappTypes } from '../Redux/DappRedux'
 
 import {
-  AsyncStorage,
-} from 'react-native';
+  AsyncStorage
+} from 'react-native'
 import API from '../Services/Api'
 import DebugConfig from '../Config/DebugConfig'
 
-const common = require('./../common.js');
+const common = require('./../common.js')
 
-let EngineInstance = undefined;
+let EngineInstance
 
 const logger = (...args) => {
   if (process.env.NODE_ENV === 'development') {
@@ -41,7 +41,7 @@ const createEngine = (userData) => {
                             )
 }
 
-function* watchAmaDataChannel() {
+function * watchAmaDataChannel () {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-update-ama-data', (amaData) => emitter(amaData))
     return () => {
@@ -54,7 +54,7 @@ function* watchAmaDataChannel() {
   }
 }
 
-function* watchAmaStatusChannel() {
+function * watchAmaStatusChannel () {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-ama-status-change', (amaStatus) => emitter(amaStatus))
     return () => {
@@ -67,7 +67,7 @@ function* watchAmaStatusChannel() {
   }
 }
 
-function* watchEngineFaultChannel() {
+function * watchEngineFaultChannel () {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-fault', (engineFault) => emitter(engineFault))
     return () => {
@@ -80,7 +80,7 @@ function* watchEngineFaultChannel() {
   }
 }
 
-function* watchInitialzedEventChannel() {
+function * watchInitialzedEventChannel () {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-initialized', (engineInit) => emitter(engineInit))
     return () => {
@@ -93,7 +93,7 @@ function* watchInitialzedEventChannel() {
   }
 }
 
-function* watchContactMgrEventChannel() {
+function * watchContactMgrEventChannel () {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-update-contactmgr', (contactMgr) => emitter(contactMgr))
     return () => {
@@ -106,7 +106,7 @@ function* watchContactMgrEventChannel() {
   }
 }
 
-function* watchMessagesEventChannel() {
+function * watchMessagesEventChannel () {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-update-messages', (messages) => emitter(messages))
     return () => {
@@ -119,7 +119,7 @@ function* watchMessagesEventChannel() {
   }
 }
 
-function* watchContactAddedChannel() {
+function * watchContactAddedChannel () {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-close-contact-search', (flag) => emitter(flag))
     return () => {
@@ -132,7 +132,7 @@ function* watchContactAddedChannel() {
   }
 }
 
-function* watchUserSettingsChannel() {
+function * watchUserSettingsChannel () {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-update-settings', (settings) => emitter(settings))
     return () => {
@@ -145,7 +145,7 @@ function* watchUserSettingsChannel() {
   }
 }
 
-function* watchShutDownChannel() {
+function * watchShutDownChannel () {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-shutdown-complete', (engineShutdown) => emitter(engineShutdown))
     return () => {
@@ -158,7 +158,7 @@ function* watchShutDownChannel() {
   }
 }
 
-function* watchIntegrationDataChannel() {
+function * watchIntegrationDataChannel () {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-integration-data', (appName, error, indexData) => {
       const result = {
@@ -180,114 +180,113 @@ function* watchIntegrationDataChannel() {
   }
 }
 
-function* addContactId(action) {
+function * addContactId (action) {
   const { id } = action
   EngineInstance.handleContactInvitation(undefined, id)
 }
 
-function* handleShutDownRequest() {
-  EngineInstance.handleShutDownRequest();
+function * handleShutDownRequest () {
+  EngineInstance.handleShutDownRequest()
 }
 
-function* handleContactClick(action) {
+function * handleContactClick (action) {
   const { activeContact } = action
   EngineInstance.handleContactClick(activeContact)
 }
 
-function* handleOutgoingMessage(action) {
+function * handleOutgoingMessage (action) {
   const { outgoingMessage, json } = action
   EngineInstance.handleOutgoingMessage(outgoingMessage, json)
 }
 
-function* handleContactAdd(action) {
+function * handleContactAdd (action) {
   const { newContact, flag } = action
   EngineInstance.handleContactAdd(newContact, flag)
 }
 
-function* handleSearchSelect(action) {
-  const { newContact } = action
-  EngineInstance.handleSearchSelect(newContact)
-}
+// function * handleSearchSelect (action) {
+//   const { newContact } = action
+//   EngineInstance.handleSearchSelect(newContact)
+// }
 
-function* updateUserSettings(action) {
+function * updateUserSettings (action) {
   const { radioSetting } = action
   EngineInstance.handleRadio(null, { name: radioSetting })
 }
 
-function* deleteContact(action) {
+function * deleteContact (action) {
   const { deleteContact } = action
   EngineInstance.handleDeleteContact(null, { contact: deleteContact })
 }
 
-function* updateContactPubKey(action) {
+function * updateContactPubKey (action) {
   EngineInstance.updateContactPubKey(action.aContactId)
 }
 
-function* handleMobileForeground() {
+function * handleMobileForeground () {
   EngineInstance.handleMobileForeground()
 }
 
-function* handleMobileBackground() {
+function * handleMobileBackground () {
   EngineInstance.handleMobileBackground()
 }
 
-function* fetchAmaData(action) {
+function * fetchAmaData (action) {
   const { msgAddress, amaId, amaUserId } = action
   EngineInstance.fetchAmaData(msgAddress, amaId, amaUserId)
 }
 
-function* getToken() {
-  const api = DebugConfig.useFixtures ? FixtureAPI : API.getAccessToken("https://us-central1-coldmessage-ae5bc.cloudfunctions.net/getAccessToken")
-  const response = yield call (api.token)
+function * getToken () {
+  const api = API.getAccessToken('https://us-central1-coldmessage-ae5bc.cloudfunctions.net/getAccessToken')
+  const response = yield call(api.token)
   if (response.ok) {
     yield put(EngineActions.setBearerToken(response.data))
   }
 }
 
-function* sendNotificationWorker(action) {
+function * sendNotificationWorker (action) {
   // process for sending a notification
   // - check fb under /global/notifications/senderPK
   // - decrypt data and look up receiver's user device token
   // - send a request to fb server to notify the person of a new message
   const { recepientToken, publicKey, bearerToken } = action
   const pk = publicKey.substr(publicKey.length - 4)
-  const api = DebugConfig.useFixtures ? FixtureAPI : API.notification('https://fcm.googleapis.com/v1/projects/coldmessage-ae5bc/messages:send', recepientToken, pk, bearerToken)
-  const response = yield call (api.send)
+  const api = API.notification('https://fcm.googleapis.com/v1/projects/coldmessage-ae5bc/messages:send', recepientToken, pk, bearerToken)
+  const response = yield call(api.send)
 }
 
-function* backgroundTasks() {
+function * backgroundTasks () {
   EngineInstance.handleMobileBackgroundUpdate()
 }
 
-function* notificationTasks(action) {
+function * notificationTasks (action) {
   const { senderInfo } = action
   EngineInstance.handleMobileNotifications(senderInfo)
 }
 
-function* getIntegrationData() {
+function * getIntegrationData () {
   EngineInstance.getIntegrationData()
 }
 
-function* checkToken() {
+function * checkToken () {
   const bearerToken = yield select(EngineSelectors.getBearerToken)
-  const baseUrl = "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + bearerToken
-  const api = DebugConfig.useFixtures ? FixtureAPI : API.checkAccessToken(baseUrl)
-  const response = yield call (api.access)
+  const baseUrl = 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=' + bearerToken
+  const api = API.checkAccessToken(baseUrl)
+  const response = yield call(api.access)
   try {
     if (response.data.error) {
-      yield call (getToken)
+      yield call(getToken)
     }
-  }
-  catch (error) {
-    yield call (getToken)
+  } catch (error) {
+    yield call(getToken)
   }
 }
 
-export function* startEngine (action) {
+export function * startEngine (action) {
   const { userData } = action
-  EngineInstance = yield call (createEngine, userData)
+  EngineInstance = yield call(createEngine, userData)
   // const engineInit = yield select(EngineSelectors.getEngineInit)
-  EngineInstance.componentDidMountWork(false, userData["username"])
+  EngineInstance.componentDidMountWork(false, userData['username'])
   yield fork(watchAmaDataChannel)
   yield fork(watchAmaStatusChannel)
   yield fork(watchEngineFaultChannel)
@@ -344,7 +343,7 @@ export function * getActiveUserProfile (api, action) {
   }
 }
 
-export default function* engineSagas(api) {
+export default function * engineSagas (api) {
   yield takeLatest(EngineTypes.SET_USER_DATA, getToken)
   yield takeLatest([EngineTypes.FORE_GROUND, EngineTypes.SEND_NOTIFICATION], checkToken)
   yield takeLatest([EngineTypes.SET_USER_DATA, EngineTypes.RESTART_ENGINE], startEngine)

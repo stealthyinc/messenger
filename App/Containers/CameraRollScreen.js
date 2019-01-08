@@ -1,21 +1,19 @@
 import React, { Component } from 'react'
-import { CameraRoll, ScrollView, TouchableOpacity } from 'react-native'
+import { CameraRoll, TouchableOpacity } from 'react-native'
 import { connect } from 'react-redux'
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from 'react-native-vector-icons/Ionicons'
 import { Text } from 'react-native-elements'
 
 // Styles
-import styles from './Styles/CameraRollScreenStyle'
-import PhotoBrowser from 'react-native-photo-browser';
-
+import PhotoBrowser from 'react-native-photo-browser'
 
 class CameraRollScreen extends Component {
   static navigationOptions = ({ navigation }) => {
-    const params = navigation.state.params || {};
+    const params = navigation.state.params || {}
     return {
       headerLeft: (
         <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
-          <Ionicons name="ios-arrow-dropleft" size={32} color='white'/>
+          <Ionicons name='ios-arrow-dropleft' size={32} color='white' />
         </TouchableOpacity>
       ),
       headerTitle: (<Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Camera Roll</Text>),
@@ -23,7 +21,7 @@ class CameraRollScreen extends Component {
       headerStyle: {
         backgroundColor: '#34bbed'
       }
-    };
+    }
   };
   constructor (props) {
     super(props)
@@ -31,27 +29,27 @@ class CameraRollScreen extends Component {
       media: []
     }
   }
-  async componentWillMount() {
-    this.props.navigation.setParams({ navigation: this.props.navigation });
+  async componentWillMount () {
+    this.props.navigation.setParams({ navigation: this.props.navigation })
     CameraRoll.getPhotos({
       first: 30,
-      assetType: 'Photos',
+      assetType: 'Photos'
     })
     .then(data => {
-      const media = [];
+      const media = []
       data.edges.forEach(d =>
         media.push({
-          photo: d.node.image.uri,
-        }),
-      );
+          photo: d.node.image.uri
+        })
+      )
       this.setState({media})
     })
-    .catch(error => alert(error));
+    .catch(error => alert(error))
   };
   render () {
     return (
       <PhotoBrowser
-        startOnGrid={true}
+        startOnGrid
         mediaList={this.state.media}
       />
     )

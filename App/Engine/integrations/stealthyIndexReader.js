@@ -5,7 +5,7 @@ const utils = require('./../misc/utils.js')
 //   Pattern from: https://ilikekillnerds.com/2015/06/abstract-classes-in-javascript/
 //
 class StealthyIndexReader {
-  constructor(aUserId, aPrivateKey, anIoInst, anAppUrl) {
+  constructor (aUserId, aPrivateKey, anIoInst, anAppUrl) {
     utils.throwIfUndef('aUserId', aUserId)
     utils.throwIfUndef('aPrivateKey', aPrivateKey)
     utils.throwIfUndef('anIoInst', anIoInst)
@@ -19,19 +19,19 @@ class StealthyIndexReader {
     this.indexData = undefined
   }
 
-  getIndexData() {
+  getIndexData () {
     return this.indexData
   }
 
-  async readIndexData() {
+  async readIndexData () {
     try {
       const result = await this._readIndexFile()
       this.indexData = result.indexData
     } catch (error) {
-      throw(`ERROR(StealthyIndex:readIndexData): unable to read index data from index file.\n${error}`)
+      throw (`ERROR(StealthyIndex:readIndexData): unable to read index data from index file.\n${error}`)
     }
 
-    let gaiaUrl = undefined
+    let gaiaUrl
     try {
       gaiaUrl = await this.ioInst.getGaiaHubUrl(this.userId, this.appUrl)
     } catch (error) {
@@ -49,19 +49,18 @@ class StealthyIndexReader {
     return this.indexData
   }
 
-
   //
   // Private:
-  ////////////////////////////////////////////////////////////////////////////////
+  /// /////////////////////////////////////////////////////////////////////////////
 
-  async _readIndexFile(indexFileName = 'stealthyIndex.json') {
+  async _readIndexFile (indexFileName = 'stealthyIndex.json') {
     const method = 'StealthyIndex::_readIndexFile'
 
-    let cipherTextObjStr = undefined
+    let cipherTextObjStr
     try {
       cipherTextObjStr = await this.ioInst.readPartnerAppFile(
         this.userId, indexFileName, this.appUrl)
-    } catch(error) {
+    } catch (error) {
       throw `ERROR(${method}): Reading ${indexFileName} from ${this.userId}'s' ${this.appUrl} GAIA failed.\n${error}`
     }
 
@@ -70,17 +69,17 @@ class StealthyIndexReader {
       return undefined
     }
 
-    let recovered = undefined
+    let recovered
     try {
       recovered = await utils.decryptObj(this.privateKey, cipherTextObjStr, true)
-    } catch(error) {
+    } catch (error) {
       throw `ERROR(${method}): Decrypting ${indexFileName} from ${this.userId}'s ${this.appUrl} GAIA failed'.\n${error}`
     }
 
     return recovered
   }
 
-  _setUrlBase(aKey, aBaseUrl) {
+  _setUrlBase (aKey, aBaseUrl) {
     if (aKey && aBaseUrl) {
       if (!this.indexData.hasOwnProperty('urlBase')) {
         this.indexData.urlBase = {}

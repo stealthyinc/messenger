@@ -43,108 +43,108 @@
 // }
 //
 
-function _throwIfUndef(aVarName, aVar) {
+function _throwIfUndef (aVarName, aVar) {
   if (aVar === undefined) {
-    throw `${aVarName} is undefined`;
+    throw `${aVarName} is undefined`
   }
 }
 
 // TODO: should constructor init to modified true or false?
 class Bundle {
-  constructor(aUserId, aBundleId) {
-    _throwIfUndef('aUserId', aUserId);
-    _throwIfUndef('aBundleId', aBundleId);
+  constructor (aUserId, aBundleId) {
+    _throwIfUndef('aUserId', aUserId)
+    _throwIfUndef('aBundleId', aBundleId)
 
-    this.userId = aUserId;
-    this.bundleId = aBundleId;
-    this.bundleFile = `${aBundleId}.b`;
-    this.modified = false;
-    this.messages = [];
+    this.userId = aUserId
+    this.bundleId = aBundleId
+    this.bundleFile = `${aBundleId}.b`
+    this.modified = false
+    this.messages = []
   }
 
-  inflate(someBundleData) {
-    this.userId = someBundleData.userId;
-    this.bundleId = someBundleData.bundleId;
-    this.bundleFile = someBundleData.bundleFile;
-    this.modified = false;
-    this.messages = (someBundleData.messages) ? someBundleData.messages : [];
+  inflate (someBundleData) {
+    this.userId = someBundleData.userId
+    this.bundleId = someBundleData.bundleId
+    this.bundleFile = someBundleData.bundleFile
+    this.modified = false
+    this.messages = (someBundleData.messages) ? someBundleData.messages : []
   }
 
-  setModified(isModified=true) {
-    this.modified = isModified;
+  setModified (isModified = true) {
+    this.modified = isModified
   }
 
-  isModified() {
-    return this.modified;
+  isModified () {
+    return this.modified
   }
 
-  addMessage(aChatMsg) {
-    this.modified = true;
-    this.messages.push(aChatMsg);
+  addMessage (aChatMsg) {
+    this.modified = true
+    this.messages.push(aChatMsg)
   }
 
-  hasMessage(aMsgId) {
+  hasMessage (aMsgId) {
     if (aMsgId) {
-      const theMessages = this.getMessages([aMsgId]);
+      const theMessages = this.getMessages([aMsgId])
       if (theMessages.length > 0) {
         if (theMessages[0].to !== theMessages[0].from) {
-          return true;  // Not sent to self (special case allows 2 messages in conv.)
+          return true  // Not sent to self (special case allows 2 messages in conv.)
         }
-        return (theMessages.length > 1);
+        return (theMessages.length > 1)
       }
     }
-    return false;
+    return false
   }
 
   // Requires an array.
-  getMessages(theMsgIds) {
-    const theMessages = [];
+  getMessages (theMsgIds) {
+    const theMessages = []
     if (theMsgIds) {
       for (const message of this.messages) {
         if (theMsgIds.includes(message.id)) {
-          theMessages.push(message);
+          theMessages.push(message)
         }
       }
     }
-    return theMessages;
+    return theMessages
   }
 
-  static getNextBundleId(theLastBundleId = undefined) {
+  static getNextBundleId (theLastBundleId = undefined) {
     if (theLastBundleId) {
-      return theLastBundleId + 1;
+      return theLastBundleId + 1
     }
-    return 0;
+    return 0
   }
 
-  static compareBundleFiles(bundleFileNameA, bundleFileNameB) {
-    const numA = parseInt(bundleFileNameA.replace('.b', ''));
-    const numB = parseInt(bundleFileNameB.replace('.b', ''));
-    return aNum - bNum;
+  static compareBundleFiles (bundleFileNameA, bundleFileNameB) {
+    const numA = parseInt(bundleFileNameA.replace('.b', ''))
+    const numB = parseInt(bundleFileNameB.replace('.b', ''))
+    return numA - numB
   }
 
-  static compareBundleFilesFB(bundleFileNameA, bundleFileNameB) {
-    const numA = parseInt(bundleFileNameA.replace('_b', ''));
-    const numB = parseInt(bundleFileNameB.replace('_b', ''));
-    return aNum - bNum;
+  static compareBundleFilesFB (bundleFileNameA, bundleFileNameB) {
+    const numA = parseInt(bundleFileNameA.replace('_b', ''))
+    const numB = parseInt(bundleFileNameB.replace('_b', ''))
+    return numA - numB
   }
 
-  static compareBundles(bundleA, bundleB) {
-    return Bundle.compareBundleFiles(bundleA.bundleFile, bundleB.bundleFile);
+  static compareBundles (bundleA, bundleB) {
+    return Bundle.compareBundleFiles(bundleA.bundleFile, bundleB.bundleFile)
   }
 
-  static compareBundlesFB(bundleA, bundleB) {
-    return Bundle.compareBundleFilesFB(bundleA.bundleFile, bundleB.bundleFile);
+  static compareBundlesFB (bundleA, bundleB) {
+    return Bundle.compareBundleFilesFB(bundleA.bundleFile, bundleB.bundleFile)
   }
 
   static MAX_MESSAGES = 100000;  // TODO: make this 1000 after testing.
 }
 
 class ConversationManager {
-  constructor(logger, aUserId, anIdxIoInst) {
-    this.logger = logger;
-    this.userId = aUserId;
-    this.conversations = {};
-    this.idxIoInst = anIdxIoInst;
+  constructor (logger, aUserId, anIdxIoInst) {
+    this.logger = logger
+    this.userId = aUserId
+    this.conversations = {}
+    this.idxIoInst = anIdxIoInst
   }
 
   // TODO: this is ugly AF competition code.
@@ -153,12 +153,12 @@ class ConversationManager {
   //
   // Always resolve to a usable bundle, even if we can't read the actual bundle:
   //   - temp tradeoff, usability for data loss
-  async _loadContactBundle(aContactId) {
-    const isFirebase = this.idxIoInst.isFirebase();
-    const extension = isFirebase ? '_b' : '.b';
-    const indexFilePath = `${aContactId}/conversations/bundles`;
+  async _loadContactBundle (aContactId) {
+    const isFirebase = this.idxIoInst.isFirebase()
+    const extension = isFirebase ? '_b' : '.b'
+    const indexFilePath = `${aContactId}/conversations/bundles`
 
-    try{
+    try {
       // TODO: more robust index data read (multi-attempt)
       const indexData = await this.idxIoInst.readLocalIndex(indexFilePath)
 
@@ -167,42 +167,42 @@ class ConversationManager {
         // Read has failed.
         // Assumption: fail will error out. Let's add them as if they're a new
         //             contact.
-        return this.addConversation(aContactId);
+        return this.addConversation(aContactId)
       }
 
       // Examine the index for active files.
       // See if any are bundles.
       if (indexData.active) {
-        const fileNames = Object.keys(indexData.active);
-        const bundleFiles = [];
+        const fileNames = Object.keys(indexData.active)
+        const bundleFiles = []
         for (const fileName of fileNames) {
           if (fileName.endsWith(extension)) {
-            bundleFiles.push(fileName);
+            bundleFiles.push(fileName)
           }
         }
         if (bundleFiles.length <= 0) {
             // Assumption: user never had bundle file written. Add them as a
             //             new contact.
-          return this.addConversation(aContactId);
+          return this.addConversation(aContactId)
         }
             // sort them to get the newest one:
         if (isFirebase) {
-          bundleFiles.sort(Bundle.compareBundleFilesFB);
+          bundleFiles.sort(Bundle.compareBundleFilesFB)
         } else {
-          bundleFiles.sort(Bundle.compareBundleFiles);
+          bundleFiles.sort(Bundle.compareBundleFiles)
         }
 
-        const lastFile = bundleFiles[bundleFiles.length - 1];
-        const bundleFilePath = `${indexFilePath}/${lastFile}`;
+        const lastFile = bundleFiles[bundleFiles.length - 1]
+        const bundleFilePath = `${indexFilePath}/${lastFile}`
 
         const bundleData = await this.idxIoInst.readLocalFile(bundleFilePath)
         if (!(aContactId in this.conversations)) {
-          this.conversations[aContactId] = [];
+          this.conversations[aContactId] = []
         }
 
-        const bundle = new Bundle(aContactId, -1);
-        bundle.inflate(bundleData);
-        return bundle;
+        const bundle = new Bundle(aContactId, -1)
+        bundle.inflate(bundleData)
+        return bundle
       }
       // Assumption: user never had bundle file written. Add them as a
       //             new contact.
@@ -216,17 +216,17 @@ class ConversationManager {
   //       -Use Promises.all() in return.
   //       -Share path generation.
   //       -Add bundle specifier (right now we load the last one).
-  loadContactBundles(contactIdArr) {
+  loadContactBundles (contactIdArr) {
     if (!contactIdArr) {
-      throw ('ERROR(ConversationManager::loadContactBundles): contactIdArr undefined.');
+      throw ('ERROR(ConversationManager::loadContactBundles): contactIdArr undefined.')
     }
 
-    const promises = [];
+    const promises = []
     for (const contactId of contactIdArr) {
-      promises.push(this._loadContactBundle(contactId));
+      promises.push(this._loadContactBundle(contactId))
     }
 
-    const isFirebase = this.idxIoInst.isFirebase();
+    const isFirebase = this.idxIoInst.isFirebase()
     return Promise.all(promises)
     .then((bundles) => {
       for (const bundle of bundles) {
@@ -235,34 +235,33 @@ class ConversationManager {
           continue
         }
 
-        const contactId = bundle.userId;
-        this.conversations[contactId].push(bundle);
+        const contactId = bundle.userId
+        this.conversations[contactId].push(bundle)
         // Inefficient--move to place where all bundles pushed in
         if (isFirebase) {
-          this.conversations[contactId].sort(Bundle.compareBundlesFB);
+          this.conversations[contactId].sort(Bundle.compareBundlesFB)
         } else {
-          this.conversations[contactId].sort(Bundle.compareBundles);
+          this.conversations[contactId].sort(Bundle.compareBundles)
         }
       }
-      return;
-    });
+    })
   }
 
-  storeContactBundles() {
-    const promises = [];
+  storeContactBundles () {
+    const promises = []
 
     for (const contactId in this.conversations) {
-      const bundlePath = `${contactId}/conversations/bundles`;
+      const bundlePath = `${contactId}/conversations/bundles`
 
-      const bundles = this.conversations[contactId];
+      const bundles = this.conversations[contactId]
       for (const bundle of bundles) {
         if (bundle.isModified()) {
-          const bundleFilePath = `${bundlePath}/${bundle.bundleFile}`;
+          const bundleFilePath = `${bundlePath}/${bundle.bundleFile}`
 
           const wrPromise = new Promise((resolve, reject) => {
             this.idxIoInst.writeLocalFile(bundleFilePath, bundle)
             .then(() => {
-              bundle.setModified(false);
+              bundle.setModified(false)
               resolve()
             })
             .catch((err) => {
@@ -277,74 +276,74 @@ class ConversationManager {
 
     return Promise.all(promises)
     .then(() => {
-      return
+
     })
     .catch((err) => {
       throw `ERROR(conversationManager::storeContactBundles): ${err}`
     })
   }
 
-  hasMessage(aChatMessage) {
+  hasMessage (aChatMessage) {
     // TODO: exapand to more bundles intelligently
-    const userId = this._getConversationId(aChatMessage);
-    const bundle = this._getLastBundle(userId);
+    const userId = this._getConversationId(aChatMessage)
+    const bundle = this._getLastBundle(userId)
 
     if (bundle === undefined) {
       // Throw b/c assume we add bundle when we add contact. Plus, can't get
       // offline msgs if we haven't added contact.
-      throw (`ERROR(ConversationManager::hasMessage): no conversation exists for ${userId}.`);
+      throw (`ERROR(ConversationManager::hasMessage): no conversation exists for ${userId}.`)
     }
 
-    const msgId = aChatMessage.id;
+    const msgId = aChatMessage.id
     if (bundle.hasMessage(msgId)) {
       // TODO: future - broader check, ie. could this bundle even include this msgId,
       //       or should we pull other bundles?
 
-      return true;
+      return true
     }
 
-    return false;
+    return false
   }
 
-  addMessage(aChatMessage) {
-    const userId = this._getConversationId(aChatMessage);
-    let bundle = this._getLastBundle(userId);
+  addMessage (aChatMessage) {
+    const userId = this._getConversationId(aChatMessage)
+    let bundle = this._getLastBundle(userId)
 
     if (bundle === undefined) {
-      throw (`ERROR(ConversationManager::addMessage): no conversation exists for ${userId}.`);
+      throw (`ERROR(ConversationManager::addMessage): no conversation exists for ${userId}.`)
     }
 
-    const msgId = aChatMessage.id;
+    const msgId = aChatMessage.id
     if (bundle.hasMessage(msgId)) {
       // TODO: future - broader check, ie. could this bundle even include this msgId,
       //       or should we pull other bundles?
 
-      return;
+      return
     }
 
     if (bundle.messages.length >= Bundle.MAX_MESSAGES) {
       if (bundle.messages.length > Bundle.MAX_MESSAGES) {
-        this.logger('ERROR(ConversationManager::addMessage): messages length exceeds Bundle.MAX_MESSAGES');
+        this.logger('ERROR(ConversationManager::addMessage): messages length exceeds Bundle.MAX_MESSAGES')
       }
 
-      bundle = this._addNewBundle(userId);
+      bundle = this._addNewBundle(userId)
     }
 
-    bundle.addMessage(aChatMessage);
+    bundle.addMessage(aChatMessage)
   }
 
   // Takes the provided chat message, searches for it in bundles (currently only
   // the last bundle), and if found, marks that bundle as modified so it gets written
   // in the next save operation.
-  markConversationModified(aChatMessage) {
+  markConversationModified (aChatMessage) {
     if (aChatMessage) {
-      const userId = this._getConversationId(aChatMessage);
-      const bundle = this._getLastBundle(userId);
+      const userId = this._getConversationId(aChatMessage)
+      const bundle = this._getLastBundle(userId)
 
       if (bundle) {
-        const msgId = aChatMessage.id;
+        const msgId = aChatMessage.id
         if (bundle.hasMessage(msgId)) {
-          bundle.setModified();
+          bundle.setModified()
         }
       }
     }
@@ -356,27 +355,27 @@ class ConversationManager {
   //            TODO: would want to add _getIndexOfMessage(aMessageId) to Bundle
   //
   // getMessages(aUserId, newestMsgId=Date.now(), limit=Bundle.MAX_MESSAGES) {
-  getMessages(aUserId) {
+  getMessages (aUserId) {
     if (!(aUserId in this.conversations)) {
-      this.logger(`ERROR(ConversationManager::getMessages): Messages for ${aUserId} unavailable.`);
+      this.logger(`ERROR(ConversationManager::getMessages): Messages for ${aUserId} unavailable.`)
     }
-    const bundle = this._getLastBundle(aUserId);
-    return (bundle) ? bundle.messages : [];
+    const bundle = this._getLastBundle(aUserId)
+    return (bundle) ? bundle.messages : []
   }
 
   // TODO: so much
   //         - merge this into getMessages above with an empty list default
   //         - handle the range to get additional bundles.
   //         - etc.
-  getSpecificMessages(aUserId, aMsgIdList) {
+  getSpecificMessages (aUserId, aMsgIdList) {
     if (!(aUserId in this.conversations)) {
-      this.logger(`ERROR(ConversationManager::getSpecificMessages): Messages for ${aUserId} unavailable.`);
+      this.logger(`ERROR(ConversationManager::getSpecificMessages): Messages for ${aUserId} unavailable.`)
     }
-    const bundle = this._getLastBundle(aUserId);
+    const bundle = this._getLastBundle(aUserId)
     if (bundle) {
-      return bundle.getMessages(aMsgIdList);
+      return bundle.getMessages(aMsgIdList)
     }
-    return [];
+    return []
   }
 
   // A message is unsent if it is either unsent or unseen.
@@ -385,84 +384,83 @@ class ConversationManager {
   //       - Should we search them?
   //       - Should we keep an index of ones w/ unsent messages?
   //       - Is this even a consideration?
-  getUnsentMessages(aUserId) {
+  getUnsentMessages (aUserId) {
     if (!(aUserId in this.conversations)) {
-      this.logger(`ERROR(ConversationManager::getUnsentMessages): Messages for ${aUserId} unavailable.`);
+      this.logger(`ERROR(ConversationManager::getUnsentMessages): Messages for ${aUserId} unavailable.`)
     }
 
-    const unsentMessages = [];
-    const bundle = this._getLastBundle(aUserId);
+    const unsentMessages = []
+    const bundle = this._getLastBundle(aUserId)
     if (bundle) {
       for (const chatMsg of bundle.messages) {
         if (chatMsg.sent || chatMsg.seen) {
-          continue;
+          continue
         }
-        unsentMessages.push(chatMsg);
+        unsentMessages.push(chatMsg)
       }
     }
-    return unsentMessages;
+    return unsentMessages
   }
 
   // messageIds: an array of message Ids to mark as sent.
   //
-  setMessageSent(messageIds, aUserId) {
+  setMessageSent (messageIds, aUserId) {
     // TODO:
-    this.logger('ConversationManager::setMessageSent - noop');
+    this.logger('ConversationManager::setMessageSent - noop')
   }
 
-  createConversation(aUserId) {
-    const bundle = this.addConversation(aUserId);
-    this.conversations[aUserId].push(bundle);
+  createConversation (aUserId) {
+    const bundle = this.addConversation(aUserId)
+    this.conversations[aUserId].push(bundle)
   }
 
-  addConversation(aUserId) {
+  addConversation (aUserId) {
     if (aUserId in this.conversations) {
-      throw 'ERROR(ConversationManager::addConversation): unexpected error adding conversation.';
+      throw 'ERROR(ConversationManager::addConversation): unexpected error adding conversation.'
     }
 
-
-    this.conversations[aUserId] = [];
-    const bundle = new Bundle(aUserId, Bundle.getNextBundleId());
-    bundle.setModified();
+    this.conversations[aUserId] = []
+    const bundle = new Bundle(aUserId, Bundle.getNextBundleId())
+    bundle.setModified()
     // this.conversations[aUserId].push(bundle);
-    return bundle;
+    return bundle
   }
 
-  removeConversation(aUserId) {
+  removeConversation (aUserId) {
     if (aUserId in this.conversations) {
-      delete this.conversations[aUserId];
+      delete this.conversations[aUserId]
 
-      const isFirebase = this.idxIoInst.isFirebase();
-      const extension = isFirebase ? '_b' : '.b';
-      const indexFilePath = `${aUserId}/conversations/bundles`;
-      return this.idxIoInst.deleteLocalDir(indexFilePath);
+      const isFirebase = this.idxIoInst.isFirebase()
+      // const extension = isFirebase ? '_b' : '.b'
+      const indexFilePath = `${aUserId}/conversations/bundles`
+      return this.idxIoInst.deleteLocalDir(indexFilePath)
     }
   }
 
-  _getLastBundle(aUserId) {
+  _getLastBundle (aUserId) {
     if (aUserId in this.conversations) {
-      const numBundles = this.conversations[aUserId].length;
-      const lastBundleIdx = numBundles - 1;
-      return this.conversations[aUserId][lastBundleIdx];
+      const numBundles = this.conversations[aUserId].length
+      const lastBundleIdx = numBundles - 1
+      return this.conversations[aUserId][lastBundleIdx]
     }
 
-    return undefined;
+    return undefined
   }
 
-  _addNewBundle(aUserId, theLastBundleId) {
+  _addNewBundle (aUserId, theLastBundleId) {
     const bundle = new Bundle(aUserId,
-                              Bundle.getNextBundleId(theLastBundleId));
-    bundle.setModified();
-    this.conversations[aUserId].push(bundle);
+                              Bundle.getNextBundleId(theLastBundleId))
+    bundle.setModified()
+    this.conversations[aUserId].push(bundle)
 
-    return bundle;
+    return bundle
   }
 
-  _getConversationId(aChatMessage) {
-    const outgoing = (aChatMessage.from === this.userId);
-    const conversationId = (outgoing) ? aChatMessage.to : aChatMessage.from;
-    return conversationId;
+  _getConversationId (aChatMessage) {
+    const outgoing = (aChatMessage.from === this.userId)
+    const conversationId = (outgoing) ? aChatMessage.to : aChatMessage.from
+    return conversationId
   }
 }
 
-module.exports = { ConversationManager };
+module.exports = { ConversationManager }

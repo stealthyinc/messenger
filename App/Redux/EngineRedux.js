@@ -1,5 +1,4 @@
 import { createReducer, createActions } from 'reduxsauce'
-import { NativeModules } from 'react-native'
 import Immutable from 'seamless-immutable'
 
 /* ------------- Types and Action Creators ------------- */
@@ -9,8 +8,8 @@ import Immutable from 'seamless-immutable'
 //
 const { Types, Creators } = createActions({
   setEngineFailure: null,
-  setUserData:['userData'],
-  addContactId:['id'],
+  setUserData: ['userData'],
+  addContactId: ['id'],
   setPublicKey: ['publicKey'],
   setEngineInitial: ['engineInit'],
   setEngineContactMgr: ['contactMgr'],
@@ -44,7 +43,7 @@ const { Types, Creators } = createActions({
   setAmaStatus: ['amaStatus'],
   sendAmaInfo: ['msgAddress', 'amaId', 'amaUserId'],
   setChannelsData: ['channels'],
-  setSpinnerData: ['spinnerFlag', 'spinnerMessage'],
+  setSpinnerData: ['spinnerFlag', 'spinnerMessage']
 })
 
 export const EngineTypes = Types
@@ -77,7 +76,7 @@ export const INITIAL_STATE = Immutable({
   amaStatus: undefined,
   channels: null,
   spinnerFlag: false,
-  spinnerMessage: '',
+  spinnerMessage: ''
 })
 
 /* ------------- Selectors ------------- */
@@ -104,7 +103,7 @@ export const EngineSelectors = {
   getAmaStatus: state => state.engine.amaStatus,
   getChannelsData: state => state.engine.channels,
   getSpinnerFlag: state => state.engine.spinnerFlag,
-  getSpinnerMessage: state => state.engine.spinnerMessage,
+  getSpinnerMessage: state => state.engine.spinnerMessage
 }
 
 /* ------------- Reducers ------------- */
@@ -252,5 +251,5 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_ENGINE_FAULT]: setEngineFault,
   [Types.RESTART_ENGINE]: restartEngine,
   [Types.SET_CHANNELS_DATA]: setChannelsData,
-  [Types.SET_SPINNER_DATA]: setSpinnerData,
+  [Types.SET_SPINNER_DATA]: setSpinnerData
 })

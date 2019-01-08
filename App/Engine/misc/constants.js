@@ -2,8 +2,8 @@ export const statusIndicators = {
   available: 'green',
   busy: 'red',
   inactive: 'yellow',
-  offline: 'grey',
-};
+  offline: 'grey'
+}
 
 export const defaultSettings = {
   notifications: true,
@@ -11,9 +11,8 @@ export const defaultSettings = {
   discovery: true,
   heartbeat: false,
   webrtc: false,
-  twitterShare: false,
+  twitterShare: false
 }
-
 
 export const testContactArr = [
   {
@@ -23,7 +22,7 @@ export const testContactArr = [
     unread: 0,
     time: '2 mins ago',
     status: statusIndicators.offline,
-    publicKey: '0321f3753d7f1bde82672bbcca9363bc9f9f074ffdb5ec4741f76da47df97f90a8',
+    publicKey: '0321f3753d7f1bde82672bbcca9363bc9f9f074ffdb5ec4741f76da47df97f90a8'
   },
   {
     id: 'batzdorff.id',
@@ -32,7 +31,7 @@ export const testContactArr = [
     unread: 0,
     time: '2 mins ago',
     status: statusIndicators.offline,
-    publicKey: '0321f3753d7f1bde82672bbcca9363bc9f9f074ffdb5ec4741f76da47df97f90a8',
+    publicKey: '0321f3753d7f1bde82672bbcca9363bc9f9f074ffdb5ec4741f76da47df97f90a8'
   },
   {
     id: 'piehead.id',
@@ -41,6 +40,6 @@ export const testContactArr = [
     unread: 0,
     time: '7 mins ago',
     status: statusIndicators.offline,
-    publicKey: '0321f3753d7f1bde82672bbcca9363bc9f9f074ffdb5ec4741f76da47df97f90a8',
-  },
-];
+    publicKey: '0321f3753d7f1bde82672bbcca9363bc9f9f074ffdb5ec4741f76da47df97f90a8'
+  }
+]

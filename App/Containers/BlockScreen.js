@@ -4,27 +4,25 @@ import {
   ActivityIndicator,
   AsyncStorage,
   Linking,
-  NativeModules,
   Image,
   View,
   Text,
   StyleSheet,
-  ScrollView,
-  Platform
+  ScrollView
 } from 'react-native'
 import { Button, SocialIcon } from 'react-native-elements'
 import { connect } from 'react-redux'
-import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import { EngineSelectors } from '../Redux/EngineRedux'
+import chatIcon from '../Images/blue512.png'
 
-const utils = require('./../Engine/misc/utils.js');
+const utils = require('./../Engine/misc/utils.js')
 
-const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
+const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 
-const common = require('./../common.js');
-import chatIcon from '../Images/blue512.png';
+const common = require('./../common.js')
 
 class BlockScreen extends Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       spinner: false
@@ -34,13 +32,13 @@ class BlockScreen extends Component {
     const { publicKey } = this.props
     if (publicKey) {
       firebaseInstance.setFirebaseData(common.getDbSessionPath(publicKey), common.getSessionId())
-      const userData = JSON.parse(await AsyncStorage.getItem('userData'));
+      const userData = JSON.parse(await AsyncStorage.getItem('userData'))
       this.setState({spinner: true})
 
       // Delay before starting session to allow closing session to finish writes etc.
       // Thoughts:
       //   - would be good to implement a handshake to know if this is necessary / status etc.
-      const DELAY_BEFORE_START_MS = 3 * 1000;
+      const DELAY_BEFORE_START_MS = 3 * 1000
       utils.resolveAfterMilliseconds(DELAY_BEFORE_START_MS)
       .then(() => {
         this.setState({spinner: false})
@@ -52,12 +50,12 @@ class BlockScreen extends Component {
         this.props.screenProps._authWork(userData)
       })
     } else {
-      this.props.navigation.navigate('Auth');
+      this.props.navigation.navigate('Auth')
     }
   }
   render () {
-    const activityIndicator = (this.state.spinner) ?
-      (<ActivityIndicator size="large" color="#34bbed"/>) : null;
+    const activityIndicator = (this.state.spinner)
+      ? (<ActivityIndicator size='large' color='#34bbed' />) : null
     const marginBottom = (this.state.spinner) ? 40 : 80
     return (
       <ScrollView contentContainerStyle={styles.container}>
@@ -75,13 +73,13 @@ class BlockScreen extends Component {
           <Button
             onPress={() => console.log('boo')}
             dispabled
-            title=""
-            titleStyle={{ fontSize: 16, fontWeight: "bold", color: "#34bbed"}}
+            title=''
+            titleStyle={{ fontSize: 16, fontWeight: 'bold', color: '#34bbed' }}
             buttonStyle={{
               marginLeft: 20,
               width: 200,
               height: 50,
-              backgroundColor: "white",
+              backgroundColor: 'white',
               marginTop: 5
             }}
           />
@@ -97,14 +95,14 @@ class BlockScreen extends Component {
         {activityIndicator}
         <Button
           onPress={this._unlockEngine}
-          title="Unlock Session"
-          titleStyle={{ fontSize: 16, fontWeight: "bold", color: "white"}}
-          icon={{name: 'unlock-alt', type: 'font-awesome', color: "white"}}
+          title='Unlock Session'
+          titleStyle={{ fontSize: 16, fontWeight: 'bold', color: 'white' }}
+          icon={{name: 'unlock-alt', type: 'font-awesome', color: 'white'}}
           buttonStyle={{
-            backgroundColor: "maroon",
+            backgroundColor: 'maroon',
             width: 180,
             height: 50,
-            borderColor: "transparent",
+            borderColor: 'transparent',
             borderWidth: 0,
             borderRadius: 5,
             marginTop: 20
@@ -112,10 +110,10 @@ class BlockScreen extends Component {
         />
         <Button
           onPress={this.props.screenProps.logout}
-          title="Log Out"
+          title='Log Out'
           icon={{name: 'launch', color: 'white'}}
           buttonStyle={{marginTop: 10, borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#34bbed'}}
-          titleStyle={{ fontSize: 18, fontWeight: "bold"}}
+          titleStyle={{ fontSize: 18, fontWeight: 'bold' }}
         />
       </ScrollView>
     )
@@ -127,14 +125,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    alignItems: 'center',
-  },
-});
+    alignItems: 'center'
+  }
+})
 
 const mapStateToProps = (state) => {
   return {
     publicKey: EngineSelectors.getPublicKey(state),
-    session: EngineSelectors.getSession(state),
+    session: EngineSelectors.getSession(state)
   }
 }
 

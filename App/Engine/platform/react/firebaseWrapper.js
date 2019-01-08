@@ -4,8 +4,8 @@ const firebase = require('firebase')
 // import EngineActions from '../Redux/EngineRedux'
 
 class FirebaseWrapper {
-  constructor() {
-    
+  constructor () {
+
   }
   // constructor() {
   //   if (!firebase.auth().currentUser) {
@@ -36,8 +36,8 @@ class FirebaseWrapper {
   //   this.notificationDisplayedListener();
   // }
 
-  getFirebaseRef(path) {
-    return firebase.database().ref(path);
+  getFirebaseRef (path) {
+    return firebase.database().ref(path)
   }
 
   // async setFirebaseData(path, data) {

@@ -1,38 +1,35 @@
-// const Config = require('Config');
-import Secrets from 'react-native-config'
-
-import {NativeModules, Platform, Dimensions} from 'react-native';
-//const Platform = require('platform');
+import {NativeModules, Platform, Dimensions} from 'react-native'
+// const Platform = require('platform');
 //
-//const { encryptECIES, decryptECIES } = require('blockstack/lib/encryption');
+// const { encryptECIES, decryptECIES } = require('blockstack/lib/encryption');
 const CHANNEL_PROTOCOLS = ['public channel 2.0']
 const AMA_PROTOCOLS = ['public ama 1.0']
 
-module.exports.isChannel = function(protocolStr) {
+module.exports.isChannel = function (protocolStr) {
   return CHANNEL_PROTOCOLS.includes(protocolStr)
 }
 
-module.exports.isAma = function(protocolStr) {
+module.exports.isAma = function (protocolStr) {
   return AMA_PROTOCOLS.includes(protocolStr)
 }
 
-module.exports.isChannelOrAma = function(protocolStr) {
+module.exports.isChannelOrAma = function (protocolStr) {
   return module.exports.isChannel(protocolStr) ||
          module.exports.isAma(protocolStr)
 }
 
-module.exports.fmtErrorStr = function(anErrDescription,
-                           aMethodName=undefined,
-                           aCaughtErrDescription=undefined) {
-  let description = (anErrDescription) ? anErrDescription : ''
-  let method = (aMethodName) ? `(${aMethodName})` : ''
-  let caughtDescription = (aCaughtErrDescription) ? aCaughtErrDescription : ''
+// module.exports.fmtErrorStr = function (anErrDescription,
+//                            aMethodName = undefined,
+//                            aCaughtErrDescription = undefined) {
+//   let description = (anErrDescription) || ''
+//   let method = (aMethodName) ? `(${aMethodName})` : ''
+//   let caughtDescription = (aCaughtErrDescription) || ''
 
-  let errorString = `ERROR${method}: ${description}\n`
-  if (caughtDescription) {
-    errorString += caughtDescription
-  }
-}
+//   let errorString = `ERROR${method}: ${description}\n`
+//   if (caughtDescription) {
+//     errorString += caughtDescription
+//   }
+// }
 
 // Determines if a js object is empty.
 //
@@ -54,84 +51,82 @@ module.exports.isEmptyObj = function (anObject) {
 
 module.exports.throwIfUndef = function (aVarName, aVar) {
   if (aVar === undefined) {
-    throw `${aVarName} is undefined`;
+    throw `${aVarName} is undefined`
   }
 }
 
 module.exports.isDef = function (aVar) {
   return ((aVar !== undefined) &&
           (aVar !== null) &&
-          (aVar !== ''));
+          (aVar !== ''))
 }
 
-module.exports.isObjEncrypted = function(anObj) {
+module.exports.isObjEncrypted = function (anObj) {
   if (module.exports.isDef(anObj)) {
     try {
       if (anObj.hasOwnProperty('cipherText')) {
-        return true;
+        return true
       }
 
-      const theObj = JSON.parse(anObj);
+      const theObj = JSON.parse(anObj)
       if (theObj.hasOwnProperty('cipherText')) {
-        return true;
+        return true
       }
     } catch (err) {
       // Ignore.
     }
   }
-  return false;
-}
-
-module.exports.deepCopyObj = function (anObj) {
-  return JSON.parse(JSON.stringify(anObj));
-};
-
-module.exports.is_oldPad = function() {
-  const {height, width} = Dimensions.get('window');
-  //bad one
-  //480 320
-  const aspectRatio = height/width;
-  if (aspectRatio<1.6 && height === 480)
-    return true
   return false
 }
 
-module.exports.is_iOS = function() {
-  return Platform.OS === 'ios';
+module.exports.deepCopyObj = function (anObj) {
+  return JSON.parse(JSON.stringify(anObj))
 }
 
-module.exports.isAndroid = function() {
+module.exports.is_oldPad = function () {
+  const {height, width} = Dimensions.get('window')
+  // bad one
+  // 480 320
+  const aspectRatio = height / width
+  if (aspectRatio < 1.6 && height === 480) { return true }
+  return false
+}
+
+module.exports.is_iOS = function () {
+  return Platform.OS === 'ios'
+}
+
+module.exports.isAndroid = function () {
   return Platform.OS === 'android'
 }
 
-module.exports.getAppContext = function(appToken) {
-  let context = 'Stealthy';
+module.exports.getAppContext = function (appToken) {
+  let context = 'Stealthy'
 
   if (appToken) {
-    // const validAppsMap = Secrets.VALID_APPS;
     const validAppsMap = {
-      'gd04012018': 'Graphite',
+      'gd04012018': 'Graphite'
     }
 
     if (validAppsMap.hasOwnProperty(appToken)) {
-      context = validAppsMap[appToken];
+      context = validAppsMap[appToken]
     }
   }
 
-  return context;
+  return context
 }
 
 module.exports.resolveAfterMilliseconds = function (milliseconds) {
   return new Promise((resolve) => {
-    setTimeout(() => { resolve('resolved'); }, milliseconds);
-  });
-};
+    setTimeout(() => { resolve('resolved') }, milliseconds)
+  })
+}
 
 // Methods to convert the Blockstack.js / Android encryptECIES/decryptECIES methods
 // to a promise (for compatibilty with our iOS encryption)
-async function jsEncryptECIES(aKey, theContent) {
+async function jsEncryptECIES (aKey, theContent) {
   return new Promise((resolve, reject) => {
-    const cipherObject = encryptECIES(aKey, theContent);
+    const cipherObject = encryptECIES(aKey, theContent)
     if (cipherObject) {
       resolve(cipherObject)
     } else {
@@ -140,11 +135,11 @@ async function jsEncryptECIES(aKey, theContent) {
   })
 }
 //
-async function jsDecryptECIES(aKey, theCipherObject) {
+async function jsDecryptECIES (aKey, theCipherObject) {
   return new Promise((resolve, reject) => {
-    const recovered = decryptECIES(aKey, theCipherObject);
+    const recovered = decryptECIES(aKey, theCipherObject)
     // Recovering an empty string might be okay since we can encrypt an empty one.
-    if (recovered && recovered !== "") {
+    if (recovered && recovered !== '') {
       resolve(recovered)
     } else {
       reject('ERROR decrypting provided content with given key.')
@@ -152,9 +147,9 @@ async function jsDecryptECIES(aKey, theCipherObject) {
   })
 }
 
-async function iosEncryptECIES(aKey, theContent) {
+async function iosEncryptECIES (aKey, theContent) {
   return new Promise((resolve, reject) => {
-    const {BlockstackNativeModule} = NativeModules;
+    const {BlockstackNativeModule} = NativeModules
     BlockstackNativeModule.encryptCryptoppECIES(aKey, theContent, (error, cipherObject) => {
       if (error) {
         reject(error)
@@ -168,21 +163,21 @@ async function iosEncryptECIES(aKey, theContent) {
   })
 }
 
-async function iosDecryptECIES(aKey, theCipherObject) {
+async function iosDecryptECIES (aKey, theCipherObject) {
   return new Promise((resolve, reject) => {
-    const {BlockstackNativeModule} = NativeModules;
+    const {BlockstackNativeModule} = NativeModules
     BlockstackNativeModule.decryptCryptoppECIES(aKey, theCipherObject, (error, recovered) => {
-        if(error) {
-          reject(error)
-        } else {
-          const {wasString} = theCipherObject
-          resolve(wasString ? recovered.toString() : recovered)
-        }
-      });
+      if (error) {
+        reject(error)
+      } else {
+        const {wasString} = theCipherObject
+        resolve(wasString ? recovered.toString() : recovered)
+      }
+    })
   })
 }
 
-module.exports.encrypt = async function(aKey, theContent) {
+module.exports.encrypt = async function (aKey, theContent) {
   // console.log(`Encrypting with key ${aKey}:\t${theContent}\n`)
   if (module.exports.is_iOS()) {
     return iosEncryptECIES(aKey, theContent)
@@ -198,7 +193,7 @@ module.exports.encrypt = async function(aKey, theContent) {
   }
 }
 
-module.exports.decrypt = async function(aKey, theCipherObject) {
+module.exports.decrypt = async function (aKey, theCipherObject) {
   // console.log(`Decrypting with key ${aKey}:\t${JSON.stringify(theCipherObject)}\n`)
   if (module.exports.is_iOS()) {
     return iosDecryptECIES(aKey, theCipherObject)
@@ -225,30 +220,30 @@ module.exports.decrypt = async function(aKey, theCipherObject) {
   }
 }
 
-module.exports.encryptObj = async function (aKey, anObject, enable=undefined) {
+module.exports.encryptObj = async function (aKey, anObject, enable = undefined) {
   module.exports.throwIfUndef('enable', enable)
 
   if (enable) {
-    _throwIfKeyUndefined(aKey, 'encryptObj');
-    const serializedObj = JSON.stringify(anObject);
+    _throwIfKeyUndefined(aKey, 'encryptObj')
+    const serializedObj = JSON.stringify(anObject)
 
     return module.exports.encrypt(aKey, serializedObj)
     .then(cipherObject => {
-      return JSON.stringify(cipherObject);
+      return JSON.stringify(cipherObject)
     })
   } else {
     return new Promise((resolve, reject) => {
       resolve(anObject)
     })
   }
-};
+}
 
-module.exports.decryptObj = async function (aKey, aStringifiedCipherObj, enable=undefined) {
+module.exports.decryptObj = async function (aKey, aStringifiedCipherObj, enable = undefined) {
   module.exports.throwIfUndef('enable', enable)
 
   if (enable) {
-    _throwIfKeyUndefined(aKey, 'decryptObj');
-    const cipherData = JSON.parse(aStringifiedCipherObj);
+    _throwIfKeyUndefined(aKey, 'decryptObj')
+    const cipherData = JSON.parse(aStringifiedCipherObj)
 
     return module.exports.decrypt(aKey, cipherData)
     .then(recovered => {
@@ -259,7 +254,7 @@ module.exports.decryptObj = async function (aKey, aStringifiedCipherObj, enable=
       resolve(aStringifiedCipherObj)
     })
   }
-};
+}
 
 // module.exports.safeEncrypt = async function (aPrivateKey, aPublicKey, theContent) {
 //
@@ -283,34 +278,33 @@ module.exports.decryptObj = async function (aKey, aStringifiedCipherObj, enable=
 //   }
 // }
 
-function _throwIfKeyUndefined(aKey, aMethodName) {
+function _throwIfKeyUndefined (aKey, aMethodName) {
   if (!aKey) {
-    throw (`ERROR: In call to ${aMethodName}, aKey is not defined.`);
+    throw (`ERROR: In call to ${aMethodName}, aKey is not defined.`)
   }
 }
 
 module.exports.cleanPathForFirebase = function (path) {
   if ((path === null) || (path === undefined)) {
-    throw (`ERROR(utils::cleanPathForFirebase): path is null or undefined.`);
+    throw (`ERROR(utils::cleanPathForFirebase): path is null or undefined.`)
   }
 
-  return path.replace(/[\.-]/g, '_');
+  return path.replace(/[\.-]/g, '_')
 }
 
 //
 // Blockstack namespace and top-level domain (TLD) utils
-////////////////////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////////////////////
 module.exports.DEFAULT_TLD = '.id'
 module.exports.DEFAULT_TLDS = ['.id.blockstack', '.id']
 
-module.exports.removeTld = function(
-  aName, theTlds = module.exports.DEFAULT_TLDS)
-{
+module.exports.removeTld = function (
+  aName, theTlds = module.exports.DEFAULT_TLDS) {
   if (aName) {
     // Descending sort to catch .id.blockstack before .blockstack -- i.e. ignore
     // subsets of a tld in a name.
-    theTlds.sort(function(a, b) {
-      return b.length - a.length;
+    theTlds.sort(function (a, b) {
+      return b.length - a.length
     })
 
     for (const tld of theTlds) {
@@ -323,7 +317,7 @@ module.exports.removeTld = function(
   return aName
 }
 
-module.exports.addTld = function(aName, aTld = module.exports.DEFAULT_TLD) {
+module.exports.addTld = function (aName, aTld = module.exports.DEFAULT_TLD) {
   if (aName && aTld && !aName.endsWith(aTld)) {
     return `${aName}${aTld}`
   }
@@ -331,10 +325,10 @@ module.exports.addTld = function(aName, aTld = module.exports.DEFAULT_TLD) {
   return aName
 }
 
-module.exports.removeIdTld = function(aName) {
+module.exports.removeIdTld = function (aName) {
   return module.exports.removeTld(aName, [module.exports.DEFAULT_TLD])
 }
 
-module.exports.addIdTld = function(aName) {
+module.exports.addIdTld = function (aName) {
   return module.exports.addTld(aName)
 }

@@ -1,37 +1,37 @@
-import React from "react";
-import { Image, Linking, StatusBar, StyleSheet, View, TouchableOpacity } from "react-native";
-import { Container, H1, Header, Content, Card, CardItem, Thumbnail, Text, Button, Icon, Left, Body, Right } from 'native-base';
+import React from 'react'
+import { Image, Linking, View, TouchableOpacity } from 'react-native'
+import { Container, Content, Card, CardItem, Thumbnail, Text, Button, Icon, Left, Body, Right } from 'native-base'
 import { connect } from 'react-redux'
-import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
-import chatIcon from '../Images/blue512.png';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { EngineSelectors } from '../Redux/EngineRedux'
+import chatIcon from '../Images/blue512.png'
+import Ionicons from 'react-native-vector-icons/Ionicons'
 
 class ContactProfile extends React.Component {
   static navigationOptions = ({ navigation }) => {
-    const params = navigation.state.params || {};
+    const params = navigation.state.params || {}
     return {
       headerLeft: (
         <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
-          <Ionicons name="ios-arrow-dropleft" size={32} color='white'/>
+          <Ionicons name='ios-arrow-dropleft' size={32} color='white' />
         </TouchableOpacity>
       ),
       headerTintColor: 'white',
       headerStyle: {
         backgroundColor: '#34bbed'
       }
-    };
+    }
   };
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
     this.state = {
       dApp: {}
-    };
+    }
   }
-  componentWillMount() {
-    this.props.navigation.setParams({ navigation: this.props.navigation });
+  componentWillMount () {
+    this.props.navigation.setParams({ navigation: this.props.navigation })
   }
   getSocial = (profile) => {
-    const list = [];
+    const list = []
     if (profile && profile.account) {
       for (const i of profile.account) {
         if (i.service === 'twitter' || i.service === 'facebook') {
@@ -39,7 +39,7 @@ class ContactProfile extends React.Component {
             <Button style={{margin: 10}} transparent key={i.service} onPress={() => Linking.openURL(i.proofUrl).catch(err => console.error('An error occurred', err))}>
               <Icon name={`logo-${i.service}`} />
             </Button>
-          );
+          )
         }
       }
       return (
@@ -48,18 +48,15 @@ class ContactProfile extends React.Component {
         </View>
       )
     }
-    return null;
+    return null
   }
-  render() {
+  render () {
     const { activeUserProfile, contactMgr } = this.props
     if (!activeUserProfile) return null
     const activeContact = contactMgr.getActiveContact()
     if (!activeContact) return null
-    const { id, title, image, status } = activeContact
-    let nTitle = (title) ? title : ''
+    const { id, title, image } = activeContact
     const { profile } = activeUserProfile
-    const { account, description } = profile
-    const checkDescription = (description) ? description : ''
     return (
       <Container>
         <Content>
@@ -77,19 +74,19 @@ class ContactProfile extends React.Component {
               </Right>
             </CardItem>
             <CardItem cardBody>
-              <Image source={{uri: image}} style={{height: 200, width: null, flex: 1}}/>
+              <Image source={{uri: image}} style={{height: 200, width: null, flex: 1}} />
             </CardItem>
           </Card>
         </Content>
       </Container>
-    );
+    )
   }
 }
 
 const mapStateToProps = (state) => {
   return {
     contactMgr: EngineSelectors.getContactMgr(state),
-    activeUserProfile: EngineSelectors.getActiveUserProfile(state),
+    activeUserProfile: EngineSelectors.getActiveUserProfile(state)
   }
 }
 

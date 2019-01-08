@@ -1,68 +1,68 @@
-const platform = require('platform');
+import AmaCommands from './misc/amaCommands.js'
+
+import API from './../Services/Api'
+
+const platform = require('platform')
 
 // Platform dependent (commented out parts are for other platforms)
 // -----------------------------------------------------------------------------
 // Web/React Server:
 //
-//const firebaseInstance = require('firebase')
-//const { EventEmitterAdapter } = require('./platform/react/eventEmitterAdapter.js')
-//const Anonalytics = require('./platform/no-op/Analytics.js')
-//const { Graphite, StealthyIndexReader } = require('./platform/no-op/Integrations.js')
+// const firebaseInstance = require('firebase')
+// const { EventEmitterAdapter } = require('./platform/react/eventEmitterAdapter.js')
+// const Anonalytics = require('./platform/no-op/Analytics.js')
+// const { Graphite, StealthyIndexReader } = require('./platform/no-op/Integrations.js')
 //
 // Web/React Client (TODO: one day.)
 // ...
 //
 // Mobile/React Native:
 //
- const { firebaseInstance } = require('./firebaseWrapper.js')
- const { EventEmitterAdapter } = require('./platform/reactNative/eventEmitterAdapter.js')
- const { Anonalytics } = require('../Analytics.js');
- const { Graphite } = require('./integrations/graphite.js')
- const { StealthyIndexReader } = require('./integrations/stealthyIndexReader.js')
+const { firebaseInstance } = require('./firebaseWrapper.js')
+const { EventEmitterAdapter } = require('./platform/reactNative/eventEmitterAdapter.js')
+const { Anonalytics } = require('../Analytics.js')
+const { Graphite } = require('./integrations/graphite.js')
+const { StealthyIndexReader } = require('./integrations/stealthyIndexReader.js')
 //
 // Common:
 //
 const { MESSAGE_TYPE,
         MESSAGE_STATE,
-        ChatMessage } = require('./messaging/chatMessage.js');
-const { ConversationManager } = require('./messaging/conversationManager.js');
-const { OfflineMessagingServices } = require('./messaging/offlineMessagingServices.js');
+        ChatMessage } = require('./messaging/chatMessage.js')
+const { ConversationManager } = require('./messaging/conversationManager.js')
+const { OfflineMessagingServices } = require('./messaging/offlineMessagingServices.js')
 
-const utils = require('./misc/utils.js');
+const utils = require('./misc/utils.js')
 
-const FirebaseIO = require('./filesystem/firebaseIO.js');
-const GaiaIO = require('./filesystem/gaiaIO.js');
-const { IndexedIO } = require('./filesystem/indexedIO.js');
+const FirebaseIO = require('./filesystem/firebaseIO.js')
+const GaiaIO = require('./filesystem/gaiaIO.js')
+const { IndexedIO } = require('./filesystem/indexedIO.js')
 
-const constants = require('./misc/constants.js');
+const constants = require('./misc/constants.js')
 
-const { ContactManager } = require('./messaging/contactManager.js');
+const { ContactManager } = require('./messaging/contactManager.js')
 
 const { Discovery } = require('./misc/discovery.js')
-const { Timer } = require('./misc/timer.js');
+const { Timer } = require('./misc/timer.js')
 
-const common = require('./../common.js');
-
-import AmaCommands from './misc/amaCommands.js'
-
-import API from './../Services/Api'
+const common = require('./../common.js')
 const api = API.create()
 
 //
-const ENCRYPT_INDEXED_IO = true;
+const ENCRYPT_INDEXED_IO = true
 //
-const ENABLE_RECEIPTS = true;
-let ENABLE_GAIA = true;
-let ENCRYPT_MESSAGES = true;
-let ENCRYPT_CONTACTS = true;
-let ENCRYPT_SETTINGS = true;
+const ENABLE_RECEIPTS = true
+let ENABLE_GAIA = true
+// let ENCRYPT_MESSAGES = true
+let ENCRYPT_CONTACTS = true
+let ENCRYPT_SETTINGS = true
 //
 // Options include: 'LOCALHOST', 'TEST_STEALTHY', & 'STEALTHY'
-let STEALTHY_PAGE = 'LOCALHOST';
+let STEALTHY_PAGE = 'LOCALHOST'
 //
 // Logging Scopes
-const LOG_GAIAIO = true;
-const LOG_OFFLINEMESSAGING = false;
+const LOG_GAIAIO = true
+const LOG_OFFLINEMESSAGING = false
 //
 const ENABLE_AMA = true
 const ENABLE_CHANNELS_V2_0 = true
@@ -70,31 +70,31 @@ const ENCRYPT_CHANNEL_NOTIFICATIONS = true
 const { ChannelServicesV2 } = require('./messaging/channelServicesV2.js')
 
 export class MessagingEngine extends EventEmitterAdapter {
-  constructor(logger,
+  constructor (logger,
               privateKey,
               publicKey,
               avatarUrl,
               sessionId) {
-    super();
-    this.logger = logger;
-    this.privateKey = privateKey;
-    this.publicKey = publicKey;
-    this.avatarUrl = avatarUrl;
-    this.sessionId = sessionId;
-    this.discovery = undefined;
+    super()
+    this.logger = logger
+    this.privateKey = privateKey
+    this.publicKey = publicKey
+    this.avatarUrl = avatarUrl
+    this.sessionId = sessionId
+    this.discovery = undefined
 
     this.settings = constants.defaultSettings
-    this.contactMgr = undefined;
+    this.contactMgr = undefined
 
     this.myTimer = new Timer('Enter MessagingEngine Ctor')
 
-    this.userId = undefined;
+    this.userId = undefined
 
-    this.conversations = undefined;
-    this.offlineMsgSvc = undefined;
-    this.io = undefined;
-    this.shuttingDown = false;
-    this.anonalytics = undefined;
+    this.conversations = undefined
+    this.offlineMsgSvc = undefined
+    this.io = undefined
+    this.shuttingDown = false
+    this.anonalytics = undefined
 
     this.indexIntegrations = {}
 
@@ -114,7 +114,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   log = (display, ...args) => {
     if (display) {
-      this.logger(...args);
+      this.logger(...args)
     }
   }
 
@@ -123,29 +123,29 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   //
-  updateContactMgr() {
+  updateContactMgr () {
     // We clone this here so that the GUI actually updates the contacts on
     // state change. (React setState didn't detect changes unless the whole array
     // object changes.)
 
     // In mobile we don't force an active contact
     const forceActiveContact = false
-    const contactMgr = new ContactManager(forceActiveContact);
-    contactMgr.clone(this.contactMgr);
+    const contactMgr = new ContactManager(forceActiveContact)
+    contactMgr.clone(this.contactMgr)
 
-    this.emit('me-update-contactmgr', contactMgr);
+    this.emit('me-update-contactmgr', contactMgr)
   }
 
-  updateMessages(aContactId) {
-    const theMessages = this._getMessageArray(aContactId);
-    this.emit('me-update-messages', theMessages);
+  updateMessages (aContactId) {
+    const theMessages = this._getMessageArray(aContactId)
+    this.emit('me-update-messages', theMessages)
   }
 
-  closeContactSearch() {
-    this.emit('me-close-contact-search', true);
+  closeContactSearch () {
+    this.emit('me-close-contact-search', true)
   }
 
-  async readAmaData() {
+  async readAmaData () {
     try {
       const encAmaData = await this.io.robustLocalRead(this.userId, 'ama-data.json')
       const amaData = await utils.decryptObj(this.privateKey, encAmaData, true)
@@ -153,12 +153,12 @@ export class MessagingEngine extends EventEmitterAdapter {
         console.log(`INFO(MessagingEngine::readAmaData): setting amaData from stored data.`)
         this.amaData = amaData
       }
-    } catch(error) {
+    } catch (error) {
       console.log(`ERROR(MessagingEngine::readAmaData): failed to read or decrypt ama-data.json.\n${error}`)
     }
   }
 
-  async writeAmaData() {
+  async writeAmaData () {
     try {
       const encAmaData = await utils.encryptObj(this.publicKey, this.amaData, true)
       await this.io.robustLocalWrite(this.userId, 'ama-data.json', encAmaData)
@@ -175,7 +175,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   // Returns the current integration data for specified appName and issues an
   // me-integration-data event.
-  getIntegrationData(appName = 'Graphite') {
+  getIntegrationData (appName = 'Graphite') {
     // const method = 'engine.js::getIntegrationData'
     // let error = undefined
     // let indexData = undefined
@@ -197,10 +197,10 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   // Updates integration data for specified appName and issues an me-integration-data
   // event on completion.
-  async refreshIntegrationData(appName = 'Graphite') {
+  async refreshIntegrationData (appName = 'Graphite') {
     const method = 'engine.js::refreshIntegrationData'
-    let error = undefined
-    let indexData = undefined
+    let error
+    let indexData
 
     if (!appName) {
       error = `ERROR(${method}): appName is not defined.`
@@ -235,7 +235,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
     this.myTimer.logEvent('Enter componentDidMountWork')
 
-    this.userId = userId;
+    this.userId = userId
     this._configureIO()
   }
 
@@ -244,21 +244,20 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   //
-  async _initWithContacts(contactArr) {
+  async _initWithContacts (contactArr) {
     const method = 'engine::_initWithContacts'
     this.myTimer.logEvent('_initWithContacts    (Entered)')
 
     // In mobile we don't force an active contact
     const forceActiveContact = false
-    this.contactMgr = new ContactManager(forceActiveContact);
-    this.contactMgr.initFromStoredArray(contactArr);
-    this.contactMgr.setAllContactsStatus();
+    this.contactMgr = new ContactManager(forceActiveContact)
+    this.contactMgr.initFromStoredArray(contactArr)
+    this.contactMgr.setAllContactsStatus()
     if (!forceActiveContact) {
       // No contact is selected initially in mobile, so unset the active contact
-      this.contactMgr.setActiveContact(undefined);
+      this.contactMgr.setActiveContact(undefined)
     }
-    this.updateContactMgr();
-
+    this.updateContactMgr()
 
     this.offlineMsgSvc =
       new OfflineMessagingServices(this.logger,
@@ -266,39 +265,39 @@ export class MessagingEngine extends EventEmitterAdapter {
                                    this.idxIo,
                                    this.io,
                                    this.contactMgr.getContacts(),
-                                   LOG_OFFLINEMESSAGING);
-    this.offlineMsgSvc.startSendService();
+                                   LOG_OFFLINEMESSAGING)
+    this.offlineMsgSvc.startSendService()
 
     this.offlineMsgSvc.on('new messages', (messages) => {
-      const unreceivedMessages = [];
+      const unreceivedMessages = []
       for (const message of messages) {
         if (message) {
           if (((message.type === MESSAGE_TYPE.TEXT) ||
                (message.type === MESSAGE_TYPE.TEXT_JSON)) &&
               !this.conversations.hasMessage(message)) {
-            unreceivedMessages.push(message);
+            unreceivedMessages.push(message)
           } else if (message.type === MESSAGE_TYPE.RECEIPT) {
-            this.handleReceipt(message);
+            this.handleReceipt(message)
           }
         }
       }
 
-      this.addIncomingMessages(unreceivedMessages);
-      this.updateContactOrderAndStatus(unreceivedMessages);
-      this.sendMessageReceipts(unreceivedMessages);
-    });
+      this.addIncomingMessages(unreceivedMessages)
+      this.updateContactOrderAndStatus(unreceivedMessages)
+      this.sendMessageReceipts(unreceivedMessages)
+    })
 
     this.offlineMsgSvc.on('offline messages sent', () => {
       // The offline service has sent messages and updated their status.
       // We want to do a redraw of the current message window to update
       // status indicators (spinners--> solid gray checkmarks) and perform
       // a bundle write to store the change.
-      this._writeConversations();
+      this._writeConversations()
 
       if (this.contactMgr.getActiveContact()) {
         this.updateMessages(this.contactMgr.getActiveContact().id)
       }
-    });
+    })
 
     if (ENABLE_CHANNELS_V2_0) {
       this.offlineMsgSvc.on('offline message written', (messageTuple) => {
@@ -312,9 +311,8 @@ export class MessagingEngine extends EventEmitterAdapter {
       })
     }
 
-
     // Lots of possiblities here (i.e. lazy load etc.)
-    this.conversations = new ConversationManager(this.logger, this.userId, this.idxIo);
+    this.conversations = new ConversationManager(this.logger, this.userId, this.idxIo)
     if (!this.newUser) {
       try {
         await this.conversations.loadContactBundles(this.contactMgr.getContactIds())
@@ -342,13 +340,13 @@ export class MessagingEngine extends EventEmitterAdapter {
         }
         const messages = this.conversations.getMessages(contactId)
         if (messages && messages.length > 0) {
-          let compactMsgAddress = undefined
+          let compactMsgAddress
 
           let msgIdx = messages.length - 1
           while (msgIdx > 0) {
             const msg = messages[msgIdx]
-            compactMsgAddress = (msg && msg.channel) ?
-              msg.channel.msgAddress : undefined
+            compactMsgAddress = (msg && msg.channel)
+              ? msg.channel.msgAddress : undefined
             if (compactMsgAddress) {
               break
             }
@@ -369,54 +367,53 @@ export class MessagingEngine extends EventEmitterAdapter {
     // TODO TODO TODO:  change this to be an emitter that sends the ids of sent
     //                  messages back to the engine so we don't have to make
     //                  a conversations ref in offlineMsgSvc
-    this.offlineMsgSvc.setConversationManager(this.conversations);
+    this.offlineMsgSvc.setConversationManager(this.conversations)
 
-    let activeContactId = undefined
+    let activeContactId
     if (this.contactMgr.getActiveContact()) {
       activeContactId = this.contactMgr.getActiveContact().id
-      const seenMessages = this.markReceivedMessagesSeen(activeContactId);
-      this.sendMessageReceipts(seenMessages);
+      const seenMessages = this.markReceivedMessagesSeen(activeContactId)
+      this.sendMessageReceipts(seenMessages)
     }
 
-    this.offlineMsgSvc.startRecvService();
+    this.offlineMsgSvc.startRecvService()
     this.myTimer.logEvent('_initWithContacts    (after startRecvService)')
-
 
     // Update the summaries for all contacts.
     //   TODO: clean this up into method(s) on conversations and contactMgr (AC)
     for (const contactId of this.contactMgr.getContactIds()) {
-      const messages = this.conversations.getMessages(contactId);
+      const messages = this.conversations.getMessages(contactId)
 
-      const lastMessage = (messages && (messages.length > 0)) ?
-        ChatMessage.getSummary(messages[messages.length - 1]) : '';
-      this.contactMgr.setSummary(contactId, lastMessage);
+      const lastMessage = (messages && (messages.length > 0))
+        ? ChatMessage.getSummary(messages[messages.length - 1]) : ''
+      this.contactMgr.setSummary(contactId, lastMessage)
 
       if (contactId !== activeContactId) {
-        let count = 0;
+        let count = 0
         for (const message of messages) {
           // Skip messages we wrote--we only count the ones we receive (
           // unless they are in the special case where we sent them to
           // ourselves).
           if (!(message.to === message.from) &&
               (this.userId === message.from)) {
-            continue;
+            continue
           }
 
           if (!message.seen) {
-            count++;
+            count++
           }
           if (count === 99) {
-            break;
+            break
           }
         }
-        this.contactMgr.setUnread(contactId, count);
+        this.contactMgr.setUnread(contactId, count)
       }
     }
 
     if (activeContactId) {
-      this.updateMessages(activeContactId);
+      this.updateMessages(activeContactId)
     }
-    this.updateContactMgr();
+    this.updateContactMgr()
     this.myTimer.logEvent('_initWithContacts    (after updateContactMgr)')
 
     // Setup Discovery services:
@@ -441,7 +438,6 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.myTimer.logEvent('_initWithContacts    (emit me-initialized)')
     this.logger(this.myTimer.getEvents())
 
-
     // Add the default channels if we are a first time user
     //  - TODO: mechanism to tie this into settings or firebase (i.e. added
     //          channels once)  This would catch folks like Justin.
@@ -463,14 +459,14 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.refreshIntegrationData('Travelstack')
   }
 
-  async _configureIO() {
+  async _configureIO () {
     this.myTimer.logEvent('Enter _configureIO')
-    this.io = (ENABLE_GAIA) ?
-      new GaiaIO(this.logger, LOG_GAIAIO) :
-      new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO);
+    this.io = (ENABLE_GAIA)
+      ? new GaiaIO(this.logger, LOG_GAIAIO)
+      : new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO)
 
     await this._mobileGaiaTest()
-    await this._fetchUserSettings();
+    await this._fetchUserSettings()
   }
 
   // Blockstack's mobile offerings create sessions for GAIA that cause a bug when
@@ -483,18 +479,18 @@ export class MessagingEngine extends EventEmitterAdapter {
   //
   // me-fault reduction effort. We only throw if we successfully write and read
   // our data back, finding it mismatches. Otherwise we assume things are good to go.
-  async _mobileGaiaTest() {
+  async _mobileGaiaTest () {
     const method = 'engine::_mobileGaiaTest'
     this.myTimer.logEvent('Enter _mobileGaiaTest')
 
     const testFilePath = 'mobileGaiaTest.txt'
-    const testValue = `${Date.now()}_${(Math.random()*100000)}`
-    let recoveredValue = undefined
+    const testValue = `${Date.now()}_${(Math.random() * 100000)}`
+    let recoveredValue
     try {
       await this.io.robustLocalWrite(this.userId, testFilePath, testValue)
       recoveredValue = await this.io.robustLocalRead(this.userId, testFilePath)
     } catch (error) {
-      console.log `WARNING(${method}): unable to read / write test file, ${testFilePath}, to / from ${this.userId}'s GAIA. Skipping test.`
+      console.log`WARNING(${method}): unable to read / write test file, ${testFilePath}, to / from ${this.userId}'s GAIA. Skipping test.`
       return
     }
 
@@ -510,15 +506,15 @@ export class MessagingEngine extends EventEmitterAdapter {
   // Future: a multiple read of settings.json, contacts.json and pk.txt
   //         and a majority test to see if first time user (i.e. if not firebase
   //         and all three null/not present, then decide first time user)
-  async _fetchUserSettings() {
+  async _fetchUserSettings () {
     const method = 'engine.js::_fetchUserSettings'
     this.myTimer.logEvent('Enter _fetchUserSettings')
 
-    let encSettingsData = undefined
+    let encSettingsData
     try {
       encSettingsData = await this.io.robustLocalRead(this.userId, 'settings.json')
       // readLocalFile returns undefined on BlobNotFound, so set new user:
-      this.newUser = (encSettingsData) ? false : true
+      this.newUser = !(encSettingsData)
     } catch (error) {
       // Two scenarios:
       //   1. New user (file never created). (continue with defaults)
@@ -571,40 +567,40 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     }
 
-    this.emit('me-update-settings', this.settings);
-    await this._fetchDataAndCompleteInit();
+    this.emit('me-update-settings', this.settings)
+    await this._fetchDataAndCompleteInit()
   }
 
-  async _fetchDataAndCompleteInit() {
+  async _fetchDataAndCompleteInit () {
     const method = 'engine.js::_fetchDataAndCompleteInit'
     this.myTimer.logEvent('_fetchDataAndCompleteInit    (Enter)')
 
     if (!this.anonalytics) {
-      this.anonalytics = new Anonalytics(this.publicKey);
+      this.anonalytics = new Anonalytics(this.publicKey)
     }
-    this.anonalytics.aeLogin();
-    this.anonalytics.aePlatformDescription(platform.description);
+    this.anonalytics.aeLogin()
+    this.anonalytics.aePlatformDescription(platform.description)
     // in mobile the app token is undefined (in web it is the value of 'app' in the query string)
     const appToken = undefined
-    this.anonalytics.aeLoginContext(utils.getAppContext(appToken));
+    this.anonalytics.aeLoginContext(utils.getAppContext(appToken))
     this.myTimer.logEvent('_fetchDataAndCompleteInit    (Anonalytics operations complete)')
 
     this.idxIo = new IndexedIO(this.logger, this.io, this.userId,
-                               this.privateKey, this.publicKey, ENCRYPT_INDEXED_IO);
+                               this.privateKey, this.publicKey, ENCRYPT_INDEXED_IO)
 
-    await this.io.writeLocalFile(this.userId, 'pk.txt', this.publicKey);
+    await this.io.writeLocalFile(this.userId, 'pk.txt', this.publicKey)
     this.myTimer.logEvent('_fetchDataAndCompleteInit    (Wrote pk.txt)')
 
     await this.writeSettings(this.settings)
     this.myTimer.logEvent('_fetchDataAndCompleteInit    (Wrote settings.json)')
 
-    let contactArr = [];
-    let contactsData = undefined
+    let contactArr = []
+    let contactsData
     try {
       const maxAttempts = 5
       contactsData = await this.io.robustLocalRead(this.userId, 'contacts.json', maxAttempts)
       this.myTimer.logEvent('_fetchDataAndCompleteInit    (After successfully reading contacts.json)')
-    } catch(error) {
+    } catch (error) {
       // TODO:
       //   - safe encrypt thie contacts data
       //   - refactor to critical load function that:
@@ -658,10 +654,10 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     if (this.offlineMsgSvc) {
       try {
-        this.offlineMsgSvc.skipSendService();
-        this.offlineMsgSvc.stopSendService();
-        this.offlineMsgSvc.pauseRecvService();
-        this.offlineMsgSvc.stopRecvService();
+        this.offlineMsgSvc.skipSendService()
+        this.offlineMsgSvc.stopSendService()
+        this.offlineMsgSvc.pauseRecvService()
+        this.offlineMsgSvc.stopRecvService()
       } catch (err) {
         // do nothing, just don't prevent the code below from happening
       }
@@ -672,19 +668,19 @@ export class MessagingEngine extends EventEmitterAdapter {
       promises.push(
         this.offlineMsgSvc.sendMessagesToStorage()
         .catch(err => {
-          console.log(`ERROR(engine.js::handleShutDownRequest): sending messages to storage. ${err}`);
-          return undefined;
+          console.log(`ERROR(engine.js::handleShutDownRequest): sending messages to storage. ${err}`)
+          return undefined
         })
-      );
+      )
     }
     if (this.conversations) {
       promises.push(
         this._writeConversations()
         .catch(err => {
-          console.log(`ERROR(engine.js::handleShutDownRequest): writing conversations. ${err}`);
-          return undefined;
+          console.log(`ERROR(engine.js::handleShutDownRequest): writing conversations. ${err}`)
+          return undefined
         })
-      );
+      )
     }
     // We stopped doing this after every incoming msg etc. to
     // speed things along, hence write here.
@@ -694,8 +690,8 @@ export class MessagingEngine extends EventEmitterAdapter {
       promises.push(
         this._writeContactList(this.contactMgr.getAllContacts())
         .catch(err => {
-          console.log(`ERROR(engine.js::handleShutDownRequest): writing contact list. ${err}`);
-          return undefined;
+          console.log(`ERROR(engine.js::handleShutDownRequest): writing contact list. ${err}`)
+          return undefined
         })
       )
     }
@@ -722,46 +718,46 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   //
-  handleMobileForeground() {
+  handleMobileForeground () {
     console.log('Engine: Foreground')
   }
 
-  handleMobileBackground() {
+  handleMobileBackground () {
     console.log('Engine: Background')
   }
 
   // Requires this.offlineMsgSvc configured and not null/undefined
-  async receiveMessagesNow() {
+  async receiveMessagesNow () {
     const method = `MessagingEngine::receiveMessagesNow`
 
     try {
-      this.offlineMsgSvc.pauseRecvService();
+      this.offlineMsgSvc.pauseRecvService()
       await this.offlineMsgSvc.receiveMessages()
     } catch (error) {
-      console.log(`ERROR:(${method}): ${error}`);
+      console.log(`ERROR:(${method}): ${error}`)
     } finally {
       this.offlineMsgSvc.resumeRecvService()
     }
   }
 
-  handleMobileBackgroundUpdate() {
-    console.log('MessagingEngine::handleMobileBackgroundUpdate:');
+  handleMobileBackgroundUpdate () {
+    console.log('MessagingEngine::handleMobileBackgroundUpdate:')
 
     // TODO: - should the service only start on background update and stop when background update done?
     //       - can the service fail if shut down inappropriately (i.e. while waiting on request)?
     if (this && this.offlineMsgSvc && !this.offlineMsgSvc.isReceiving()) {
-      this.offlineMsgSvc.pauseRecvService();
+      this.offlineMsgSvc.pauseRecvService()
 
       this.offlineMsgSvc.receiveMessages()
       .then(() => {
-        this.offlineMsgSvc.resumeRecvService();
+        this.offlineMsgSvc.resumeRecvService()
       })
       .catch((err) => {
-        console.log(`ERROR:(engine.js::handleMobileBackgroundUpdate): ${err}`);
-        this.offlineMsgSvc.resumeRecvService();
+        console.log(`ERROR:(engine.js::handleMobileBackgroundUpdate): ${err}`)
+        this.offlineMsgSvc.resumeRecvService()
       })
     } else {
-        console.log(`ERROR:(engine.js::handleMobileBackgroundUpdate): unable to call this.offlineMsgSvc.isReceiving()`);
+      console.log(`ERROR:(engine.js::handleMobileBackgroundUpdate): unable to call this.offlineMsgSvc.isReceiving()`)
     }
   }
 
@@ -774,25 +770,25 @@ export class MessagingEngine extends EventEmitterAdapter {
   //   TODO: challenges:
   //         - what to do if isReceiving() is true? (wait and check again?)
   //
-  handleMobileNotifications(senderInfo) {
-    const logPrefix = "INFO(engine.js::handleMobileNotifications)";
-    console.log(`${logPrefix}: received notification ${senderInfo}`);
-    let contactsToCheck = undefined;
+  handleMobileNotifications (senderInfo) {
+    const logPrefix = 'INFO(engine.js::handleMobileNotifications)'
+    console.log(`${logPrefix}: received notification ${senderInfo}`)
+    let contactsToCheck
     if (senderInfo) {
-      contactsToCheck = this.contactMgr.getContactsWithMatchingPKMask(senderInfo);
+      contactsToCheck = this.contactMgr.getContactsWithMatchingPKMask(senderInfo)
     }
 
     if (this && this.offlineMsgSvc && !this.offlineMsgSvc.isReceiving()) {
-      this.offlineMsgSvc.pauseRecvService();
+      this.offlineMsgSvc.pauseRecvService()
 
       this.offlineMsgSvc.receiveMessages(contactsToCheck)
       .then(() => {
-        this.offlineMsgSvc.resumeRecvService();
+        this.offlineMsgSvc.resumeRecvService()
       })
       .catch((err) => {
-        console.log(`ERROR:(engine.js::handleMobileNotifications): ${err}`);
-        this.offlineMsgSvc.resumeRecvService();
-      });
+        console.log(`ERROR:(engine.js::handleMobileNotifications): ${err}`)
+        this.offlineMsgSvc.resumeRecvService()
+      })
       console.log(`${logPrefix}: shortcutting offline message service with fast read.`)
     } else {
       console.log(`${logPrefix}: offline message service already receiving.`)
@@ -806,31 +802,31 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   //
-  handleSearchSelect(contact) {
+  handleSearchSelect (contact) {
     if (!contact || !contact.id || !this.contactMgr) {
       console.log('ERROR(engine.js::handleSearchSelect): contact or contactMgr undefined.')
-      return;
+      return
     }
 
-    let selfAddCheck = false;
+    let selfAddCheck = false
     if (process.env.NODE_ENV === 'production' &&
         (contact.id !== 'alexc.id' ||
          contact.id !== 'alex.stealthy.id' ||
          contact.id !== 'relay.id')
         ) {
-      selfAddCheck = (contact.id === this.userId);
+      selfAddCheck = (contact.id === this.userId)
     }
     if (this.contactMgr.isExistingContactId(contact.id) || selfAddCheck) {
-      this.contactMgr.setActiveContact(contact);
-      this.updateContactMgr();
-      this.closeContactSearch();
+      this.contactMgr.setActiveContact(contact)
+      this.updateContactMgr()
+      this.closeContactSearch()
     } else {
-      this.handleContactAdd(contact);
+      this.handleContactAdd(contact)
     }
-    this.emit('me-search-select-done', true);
+    this.emit('me-search-select-done', true)
   }
 
-  async handleContactInvitation(theirPublicKey, theirUserId) {
+  async handleContactInvitation (theirPublicKey, theirUserId) {
     const method = 'engine::handleContactInvitation'
 
     if (this.contactMgr.isExistingContactId(theirUserId)) {
@@ -854,12 +850,12 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
   }
 
-  async handleContactAdd(contact, makeActiveContact=true) {
+  async handleContactAdd (contact, makeActiveContact = true) {
     const method = 'MessagingEngine::handleContactAdd'
 
     this.logger(`DEBUG(${method}): starting contact add for ${contact.id}.`)
     if (this.anonalytics) {
-      this.anonalytics.aeContactAdded();
+      this.anonalytics.aeContactAdded()
     }
 
     this.logger(`DEBUG(${method}): fetching public key ...`)
@@ -867,14 +863,14 @@ export class MessagingEngine extends EventEmitterAdapter {
     if (!publicKey) {
       try {
         publicKey = await this._fetchPublicKey(contact.id)
-        this.logger(`Adding contact ${contact.id}. Read public key: ${publicKey}`);
-      } catch(err) {
-        this.logger(`Adding contact ${contact.id}. UNABLE TO READ PUBLIC KEY`);
+        this.logger(`Adding contact ${contact.id}. Read public key: ${publicKey}`)
+      } catch (err) {
+        this.logger(`Adding contact ${contact.id}. UNABLE TO READ PUBLIC KEY`)
       }
     }
 
     let isChannel = false
-    let protocol = undefined
+    let protocol
     let administrable = false
     if (ENABLE_CHANNELS_V2_0) {
       this.logger(`DEBUG(${method}): fetching channel protocol ...`)
@@ -913,7 +909,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
           const pkLen = this.publicKey.length
           if (pkLen > 4) {
-            const pkLast4 = this.publicKey.substr(pkLen-4, pkLen)
+            const pkLast4 = this.publicKey.substr(pkLen - 4, pkLen)
 
             for (const delegateData of delegateDataArr) {
               if (!delegateData.hasOwnProperty(pkLast4)) {
@@ -939,7 +935,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
     this.logger(`DEBUG(${method}): adding new contact ${contact.id} to contact manager ...`)
-    await this.contactMgr.addNewContact(contact, contact.id, publicKey, makeActiveContact);
+    await this.contactMgr.addNewContact(contact, contact.id, publicKey, makeActiveContact)
     // We do the next part here to minimize the reading delay on protocol so that
     // when the contact is added and inserted into the offline messaging service, the
     // protocol and administrability are known and set.
@@ -953,15 +949,14 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     }
 
-
     this.logger(`DEBUG(${method}): writing contact list (non blocking) ...`)
-    this._writeContactList(this.contactMgr.getContacts());
+    this._writeContactList(this.contactMgr.getContacts())
 
     this.logger(`DEBUG(${method}): creating conversation ...`)
-    this.conversations.createConversation(contact.id);
+    this.conversations.createConversation(contact.id)
 
     this.logger(`DEBUG(${method}): writing conversations (non blocking) ...`)
-    this._writeConversations();
+    this._writeConversations()
 
     if (ENABLE_CHANNELS_V2_0 && isChannel) {
       this.logger(`DEBUG(${method}): setting channel address in offline msg svc ...`)
@@ -985,7 +980,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
     this.logger(`DEBUG(${method}): updating contacts in offline messaging service ...`)
-    this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
+    this.offlineMsgSvc.setContacts(this.contactMgr.getContacts())
 
     // IMPORTANT (even for Prabhaav):
     // - Do not change the order of these updates. The UI depends on
@@ -993,13 +988,13 @@ export class MessagingEngine extends EventEmitterAdapter {
     //   update messages last, it navigates to a screen with the wrong
     //   messages.
     this.logger(`DEBUG(${method}): updating messages (sends event 'me-update-messages') ...`)
-    this.updateMessages(contact.id);
+    this.updateMessages(contact.id)
 
     this.logger(`DEBUG(${method}): updating contact manager (sends event 'me-update-contactmgr') ...`)
-    this.updateContactMgr();
+    this.updateContactMgr()
 
     this.logger(`DEBUG(${method}): close contact search (sends event 'me-close-contact-search') ...`)
-    this.closeContactSearch();
+    this.closeContactSearch()
 
     // Fast read of messages from contact (in case we're at the start or middle of a polling delay):
     //
@@ -1019,42 +1014,40 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     }
 
-    this.contactMgr.deleteContact(contact);
+    this.contactMgr.deleteContact(contact)
 
-    this._writeContactList(this.contactMgr.getAllContacts());
+    this._writeContactList(this.contactMgr.getAllContacts())
 
-    this.conversations.removeConversation(contact.id);
-    this._writeConversations();
+    this.conversations.removeConversation(contact.id)
+    this._writeConversations()
 
-    this.offlineMsgSvc.removeMessages(contact);
+    this.offlineMsgSvc.removeMessages(contact)
 
-    this.offlineMsgSvc.setContacts(this.contactMgr.getContacts());
+    this.offlineMsgSvc.setContacts(this.contactMgr.getContacts())
 
-    const activeUser = this.contactMgr.getActiveContact();
+    const activeUser = this.contactMgr.getActiveContact()
     if (activeUser) {
-      const activeUserId = activeUser.id;
-      this.contactMgr.clearUnread(activeUserId);
+      const activeUserId = activeUser.id
+      this.contactMgr.clearUnread(activeUserId)
     }
 
-    this.updateContactMgr();
-    this.updateMessages(activeUser ? activeUser.id : undefined);
+    this.updateContactMgr()
+    this.updateMessages(activeUser ? activeUser.id : undefined)
   }
 
   handleRadio = async (e, { name }) => {
     if (name === 'twitterShare') {
-      this.settings.twitterShare = !this.settings.twitterShare;
-      this.anonalytics.aeSettings(`twitterShare:${this.settings.twitterShare}`);
-    }
-    else if (name === 'console') {
-      this.settings.console = !this.settings.console;
-      this.anonalytics.aeSettings(`console:${this.settings.console}`);
+      this.settings.twitterShare = !this.settings.twitterShare
+      this.anonalytics.aeSettings(`twitterShare:${this.settings.twitterShare}`)
+    } else if (name === 'console') {
+      this.settings.console = !this.settings.console
+      this.anonalytics.aeSettings(`console:${this.settings.console}`)
     } else if (name === 'analytics') {
-      this.settings.analytics = !this.settings.analytics;
+      this.settings.analytics = !this.settings.analytics
       if (this.settings.analytics) {
-        this.anonalytics.aeEnable();
-      }
-      else {
-        this.anonalytics.aeDisable();
+        this.anonalytics.aeEnable()
+      } else {
+        this.anonalytics.aeDisable()
       }
     } else if (name === 'notifications') {
       const notificationPath = common.getDbNotificationPath(this.publicKey)
@@ -1063,19 +1056,18 @@ export class MessagingEngine extends EventEmitterAdapter {
         const token = snapshot.child('token').val()
         if (this.settings.notifications) {
           firebaseInstance.getFirebaseRef(`${notificationPath}`).set({token, enabled: false})
-        }
-        else {
+        } else {
           firebaseInstance.getFirebaseRef(`${notificationPath}`).set({token, enabled: true})
         }
-        this.settings.notifications = !this.settings.notifications;
-      });
+        this.settings.notifications = !this.settings.notifications
+      })
       // this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`);
     } else if (name === 'search') {
-      this.settings.search = !this.settings.search;
-      this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`);
+      this.settings.search = !this.settings.search
+      this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`)
     } else if (name === 'discovery') {
-      this.settings.discovery = !this.settings.discovery;
-      this.anonalytics.aeSettings(`discovery:${this.settings.discovery}`);
+      this.settings.discovery = !this.settings.discovery
+      this.anonalytics.aeSettings(`discovery:${this.settings.discovery}`)
       if (this.settings.discovery) {
         if (!this.discovery) {
           this.discovery = new Discovery(this.userId, this.publicKey, this.privateKey)
@@ -1098,14 +1090,14 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     } // webrtc, heartbeat is ignored
 
-    this.emit('me-update-settings', this.settings);
-    this.writeSettings(this.settings);
+    this.emit('me-update-settings', this.settings)
+    this.writeSettings(this.settings)
   }
 
-  async updateContactPubKey(aContactId) {
+  async updateContactPubKey (aContactId) {
     const contact = this.contactMgr.getContact(aContactId)
     if (contact && !this.contactMgr.hasPublicKey(contact)) {
-      let publicKey = undefined
+      let publicKey
       try {
         publicKey = await this._fetchPublicKey(aContactId)
       } catch (error) {
@@ -1131,7 +1123,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   //  Messaging
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
-  handleOutgoingMessage = async (text, json=undefined) => {
+  handleOutgoingMessage = async (text, json = undefined) => {
     const method = 'engine.js::handleOutgoingMessage'
     if (!this.contactMgr.getActiveContact()) {
       return
@@ -1157,18 +1149,18 @@ export class MessagingEngine extends EventEmitterAdapter {
         if (!outgoingPublicKey) {
           throw `Public key is undefined for ${outgoingUserId}.`
         }
-        this.logger(`Fetched publicKey for ${outgoingUserId}.`);
+        this.logger(`Fetched publicKey for ${outgoingUserId}.`)
       } catch (err) {
         console.log(`ERROR(engine.js::handleOutgoingMessage): unable to fetch public key. ${err}`)
         return
       }
 
-      this.contactMgr.setPublicKey(outgoingUserId, outgoingPublicKey);
+      this.contactMgr.setPublicKey(outgoingUserId, outgoingPublicKey)
     }
 
     let amaCommand = false
     let displayInConversation = true
-    const chatMsg = new ChatMessage();
+    const chatMsg = new ChatMessage()
     if (text) {
       // TODO: Change ama commands to use JSON directly (not type TEXT_JSON, but
       //       a new message type called JSON that is not directly supported for
@@ -1177,7 +1169,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       displayInConversation = !amaCommand
 
       chatMsg.init(this.userId, outgoingUserId, this._getNewMessageId(), text,
-                   Date.now());
+                   Date.now())
     } else {  // json
       chatMsg.init(this.userId, outgoingUserId, this._getNewMessageId(), json,
                    Date.now(), MESSAGE_TYPE.TEXT_JSON)
@@ -1209,24 +1201,22 @@ export class MessagingEngine extends EventEmitterAdapter {
       // }
     }
 
-
-    this._sendOutgoingMessageOffline(chatMsg);
-    this.anonalytics.aeMessageSent();
+    this._sendOutgoingMessageOffline(chatMsg)
+    this.anonalytics.aeMessageSent()
     if (this.discovery) {
-      this.discovery.inviteContact(outgoingPublicKey);
+      this.discovery.inviteContact(outgoingPublicKey)
     }
 
     if (displayInConversation) {
-      this.conversations.addMessage(chatMsg);
-      this._writeConversations();
+      this.conversations.addMessage(chatMsg)
+      this._writeConversations()
 
+      this.contactMgr.moveContactToTop(outgoingUserId)
+      this.contactMgr.setSummary(outgoingUserId, ChatMessage.getSummary(chatMsg))
+      this._writeContactList(this.contactMgr.getAllContacts())
 
-      this.contactMgr.moveContactToTop(outgoingUserId);
-      this.contactMgr.setSummary(outgoingUserId, ChatMessage.getSummary(chatMsg));
-      this._writeContactList(this.contactMgr.getAllContacts());
-
-      this.updateContactMgr();
-      this.updateMessages(outgoingUserId);
+      this.updateContactMgr()
+      this.updateMessages(outgoingUserId)
     }
   }
 
@@ -1237,9 +1227,9 @@ export class MessagingEngine extends EventEmitterAdapter {
   //    initialization method
   //    handleContactClick
   //
-  sendMessageReceipts(theMessages) {
+  sendMessageReceipts (theMessages) {
     if (!ENABLE_RECEIPTS) {
-      return;
+      return
     }
     // Receipts structure:
     // {
@@ -1254,11 +1244,11 @@ export class MessagingEngine extends EventEmitterAdapter {
     // TODO: build the receipts structure from theMessages, then sent it to
     //       the receipt dispatch method, which iterates over each object
     //       and sends it realtime or offline to the destination.
-    const receipts = {};
+    const receipts = {}
 
     if (theMessages && theMessages.length > 0) {
       for (const message of theMessages) {
-        const fromId = message.from;
+        const fromId = message.from
 
         // If the message is from a channel, don't send read receipts:
         // TODO: unify the protocol constant
@@ -1266,31 +1256,30 @@ export class MessagingEngine extends EventEmitterAdapter {
           continue
         }
 
-
         if (!(fromId in receipts)) {
           receipts[fromId] = {
             recipient: this.userId,
             receivedMsgIds: [],
-            readMsgIds: [],
-          };
+            readMsgIds: []
+          }
         }
 
         if (message.msgState === MESSAGE_STATE.SEEN) {
-          receipts[fromId].readMsgIds.push(message.id);
+          receipts[fromId].readMsgIds.push(message.id)
         } else {  // SENT_OFFLINE or SENT_REALTIME
-          receipts[fromId].receivedMsgIds.push(message.id);
+          receipts[fromId].receivedMsgIds.push(message.id)
         }
       }
 
-      this.dispatchMessageReceipts(receipts);
+      this.dispatchMessageReceipts(receipts)
     }
   }
 
-  dispatchMessageReceipts(theReceipts) {
+  dispatchMessageReceipts (theReceipts) {
     if (theReceipts) {
       for (const destId of Object.keys(theReceipts)) {
-        const receipt = theReceipts[destId];
-        const receiptMsg = new ChatMessage();
+        const receipt = theReceipts[destId]
+        const receiptMsg = new ChatMessage()
         receiptMsg.init(
             this.userId,
             destId,
@@ -1298,168 +1287,168 @@ export class MessagingEngine extends EventEmitterAdapter {
             receipt,
             Date.now(),
             MESSAGE_TYPE.RECEIPT
-          );
+          )
 
-        const destPublicKey = this.contactMgr.getPublicKey(destId);
+        const destPublicKey = this.contactMgr.getPublicKey(destId)
         if (!destPublicKey) {
-          this.logger(`ERROR: Unable to send receipts to ${destId}. No public key.`);
-          continue;
+          this.logger(`ERROR: Unable to send receipts to ${destId}. No public key.`)
+          continue
         }
 
-        this._sendOutgoingMessageOffline(receiptMsg);
+        this._sendOutgoingMessageOffline(receiptMsg)
       }
     }
   }
 
-  handleReceipt(aChatMsg) {
+  handleReceipt (aChatMsg) {
     if (!ENABLE_RECEIPTS) {
-      return;
+      return
     }
 
     if (aChatMsg.type !== MESSAGE_TYPE.RECEIPT) {
-      this.logger('ERROR (handleReceipt): received non-receipt message.');
-      return;
+      this.logger('ERROR (handleReceipt): received non-receipt message.')
+      return
     }
 
-    const receiptObj = aChatMsg.content;
+    const receiptObj = aChatMsg.content
     if (receiptObj) {
       // this.logger(`Processing receipt from ${aChatMsg.from}`);
-      const recipientId = receiptObj.recipient;
-      const receivedMsgIds = receiptObj.receivedMsgIds;
-      const readMsgIds = receiptObj.readMsgIds;
+      const recipientId = receiptObj.recipient
+      const receivedMsgIds = receiptObj.receivedMsgIds
+      const readMsgIds = receiptObj.readMsgIds
 
       //   1. mark message objects in the conversation manager appropriately.
-      let needsSave = false;
+      let needsSave = false
 
       const receivedMsgs =
-        this.conversations.getSpecificMessages(recipientId, receivedMsgIds);
+        this.conversations.getSpecificMessages(recipientId, receivedMsgIds)
       for (const receivedMsg of receivedMsgs) {
         if ((receivedMsg.msgState !== MESSAGE_STATE.SEEN) ||
             (receivedMsg.msgState !== MESSAGE_STATE.RECEIVED)) {
-          needsSave = true;
-          this.conversations.markConversationModified(receivedMsg);
-          receivedMsg.msgState = MESSAGE_STATE.RECEIVED;
+          needsSave = true
+          this.conversations.markConversationModified(receivedMsg)
+          receivedMsg.msgState = MESSAGE_STATE.RECEIVED
         }
       }
 
       const readMsgs =
-        this.conversations.getSpecificMessages(recipientId, readMsgIds);
+        this.conversations.getSpecificMessages(recipientId, readMsgIds)
       for (const readMsg of readMsgs) {
         if (readMsg.msgState !== MESSAGE_STATE.SEEN) {
-          needsSave = true;
-          this.conversations.markConversationModified(readMsg);
-          readMsg.msgState = MESSAGE_STATE.SEEN;
+          needsSave = true
+          this.conversations.markConversationModified(readMsg)
+          readMsg.msgState = MESSAGE_STATE.SEEN
         }
       }
 
       if (needsSave) {
-        this._writeConversations();
+        this._writeConversations()
 
-        const ac = this.contactMgr.getActiveContact();
-        const needsMsgListUpdate = ac && (recipientId === ac.id);
+        const ac = this.contactMgr.getActiveContact()
+        const needsMsgListUpdate = ac && (recipientId === ac.id)
         if (needsMsgListUpdate) {
-          this.updateMessages(recipientId);
+          this.updateMessages(recipientId)
         }
       }
 
       //   2. get the offline message service to delete any offline messages
       //      that have been read or received.
-      let allMsgIds = [];
+      let allMsgIds = []
       if (receivedMsgIds) {
-        allMsgIds = allMsgIds.concat(receivedMsgIds);
+        allMsgIds = allMsgIds.concat(receivedMsgIds)
       }
       if (readMsgIds) {
-        allMsgIds = allMsgIds.concat(readMsgIds);
+        allMsgIds = allMsgIds.concat(readMsgIds)
       }
-      const recipient = this.contactMgr.getContact(recipientId);
-      this.offlineMsgSvc.deleteMessagesFromStorage(recipient, allMsgIds);
+      const recipient = this.contactMgr.getContact(recipientId)
+      this.offlineMsgSvc.deleteMessagesFromStorage(recipient, allMsgIds)
     }
   }
 
-  addIncomingMessages(messages) {
+  addIncomingMessages (messages) {
     for (const message of messages) {
-      this.conversations.addMessage(message);
+      this.conversations.addMessage(message)
     }
-    this._writeConversations();
+    this._writeConversations()
   }
 
-  updateContactOrderAndStatus(messages, writeContacts = true) {
-    let updateActiveMsgs = false;
-    const lastMsgIdxStr = `${messages.length-1}`;
+  updateContactOrderAndStatus (messages, writeContacts = true) {
+    let updateActiveMsgs = false
+    const lastMsgIdxStr = `${messages.length - 1}`
     for (const idx in messages) {
-      const message = messages[idx];
-      const incomingId = message.from;
+      const message = messages[idx]
+      const incomingId = message.from
 
       // message.sent = true;
 
       // idx is a string representing the index (comparsion to length directly
       // fails since it's an int)
-      const isLastOne = (idx == lastMsgIdxStr);
-      const isActive = this.contactMgr.isActiveContactId(incomingId);
+      const isLastOne = (idx === lastMsgIdxStr)
+      const isActive = this.contactMgr.isActiveContactId(incomingId)
 
-      this.contactMgr.setSummary(incomingId, ChatMessage.getSummary(message));
+      this.contactMgr.setSummary(incomingId, ChatMessage.getSummary(message))
 
       if (isActive) {
-        updateActiveMsgs = true;
-        message.seen = true;
-        message.msgState = MESSAGE_STATE.SEEN;
-        this.conversations.markConversationModified(message);
+        updateActiveMsgs = true
+        message.seen = true
+        message.msgState = MESSAGE_STATE.SEEN
+        this.conversations.markConversationModified(message)
       } else {
-        this.contactMgr.incrementUnread(incomingId);
-        const count = this.contactMgr.getAllUnread()
+        this.contactMgr.incrementUnread(incomingId)
+        // const count = this.contactMgr.getAllUnread()
       }
 
       if (isLastOne) {
-        this.contactMgr.moveContactToTop(incomingId);
+        this.contactMgr.moveContactToTop(incomingId)
       }
     }
 
     if (updateActiveMsgs) {
-      const activeId = this.contactMgr.getActiveContact() ?
-        this.contactMgr.getActiveContact().id : undefined;
-      this.updateMessages(activeId);
+      const activeId = this.contactMgr.getActiveContact()
+        ? this.contactMgr.getActiveContact().id : undefined
+      this.updateMessages(activeId)
     }
 
     if (writeContacts) {
-      this._writeContactList(this.contactMgr.getAllContacts());
+      this._writeContactList(this.contactMgr.getAllContacts())
     }
 
-    this.updateContactMgr();
+    this.updateContactMgr()
   }
 
-  markReceivedMessagesSeen(aUserId) {
-    let changesNeedSaving = false;
-    const isSelf = (this.userId === aUserId);
-    const chatMessages = this.conversations.getMessages(aUserId);
+  markReceivedMessagesSeen (aUserId) {
+    let changesNeedSaving = false
+    const isSelf = (this.userId === aUserId)
+    const chatMessages = this.conversations.getMessages(aUserId)
 
-    const seenMessages = [];
+    const seenMessages = []
 
     for (const chatMessage of chatMessages) {
-      const received = (chatMessage.from !== this.userId) || isSelf;
+      const received = (chatMessage.from !== this.userId) || isSelf
       if (received && (chatMessage.msgState !== MESSAGE_STATE.SEEN)) {
-        changesNeedSaving = true;
-        this.conversations.markConversationModified(chatMessage);
-        chatMessage.seen = true;
-        chatMessage.msgState = MESSAGE_STATE.SEEN;
-        seenMessages.push(chatMessage);
+        changesNeedSaving = true
+        this.conversations.markConversationModified(chatMessage)
+        chatMessage.seen = true
+        chatMessage.msgState = MESSAGE_STATE.SEEN
+        seenMessages.push(chatMessage)
       }
     }
 
     if (changesNeedSaving) {
-      this._writeConversations();
+      this._writeConversations()
     }
 
-    return seenMessages;
+    return seenMessages
   }
 
   handleContactClick = (contact) => {
     if (!contact && !this.forceActiveContact) {
-      this.contactMgr.setActiveContact(undefined);
+      this.contactMgr.setActiveContact(undefined)
       this.updateContactMgr()
       return
     }
 
-    const selectedUserId = contact.id;
+    const selectedUserId = contact.id
     if (this.contactMgr.isExistingContactId(selectedUserId)) {
       // TODO: need to send a packet back indicating messages seen.
       //       need offline solution to this too.
@@ -1472,37 +1461,36 @@ export class MessagingEngine extends EventEmitterAdapter {
       // }
 
       // TODO: predicate this by checking if unread is already zero ...
-      this.contactMgr.setActiveContact(contact);
+      this.contactMgr.setActiveContact(contact)
       // ACTODO: this method makes shit break...............
-      this.contactMgr.clearUnread(selectedUserId);
+      this.contactMgr.clearUnread(selectedUserId)
 
-      const seenMessages = this.markReceivedMessagesSeen(selectedUserId);
-      this.sendMessageReceipts(seenMessages);
+      const seenMessages = this.markReceivedMessagesSeen(selectedUserId)
+      this.sendMessageReceipts(seenMessages)
 
-      this.updateContactMgr();
-      this.updateMessages(selectedUserId);
+      this.updateContactMgr()
+      this.updateMessages(selectedUserId)
     }
     // this.closeContactSearch();
   }
 
-  _sendOutgoingMessageOffline(aChatMsg) {
-    const outgoingUserId = aChatMsg.to;
-    aChatMsg.msgState = MESSAGE_STATE.SENDING;
-    const contact = this.contactMgr.getContact(outgoingUserId);
-    this.offlineMsgSvc.sendMessage(contact, aChatMsg);
+  _sendOutgoingMessageOffline (aChatMsg) {
+    const outgoingUserId = aChatMsg.to
+    aChatMsg.msgState = MESSAGE_STATE.SENDING
+    const contact = this.contactMgr.getContact(outgoingUserId)
+    this.offlineMsgSvc.sendMessage(contact, aChatMsg)
   }
-
 
   //
   //  I/O & Persistence
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   //
-  async _writeContactList(aContactArr) {
+  async _writeContactList (aContactArr) {
     const method = 'MessagingEngine::_writeContactList'
 
     let decryptionPassed = false
-    let encContactsData = undefined
+    let encContactsData
     try {
       encContactsData = await utils.encryptObj(this.publicKey, aContactArr, ENCRYPT_CONTACTS)
       // We never want to write a corrupted contacts file, so test decryption here
@@ -1536,7 +1524,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.emit('me-close-add-ui')
   }
 
-  async _writeConversations() {
+  async _writeConversations () {
     const method = 'engine::_writeConversations'
 
     try {
@@ -1547,7 +1535,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
   }
 
-  async writeSettings(theSettings) {
+  async writeSettings (theSettings) {
     const method = 'engine::writeSettings'
 
     if (!theSettings || (theSettings === {})) {
@@ -1563,7 +1551,6 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
   }
 
-
   //
   //  Miscellany
   // ////////////////////////////////////////////////////////////////////////////
@@ -1572,18 +1559,18 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   // This method transforms engine formatted messages to gui formatted ones. TODO:
   // we should push this into the GUI or make the GUI work with the native format.
-  _getMessageArray(aRecipientId) {
-    const messages = [];
+  _getMessageArray (aRecipientId) {
+    const messages = []
 
     if (aRecipientId) {
-      const recipient = this.contactMgr.getContact(aRecipientId);
-      const recipientImageUrl = (recipient) ? recipient.image : undefined;
+      const recipient = this.contactMgr.getContact(aRecipientId)
+      const recipientImageUrl = (recipient) ? recipient.image : undefined
 
-      const chatMessages = this.conversations.getMessages(aRecipientId);
+      const chatMessages = this.conversations.getMessages(aRecipientId)
       for (const chatMessage of chatMessages) {
-        const isMe = (chatMessage.from === this.userId);
-        const msgAddress = (chatMessage.channel) ?
-          chatMessage.channel.msgAddress : undefined
+        const isMe = (chatMessage.from === this.userId)
+        const msgAddress = (chatMessage.channel)
+          ? chatMessage.channel.msgAddress : undefined
         const message = {
           me: isMe,
           image: (isMe ? this.avatarUrl : recipientImageUrl),
@@ -1595,35 +1582,35 @@ export class MessagingEngine extends EventEmitterAdapter {
           time: chatMessage.time,
           state: chatMessage.msgState,
           msgAddress
-        };
-        messages.push(message);
+        }
+        messages.push(message)
       }
     }
 
-    return messages;
+    return messages
   }
 
-  _getNewMessageId() {
+  _getNewMessageId () {
     // Try this for now--it might be good enough.
-    return Date.now();
+    return Date.now()
   }
 
-  async _fetchPublicKey(aUserId) {
+  async _fetchPublicKey (aUserId) {
     return this.io.robustRemoteRead(aUserId, 'pk.txt')
   }
 
-  getAnonalytics() {
-    return this.anonalytics;
+  getAnonalytics () {
+    return this.anonalytics
   }
 
   // Stealthy Channel 2.0 Work:
-  //////////////////////////////////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////////////////////////////
 
-  async _fetchProtocol(aUserId) {
+  async _fetchProtocol (aUserId) {
     const method = 'MessagingEngine::_fetchProtocol'
 
     const maxAttempts = 5
-    let stringifiedInfo = undefined
+    let stringifiedInfo
     try {
       console.log(`INFO(${method}): reading info.json.`)
       stringifiedInfo = await this.io.robustRemoteRead(aUserId, 'info.json', maxAttempts)
@@ -1650,7 +1637,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   }
 
   // aMessageTuple: {filePath, chatMsg, publicKey}
-  async _sendChannelNotification(aMessageTuple) {
+  async _sendChannelNotification (aMessageTuple) {
     try {
       const destinationId = aMessageTuple.chatMsg.to
 
@@ -1677,7 +1664,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
   }
 
-  async _addDefaultChannels() {
+  async _addDefaultChannels () {
     const method = `engine::_addDefaultChannels`
     // const defaultChannelIds = ['hello.stealthy.id', 'ama.stealthy.id']
     const defaultChannelIds = ['hello.stealthy.id']
@@ -1690,21 +1677,20 @@ export class MessagingEngine extends EventEmitterAdapter {
       try {
         const publicKey = await this._fetchPublicKey(channelId)
         await this.handleContactInvitation(publicKey, channelId)
-      } catch (error){
+      } catch (error) {
         // Suppress
         console.log(`WARNING(${method}): problem adding default channel ${channelId}.\n${error}.`)
         continue
       }
     }
-
   }
 
   // Stealthy AMA 1.0 Work:
-  //////////////////////////////////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////////////////////////////
 
   // Fetches the json data model for an AMA and pushes it out in an event.
   //
-  async fetchAmaData(msgAddress, amaId, amaUserId) {
+  async fetchAmaData (msgAddress, amaId, amaUserId) {
     const method = 'MessagingEngine::fetchAmaData'
 
     console.log(`INFO(${method}): msgAddress=${msgAddress}, amaId=${amaId}`)
@@ -1726,7 +1712,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
   }
 
-  annotateAmaData(amaData) {
+  annotateAmaData (amaData) {
     if (amaData && amaData.id) {
       const amaId = amaData.id
       // Merge in locally stored voting data

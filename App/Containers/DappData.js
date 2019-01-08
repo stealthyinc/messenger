@@ -1,34 +1,34 @@
 import React, { Component } from 'react'
-import { View, ScrollView, Text, WebView, TouchableOpacity } from 'react-native'
+import { View, TouchableOpacity } from 'react-native'
 import { connect } from 'react-redux'
 // Add Actions - replace 'Your' with whatever your reducer is called :)
 // import YourActions from '../Redux/YourRedux'
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from 'react-native-vector-icons/Ionicons'
 import DappActions, { DappSelectors } from '../Redux/DappRedux'
 import { Divider, List, ListItem } from 'react-native-elements'
-import GraphiteIcon from '../Images/GraphiteIcon.png';
+import GraphiteIcon from '../Images/GraphiteIcon.png'
 import TravelstackIcon from '../Images/TravelIcon.png'
-import BlockSignIcon from '../Images/BlockSignIcon.png';
-import CryptoIcon from '../Images/CryptoIcon.png';
+import BlockSignIcon from '../Images/BlockSignIcon.png'
+import CryptoIcon from '../Images/CryptoIcon.png'
 
 class DappData extends Component {
   static navigationOptions = ({ navigation }) => {
-    const params = navigation.state.params || {};
+    const params = navigation.state.params || {}
     return {
       headerLeft: (
         <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
-          <Ionicons name="ios-arrow-dropleft" size={32} color='#34bbed'/>
+          <Ionicons name='ios-arrow-dropleft' size={32} color='#34bbed' />
         </TouchableOpacity>
       ),
       headerRight: (
         <TouchableOpacity onPress={() => params.refresh()} style={{marginRight: 10}}>
-          <Ionicons name="ios-refresh" size={28} color='#34bbed'/>
+          <Ionicons name='ios-refresh' size={28} color='#34bbed' />
         </TouchableOpacity>
-      ),
-    };
+      )
+    }
   }
-  componentWillMount() {
-    this.props.navigation.setParams({ navigation: this.props.navigation, refresh: this.props.refreshIntegrationData });
+  componentWillMount () {
+    this.props.navigation.setParams({ navigation: this.props.navigation, refresh: this.props.refreshIntegrationData })
   }
   sendDappUrlMessage = (dappUrl, dappMessage) => {
     if (dappUrl) {
@@ -76,7 +76,7 @@ class DappData extends Component {
     let graphiteCards = []
 //    TODO: check for integrationError
 //    const integrationError = this.props.dappError
-    let graphiteData = undefined
+    let graphiteData
     try {
       graphiteData = this.props.dappData['Graphite']
     } catch (error) {
@@ -87,7 +87,7 @@ class DappData extends Component {
     // if (graphiteData && !integrationError) {
       for (const item in graphiteData) {
         const data = graphiteData[item]
-        const {title, description, author, fileUrl, profile, avatar} = data
+        const {title, author, fileUrl, avatar} = data
         graphiteCards.push(
           <ListItem
             key={item}
@@ -102,7 +102,7 @@ class DappData extends Component {
     }
 
     let travelstackCards = []
-    let travelstackData = undefined
+    let travelstackData
     try {
       travelstackData = this.props.dappData['Travelstack']
     } catch (error) {
@@ -118,7 +118,7 @@ class DappData extends Component {
 
       for (const item in modTravelstackResources) {
         const resource = modTravelstackResources[item]
-        const {title, utcTime, relativePath, version} = resource
+        const {title, relativePath} = resource
 
         // In StealthyIndex Version 0.1 (and Resource Version 0.0), urlBase
         // was a string that was the base URL for all resources.
@@ -133,13 +133,13 @@ class DappData extends Component {
         // index versions together and allow individual resource base urls
         // which take precedence. This resolving code will need to move to the
         // stealthy index reader (unify it to preven problems). TODO
-        const resourceType = (resource.version > '0.0') ?
-          resource.resourceType : 'other'
+        const resourceType = (resource.version > '0.0')
+          ? resource.resourceType : 'other'
         if (!resourceType || resourceType !== 'browsable') {
           continue
         }
-        const resourceUrlBase = (urlBase.hasOwnProperty(resourceType)) ?
-          urlBase[resourceType] : urlBase
+        const resourceUrlBase = (urlBase.hasOwnProperty(resourceType))
+          ? urlBase[resourceType] : urlBase
         if (!resourceUrlBase) {
           continue
         }
@@ -147,8 +147,8 @@ class DappData extends Component {
         const fileUrl = `${resourceUrlBase}${relativePath}`
         // const avatar = (resourceType !== 'browsable') ?
         //   {uri: fileUrl} : TravelstackIcon
-        const icon = (resource.hasOwnProperty('icon')) ?
-          resource['icon'] : TravelstackIcon
+        const icon = (resource.hasOwnProperty('icon'))
+          ? resource['icon'] : TravelstackIcon
         travelstackCards.push(
           <ListItem
             key={item}
@@ -187,7 +187,7 @@ class DappData extends Component {
             title={'Graphite Docs'}
             subtitle={'Decentralized G-Suite'}
             avatar={GraphiteIcon}
-            hideChevron={true}
+            hideChevron
           />
           {graphiteCards}
         </List>
@@ -198,7 +198,7 @@ class DappData extends Component {
             title={'Travelstack'}
             subtitle={'Decentralized Instagram'}
             avatar={TravelstackIcon}
-            hideChevron={true}
+            hideChevron
           />
           {travelstackCards}
         </List>
@@ -210,7 +210,7 @@ class DappData extends Component {
             title={'Blockusign'}
             subtitle={'Decentralized Document Signing'}
             avatar={BlockSignIcon}
-            hideChevron={true}
+            hideChevron
           />
         </List>
         <Divider style={{ backgroundColor: '#34bbed', height: 8 }} /><List>
@@ -220,7 +220,7 @@ class DappData extends Component {
             title={'Cryptocracy'}
             subtitle={'Decentralized Voluntary Associations'}
             avatar={CryptoIcon}
-            hideChevron={true}
+            hideChevron
           />
         </List>
       </View>
@@ -229,7 +229,7 @@ class DappData extends Component {
 
   // Private:
   // ---------------------------------------------------------------------------
-  static _getTravelstackDataWithIcons(theTravelstackResources) {
+  static _getTravelstackDataWithIcons (theTravelstackResources) {
     // Combine the post resource and the image resource together for now.
     // TODO: In the spec. make this a field called 'icon'.
     //
@@ -239,16 +239,16 @@ class DappData extends Component {
     for (const resourceIdx in theTravelstackResources.resources) {
       const resource = theTravelstackResources.resources[resourceIdx]
       const {title, utcTime, relativePath, version} = resource
-      const resourceType = (resource.hasOwnProperty('resourceType')) ?
-        resource.resourceType : undefined
+      const resourceType = (resource.hasOwnProperty('resourceType'))
+        ? resource.resourceType : undefined
 
       if (!resourcesMod.hasOwnProperty(title)) {
         resourcesMod[title] = {}
       }
 
       if (resourceType === 'image') {
-        const resourceUrlBase = (urlBase.hasOwnProperty(resourceType)) ?
-          urlBase[resourceType] : urlBase
+        const resourceUrlBase = (urlBase.hasOwnProperty(resourceType))
+          ? urlBase[resourceType] : urlBase
         if (resourceUrlBase) {
           resourcesMod[title]['icon'] = `${resourceUrlBase}${relativePath}`
         }
@@ -269,7 +269,6 @@ class DappData extends Component {
 
     return resourcesArr
   }
-
 }
 
 const mapStateToProps = (state) => {
@@ -277,7 +276,7 @@ const mapStateToProps = (state) => {
     dapp: DappSelectors.getDapp(state),
     dappUrl: DappSelectors.getDappUrl(state),
     dappError: DappSelectors.getDappError(state),
-    dappData: DappSelectors.getDappData(state),
+    dappData: DappSelectors.getDappData(state)
   }
 }
 

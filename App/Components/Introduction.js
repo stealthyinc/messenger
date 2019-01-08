@@ -1,60 +1,65 @@
-import assign from 'assign-deep';
-import React, { Component } from 'react';
+import assign from 'assign-deep'
+import React, { Component } from 'react'
 import {
-  AppRegistry,
   Animated,
-  Button,
-  Dimensions,
   Image,
   StyleSheet,
   Text,
   View
-} from 'react-native';
+} from 'react-native'
 
-import Swiper from 'react-native-swiper';
-import DoneButton from './AppIntro/DoneButton';
-import SkipButton from './AppIntro/SkipButton';
-import RenderDots from './AppIntro/Dots';
-const utils = require('./../Engine/misc/utils.js');
+import Swiper from 'react-native-swiper'
+import DoneButton from './AppIntro/DoneButton'
+import SkipButton from './AppIntro/SkipButton'
+import RenderDots from './AppIntro/Dots'
 
-const windowsWidth = Dimensions.get('window').width;
-const windowsHeight = Dimensions.get('window').height;
+import folder from '../Images/Icons/folder.png'
+import dapp from '../Images/Icons/dapp.png'
+import bitcoin from '../Images/Icons/bitcoin.png'
+import blockchain from '../Images/Icons/blockchain.png'
+import security from '../Images/Icons/molecular.png'
+import censor from '../Images/Icons/chat.png'
+
+const utils = require('./../Engine/misc/utils.js')
+
+// const windowsWidth = Dimensions.get('window').width
+// const windowsHeight = Dimensions.get('window').height
 
 const defaultStyles = {
   header: {
     flex: 0.5,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   pic: {
     width: 150,
-    height: 150,
+    height: 150
   },
   info: {
     flex: 0.5,
     alignItems: 'center',
-    padding: 30,
+    padding: 30
   },
   slide: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#9DD6EB',
-    padding: 15,
+    padding: 15
   },
   title: {
     color: '#fff',
     fontSize: 30,
-    paddingBottom: 20,
+    paddingBottom: 20
   },
   description: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 20
   },
   controllText: {
     color: '#fff',
     fontSize: 26,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   dotStyle: {
     backgroundColor: 'rgba(255,255,255,.3)',
@@ -64,10 +69,10 @@ const defaultStyles = {
     marginLeft: 7,
     marginRight: 7,
     marginTop: 7,
-    marginBottom: 7,
+    marginBottom: 7
   },
   activeDotStyle: {
-    backgroundColor: '#fff',
+    backgroundColor: '#fff'
   },
   paginationContainer: {
     position: 'absolute',
@@ -78,31 +83,31 @@ const defaultStyles = {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'transparent',
+    backgroundColor: 'transparent'
   },
   dotContainer: {
     flex: 0.6,
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   btnContainer: {
     flex: 0.2,
     justifyContent: 'center',
     alignItems: 'center',
-    height: 50,
+    height: 50
   },
   nextButtonText: {
     fontSize: 25,
     fontWeight: 'bold',
-    fontFamily: 'Arial',
+    fontFamily: 'Arial'
   },
   full: {
     height: 80,
     width: 100,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
+    alignItems: 'center'
+  }
 }
 
 const styles = StyleSheet.create({
@@ -111,32 +116,32 @@ const styles = StyleSheet.create({
   slide1: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#34bbed',
+    backgroundColor: '#34bbed'
   },
   slide2: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#34bbed',
+    backgroundColor: '#34bbed'
   },
   slide3: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#34bbed',
+    backgroundColor: '#34bbed'
   },
   slide4: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#34bbed',
+    backgroundColor: '#34bbed'
   },
   slide5: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#34bbed',
+    backgroundColor: '#34bbed'
   },
   slide6: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#34bbed',
+    backgroundColor: '#34bbed'
   },
   text: {
     color: '#fff',
@@ -147,64 +152,56 @@ const styles = StyleSheet.create({
   }
 })
 
-import folder from '../Images/Icons/folder.png'
-import dapp from '../Images/Icons/dapp.png'
-import bitcoin from '../Images/Icons/bitcoin.png'
-import blockchain from '../Images/Icons/blockchain.png'
-import security from '../Images/Icons/molecular.png'
-import censor from '../Images/Icons/chat.png'
-
-
 export default class Introduction extends Component {
   static navigationOptions = {
-    header: null,
+    header: null
   };
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
 
-    this.styles = StyleSheet.create(assign({}, defaultStyles, props.customStyles));
+    this.styles = StyleSheet.create(assign({}, defaultStyles, props.customStyles))
     this.state = {
       skipFadeOpacity: new Animated.Value(1),
       doneFadeOpacity: new Animated.Value(0),
       nextOpacity: new Animated.Value(1),
-      parallax: new Animated.Value(0),
-    };
+      parallax: new Animated.Value(0)
+    }
   }
   setDoneBtnOpacity = (value) => {
     Animated.timing(
       this.state.doneFadeOpacity,
-      { toValue: value },
-    ).start();
+      { toValue: value }
+    ).start()
   }
 
   setSkipBtnOpacity = (value) => {
     Animated.timing(
       this.state.skipFadeOpacity,
-      { toValue: value },
-    ).start();
+      { toValue: value }
+    ).start()
   }
 
   setNextOpacity = (value) => {
     Animated.timing(
       this.state.nextOpacity,
-      { toValue: value },
-    ).start();
+      { toValue: value }
+    ).start()
   }
   renderPagination = (index, total, context) => {
-    let isDoneBtnShow;
-    let isSkipBtnShow;
+    let isDoneBtnShow
+    let isSkipBtnShow
     if (index === total - 1) {
-      this.setDoneBtnOpacity(1);
-      this.setSkipBtnOpacity(0);
-      this.setNextOpacity(0);
-      isDoneBtnShow = true;
-      isSkipBtnShow = false;
+      this.setDoneBtnOpacity(1)
+      this.setSkipBtnOpacity(0)
+      this.setNextOpacity(0)
+      isDoneBtnShow = true
+      isSkipBtnShow = false
     } else {
-      this.setDoneBtnOpacity(0);
-      this.setSkipBtnOpacity(1);
-      this.setNextOpacity(1);
-      isDoneBtnShow = false;
-      isSkipBtnShow = true;
+      this.setDoneBtnOpacity(0)
+      this.setSkipBtnOpacity(1)
+      this.setNextOpacity(1)
+      isDoneBtnShow = false
+      isSkipBtnShow = true
     }
     return (
       <View style={[this.styles.paginationContainer]}>
@@ -232,16 +229,16 @@ export default class Introduction extends Component {
           onDoneBtnClick={() => this.props.navigation.navigate('SignIn')}
         />
       </View>
-    );
+    )
   }
-  render(){
+  render () {
     const oldPad = utils.is_oldPad()
     const size = (oldPad) ? 100 : 150
     return (
-      <Swiper 
-        style={styles.wrapper} 
-        showsButtons={false} 
-        autoplay={true} 
+      <Swiper
+        style={styles.wrapper}
+        showsButtons={false}
+        autoplay
         loop={false}
         renderPagination={this.renderPagination}>
         <View style={styles.slide5}>
@@ -269,6 +266,6 @@ export default class Introduction extends Component {
           <Text style={styles.text}>Censorship Free</Text>
         </View>
       </Swiper>
-    );
+    )
   }
 }

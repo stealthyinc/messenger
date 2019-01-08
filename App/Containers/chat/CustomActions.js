@@ -1,78 +1,78 @@
-import PropTypes from 'prop-types';
-import React from 'react';
+import PropTypes from 'prop-types'
+import React from 'react'
 import {
   Modal,
   StyleSheet,
   TouchableOpacity,
   View,
   ViewPropTypes,
-  Text,
-} from 'react-native';
+  Text
+} from 'react-native'
 
 // import CameraRollPicker from 'react-native-camera-roll-picker';
 // import NavBar, { NavButton, NavButtonText, NavTitle } from 'react-native-nav';
 
 export default class CustomActions extends React.Component {
-  constructor(props) {
-    super(props);
-    this._images = [];
+  constructor (props) {
+    super(props)
+    this._images = []
     this.state = {
-      modalVisible: false,
-    };
-    this.onActionsPress = this.onActionsPress.bind(this);
-    this.selectImages = this.selectImages.bind(this);
+      modalVisible: false
+    }
+    this.onActionsPress = this.onActionsPress.bind(this)
+    this.selectImages = this.selectImages.bind(this)
   }
 
-  setImages(images) {
-    this._images = images;
+  setImages (images) {
+    this._images = images
   }
 
-  getImages() {
-    return this._images;
+  getImages () {
+    return this._images
   }
 
-  setModalVisible(visible = false) {
-    this.setState({modalVisible: visible});
+  setModalVisible (visible = false) {
+    this.setState({modalVisible: visible})
   }
 
-  onActionsPress() {
-    const options = ['Choose From Library', 'Send Location', 'Cancel'];
-    const cancelButtonIndex = options.length - 1;
+  onActionsPress () {
+    const options = ['Choose From Library', 'Send Location', 'Cancel']
+    const cancelButtonIndex = options.length - 1
     this.context.actionSheet().showActionSheetWithOptions({
       options,
-      cancelButtonIndex,
+      cancelButtonIndex
     },
     (buttonIndex) => {
       switch (buttonIndex) {
         case 0:
-          this.setModalVisible(true);
-          break;
+          this.setModalVisible(true)
+          break
         case 1:
           navigator.geolocation.getCurrentPosition(
             (position) => {
               this.props.onSend({
                 location: {
                   latitude: position.coords.latitude,
-                  longitude: position.coords.longitude,
-                },
-              });
+                  longitude: position.coords.longitude
+                }
+              })
             },
             (error) => alert(error.message),
             {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
-          );
-          break;
+          )
+          break
         default:
       }
-    });
+    })
   }
 
-  selectImages(images) {
-    this.setImages(images);
+  selectImages (images) {
+    this.setImages(images)
   }
 
-  renderIcon() {
+  renderIcon () {
     if (this.props.icon) {
-      return this.props.icon();
+      return this.props.icon()
     }
     return (
       <View
@@ -84,10 +84,10 @@ export default class CustomActions extends React.Component {
           +
         </Text>
       </View>
-    );
+    )
   }
 
-  render() {
+  render () {
     return (
       <TouchableOpacity
         style={[styles.container, this.props.containerStyle]}
@@ -98,13 +98,12 @@ export default class CustomActions extends React.Component {
           transparent={false}
           visible={this.state.modalVisible}
           onRequestClose={() => {
-            this.setModalVisible(false);
+            this.setModalVisible(false)
           }}
-        >
-        </Modal>
+         />
         {this.renderIcon()}
       </TouchableOpacity>
-    );
+    )
   }
 }
 
@@ -113,26 +112,26 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     marginLeft: 10,
-    marginBottom: 10,
+    marginBottom: 10
   },
   wrapper: {
     borderRadius: 13,
     borderColor: '#b2b2b2',
     borderWidth: 2,
-    flex: 1,
+    flex: 1
   },
   iconText: {
     color: '#b2b2b2',
     fontWeight: 'bold',
     fontSize: 16,
     backgroundColor: 'transparent',
-    textAlign: 'center',
-  },
-});
+    textAlign: 'center'
+  }
+})
 
 CustomActions.contextTypes = {
-  actionSheet: PropTypes.func,
-};
+  actionSheet: PropTypes.func
+}
 
 CustomActions.defaultProps = {
   onSend: () => {},
@@ -140,8 +139,8 @@ CustomActions.defaultProps = {
   icon: null,
   containerStyle: {},
   wrapperStyle: {},
-  iconTextStyle: {},
-};
+  iconTextStyle: {}
+}
 
 CustomActions.propTypes = {
   onSend: PropTypes.func,
@@ -149,5 +148,5 @@ CustomActions.propTypes = {
   icon: PropTypes.func,
   containerStyle: ViewPropTypes.style,
   wrapperStyle: ViewPropTypes.style,
-  iconTextStyle: Text.propTypes.style,
-};
+  iconTextStyle: Text.propTypes.style
+}

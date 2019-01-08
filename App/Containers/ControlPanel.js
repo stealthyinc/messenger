@@ -1,27 +1,25 @@
 import React, { Component } from 'react'
-import { ScrollView, TouchableOpacity, View } from 'react-native';
-import { 
+import { ScrollView, TouchableOpacity, View } from 'react-native'
+import {
   Container,
   List,
   ListItem,
   Left,
   Body,
-  Right,
-  Thumbnail,
   Text
 } from 'native-base'
 
 import LetterAvatar from './LetterAvatar'
 
 export default class ControlPanel extends Component {
-  render() {
+  render () {
     const items = [
       { name: 'Simon Mignolet', id: 'simon.id' },
       { name: 'Nathaniel Clyne', id: 'nathan.id' },
       { name: 'Dejan Lovren', id: 'dejan.id' },
       { name: 'Mama Sakho', id: 'mama.id' },
-      { name: 'Emre Can', id: 'emre.id' },
-    ];
+      { name: 'Emre Can', id: 'emre.id' }
+    ]
     const { closeDrawer, addToInput } = this.props
     return (
       <View style={{flex: 1}}>
@@ -41,12 +39,11 @@ export default class ControlPanel extends Component {
                     <Text note>{item.id}</Text>
                   </Body>
                 </ListItem>
-              }>
-            </List>
+              } />
           </ScrollView>
         </Container>
         <TouchableOpacity onPress={closeDrawer} style={{flex: 0.55}} />
       </View>
-    );
+    )
   }
 }

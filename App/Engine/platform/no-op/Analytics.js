@@ -1,39 +1,39 @@
-// Does nothing. Just a placeholder for the engine code to permit server 
+// Does nothing. Just a placeholder for the engine code to permit server
 // operations without modifying the engine code.
 
 class Anonalytics {
-  constructor(publicKey = undefined) {}
+  constructor (publicKey = undefined) {}
 
   // Homepage Events:
   //
-  aeReferral(aReferer) {}
-  aeVisitContext(aContext) {}
-  aeLoginWithBlockstack() {}
-  aeCreateAccount() {}
-  aeSocialMediaLink() {}
-  aeFeaturesSection() {}
-  aeFaqSection() {}
+  aeReferral (aReferer) {}
+  aeVisitContext (aContext) {}
+  aeLoginWithBlockstack () {}
+  aeCreateAccount () {}
+  aeSocialMediaLink () {}
+  aeFeaturesSection () {}
+  aeFaqSection () {}
 
   // Improper ID Application Page Events:
   //
-  aeGetStealthyId() {}
-  aeGetBlockstackId() {}
-  aeWhyDoINeedAnId() {}
-  aeStealthyIdFlow(aPage = undefined, aButtonName = undefined) {}
+  aeGetStealthyId () {}
+  aeGetBlockstackId () {}
+  aeWhyDoINeedAnId () {}
+  aeStealthyIdFlow (aPage = undefined, aButtonName = undefined) {}
 
   // Proper ID Application Page Events:
   //
-  aeLogin() {}
-  aePlatformDescription(aPlatformDescription) {}
-  aeLoginContext(aContext) {}
-  aeSettings(aSetting) {}
-  aeMessageSent() {}
-  aeContactsSearched() {}
-  aeContactAdded() {}
-  aeWebRtcConnectionEstablished() {}
-  aeVideoChatButton() {}
-  aeChatWebRtcError(anError) {}
-  aeAVWebRtcError(anError) {}
+  aeLogin () {}
+  aePlatformDescription (aPlatformDescription) {}
+  aeLoginContext (aContext) {}
+  aeSettings (aSetting) {}
+  aeMessageSent () {}
+  aeContactsSearched () {}
+  aeContactAdded () {}
+  aeWebRtcConnectionEstablished () {}
+  aeVideoChatButton () {}
+  aeChatWebRtcError (anError) {}
+  aeAVWebRtcError (anError) {}
 }
 
-module.exports = { Anonalytics };
+module.exports = { Anonalytics }

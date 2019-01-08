@@ -1,20 +1,21 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { Container, Header, Content, List, ListItem, Thumbnail, Text, Body } from 'native-base';
-import { Platform, TouchableOpacity } from 'react-native'
-import { Button, Icon, SearchBar } from 'react-native-elements'
+import { Container, Content, ListItem, Thumbnail, Text, Body } from 'native-base'
+import { Button, SearchBar } from 'react-native-elements'
 import BlockstackContactsActions, { BlockstackContactsSelectors } from '../Redux/BlockstackContactsRedux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
-import Communications from 'react-native-communications';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import FIcon from 'react-native-vector-icons/dist/FontAwesome';
-const utils = require('./../Engine/misc/utils.js');
+import Communications from 'react-native-communications'
+import Ionicons from 'react-native-vector-icons/Ionicons'
+import FIcon from 'react-native-vector-icons/dist/FontAwesome'
 
 import {
   ActivityIndicator,
   StyleSheet,
   View,
+  Platform,
+  TouchableOpacity
 } from 'react-native'
+const utils = require('./../Engine/misc/utils.js')
 
 // Styles
 const styles = StyleSheet.create({
@@ -31,23 +32,23 @@ const styles = StyleSheet.create({
 
 class BlockContactSearch extends Component {
   static navigationOptions = ({ navigation }) => {
-    const params = navigation.state.params || {};
+    const params = navigation.state.params || {}
     return {
       headerLeft: (
         <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
-          <Ionicons name="ios-arrow-dropleft" size={32} color='white'/>
+          <Ionicons name='ios-arrow-dropleft' size={32} color='white' />
         </TouchableOpacity>
       ),
       headerRight: (
         <TouchableOpacity onPress={() => params.navigation.navigate('Camera')} style={{marginRight: 10}}>
-          <FIcon name="qrcode" size={30} color='white'/>
+          <FIcon name='qrcode' size={30} color='white' />
         </TouchableOpacity>
       ),
       headerTintColor: 'white',
       headerStyle: {
         backgroundColor: '#34bbed'
       }
-    };
+    }
   };
   constructor (props) {
     super(props)
@@ -56,61 +57,53 @@ class BlockContactSearch extends Component {
       showNothing: true
     }
     this.search = undefined
-    this.numContacts = (props.contactMgr) ?
-      (props.contactMgr.getAllContacts().length) : 0;
+    this.numContacts = (props.contactMgr)
+      ? (props.contactMgr.getAllContacts().length) : 0
   }
-  componentWillMount() {
-    this.props.navigation.setParams({ navigation: this.props.navigation });
+  componentWillMount () {
+    this.props.navigation.setParams({ navigation: this.props.navigation })
   }
-  componentDidMount() {
+  componentDidMount () {
     this.search.input.focus()
     this.props.request('')
   }
-  componentWillReceiveProps(nextProps) {
-    const { contactAdded, contactMgr } = nextProps
+  componentWillReceiveProps (nextProps) {
+    const { contactMgr } = nextProps
     if (contactMgr && contactMgr.getAllContacts().length > this.numContacts) {
-      this.numContacts = contactMgr.getAllContacts().length;
-      this.props.navigation.goBack();
+      this.numContacts = contactMgr.getAllContacts().length
+      this.props.navigation.goBack()
       const theNextActiveContact = contactMgr.getActiveContact()
-      this.protocol = (theNextActiveContact) ?
-        utils.isChannelOrAma(theNextActiveContact.protocol) : false
+      this.protocol = (theNextActiveContact)
+        ? utils.isChannelOrAma(theNextActiveContact.protocol) : false
       if (theNextActiveContact) {
-        if (this.protocol)
-          this.props.navigation.navigate('ChannelRoom')
-        else
-          this.props.navigation.navigate('ChatRoom')
-      }
-      else {
-        this.props.navigation.goBack();
+        if (this.protocol) { this.props.navigation.navigate('ChannelRoom') } else { this.props.navigation.navigate('ChatRoom') }
+      } else {
+        this.props.navigation.goBack()
       }
       this.props.setContactAdded(false)
       this.props.setSpinnerData(false, '')
     }
   }
-  parseContact(item) {
-    const { profile, username, fullyQualifiedName } = item
+  parseContact (item) {
+    const { profile, fullyQualifiedName } = item
     const { contactMgr } = this.props
     if (contactMgr.isExistingContactId(fullyQualifiedName)) {
       this.props.navigation.goBack()
-      const theNextActiveContactId = fullyQualifiedName;
-      const theNextActiveContact = contactMgr.getContact(theNextActiveContactId);
-      this.props.handleContactClick(theNextActiveContact);
-      this.protocol = (theNextActiveContact) ?
-        utils.isChannelOrAma(theNextActiveContact.protocol) : false
-      if (this.protocol)
-        this.props.navigation.navigate('ChannelRoom')
-      else
-        this.props.navigation.navigate('ChatRoom')
+      const theNextActiveContactId = fullyQualifiedName
+      const theNextActiveContact = contactMgr.getContact(theNextActiveContactId)
+      this.props.handleContactClick(theNextActiveContact)
+      this.protocol = (theNextActiveContact)
+        ? utils.isChannelOrAma(theNextActiveContact.protocol) : false
+      if (this.protocol) { this.props.navigation.navigate('ChannelRoom') } else { this.props.navigation.navigate('ChatRoom') }
       // this.props.navigation.navigate('ChatRoom')
-    }
-    else {
+    } else {
       // TODO: look at merging this with code that handles engine query to bs endpoint
       //       (api.getUserProfile call results)
       // For now, if no avatarUrl, make it undefined (pbj sets an image automatically)
       const { image, name, description } = profile
       const userImage = (image && image[0] &&
-                         'contentUrl' in image[0]) ?
-                        image[0]['contentUrl'] : undefined
+                         'contentUrl' in image[0])
+                        ? image[0]['contentUrl'] : undefined
 
       const contact = {
         description,
@@ -123,13 +116,12 @@ class BlockContactSearch extends Component {
       this.props.setSpinnerData(true, 'Adding contact...')
     }
   }
-  createListItem(contact) {
-    const { payload, error } = this.props
-    const { showNothing, showAdding, showLoading } = this.state
+  createListItem (contact) {
+    const { payload } = this.props
+    const { showNothing, showLoading } = this.state
     if (showNothing) {
       return <ListItem>{null}</ListItem>
-    }
-    else if (payload && payload.length) {
+    } else if (payload && payload.length) {
       return payload.map((item, i) => (
         <ListItem key={i} onPress={this.parseContact.bind(this, item)}>
           <Thumbnail square size={80} source={{ uri: (item.profile.image && item.profile.image[0]) ? item.profile.image[0].contentUrl : '' }} />
@@ -139,14 +131,12 @@ class BlockContactSearch extends Component {
           </Body>
         </ListItem>
       ))
-    }
-    else if (showLoading) {
+    } else if (showLoading) {
       setTimeout(() => {
         this.setState({showLoading: false})
-      }, 5000);
-      return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#34bbed"/></View>
-    }
-    else {
+      }, 5000)
+      return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size='large' color='#34bbed' /></View>
+    } else {
       return (
         <ListItem>
           <Body>
@@ -154,7 +144,7 @@ class BlockContactSearch extends Component {
             <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 20}}>
               <Button
                 backgroundColor={'#34bbed'}
-                onPress={() => Communications.email([''],null,null,'Add me on Stealthy IM','')}
+                onPress={() => Communications.email([''], null, null, 'Add me on Stealthy IM', '')}
                 icon={{name: 'email', color: 'white'}}
                 title='Email'
                 raised
@@ -177,9 +167,8 @@ class BlockContactSearch extends Component {
       setTimeout(() => {
         this.props.request(text)
         this.setState({showLoading: true, showNothing: false})
-      }, timeout);
-    }
-    else if (text.length < 1) {
+      }, timeout)
+    } else if (text.length < 1) {
       this.onClear()
     }
   }
@@ -187,9 +176,9 @@ class BlockContactSearch extends Component {
     this.props.request('')
     this.setState({showLoading: false, showNothing: true})
     this.props.clear()
-    this.search.input.clear();
+    this.search.input.clear()
   }
-  render() {
+  render () {
     return (
       <Container style={{backgroundColor: 'white'}}>
         <SearchBar
@@ -209,7 +198,7 @@ class BlockContactSearch extends Component {
           {this.createListItem(this.props.contact)}
         </Content>
       </Container>
-    );
+    )
   }
 }
 
@@ -218,7 +207,7 @@ const mapStateToProps = (state) => {
     payload: BlockstackContactsSelectors.getPayload(state),
     error: BlockstackContactsSelectors.getError(state),
     contactMgr: EngineSelectors.getContactMgr(state),
-    contactAdded: EngineSelectors.getContactAdded(state),
+    contactAdded: EngineSelectors.getContactAdded(state)
   }
 }
 
@@ -230,7 +219,7 @@ const mapDispatchToProps = (dispatch) => {
     handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
     setContactAdded: (flag) => dispatch(EngineActions.setContactAdded(flag)),
     setActiveContact: (contact) => dispatch(EngineActions.setActiveContact(contact)),
-    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),
+    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message))
   }
 }
 

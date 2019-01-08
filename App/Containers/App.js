@@ -4,8 +4,8 @@ import React, { Component } from 'react'
 import { Provider } from 'react-redux'
 import RootContainer from './RootContainer'
 import createStore from '../Redux'
-import { AppState, AsyncStorage, PushNotificationIOS, Platform, Linking } from 'react-native'
-import LinkRoutes from './LinkRoutes';
+import { AppState, PushNotificationIOS, Platform, Linking } from 'react-native'
+import LinkRoutes from './LinkRoutes'
 import EngineActions from '../Redux/EngineRedux'
 
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
@@ -30,35 +30,33 @@ class App extends Component {
     // await AsyncStorage.clear()
     firebaseInstance.setFirebasePermissions()
   }
-  async componentDidMount() {
-    AppState.addEventListener('change', this._handleAppStateChange);
+  async componentDidMount () {
+    AppState.addEventListener('change', this._handleAppStateChange)
     firebaseInstance.setFirebaseNotifications(store)
-    Linking.addEventListener('url', event => this.handleOpenURL(event.url));
-    Linking.getInitialURL().then(url => url && this.handleOpenURL(url));
+    Linking.addEventListener('url', event => this.handleOpenURL(event.url))
+    Linking.getInitialURL().then(url => url && this.handleOpenURL(url))
   }
-  componentWillUnmount() {
-    AppState.removeEventListener('change', this._handleAppStateChange);
+  componentWillUnmount () {
+    AppState.removeEventListener('change', this._handleAppStateChange)
     firebaseInstance.cleanNotificationListeners()
-    Linking.removeEventListener('url', this.handleOpenURL);
+    Linking.removeEventListener('url', this.handleOpenURL)
   }
-  handleOpenURL(url) {
+  handleOpenURL (url) {
     if (url) {
-      const path = url.split(':/')[1];
-      LinkRoutes(path, store);
+      const path = url.split(':/')[1]
+      LinkRoutes(path, store)
     }
   }
   _handleAppStateChange = (nextAppState) => {
     if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
       console.log('App has come to the foreground!')
       store.dispatch(EngineActions.foreGround())
-      if (Platform.OS === 'ios')
-        PushNotificationIOS.setApplicationIconBadgeNumber(0)
-    }
-    else if (this.state.appState.match(/active/) && nextAppState === 'inactive') {
+      if (Platform.OS === 'ios') { PushNotificationIOS.setApplicationIconBadgeNumber(0) }
+    } else if (this.state.appState.match(/active/) && nextAppState === 'inactive') {
       console.log('App has gone to the background!')
       store.dispatch(EngineActions.backGround())
     }
-    this.setState({appState: nextAppState});
+    this.setState({appState: nextAppState})
   }
   render () {
     return (

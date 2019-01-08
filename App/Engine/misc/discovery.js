@@ -1,12 +1,12 @@
 const { EventEmitterAdapter } = require('./../platform/reactNative/eventEmitterAdapter.js')
-const utils = require('./utils.js');
+const utils = require('./utils.js')
 const { firebaseInstance } = require('./../firebaseWrapper.js')
-const common = require('./../../common.js');
+const common = require('./../../common.js')
 
 class Discovery extends EventEmitterAdapter {
-  constructor(aUserId, aPublicKey, aPrivateKey) {
+  constructor (aUserId, aPublicKey, aPrivateKey) {
     if (!aUserId || !aPublicKey || !aPrivateKey) {
-      throw('ERROR(discovery.js): Unable to create object from provided arguments.')
+      throw ('ERROR(discovery.js): Unable to create object from provided arguments.')
     }
 
     super()
@@ -19,12 +19,12 @@ class Discovery extends EventEmitterAdapter {
     this.fbListenerFn = undefined
   }
 
-  _getDiscoveryRootRef() {
+  _getDiscoveryRootRef () {
     const discoveryPath = `${common.getDbDiscoveryPath(this.publicKey)}`
     return firebaseInstance.getFirebaseRef(discoveryPath)
   }
 
-  stop() {
+  stop () {
     if (this.fbListenerFn) {
       this._getDiscoveryRootRef().off('child_added', this.fbListenerFn)
     }
@@ -32,8 +32,7 @@ class Discovery extends EventEmitterAdapter {
     this.fbListenerFn = undefined
   }
 
-
-  async _handleInvitation(aPublicKey, aStringifiedCipherObj) {
+  async _handleInvitation (aPublicKey, aStringifiedCipherObj) {
     // console.log(`DEBUG(discovery.js::_handleInvitation) ${aPublicKey}`)
     try {
       const cipherObj = JSON.parse(aStringifiedCipherObj)
@@ -44,7 +43,7 @@ class Discovery extends EventEmitterAdapter {
     }
   }
 
-  async _handleInvitationFromSnapshot(snapshot) {
+  async _handleInvitationFromSnapshot (snapshot) {
     // const publicKey = snapshot ? snapshot.key : ''
     // console.log(`DEBUG(discovery.js::_handleInvitationFromSnapshot): ${publicKey}`)
     if (snapshot && snapshot.val()) {
@@ -57,7 +56,7 @@ class Discovery extends EventEmitterAdapter {
   //
   // Used right now only with channels (for maintaining counts of users in room).
   //
-  async clearSentInvitation(theirPublicKey) {
+  async clearSentInvitation (theirPublicKey) {
     if (!theirPublicKey) {
       console.log(`ERROR(discovery.js::inviteContact): theirPublicKey unspecified.`)
       return
@@ -74,7 +73,7 @@ class Discovery extends EventEmitterAdapter {
 
   // Clears an invitation to this user (this.publicKey) from a remote user
   // (theirPublicKey).
-  async clearReceivedInvitation(theirPublicKey) {
+  async clearReceivedInvitation (theirPublicKey) {
     if (!theirPublicKey) {
       console.log(`ERROR(discovery.js::clearReceivedInvitation): theirPublicKey unspecified.`)
       return
@@ -89,7 +88,7 @@ class Discovery extends EventEmitterAdapter {
     }
   }
 
-  async clearDiscoveryDb() {
+  async clearDiscoveryDb () {
     try {
       const result = await this._getDiscoveryRootRef().remove()
     } catch (err) {
@@ -101,9 +100,9 @@ class Discovery extends EventEmitterAdapter {
   // collection and checks to see if we have contacts with the public keys in
   // the collection. If a new contact is found, we call the _handleInvitation
   // method.
-  async checkInvitations(aContactMgr) {
+  async checkInvitations (aContactMgr) {
     if (aContactMgr) {
-      let snapshot = undefined
+      let snapshot
       try {
         snapshot = await this._getDiscoveryRootRef().once('value')
       } catch (err) {
@@ -121,7 +120,7 @@ class Discovery extends EventEmitterAdapter {
     }
   }
 
-  monitorInvitations() {
+  monitorInvitations () {
     this.fbListenerFn = this._getDiscoveryRootRef().on(
       'child_added', (snapshot) => this._handleInvitationFromSnapshot(snapshot))
   }
@@ -135,9 +134,9 @@ class Discovery extends EventEmitterAdapter {
   //   - If the key doesn't exist, we haven't connected to this person before or
   //     they deleted our thread and we need to send again.
   //
-  async inviteContact(theirPublicKey) {
+  async inviteContact (theirPublicKey) {
     if (!theirPublicKey) {
-      throw(`ERROR(discovery.js::inviteContact): theirPublicKey unspecified.`)
+      throw (`ERROR(discovery.js::inviteContact): theirPublicKey unspecified.`)
     }
 
     try {
@@ -157,4 +156,4 @@ class Discovery extends EventEmitterAdapter {
   }
 }
 
-module.exports = { Discovery };
+module.exports = { Discovery }

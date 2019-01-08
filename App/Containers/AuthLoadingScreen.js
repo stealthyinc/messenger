@@ -1,24 +1,20 @@
-import React from 'react';
+import React from 'react'
 import {
-  ActivityIndicator,
   AsyncStorage,
   NativeModules,
   StatusBar,
   StyleSheet,
-  View,
-  Platform
-} from 'react-native';
+  View
+} from 'react-native'
 import { connect } from 'react-redux'
-import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import EngineActions from '../Redux/EngineRedux'
 
-const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
-const common = require('./../common.js');
-const utils = require('./../Engine/misc/utils.js');
+const utils = require('./../Engine/misc/utils.js')
 
 class AuthLoadingScreen extends React.Component {
-  constructor(props) {
-    super(props);
-    this._bootstrapAsync();
+  constructor (props) {
+    super(props)
+    this._bootstrapAsync()
   }
 
   // Fetch the token from storage then navigate to our appropriate place
@@ -26,8 +22,9 @@ class AuthLoadingScreen extends React.Component {
     const method = 'AuthLoadingScreen::_bootstrapAsync'
     // Android specific session creation. This has to be done or you end up with
     // lazyinit errors. It's here b/c we don't always reavist the sign in code.
+    let error
     if (utils.isAndroid()) {
-      const {BlockstackNativeModule} = NativeModules;
+      const {BlockstackNativeModule} = NativeModules
 
       const hasSession = false
       try {
@@ -38,7 +35,7 @@ class AuthLoadingScreen extends React.Component {
       }
 
       if (!hasSession) {
-        const baseUrl = "https://www.stealthy.im"
+        const baseUrl = 'https://www.stealthy.im'
 
         // Unfortunately this doesn't seem to work, so we've hard-coded some
         // stuff from @Friedger into the Kotlin that gets called by the
@@ -52,10 +49,10 @@ class AuthLoadingScreen extends React.Component {
           // redirectPath: `${baseUrl}/redirectAndroid/index.html`,
           // redirectUrl: `${baseUrl}/redirect.html`,
           // redirectUrl: 'https://flamboyant-darwin-d11c17.netlify.com/',
-          scopes:["store_write", "publish_data"]
+          scopes: ['store_write', 'publish_data']
         }
 
-        let sessionResult = undefined
+        let sessionResult
         try {
           sessionResult = await BlockstackNativeModule.createSession(config)
         } catch (error) {
@@ -76,24 +73,22 @@ class AuthLoadingScreen extends React.Component {
     //   undefined : JSON.parse(await AsyncStorage.getItem('userData'));
     const userData = JSON.parse(await AsyncStorage.getItem('userData'))
     const channels = JSON.parse(await AsyncStorage.getItem('channels'))
-    if (channels)
-      this.props.setChannelsData(channels)
+    if (channels) { this.props.setChannelsData(channels) }
 
     if (!userData) {
-      this.props.navigation.navigate('Auth');
-    }
-    else {
+      this.props.navigation.navigate('Auth')
+    } else {
       this.props.screenProps.authWork(userData)
     }
   };
 
   // Render any loading content that you like here
-  render() {
+  render () {
     return (
       <View style={styles.container}>
-        <StatusBar barStyle="default" />
+        <StatusBar barStyle='default' />
       </View>
-    );
+    )
   }
 }
 
@@ -101,9 +96,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+    justifyContent: 'center'
+  }
+})
 
 const mapStateToProps = (state) => {
   return {
@@ -113,7 +108,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     setChannelsData: (channels) => dispatch(EngineActions.setChannelsData(channels)),
-    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),
+    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message))
   }
 }
 

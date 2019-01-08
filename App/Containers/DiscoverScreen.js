@@ -1,30 +1,29 @@
 import React, { Component } from 'react'
-import { ActivityIndicator, FlatList, ListView, View, TouchableOpacity, StyleSheet } from 'react-native'
+import { ActivityIndicator, ListView, View, StyleSheet } from 'react-native'
 import { Text, Divider } from 'react-native-elements'
-import { Button, Badge, Container, Header, Content, List, ListItem, Left, Body, Right, Item, Icon, Input, Thumbnail, Title, Separator } from 'native-base';
+import { Button, Container, Content, List, ListItem, Left, Body, Right, Icon, Thumbnail } from 'native-base'
 import { connect } from 'react-redux'
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
-const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
-import {NavigationActions} from 'react-navigation';
+import {NavigationActions} from 'react-navigation'
+const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 
 // Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 20,
+    marginTop: 20
   },
   separator: {
     flex: 1,
     height: StyleSheet.hairlineWidth,
-    backgroundColor: '#8E8E8E',
+    backgroundColor: '#8E8E8E'
   },
   horizontal: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: 10
   }
-});
+})
 
 class DiscoverScreen extends Component {
   // static navigationOptions = ({ navigation }) => {
@@ -44,21 +43,21 @@ class DiscoverScreen extends Component {
   // };
   constructor (props) {
     super(props)
-    this.ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+    this.ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 })
     this.state = {
       channelClicked: false,
       showLoading: true,
       showNothing: true,
       channels: [],
-      channelId: '',
+      channelId: ''
     }
-    this.numContacts = (props.contactMgr) ?
-      (props.contactMgr.getAllContacts().length) : 0;
+    this.numContacts = (props.contactMgr)
+      ? (props.contactMgr.getAllContacts().length) : 0
   }
   // componentWillMount() {
   //   this.props.navigation.setParams({ navigation: this.props.navigation });
   // }
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     const method = 'DiscoverScreen::componentWillReceiveProps'
 
     const { contactAdded, contactMgr } = nextProps
@@ -76,16 +75,15 @@ class DiscoverScreen extends Component {
     // AC: End debug output
 
     if (channelClicked && contactMgr && contactMgr.isExistingContactId(channelId)) {
-
       // AC: Begin debug output
       console.log(`INFO(${method}): in code to stop spinner ...`)
       // AC: End debug output
 
-      this.numContacts = contactMgr.getAllContacts().length;
+      this.numContacts = contactMgr.getAllContacts().length
       this.setState({channelClicked: false, channelId: ''})
       // this.props.navigation.navigate('ChatRoom')
       // const params = {id: channelId}
-      const params = {id: ''}
+      // const params = {id: ''}
       // this.props.pushToChannel('Messages', params)
       this.props.setContactAdded(false)
       this.props.closeDrawer()
@@ -99,8 +97,8 @@ class DiscoverScreen extends Component {
     // this.props.setActiveContact(data);
     // console.log(`INFO(${method}): called setActiveContact for ${data.id}`)
 
-    rowMap[`${secId}${rowId}`].props.closeRow();
-    let newData = this.state.channels;
+    rowMap[`${secId}${rowId}`].props.closeRow()
+    let newData = this.state.channels
     delete newData[rowId]
     this.setState({ channelClicked: true, channelId: data.id, channels: newData })
     firebaseInstance.subscribeToTopic(data.id)
@@ -115,8 +113,7 @@ class DiscoverScreen extends Component {
         // console.log("PBJ INFO", ch, this.props.channels[ch])
         const {id} = this.props.channels[ch]
         const exists = this.props.contactMgr.isExistingContactId(id)
-        if (!exists)
-          channels[ch] = this.props.channels[ch]
+        if (!exists) { channels[ch] = this.props.channels[ch] }
       }
       // this.setState({
       //   channels,
@@ -124,9 +121,8 @@ class DiscoverScreen extends Component {
       // })
     }
     if (this.state.channelClicked) {
-      return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size="large" color="#FFF"/></View>
-    }
-    else {
+      return <View style={[styles.container, styles.horizontal]}><ActivityIndicator size='large' color='#FFF' /></View>
+    } else {
       return (
         <Container style={{backgroundColor: 'white'}}>
           <Content>
@@ -152,13 +148,13 @@ class DiscoverScreen extends Component {
               }
               renderRightHiddenRow={(data, secId, rowId, rowMap) =>
                 <Button full danger onPress={_ => this.deleteRow(data, secId, rowId, rowMap)}>
-                  <Icon active name="trash" />
+                  <Icon active name='trash' />
                 </Button>}
               rightOpenValue={0}
             />
           </Content>
         </Container>
-      );
+      )
     }
   }
 }
@@ -166,7 +162,7 @@ class DiscoverScreen extends Component {
 const mapStateToProps = (state) => {
   return {
     contactAdded: EngineSelectors.getContactAdded(state),
-    channels: EngineSelectors.getChannelsData(state),
+    channels: EngineSelectors.getChannelsData(state)
   }
 }
 
@@ -174,12 +170,12 @@ const mapDispatchToProps = (dispatch) => {
   return {
     pushToChannel: (routeName, params) => dispatch(NavigationActions.navigate({
       routeName,
-      params,
+      params
     })),
     addNewContact: (contact, flag) => dispatch(EngineActions.addNewContact(contact, flag)),
     setContactAdded: (flag) => dispatch(EngineActions.setContactAdded(flag)),
     setActiveContact: (contact) => dispatch(EngineActions.setActiveContact(contact)),
-    handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
+    handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact))
   }
 }
 

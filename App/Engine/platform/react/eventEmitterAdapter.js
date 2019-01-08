@@ -6,7 +6,7 @@ const EventEmitter = require('EventEmitter')
 // the engine between react and react native)
 //
 export class EventEmitterAdapter extends EventEmitter {
-  constructor() {
+  constructor () {
     super()
     this.listeners = {}
   }

@@ -1,8 +1,7 @@
 import React from 'react'
 import {
-  Text,
   View
-} from 'react-native';
+} from 'react-native'
 
 export const Dot = ({
   styles, dotColor, activeDotColor, active
@@ -10,31 +9,31 @@ export const Dot = ({
   if (active) {
     return (
       <View
-        style={[styles.dotStyle, styles.activeDotStyle, { 
-          backgroundColor: 'grey' 
+        style={[styles.dotStyle, styles.activeDotStyle, {
+          backgroundColor: 'grey'
         }]}
       />
-    );
+    )
   } else {
     return (
-      <View 
-        style={[styles.dotStyle, { 
+      <View
+        style={[styles.dotStyle, {
           backgroundColor: 'white'
         }]} />
-    );
+    )
   }
 }
 
 export const RenderDots = (index, total, props) => {
-  let dots = [];
+  let dots = []
   for (let i = 0; i < total; i++) {
-    dots.push(React.createElement(Dot, { 
+    dots.push(React.createElement(Dot, {
       ...props,
       key: i,
       active: i === index
-    }));
+    }))
   }
-  return dots;
+  return dots
 }
 
-export default RenderDots;
+export default RenderDots

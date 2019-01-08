@@ -9,35 +9,35 @@ const RELAY_GRAPHITE_HUB = 'https://gaia.blockstack.org/hub/1PeNcCQXdg7t8iNmK7Xq
 const SIMULATE_DATA = false
 // publicShare is what we're currently using for demos. This will change when we
 // start encrypting.
-const RELAY_DOC_BASES = {
-  publicShare: 'https://app.graphitedocs.com/shared/docs/relay.id-',  // append <doc id>
-  privateShare: `${RELAY_GRAPHITE_HUB}`, // append <doc id>sharedwith.json
-  originalDoc : `${RELAY_GRAPHITE_HUB}/documents/`, // append <doc id>.json
-}
+// const RELAY_DOC_BASES = {
+//   publicShare: 'https://app.graphitedocs.com/shared/docs/relay.id-',  // append <doc id>
+//   privateShare: `${RELAY_GRAPHITE_HUB}`, // append <doc id>sharedwith.json
+//   originalDoc: `${RELAY_GRAPHITE_HUB}/documents/` // append <doc id>.json
+// }
 
 const USE_PRODUCTION_URL = true
-const GRAPHITE_URL = (USE_PRODUCTION_URL) ?
-   'https://app.graphitedocs.com' : 'https://serene-hamilton-56e88e.netlify.com'
+const GRAPHITE_URL = (USE_PRODUCTION_URL)
+   ? 'https://app.graphitedocs.com' : 'https://serene-hamilton-56e88e.netlify.com'
 
-function getFileUrl(aFileName) {
+function getFileUrl (aFileName) {
   return `${GRAPHITE_URL}/shared/docs/${aFileName}`
 }
 
 // TODO: move things around so privateKey is not needed here or is appropriate (#demoware)
 class Graphite {
-  constructor(ioClassInst, localUserId, privateKey) {
+  constructor (ioClassInst, localUserId, privateKey) {
     this.io = ioClassInst
     this.userId = localUserId
     this.indexData = undefined
     this.privateKey = privateKey
   }
 
-  getIndexData() {
+  getIndexData () {
     return this.indexData
   }
 
   // Throws!
-  async readIndexData() {
+  async readIndexData () {
     if (SIMULATE_DATA) {
       this.indexData = Graphite._getSimulatedIntermediateGraphiteData()
     } else {
@@ -46,85 +46,84 @@ class Graphite {
         const graphiteIndex = await this._readIndexFile()
         this.indexData = this._getDataFromGraphiteIndex(graphiteIndex)
       } catch (error) {
-        throw(`ERROR(graphite.js::readIndexData): unable to refresh index data from index file.\n${error}`)
+        throw (`ERROR(graphite.js::readIndexData): unable to refresh index data from index file.\n${error}`)
       }
     }
 
     return this.indexData
   }
 
-
-  static _getSimulatedIntermediateGraphiteData() {
+  static _getSimulatedIntermediateGraphiteData () {
     return {
-      'relay.id-1532144113901' : {
-        title : 'Test Stealthy Integration 2',
-        description : '',
-        author : 'relay.id',
-        decryptable : {
-          user : 'TBD',
-          key : 'Graphite',
+      'relay.id-1532144113901': {
+        title: 'Test Stealthy Integration 2',
+        description: '',
+        author: 'relay.id',
+        decryptable: {
+          user: 'TBD',
+          key: 'Graphite'
         },
-        fileUrl : 'https://app.graphitedocs.com/shared/docs/relay.id-1532144113901',
-        version : '',
-        appMetadata : {
-          title : 'Test Stealthy Integration 2',
-          id : '1532144113901',
-          updated : '7/21/2018',
-          words : '11',
-          sharedWith : '',
-          singleDocIsPublic : 'true',
-          author : 'relay.id',
-          tags : '',
-          fileType : 'documents',
-        },
+        fileUrl: 'https://app.graphitedocs.com/shared/docs/relay.id-1532144113901',
+        version: '',
+        appMetadata: {
+          title: 'Test Stealthy Integration 2',
+          id: '1532144113901',
+          updated: '7/21/2018',
+          words: '11',
+          sharedWith: '',
+          singleDocIsPublic: 'true',
+          author: 'relay.id',
+          tags: '',
+          fileType: 'documents'
+        }
       },
-      'relay.id-1532196940159' : {
-        title : 'Delete Facebook Movement Spreads Worldwide',
-        description : '',
-        author : 'relay.id',
-        decryptable : {
-          user : 'TBD',
-          key : 'Graphite',
+      'relay.id-1532196940159': {
+        title: 'Delete Facebook Movement Spreads Worldwide',
+        description: '',
+        author: 'relay.id',
+        decryptable: {
+          user: 'TBD',
+          key: 'Graphite'
         },
-        fileUrl : 'https://app.graphitedocs.com/shared/docs/relay.id-1532196940159',
-        version : '',
-        appMetadata : {
-          title : 'Delete Facebook Movement Spreads Worldwide',
-          id : '1532196940159',
-          updated : '7/21/2018',
-          words : '23',
-          sharedWith : '',
-          singleDocIsPublic : 'true',
-          author : 'relay.id',
-          tags : '',
-          fileType : 'documents',
-        },
+        fileUrl: 'https://app.graphitedocs.com/shared/docs/relay.id-1532196940159',
+        version: '',
+        appMetadata: {
+          title: 'Delete Facebook Movement Spreads Worldwide',
+          id: '1532196940159',
+          updated: '7/21/2018',
+          words: '23',
+          sharedWith: '',
+          singleDocIsPublic: 'true',
+          author: 'relay.id',
+          tags: '',
+          fileType: 'documents'
+        }
       },
-      'relay.id-1532197099770' : {
-        title : 'Data Breaches on the Rise Worldwide',
-        description : '',
-        author : 'relay.id',
-        decryptable : {
-          user : 'TBD',
-          key : 'Graphite',
+      'relay.id-1532197099770': {
+        title: 'Data Breaches on the Rise Worldwide',
+        description: '',
+        author: 'relay.id',
+        decryptable: {
+          user: 'TBD',
+          key: 'Graphite'
         },
-        fileUrl : 'https://app.graphitedocs.com/shared/docs/relay.id-1532197099770',
-        version : '',
-        appMetadata : {
-          title : 'Data Breaches on the Rise Worldwide',
-          id : '1532197099770',
-          updated : '7/21/2018',
-          words : '35',
-          sharedWith : '',
-          author : 'relay.id',
-          tags : '',
-          fileType : 'documents',
-        },
-      },
+        fileUrl: 'https://app.graphitedocs.com/shared/docs/relay.id-1532197099770',
+        version: '',
+        appMetadata: {
+          title: 'Data Breaches on the Rise Worldwide',
+          id: '1532197099770',
+          updated: '7/21/2018',
+          words: '35',
+          sharedWith: '',
+          author: 'relay.id',
+          tags: '',
+          fileType: 'documents'
+        }
+      }
     }
   }
 
-  _getDataFromGraphiteIndex(aGraphiteIndex) {
+  _getDataFromGraphiteIndex (aGraphiteIndex) {
     const indexData = {}
 
     if (aGraphiteIndex) {
@@ -132,22 +131,21 @@ class Graphite {
         if (element &&
             element.id &&
             element.fileType &&
-            element.title ) {
-
+            element.title) {
           // const fileName = `relay.id-${element.id}`
           const fileName = `${this.userId}-${element.id}`
           const fileUrl = getFileUrl(fileName)
           const author = element.author ? element.author : ''
 
           const fileData = {
-            title : `${element.title}`,
-            description : '',
-            author : `${author}`,
-            decryptable : {
-              user : 'TBD',
-              key : 'Graphite'
+            title: `${element.title}`,
+            description: '',
+            author: `${author}`,
+            decryptable: {
+              user: 'TBD',
+              key: 'Graphite'
             },
-            fileUrl : fileUrl,
+            fileUrl: fileUrl,
             // fileUrl : `${RELAY_DOC_BASES.publicShare}${element.id}`,
             version: '',
             appMetadata: element
@@ -161,14 +159,14 @@ class Graphite {
     return indexData
   }
 
-  async _readIndexFile(indexFileName = 'stealthyIndex.json') {
+  async _readIndexFile (indexFileName = 'stealthyIndex.json') {
     const method = 'graphite.js::_readIndexFile'
 
-    let cipherTextObjStr = undefined
+    let cipherTextObjStr
     try {
       cipherTextObjStr = await this.io.readPartnerAppFile(
         this.userId, indexFileName, GRAPHITE_URL)
-    } catch(error) {
+    } catch (error) {
       throw `ERROR(${method}): read failure.\n${error}`
     }
 
@@ -177,18 +175,17 @@ class Graphite {
       return undefined
     }
 
-    let recovered = undefined
+    let recovered
     try {
       recovered = await utils.decryptObj(this.privateKey, cipherTextObjStr, true)
-    } catch(error) {
+    } catch (error) {
       throw `ERROR(${method}): failed to decrypt ${indexFileName}.\n${error}`
     }
 
     return recovered
   }
 
-
-  _dumpIndexData(theIndexData) {
+  _dumpIndexData (theIndexData) {
     console.log('const indexData = {')
     for (const fileName in theIndexData) {
       if (!fileName || !theIndexData[fileName]) {
@@ -216,4 +213,4 @@ class Graphite {
   }
 }
 
-module.exports = { Graphite };
+module.exports = { Graphite }

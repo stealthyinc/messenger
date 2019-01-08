@@ -1,62 +1,61 @@
-import {Platform} from 'react-native';
+import {Platform} from 'react-native'
 
 export const NO_SESSION = 'none'
 
-
-module.exports.getDbRootPath = function(aPublicKey) {
+module.exports.getDbRootPath = function (aPublicKey) {
   // ud --> user data:
-  const context = (process.env.NODE_ENV !== 'development') ?
-    'ud' : 'development/ud'
+  const context = (process.env.NODE_ENV !== 'development')
+    ? 'ud' : 'development/ud'
 
   return `/global/${context}/${aPublicKey}`
-};
+}
 
-module.exports.getDbSessionPath = function(aPublicKey) {
+module.exports.getDbSessionPath = function (aPublicKey) {
   const rootPath = module.exports.getDbRootPath(aPublicKey)
   return `${rootPath}/session`
-};
+}
 
-module.exports.getDbDiscoveryPath = function(aPublicKey) {
+module.exports.getDbDiscoveryPath = function (aPublicKey) {
   const rootPath = module.exports.getDbRootPath(aPublicKey)
   return `${rootPath}/discovery`
 }
 
-module.exports.getDbNotificationPath = function(aPublicKey) {
+module.exports.getDbNotificationPath = function (aPublicKey) {
   const rootPath = module.exports.getDbRootPath(aPublicKey)
   return `${rootPath}/notifications`
 }
 
-module.exports.getDbExistingDataPath = function(aPublicKey) {
+module.exports.getDbExistingDataPath = function (aPublicKey) {
   const rootPath = module.exports.getDbRootPath(aPublicKey)
   return `${rootPath}/existingData`
 }
 
-module.exports.getDbChannelRootPath = function(aPublicKey,
+module.exports.getDbChannelRootPath = function (aPublicKey,
                                                aChannelProtocol = 'public_channel_v2_0') {
   // ud --> user data:
-  const context = (process.env.NODE_ENV !== 'development') ?
-    `${aChannelProtocol}/ud` : `development/${aChannelProtocol}/ud`
+  const context = (process.env.NODE_ENV !== 'development')
+    ? `${aChannelProtocol}/ud` : `development/${aChannelProtocol}/ud`
 
   return `/global/${context}/${aPublicKey}`
 }
 
-module.exports.getDbChannelStatusPath = function(aPublicKey) {
+module.exports.getDbChannelStatusPath = function (aPublicKey) {
   const rootPath = module.exports.getDbChannelRootPath(aPublicKey)
   return `${rootPath}/status`
 }
 
-module.exports.getDbChannelNotificationPath = function(aPublicKey) {
+module.exports.getDbChannelNotificationPath = function (aPublicKey) {
   const rootPath = module.exports.getDbChannelRootPath(aPublicKey)
   return `${rootPath}/message_notifications`
 }
 
-var __sessionId = undefined;
+var __sessionId
 //
-module.exports.getSessionId = function() {
+module.exports.getSessionId = function () {
   if (!__sessionId) {
     __sessionId = `${Platform.OS}-${Date.now()}`
   }
 
   console.log(`INFO(common.js::getSessionId): returning ${__sessionId}`)
   return __sessionId
-};
+}

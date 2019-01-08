@@ -1,55 +1,54 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import { StyleSheet, View, ViewPropTypes, TouchableOpacity, Text } from 'react-native';
-import { GiftedAvatar, Day, utils } from 'react-native-gifted-chat';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import PropTypes from 'prop-types'
+import React from 'react'
+import { StyleSheet, View, ViewPropTypes, TouchableOpacity, Text } from 'react-native'
+import { GiftedAvatar, utils } from 'react-native-gifted-chat'
+import Ionicons from 'react-native-vector-icons/Ionicons'
 
-const { isSameUser, isSameDay } = utils;
+const { isSameUser, isSameDay } = utils
 
 const styles = {
   left: StyleSheet.create({
     container: {
-      marginRight: 8,
+      marginRight: 8
     },
     onTop: {
-      alignSelf: 'flex-start',
+      alignSelf: 'flex-start'
     },
     onBottom: {},
     image: {
       height: 36,
       width: 36,
-      borderRadius: 18,
-    },
+      borderRadius: 18
+    }
   }),
   right: StyleSheet.create({
     container: {
-      marginLeft: 8,
+      marginLeft: 8
     },
     onTop: {
-      alignSelf: 'flex-start',
+      alignSelf: 'flex-start'
     },
     onBottom: {},
     image: {
       height: 36,
       width: 36,
-      borderRadius: 18,
-    },
-  }),
-};
+      borderRadius: 18
+    }
+  })
+}
 
 export default class Avatar extends React.PureComponent {
-
-  renderAvatar() {
+  renderAvatar () {
     if (this.props.renderAvatar) {
-      const { renderAvatar, ...avatarProps } = this.props;
-      return this.props.renderAvatar(avatarProps);
+      const { renderAvatar, ...avatarProps } = this.props
+      return this.props.renderAvatar(avatarProps)
     }
     const voted = this.props.upvoteRegistered(this.props.currentMessage._id)
     const color = (voted) ? 'grey' : 'green'
     const votes = (!this.props.currentMessage.user.avatar) ? (
       <View style={{marginRight: 10}}>
         <TouchableOpacity disabled={voted} onPress={() => this.props.questionUpvote(this.props.currentMessage._id)}>
-          <Ionicons name="ios-arrow-dropup" size={30} color={color}/>
+          <Ionicons name='ios-arrow-dropup' size={30} color={color} />
         </TouchableOpacity>
         <Text style={{textAlign: 'center', fontSize: 14}}>{this.props.currentMessage.score}</Text>
       </View>
@@ -60,22 +59,22 @@ export default class Avatar extends React.PureComponent {
         <GiftedAvatar
           avatarStyle={StyleSheet.flatten([
             styles[this.props.position].image,
-            this.props.imageStyle[this.props.position],
+            this.props.imageStyle[this.props.position]
           ])}
           user={this.props.currentMessage.user}
           onPress={() => this.props.onPressAvatar && this.props.onPressAvatar(this.props.currentMessage.user)}
         />
       </View>
-    );
+    )
   }
 
-  render() {
-    const { renderAvatarOnTop, showAvatarForEveryMessage } = this.props;
-    const messageToCompare = renderAvatarOnTop ? this.props.previousMessage : this.props.nextMessage;
-    const computedStyle = renderAvatarOnTop ? 'onTop' : 'onBottom';
+  render () {
+    const { renderAvatarOnTop, showAvatarForEveryMessage } = this.props
+    const messageToCompare = renderAvatarOnTop ? this.props.previousMessage : this.props.nextMessage
+    const computedStyle = renderAvatarOnTop ? 'onTop' : 'onBottom'
 
     if (this.props.renderAvatar === null) {
-      return null;
+      return null
     }
 
     if (
@@ -88,11 +87,11 @@ export default class Avatar extends React.PureComponent {
           <GiftedAvatar
             avatarStyle={StyleSheet.flatten([
               styles[this.props.position].image,
-              this.props.imageStyle[this.props.position],
+              this.props.imageStyle[this.props.position]
             ])}
           />
         </View>
-      );
+      )
     }
 
     return (
@@ -100,14 +99,13 @@ export default class Avatar extends React.PureComponent {
         style={[
           styles[this.props.position].container,
           styles[this.props.position][computedStyle],
-          this.props.containerStyle[this.props.position],
+          this.props.containerStyle[this.props.position]
         ]}
       >
         {this.renderAvatar()}
       </View>
-    );
+    )
   }
-
 }
 
 Avatar.defaultProps = {
@@ -115,14 +113,14 @@ Avatar.defaultProps = {
   showAvatarForEveryMessage: false,
   position: 'left',
   currentMessage: {
-    user: null,
+    user: null
   },
   previousMessage: {},
   nextMessage: {},
   containerStyle: {},
   imageStyle: {},
-  onPressAvatar: () => {},
-};
+  onPressAvatar: () => {}
+}
 
 Avatar.propTypes = {
   renderAvatarOnTop: PropTypes.bool,
@@ -135,10 +133,10 @@ Avatar.propTypes = {
   renderAvatar: PropTypes.func,
   containerStyle: PropTypes.shape({
     left: ViewPropTypes.style,
-    right: ViewPropTypes.style,
+    right: ViewPropTypes.style
   }),
   imageStyle: PropTypes.shape({
     left: ViewPropTypes.style,
-    right: ViewPropTypes.style,
-  }),
-};
+    right: ViewPropTypes.style
+  })
+}

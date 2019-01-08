@@ -1,8 +1,8 @@
-import {Dimensions, Platform} from 'react-native'
+import {Dimensions} from 'react-native'
 
 const { width, height } = Dimensions.get('window')
 
-const utils = require('./../Engine/misc/utils.js');
+const utils = require('./../Engine/misc/utils.js')
 
 // Used via Metrics.baseMargin
 const metrics = {

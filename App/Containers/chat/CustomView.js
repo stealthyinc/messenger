@@ -1,18 +1,15 @@
-import PropTypes from 'prop-types';
-import React from 'react';
+import PropTypes from 'prop-types'
+import React from 'react'
 import {
-  Text,
   Image,
-  Linking,
-  Platform,
   StyleSheet,
   ViewPropTypes,
-  TouchableOpacity,
-} from 'react-native';
+  TouchableOpacity
+} from 'react-native'
 
 export default class CustomView extends React.Component {
-  render() {
-    const {url, image, text} = this.props.currentMessage
+  render () {
+    const {url, image} = this.props.currentMessage
     const {onPress} = this.props
     if (url && image) {
       return (
@@ -22,9 +19,9 @@ export default class CustomView extends React.Component {
             source={{uri: image}}
           />
         </TouchableOpacity>
-      );
+      )
     }
-    return null;
+    return null
   }
 }
 
@@ -35,16 +32,16 @@ const styles = StyleSheet.create({
     width: 150,
     height: 100,
     borderRadius: 10,
-    margin: 5,
-  },
-});
+    margin: 5
+  }
+})
 
 CustomView.defaultProps = {
   currentMessage: {},
-  containerStyle: {},
-};
+  containerStyle: {}
+}
 
 CustomView.propTypes = {
   currentMessage: PropTypes.object,
-  containerStyle: ViewPropTypes.style,
-};
+  containerStyle: ViewPropTypes.style
+}

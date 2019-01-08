@@ -1,64 +1,58 @@
 import React, { Component } from 'react'
-import { TextInput, Dimensions, Keyboard, Platform, Image, Modal, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, WebView, View, Text, ActivityIndicator } from 'react-native'
+import { Dimensions, Keyboard, Platform, TouchableOpacity, View, Text } from 'react-native'
 import { connect } from 'react-redux'
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Button, Icon } from 'react-native-elements'
-import Drawer from 'react-native-drawer'
-import ControlPanel from './ControlPanel'
+import Ionicons from 'react-native-vector-icons/Ionicons'
+import { Button } from 'react-native-elements'
 
 import AmaCommands from '../Engine/misc/amaCommands.js'
 
 import PopupDialog, {
   DialogTitle,
   DialogButton,
-  SlideAnimation,
-} from 'react-native-popup-dialog';
-import { Container, Header, Content, Item, Form, Textarea, Toast } from 'native-base';
+  SlideAnimation
+} from 'react-native-popup-dialog'
+import { Container, Content, Form, Textarea } from 'native-base'
 
 // Styles
 import ActionSheet from 'react-native-actionsheet'
-import emojiUtils from 'emoji-utils';
-import SlackMessage from './chat/SlackMessage';
+import emojiUtils from 'emoji-utils'
+import SlackMessage from './chat/SlackMessage'
 import styles from './Styles/ChatStyle'
-import {GiftedChat, Actions, Bubble, SystemMessage, InputToolbar} from 'react-native-gifted-chat';
-import CustomView from './chat/CustomView';
+import {GiftedChat, InputToolbar} from 'react-native-gifted-chat'
 import TwitterShareActions from '../Redux/TwitterShareRedux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import DappActions, { DappSelectors } from '../Redux/DappRedux'
-import Communications from 'react-native-communications';
-const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
-const common = require('./../common.js');
-const utils = require('./../Engine/misc/utils.js');
+const utils = require('./../Engine/misc/utils.js')
 
-const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js');
-const slideAnimation = new SlideAnimation({ slideFrom: 'bottom' });
-const { width, height } = Dimensions.get('window')
+const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js')
+const slideAnimation = new SlideAnimation({ slideFrom: 'bottom' })
+const { width } = Dimensions.get('window')
 
 class ChannelScreen extends Component {
   static navigationOptions = ({ navigation }) => {
-    const params = navigation.state.params || {};
+    const params = navigation.state.params || {}
     return {
       headerLeft: (
         <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
-          <Ionicons name="ios-arrow-dropleft" size={32} color='white'/>
+          <Ionicons name='ios-arrow-dropleft' size={32} color='white' />
         </TouchableOpacity>
       ),
       headerTitle: params.name,
       headerRight: (
         // <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
         <TouchableOpacity onPress={() => alert('Public Unencrypted Channels')} style={{marginRight: 10}}>
-          <Ionicons name="ios-help-buoy" size={28} color='white'/>
+          <Ionicons name='ios-help-buoy' size={28} color='white' />
         </TouchableOpacity>
       ),
       headerTintColor: 'white',
       headerStyle: {
         backgroundColor: '#34bbed'
       }
-    };
+    }
   };
 
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
     this.state = {
       messages: [],
       loadEarlier: false,
@@ -74,11 +68,11 @@ class ChannelScreen extends Component {
       inputText: '',
       user: '',
       visible: false
-    };
+    }
 
-    this._isMounted = false;
-    this._isAlright = null;
-    this.activeContact = undefined;
+    this._isMounted = false
+    this._isAlright = null
+    this.activeContact = undefined
     this.publicKey = undefined
     this.displayname = ''
     this.delegate = false
@@ -88,7 +82,7 @@ class ChannelScreen extends Component {
     //
     this.amaTitleIndex = {}
   }
-  configWithActiveContact = (anActiveContact, administrable=false, force=false, callSetState=false) => {
+  configWithActiveContact = (anActiveContact, administrable = false, force = false, callSetState = false) => {
     const method = 'ChannelScreen::configWithActiveContact'
     console.log(`INFO(${method}): anActiveContact=${anActiveContact}`)
 
@@ -103,16 +97,16 @@ class ChannelScreen extends Component {
     this.activeContact = anActiveContact
     this.publicKey = (this.activeContact) ? this.activeContact.publicKey : undefined
     this.isAma = utils.isAma(this.activeContact.protocol)
-    this.protocol = (this.activeContact) ?
-      utils.isChannelOrAma(this.activeContact.protocol) : false
+    this.protocol = (this.activeContact)
+      ? utils.isChannelOrAma(this.activeContact.protocol) : false
     console.log(`DEBUG(${method}): this.protocol = ${this.protocol}, this.activeContact.protocol = ${this.activeContact.protocol}.`)
     console.log(`INFO(${method}): check #2 anActiveContact=${anActiveContact}`)
     console.log(`INFO(${method}): check #2 anActiveContact=${anActiveContact}`)
     this.displayname = (anActiveContact.title) ? anActiveContact.title : anActiveContact.id
-    this.props.navigation.setParams({ navigation: this.props.navigation, name: this.displayname });
+    this.props.navigation.setParams({ navigation: this.props.navigation, name: this.displayname })
   }
-  componentWillMount() {
-    this._isMounted = true;
+  componentWillMount () {
+    this._isMounted = true
     const { userData, userProfile } = this.props
     const { username } = userData
     const { profile } = userProfile
@@ -126,37 +120,38 @@ class ChannelScreen extends Component {
       name,
       userImage
     }
-    //user added to the channel notification topic
+    // user added to the channel notification topic
     // firebaseInstance.subscribeToTopic(username);
     const { contactMgr } = this.props
-    const activeContact = (contactMgr && contactMgr.getActiveContact()) ?
-      contactMgr.getActiveContact() : undefined
-    const administrable = (activeContact && contactMgr.isAdministrable(activeContact.id)) ? true : false
+    const activeContact = (contactMgr && contactMgr.getActiveContact())
+      ? contactMgr.getActiveContact() : undefined
+    const administrable = !!((activeContact && contactMgr.isAdministrable(activeContact.id)))
     if (activeContact) {
       this.configWithActiveContact(activeContact, administrable)
       // firebaseInstance.subscribeToTopic(activeContact.id);
-      const { messages } = this.props;
+      const { messages } = this.props
       if (messages) {
-        this.state.messages = this.setupMessages(messages).reverse();
+        this.state.messages = this.setupMessages(messages).reverse()
       }
     }
   }
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (!this.activeContact) {
       return
     }
     if (!this.publicKey) {
-      if (nextProps.contactMgr && nextProps.contactMgr.hasPublicKey()) {
-        const activeContact = nextProps.contactMgr.getActiveContact()
+      const {contactMgr} = nextProps
+      if (contactMgr && contactMgr.hasPublicKey()) {
+        const activeContact = contactMgr.getActiveContact()
         // Ugly AF configWithActiveContact designed to be called before UI
         // exists. Modified it to work after UI exists with setState call option.
-        const administrable = (activeContact && contactMgr.isAdministrable(activeContact.id)) ? true : false
+        const administrable = !!((activeContact && contactMgr.isAdministrable(activeContact.id)))
         const FORCE = true
         const CALL_SET_STATE = true
         this.configWithActiveContact(activeContact, administrable, FORCE, CALL_SET_STATE)
       }
     }
-    const { messages, dappUrl, dappMessage } = nextProps
+    const { messages } = nextProps
     if (this.props.messages && this.props.messages.length !== messages.length) {
       //
       // TODO: Prabhaav, the code to handle 'TEXT' & 'TEXT_JSON' is duplicated
@@ -164,9 +159,9 @@ class ChannelScreen extends Component {
       //       cause crashes when we forget to fix both pieces of code when we add
       //       new message types.
       //
-      const numNewMsgs = messages.length - this.props.messages.length;
-      let newMessages = [];
-      for (const idx = messages.length-numNewMsgs; idx < messages.length; idx++) {
+      const numNewMsgs = messages.length - this.props.messages.length
+      let newMessages = []
+      for (let idx = messages.length - numNewMsgs; idx < messages.length; idx++) {
         const msg = messages[idx]
         const { author, image } = msg
         if (author !== this.state.author.username) {
@@ -180,28 +175,27 @@ class ChannelScreen extends Component {
             user: {
               _id: author,
               name: author,
-              avatar: image,
-            },
+              avatar: image
+            }
           }
-          newMessages.splice(0, 0, newMessage);
+          newMessages.splice(0, 0, newMessage)
         }
       }
       this.onReceive(newMessages)
     }
   }
-  componentWillUnmount() {
-    this._isMounted = false;
+  componentWillUnmount () {
+    this._isMounted = false
     this.props.handleContactClick()
   }
   parseJargon = (message) => {
-    const { body, time, image, contentType } = message
+    const { body, time, contentType } = message
     let url, gimage, text
     if (contentType === 'TEXT') {
       text = body
       url = ''
       gimage = ''
-    }
-    else if (contentType === 'TEXT_JSON') {
+    } else if (contentType === 'TEXT_JSON') {
       text = body.text
       //
       // Handle AMA message objects
@@ -211,7 +205,7 @@ class ChannelScreen extends Component {
                '(' + body.status + ')'
         this.amaTitleIndex[body.title] = {
           id: body.ama_id,
-          msgAddress: message.msgAddress,
+          msgAddress: message.msgAddress
         }
         this.state.amaTitle = body.title
       }
@@ -225,20 +219,18 @@ class ChannelScreen extends Component {
     let messages = []
     let { description, id } = this.activeContact
     for (const message of inputMessages) {
-      const { author, body, image, state, contentType } = message
+      let { author, image, state } = message
       const sent = (state === MESSAGE_STATE.SENT_OFFLINE || state === MESSAGE_STATE.SENT_REALTIME || state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
       const received = (state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
-      const { url, gimage, text, time } = this.parseJargon(message)
+      let { url, gimage, text, time } = this.parseJargon(message)
       if (author === id) {
         if (this.protocol) {
           const newText = text
           const index = newText.indexOf(' says: ')
           author = newText.substring(0, index)
           if (author) {
-            text = newText.substring(index+7)
-            if (this.protocol)
-              image = ''
-            name = ''
+            text = newText.substring(index + 7)
+            if (this.protocol) { image = '' }
             description = author
           }
         }
@@ -253,11 +245,10 @@ class ChannelScreen extends Component {
           user: {
             _id: author,
             name: description,
-            avatar: image,
-          },
+            avatar: image
+          }
         })
-      }
-      else {
+      } else {
         messages.push({
           _id: Math.round(Math.random() * 1000000),
           text,
@@ -269,19 +260,19 @@ class ChannelScreen extends Component {
           user: {
             _id: author,
             name: author,
-            avatar: image,
-          },
+            avatar: image
+          }
         })
       }
     }
-    return messages;
+    return messages
   }
   onLoadEarlier = () => {
     this.setState((previousState) => {
       return {
-        isLoadingEarlier: true,
-      };
-    });
+        isLoadingEarlier: true
+      }
+    })
 
     setTimeout(() => {
       if (this._isMounted === true) {
@@ -289,35 +280,29 @@ class ChannelScreen extends Component {
           return {
             messages: GiftedChat.prepend(previousState.messages, require('./data/old_messages.js')),
             loadEarlier: false,
-            isLoadingEarlier: false,
-          };
-        });
+            isLoadingEarlier: false
+          }
+        })
       }
-    }, 1000); // simulating network
+    }, 1000) // simulating network
   }
   onSend = (messages = [], json) => {
-    const { token } = this.state
-    const { publicKey, bearerToken } = this.props
-    // if (token) {
-    //   this.props.sendNotification(token, publicKey, bearerToken)
-    // }
-    const {text, gtext, image, url} = messages[0]
+    const {text, image, url} = messages[0]
     if (image && url) {
       this.props.handleOutgoingMessage(undefined, messages[0])
-    }
-    else if (text) {
-      this.props.handleOutgoingMessage(text, undefined);
+    } else if (text) {
+      this.props.handleOutgoingMessage(text, undefined)
     }
     this.setState((previousState) => {
       return {
-        messages: GiftedChat.append(previousState.messages, messages),
-      };
-    });
-    //call twitter share after first send
+        messages: GiftedChat.append(previousState.messages, messages)
+      }
+    })
+    // call twitter share after first send
     this.props.shareInit()
   }
   onReceive = (newMessages) => {
-    //hack to show the generated id instead of stealthy all the time
+    // hack to show the generated id instead of stealthy all the time
     let updatedMessages = []
     if (this.protocol) {
       for (let message of newMessages) {
@@ -327,7 +312,7 @@ class ChannelScreen extends Component {
         let newText = text
         if (index > -1) {
           newId = text.substring(0, index)
-          newText = text.substring(index+7)
+          newText = text.substring(index + 7)
           user.avatar = ''
           user.name = newId
           user._id = newId
@@ -336,19 +321,18 @@ class ChannelScreen extends Component {
           user,
           text: newText,
           createdAt,
-          _id,
+          _id
         }
         updatedMessages.push(crap)
       }
-    }
-    else {
+    } else {
       updatedMessages = newMessages
     }
     this.setState((previousState) => {
       return {
-        messages: GiftedChat.append(previousState.messages, updatedMessages),
-      };
-    });
+        messages: GiftedChat.append(previousState.messages, updatedMessages)
+      }
+    })
   }
   renderCustomActions = (props) => {
     return (this.isAma) ? (
@@ -358,10 +342,10 @@ class ChannelScreen extends Component {
           this.setState({visible: true})
         }}
       >
-        <Ionicons name="ios-radio" size={28} color='#34bbed' />
+        <Ionicons name='ios-radio' size={28} color='#34bbed' />
       </TouchableOpacity>
     ) : null
-    //disabling this for v1.7
+    // disabling this for v1.7
     // (
     //   <TouchableOpacity
     //     style={[styles.chatContainer, this.props.containerStyle]}
@@ -379,12 +363,12 @@ class ChannelScreen extends Component {
             {this.state.typingText}
           </Text>
         </View>
-      );
+      )
     }
-    return null;
+    return null
   }
   renderInputToolbar = (props) => {
-     //Add the extra styles via containerStyle
+     // Add the extra styles via containerStyle
     return (
       <InputToolbar
         {...props}
@@ -412,10 +396,7 @@ class ChannelScreen extends Component {
     }
   }
   toggleDrawer = () => {
-    if (this.state.drawerOpen)
-      this.closeDrawer()
-    else
-      this.openDrawer()
+    if (this.state.drawerOpen) { this.closeDrawer() } else { this.openDrawer() }
   };
   closeDrawer = () => {
     this._drawer.close()
@@ -426,7 +407,7 @@ class ChannelScreen extends Component {
     this._giftedChat.textInput.focus()
   };
   setCustomText = (inputText) => {
-    //turning this off for v1.7
+    // turning this off for v1.7
     // if (this.protocol && inputText && (inputText[0] === '@' || inputText[0] === '/') && inputText.length < 2) {
     //   this.openDrawer()
     // }
@@ -438,25 +419,25 @@ class ChannelScreen extends Component {
     this.closeDrawer()
   }
   renderMessage = (props) => {
-    const { currentMessage: { text: currText } } = props;
-    let messageTextStyle;
+    const { currentMessage: { text: currText } } = props
+    let messageTextStyle
     // Make "pure emoji" messages much bigger than plain text.
     if (currText && emojiUtils.isPureEmojiString(currText)) {
       messageTextStyle = {
         fontSize: 28,
         // Emoji get clipped if lineHeight isn't increased; make it consistent across platforms.
-        lineHeight: Platform.OS === 'android' ? 34 : 30,
-      };
+        lineHeight: Platform.OS === 'android' ? 34 : 30
+      }
     }
     return (
       <SlackMessage {...props} messageTextStyle={messageTextStyle} />
-    );
+    )
   }
   handleUserActionSheet = (index) => {
     switch (index) {
       case 0: {
         this.props.addContactId(this.state.user.name)
-        break;
+        break
       }
     }
   }
@@ -476,13 +457,13 @@ class ChannelScreen extends Component {
   //     />
   //   );
   // }
-  render() {
+  render () {
     const amaButton = (this.amaTitleIndex[this.state.amaTitle]) ? (
       <Button
         raised
         color='green'
         buttonStyle={{backgroundColor: '#b37ccf'}}
-        textStyle={{ fontSize: 24, fontWeight: "900", color: "white"}}
+        textStyle={{ fontSize: 24, fontWeight: '900', color: 'white' }}
         title={this.state.amaTitle}
         onPress={() => this.onPressAma(this.state.amaTitle)}
         icon={{size: 28, type: 'font-awesome', name: 'bullhorn', color: 'white'}}
@@ -491,39 +472,38 @@ class ChannelScreen extends Component {
     const disableAmaFeatures = this.isAma && !this.delegate
     return (
       <View id='GiftedChatContainer'
-           style={{flex: 1,
-                   backgroundColor: 'white'}}>
+        style={{flex: 1,
+          backgroundColor: 'white'}}>
         <PopupDialog
-          dialogKey="goWay"
+          dialogKey='goWay'
           height={0.4}
           width={0.9}
           dialogStyle={{
             top: -1 * (width / 3),
             borderRadius: 20,
             padding: 10,
-            overflow: 'hidden',
+            overflow: 'hidden'
           }}
-          dialogTitle={<DialogTitle key='dpdialog' align="left" title="Set your AMA Topic" />}
+          dialogTitle={<DialogTitle key='dpdialog' align='left' title='Set your AMA Topic' />}
           visible={this.state.visible}
           dialogAnimation={slideAnimation}
           actions={[
             <DialogButton
-              key="button-2"
+              key='button-2'
               text='Close'
               align='left'
-              bordered={true}
+              bordered
               style={{paddingBottom: 20, backgroundColor: '#DD6B55'}}
               textStyle={{color: 'white'}}
               onPress={() => {
                 this.setState({visible: false})
                 Keyboard.dismiss()
-              }}>
-            </DialogButton>,
+              }} />,
             <DialogButton
-              key="button-1"
+              key='button-1'
               text='Submit'
               align='right'
-              bordered={true}
+              bordered
               style={{paddingBottom: 20, backgroundColor: '#34bbed'}}
               textStyle={{color: 'white'}}
               onPress={() => {
@@ -531,15 +511,14 @@ class ChannelScreen extends Component {
                   this.setState({visible: false})
                   Keyboard.dismiss()
                   const stringifiedCmd = AmaCommands.amaCreate(this.state.amaAnswer)
-                  this.props.handleOutgoingMessage(stringifiedCmd, undefined);
+                  this.props.handleOutgoingMessage(stringifiedCmd, undefined)
                   this.setState({amaTitle: this.state.amaAnswer, amaAnswer: ''})
                   this.props.setSpinnerData(true, 'Processing...')
                   setTimeout(() => {
                     this.props.setSpinnerData(false, '')
-                  }, 3000);
+                  }, 3000)
                 }
-              }}>
-            </DialogButton>
+              }} />
           ]}
         >
           <Container>
@@ -549,7 +528,7 @@ class ChannelScreen extends Component {
                   rowSpan={7}
                   onChangeText={(amaAnswer) => this.setState({amaAnswer: `AMA: ${amaAnswer}`})}
                   bordered
-                  placeholder="Enter a AMA Topic"
+                  placeholder='Enter a AMA Topic'
                 />
               </Form>
             </Content>
@@ -574,10 +553,10 @@ class ChannelScreen extends Component {
            : () => this.props.navigation.navigate('ContactProfile')}
           isLoadingEarlier={this.state.isLoadingEarlier}
           user={{
-            _id: this.state.author.username, // sent messages should have same user._id
+            _id: this.state.author.username // sent messages should have same user._id
           }}
-          showAvatarForEveryMessage={true}
-          renderAvatarOnTop={true}
+          showAvatarForEveryMessage
+          renderAvatarOnTop
           text={this.state.inputText}
           renderBubble={this.renderBubble}
           renderActions={(!disableAmaFeatures) ? this.renderCustomActions : null}
@@ -586,20 +565,15 @@ class ChannelScreen extends Component {
           maxInputLength={240}
           renderInputToolbar={this.renderInputToolbar}
           parsePatterns={(linkStyle) => [
-            { pattern: /AMA:.*\n\n.*/, style: linkStyle, onPress: this.onPressAma },
+            { pattern: /AMA:.*\n\n.*/, style: linkStyle, onPress: this.onPressAma }
           ]}
           onInputTextChanged={text => this.setCustomText(text)}
           textInputProps={{editable: (!disableAmaFeatures)}}
           onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
         />
       </View>
-    );
+    )
   }
-}
-
-const drawerStyles = {
-  drawer: { shadowColor: '#000000', shadowOpacity: 0.8, shadowRadius: 3},
-  main: {paddingLeft: 3},
 }
 
 const mapStateToProps = (state) => {
@@ -611,7 +585,7 @@ const mapStateToProps = (state) => {
     publicKey: EngineSelectors.getPublicKey(state),
     bearerToken: EngineSelectors.getBearerToken(state),
     dappUrl: DappSelectors.getDappUrl(state),
-    dappMessage: DappSelectors.getDappMessage(state),
+    dappMessage: DappSelectors.getDappMessage(state)
   }
 }
 
@@ -626,7 +600,7 @@ const mapDispatchToProps = (dispatch) => {
     updateContactPubKey: (aContactId) => dispatch(EngineActions.updateContactPubKey(aContactId)),
     setDappUrl: (dappUrl) => dispatch(DappActions.setDappUrl(dappUrl)),
     setDappMessage: (dappMessage) => dispatch(DappActions.setDappMessage(dappMessage)),
-    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),
+    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message))
   }
 }
 

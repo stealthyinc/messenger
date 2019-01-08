@@ -13,8 +13,7 @@
 //
 // Common:
 //
-const utils = require('./../misc/utils.js');
-
+const utils = require('./../misc/utils.js')
 
 // Tools for managing a channel.
 // The filestructure looks like this:
@@ -52,7 +51,7 @@ class ChannelServicesV2 {
   static CHANNEL_DIR = 'channel'
   static STATUS_FILENAME = 'status.json'
 
-  constructor() {
+  constructor () {
     // Uniquely identifyies each message while also describing where it is
     // stored in our sharded append only log:
     this.lastMsgAddress = {
@@ -64,27 +63,27 @@ class ChannelServicesV2 {
 
   // The last message address is typically stored stringified in status.json
   //
-  setLastMsgAddress(aMsgAddress) {
+  setLastMsgAddress (aMsgAddress) {
     if (!aMsgAddress) {
       throw `ERROR(ChannelServicesV2::setLastMsgAddress): aMsgAddress is not defined.`
     }
     this.lastMsgAddress = utils.deepCopyObj(aMsgAddress)
   }
   //
-  getLastMsgAddress() {
+  getLastMsgAddress () {
     return utils.deepCopyObj(this.lastMsgAddress)
   }
 
-  getCompactLastMsgAddress() {
+  getCompactLastMsgAddress () {
     const addr = this.lastMsgAddress
     return `${addr.outerFolderNumber}/${addr.innerFolderNumber}/${addr.fileNumber}`
   }
 
-  getLastMessageFilePath() {
+  getLastMessageFilePath () {
     return ChannelServicesV2.getMsgFilePath(this.lastMsgAddress)
   }
 
-  incrementLastMsgAddress() {
+  incrementLastMsgAddress () {
     this.lastMsgAddress = ChannelServicesV2.getIncrementedMsgAddress(this.lastMsgAddress)
   }
 
@@ -100,7 +99,7 @@ class ChannelServicesV2 {
   // Special case:  If aMsgAddress is 0/0/0, then return the last n messages as
   //                specified in firstFetchLimit after returning the first message
   //                (which is typically a disclaimer)
-  getMsgFilePaths(aMsgAddress, maxPaths=4, firstFetchLimit=20) {
+  getMsgFilePaths (aMsgAddress, maxPaths = 4, firstFetchLimit = 20) {
     let msgFilePaths = []
     if (aMsgAddress) {
       let pathCount = 0
@@ -147,7 +146,7 @@ class ChannelServicesV2 {
     return msgFilePaths
   }
 
-  static getMsgFileName(aFileNumber) {
+  static getMsgFileName (aFileNumber) {
     if (Number.isInteger(aFileNumber) &&
         (aFileNumber >= 0) &&
         (aFileNumber < ChannelServicesV2.MAX_FILES_PER_INNER_FOLDER)) {
@@ -158,11 +157,11 @@ class ChannelServicesV2 {
            integer >= 0 and < ${ChannelServicesV2.MAX_FILES_PER_INNER_FOLDER}.`
   }
 
-  static getStatusFilePath() {
+  static getStatusFilePath () {
     return `${ChannelServicesV2.CHANNEL_DIR}/${ChannelServicesV2.STATUS_FILENAME}`
   }
 
-  static getMsgFilePath(aMessageAddress) {
+  static getMsgFilePath (aMessageAddress) {
     if (aMessageAddress) {
       const fileName = ChannelServicesV2.getMsgFileName(aMessageAddress.fileNumber)
       return `${ChannelServicesV2.CHANNEL_DIR}/${aMessageAddress.outerFolderNumber}/${aMessageAddress.innerFolderNumber}/${fileName}`
@@ -171,16 +170,15 @@ class ChannelServicesV2 {
   }
 
   // Yuck. Need to put this somehwere more sensible etc. TODO
-  static getAmaFilePath(aCompactMessageAddress) {
+  static getAmaFilePath (aCompactMessageAddress) {
     if (aCompactMessageAddress) {
       return `${ChannelServicesV2.CHANNEL_DIR}/${aCompactMessageAddress}.ama.json`
     }
     return undefined
   }
 
-
   // For atomic updates and new object creation.
-  static getIncrementedMsgAddress(aMessageAddress) {
+  static getIncrementedMsgAddress (aMessageAddress) {
     const addr = utils.deepCopyObj(aMessageAddress)
     ChannelServicesV2.incrementMsgAddress(addr)
 
@@ -188,7 +186,7 @@ class ChannelServicesV2 {
   }
 
   // For in place mdoification of an existing object
-  static incrementMsgAddress(aMessageAddress) {
+  static incrementMsgAddress (aMessageAddress) {
     aMessageAddress.fileNumber++
 
     if (aMessageAddress.fileNumber === ChannelServicesV2.MAX_FILES_PER_INNER_FOLDER) {
@@ -202,7 +200,7 @@ class ChannelServicesV2 {
   }
 
   // Returns undefined if invalid addresses passed in.
-  static msgAddressLessThanOrEqual(msgAddress1, msgAddress2) {
+  static msgAddressLessThanOrEqual (msgAddress1, msgAddress2) {
     // TODO: make this less crappy. In a hurry. Needs things like parseInt and
     //       refactoring.
     // if ((msgAddress1 &&
@@ -224,7 +222,7 @@ class ChannelServicesV2 {
             return false
           } else if (msgAddress1.innerFolderNumber < msgAddress2.innerFolderNumber) {
             return true
-          } else  {// equal innerFolderNumbers
+          } else { // equal innerFolderNumbers
             return (msgAddress1.fileNumber <= msgAddress2.fileNumber)
           }
         }
@@ -235,7 +233,7 @@ class ChannelServicesV2 {
     return undefined
   }
 
-  static msgAddressEqual(msgAddress1, msgAddress2) {
+  static msgAddressEqual (msgAddress1, msgAddress2) {
     if (msgAddress1 && msgAddress2) {
       try {
         return ((msgAddress1.fileNumber === msgAddress2.fileNumber) &&
@@ -248,7 +246,7 @@ class ChannelServicesV2 {
     return false
   }
 
-  static getMsgAddressFromCompact(aCompactMsgAddress) {
+  static getMsgAddressFromCompact (aCompactMsgAddress) {
     try {
       const patt = /^([0-9]+)\/([0-9]+)\/([0-9]+)/g
       const res = patt.exec(aCompactMsgAddress)
@@ -273,12 +271,12 @@ class ChannelServicesV2 {
   //         = 11 + 4,000 + 3,000,000
   //         = 3,004,011
   //
-  static getNumberOfMessages(aMsgAddress) {
+  static getNumberOfMessages (aMsgAddress) {
     let numMsgs = 0
     if (aMsgAddress) {
       if (aMsgAddress.outerFolderNumber >=
           ChannelServicesV2.MAX_SUPPORTED_OUTER_FOLDER_NUM) {
-        throw(`ERROR(ChannelServicesV2::getNumberOfMessages): aMsgAddress will calculate to exceed a number representable in js.`)
+        throw (`ERROR(ChannelServicesV2::getNumberOfMessages): aMsgAddress will calculate to exceed a number representable in js.`)
       }
 
       numMsgs = ((aMsgAddress.fileNumber + 1) *
@@ -297,11 +295,11 @@ class ChannelServicesV2 {
   //  * aMsgNum=327 would return the long form of 0/0/326
   //  * aMsgNum=3004011 would return the long form of 3/4/10
   //  * aMsgNum < 1 returns the long form of 0/0/0
-  static getMsgAddressFromMsgNum(aMsgNum) {
+  static getMsgAddressFromMsgNum (aMsgNum) {
     if (aMsgNum >= Number.MAX_SAFE_INTEGER) {
-      throw(`ERROR(ChannelServicesV2::getMsgAddressFromMsgNum): aMsgNum exceeds or is the max number representable in js.`)
+      throw (`ERROR(ChannelServicesV2::getMsgAddressFromMsgNum): aMsgNum exceeds or is the max number representable in js.`)
     } else if (aMsgNum <= 0) {
-      throw(`ERROR(ChannelServicesV2::getMsgAddressFromMsgNum): aMsgNum(${aMsgNum}) must be > 0.`)
+      throw (`ERROR(ChannelServicesV2::getMsgAddressFromMsgNum): aMsgNum(${aMsgNum}) must be > 0.`)
     }
 
     const outerFolderNumber = Math.floor(aMsgNum / ChannelServicesV2.MAX_MESSAGES_PER_OUTER_FOLDER)
@@ -320,7 +318,7 @@ class ChannelServicesV2 {
     }
   }
 
-  static isFirstMsgAddress(aMsgAddress) {
+  static isFirstMsgAddress (aMsgAddress) {
     return aMsgAddress &&
            aMsgAddress.fileNumber === 0 &&
            aMsgAddress.innerFolderNumber === 0 &&

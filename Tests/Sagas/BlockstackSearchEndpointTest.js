@@ -2,7 +2,7 @@ import FixtureAPI from '../../App/Services/FixtureApi'
 import { put, call } from 'redux-saga/effects'
 import { getActiveUserProfile } from '../../App/Sagas/EngineSagas'
 import EngineActions from '../../App/Redux/EngineRedux'
-import { path } from 'ramda'
+// import { path } from 'ramda'
 
 const stepper = (fn) => (mock) => fn.next(mock).value
 

@@ -12,7 +12,6 @@
 
 import { call, put } from 'redux-saga/effects'
 import BlockstackContactsActions from '../Redux/BlockstackContactsRedux'
-import { BlockstackContactsSelectors } from '../Redux/BlockstackContactsRedux'
 
 export function * getBlockstackContacts (api, action) {
   const { data } = action
@@ -31,7 +30,7 @@ export function * getBlockstackContacts (api, action) {
       const {results} = response.data
       if (results && !results.length) {
         // console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%2')
-        const namesResponse = yield call (api.getBlockstackNames, name)
+        const namesResponse = yield call(api.getBlockstackNames, name)
         if (namesResponse) {
           // console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%3')
           const item = {
@@ -46,8 +45,7 @@ export function * getBlockstackContacts (api, action) {
         //   console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%4')
         //   yield put(BlockstackContactsActions.blockstackContactsSuccess({payload: []}))
         // }
-      }
-      else {
+      } else {
         // console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5')
         yield put(BlockstackContactsActions.blockstackContactsSuccess(results))
       }

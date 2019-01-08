@@ -1,32 +1,29 @@
 import React, { Component } from 'react'
-import { Platform, Image, Modal, Keyboard, StyleSheet, ScrollView, TouchableOpacity, TouchableHighlight, WebView, View, Text } from 'react-native'
+import { TouchableOpacity, View, Text } from 'react-native'
 import { connect } from 'react-redux'
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Button, Icon } from 'react-native-elements'
-
-import { Container, Header, Content, Item, Form, Textarea, Toast } from 'native-base';
+import Ionicons from 'react-native-vector-icons/Ionicons'
+import { Button } from 'react-native-elements'
 
 // Styles
 import styles from './Styles/ChatStyle'
-import {GiftedChat, Actions, Bubble, SystemMessage, InputToolbar} from 'react-native-gifted-chat';
-import CustomView from './chat/CustomView';
+import {GiftedChat, Bubble, SystemMessage, InputToolbar} from 'react-native-gifted-chat'
+import CustomView from './chat/CustomView'
 import TwitterShareActions from '../Redux/TwitterShareRedux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import DappActions, { DappSelectors } from '../Redux/DappRedux'
-import Communications from 'react-native-communications';
+import Communications from 'react-native-communications'
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
-const common = require('./../common.js');
-const utils = require('./../Engine/misc/utils.js');
+const common = require('./../common.js')
 
-const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js');
+const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js')
 
 class ChatScreen extends Component {
   static navigationOptions = ({ navigation }) => {
-    const params = navigation.state.params || {};
+    const params = navigation.state.params || {}
     return {
       headerLeft: (
         <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
-          <Ionicons name="ios-arrow-dropleft" size={32} color='white'/>
+          <Ionicons name='ios-arrow-dropleft' size={32} color='white' />
         </TouchableOpacity>
       ),
       headerTitle: params.name,
@@ -40,11 +37,11 @@ class ChatScreen extends Component {
       headerStyle: {
         backgroundColor: '#34bbed'
       }
-    };
+    }
   };
 
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
     this.state = {
       messages: [],
       loadEarlier: false,
@@ -59,16 +56,16 @@ class ChatScreen extends Component {
       drawerOpen: false,
       drawerDisabled: false,
       inputText: ''
-    };
+    }
 
-    this._isMounted = false;
-    this._isAlright = null;
-    this.activeContact = undefined;
+    this._isMounted = false
+    this._isAlright = null
+    this.activeContact = undefined
     this.publicKey = undefined
     this.displayname = ''
     this.delegate = true
   }
-  configWithActiveContact = (anActiveContact, administrable=false, force=false, callSetState=false) => {
+  configWithActiveContact = (anActiveContact, administrable = false, force = false, callSetState = false) => {
     const method = 'ChatScreen::configWithActiveContact'
     console.log(`INFO(${method}): anActiveContact=${anActiveContact}`)
 
@@ -97,14 +94,14 @@ class ChatScreen extends Component {
           })
         }
       }
-    });
+    })
     console.log(`INFO(${method}): check #2 anActiveContact=${anActiveContact}`)
     console.log(`INFO(${method}): check #2 anActiveContact=${anActiveContact}`)
     this.displayname = (anActiveContact.title) ? anActiveContact.title : anActiveContact.id
-    this.props.navigation.setParams({ navigation: this.props.navigation, name: this.displayname });
+    this.props.navigation.setParams({ navigation: this.props.navigation, name: this.displayname })
   }
-  componentWillMount() {
-    this._isMounted = true;
+  componentWillMount () {
+    this._isMounted = true
 
     const { userData, userProfile } = this.props
     const { username } = userData
@@ -121,29 +118,30 @@ class ChatScreen extends Component {
     }
 
     const { contactMgr } = this.props
-    const activeContact = (contactMgr && contactMgr.getActiveContact()) ?
-      contactMgr.getActiveContact() : undefined
-    const administrable = (activeContact && contactMgr.isAdministrable(activeContact.id)) ? true : false
+    const activeContact = (contactMgr && contactMgr.getActiveContact())
+      ? contactMgr.getActiveContact() : undefined
+    const administrable = !!((activeContact && contactMgr.isAdministrable(activeContact.id)))
 
     if (activeContact) {
       this.configWithActiveContact(activeContact, administrable)
 
-      const { messages } = this.props;
+      const { messages } = this.props
       if (messages) {
-        this.state.messages = this.setupMessages(messages).reverse();
+        this.state.messages = this.setupMessages(messages).reverse()
       }
     }
   }
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps (nextProps) {
     if (!this.activeContact) {
       return
     }
     if (!this.publicKey) {
-      if (nextProps.contactMgr && nextProps.contactMgr.hasPublicKey()) {
-        const activeContact = nextProps.contactMgr.getActiveContact()
+      const {contactMgr} = nextProps
+      if (contactMgr && contactMgr.hasPublicKey()) {
+        const activeContact = contactMgr.getActiveContact()
         // Ugly AF configWithActiveContact designed to be called before UI
         // exists. Modified it to work after UI exists with setState call option.
-        const administrable = (activeContact && contactMgr.isAdministrable(activeContact.id)) ? true : false
+        const administrable = !!((activeContact && contactMgr.isAdministrable(activeContact.id)))
         const FORCE = true
         const CALL_SET_STATE = true
         this.configWithActiveContact(activeContact, administrable, FORCE, CALL_SET_STATE)
@@ -160,8 +158,8 @@ class ChatScreen extends Component {
       const graphiteLogo = 'https://image.ibb.co/hde71b/AppIcon.png'
       const travelstackLogo = 'https://app.travelstack.club/icon-192x192.png'
       const image = (dappUrl.includes('serene-hamilton') ||
-                     dappUrl.includes('graphite')) ?
-                     graphiteLogo : travelstackLogo
+                     dappUrl.includes('graphite'))
+                     ? graphiteLogo : travelstackLogo
       // const messageContent = `${name} shared "${dappData.title}" with you:\n\n${dappUrl}`
       const fileMessage = [{
         createdAt: time,
@@ -173,32 +171,30 @@ class ChatScreen extends Component {
           name: name,
           avatar: userImage
         },
-        _id: start,
+        _id: start
       }]
       this.onSend(fileMessage)
       this.props.setDappMessage(null)
-    }
-    else if (this.props.messages && this.props.messages.length !== messages.length) {
+    } else if (this.props.messages && this.props.messages.length !== messages.length) {
       //
       // TODO: Prabhaav, the code to handle 'TEXT' & 'TEXT_JSON' is duplicated
       //       below from method setupMessages. We should unify it so it doesn't
       //       cause crashes when we forget to fix both pieces of code when we add
       //       new message types.
       //
-      const numNewMsgs = messages.length - this.props.messages.length;
-      let newMessages = [];
-      for (const idx = messages.length-numNewMsgs; idx < messages.length; idx++) {
+      const numNewMsgs = messages.length - this.props.messages.length
+      let newMessages = []
+      for (let idx = messages.length - numNewMsgs; idx < messages.length; idx++) {
         const msg = messages[idx]
         const { author } = msg
         if (author !== this.state.author.username) {
           const { body, time, image, contentType } = msg
-          let url, press, gimage
+          let url, text, gimage
           if (contentType === 'TEXT') {
             text = body
             url = ''
             gimage = ''
-          }
-          else if (contentType === 'TEXT_JSON') {
+          } else if (contentType === 'TEXT_JSON') {
             text = body.text
             url = body.url
             gimage = body.image
@@ -212,17 +208,17 @@ class ChatScreen extends Component {
             user: {
               _id: author,
               name: author,
-              avatar: image,
-            },
+              avatar: image
+            }
           }
-          newMessages.splice(0, 0, newMessage);
+          newMessages.splice(0, 0, newMessage)
         }
       }
       this.onReceive(newMessages)
     }
   }
-  componentWillUnmount() {
-    this._isMounted = false;
+  componentWillUnmount () {
+    this._isMounted = false
     this.props.handleContactClick()
   }
   setupMessages = (inputMessages) => {
@@ -232,13 +228,12 @@ class ChatScreen extends Component {
       const { author, body, time, image, state, contentType } = message
       const sent = (state === MESSAGE_STATE.SENT_OFFLINE || state === MESSAGE_STATE.SENT_REALTIME || state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
       const received = (state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
-      let gtext, url, gimage, press
+      let text, url, gimage
       if (contentType === 'TEXT') {
         text = body
         url = ''
         gimage = ''
-      }
-      else if (contentType === 'TEXT_JSON') {
+      } else if (contentType === 'TEXT_JSON') {
         text = body.text
         url = body.url
         gimage = body.image
@@ -255,11 +250,10 @@ class ChatScreen extends Component {
           user: {
             _id: author,
             name: description,
-            avatar: image,
-          },
+            avatar: image
+          }
         })
-      }
-      else {
+      } else {
         messages.push({
           _id: Math.round(Math.random() * 1000000),
           text,
@@ -271,19 +265,19 @@ class ChatScreen extends Component {
           user: {
             _id: author,
             name: author,
-            avatar: image,
-          },
+            avatar: image
+          }
         })
       }
     }
-    return messages;
+    return messages
   }
   onLoadEarlier = () => {
     this.setState((previousState) => {
       return {
-        isLoadingEarlier: true,
-      };
-    });
+        isLoadingEarlier: true
+      }
+    })
 
     setTimeout(() => {
       if (this._isMounted === true) {
@@ -291,11 +285,11 @@ class ChatScreen extends Component {
           return {
             messages: GiftedChat.prepend(previousState.messages, require('./data/old_messages.js')),
             loadEarlier: false,
-            isLoadingEarlier: false,
-          };
-        });
+            isLoadingEarlier: false
+          }
+        })
       }
-    }, 1000); // simulating network
+    }, 1000) // simulating network
   }
   onSend = (messages = [], json) => {
     const { token, enabled } = this.state
@@ -303,30 +297,29 @@ class ChatScreen extends Component {
     if (token && enabled) {
       this.props.sendNotification(token, publicKey, bearerToken)
     }
-    const {text, gtext, image, url} = messages[0]
+    const {text, image, url} = messages[0]
     if (image && url) {
       this.props.handleOutgoingMessage(undefined, messages[0])
-    }
-    else if (text) {
-      this.props.handleOutgoingMessage(text, undefined);
+    } else if (text) {
+      this.props.handleOutgoingMessage(text, undefined)
     }
     this.setState((previousState) => {
       return {
-        messages: GiftedChat.append(previousState.messages, messages),
-      };
-    });
-    //call twitter share after first send
+        messages: GiftedChat.append(previousState.messages, messages)
+      }
+    })
+    // call twitter share after first send
     this.props.shareInit()
   }
   onReceive = (newMessages) => {
     this.setState((previousState) => {
       return {
-        messages: GiftedChat.append(previousState.messages, newMessages),
-      };
-    });
+        messages: GiftedChat.append(previousState.messages, newMessages)
+      }
+    })
   }
   setModalVisible = (flag) => {
-    console.log("flag", flag)
+    console.log('flag', flag)
     this.setState({modalVisible: flag})
   }
   renderCustomActions = (props) => {
@@ -335,7 +328,7 @@ class ChatScreen extends Component {
         style={[styles.chatContainer, this.props.containerStyle]}
         onPress={() => this.props.navigation.navigate('DappData')}
       >
-        <Ionicons name="ios-aperture" size={28} color='#34bbed' />
+        <Ionicons name='ios-aperture' size={28} color='#34bbed' />
       </TouchableOpacity>
     )
   }
@@ -345,24 +338,24 @@ class ChatScreen extends Component {
         {...props}
         wrapperStyle={{
           left: {
-            backgroundColor: '#f0f0f0',
+            backgroundColor: '#f0f0f0'
           }
         }}
       />
-    );
+    )
   }
   renderSystemMessage = (props) => {
     return (
       <SystemMessage
         {...props}
         containerStyle={{
-          marginBottom: 15,
+          marginBottom: 15
         }}
         textStyle={{
-          fontSize: 14,
+          fontSize: 14
         }}
       />
-    );
+    )
   }
   renderCustomView = (props) => {
     return (
@@ -370,7 +363,7 @@ class ChatScreen extends Component {
         {...props}
         onPress={this.onPressUrl}
       />
-    );
+    )
   }
   renderFooter = (props) => {
     if (this.state.typingText) {
@@ -380,12 +373,12 @@ class ChatScreen extends Component {
             {this.state.typingText}
           </Text>
         </View>
-      );
+      )
     }
-    return null;
+    return null
   }
   renderInputToolbar = (props) => {
-     //Add the extra styles via containerStyle
+     // Add the extra styles via containerStyle
     return (
       <InputToolbar
         {...props}
@@ -404,7 +397,7 @@ class ChatScreen extends Component {
     this.setState({inputText: newText})
     this.closeDrawer()
   }
-  render() {
+  render () {
     if (!this.publicKey) {
       const {id} = this.activeContact
       return (
@@ -433,7 +426,7 @@ class ChatScreen extends Component {
             />
             <Button
               backgroundColor={'#34bbed'}
-              onPress={() => Communications.email([''],null,null,'Add me on Stealthy IM','')}
+              onPress={() => Communications.email([''], null, null, 'Add me on Stealthy IM', '')}
               icon={{name: 'email', color: 'white'}}
               title='Email'
               raised
@@ -444,8 +437,8 @@ class ChatScreen extends Component {
     }
     return (
       <View id='GiftedChatContainer'
-           style={{flex: 1,
-                   backgroundColor: 'white'}}>
+        style={{flex: 1,
+          backgroundColor: 'white'}}>
         <GiftedChat
           ref={(ref) => this._giftedChat = ref}
           messages={this.state.messages}
@@ -455,7 +448,7 @@ class ChatScreen extends Component {
           onPressAvatar={() => this.props.navigation.navigate('ContactProfile')}
           isLoadingEarlier={this.state.isLoadingEarlier}
           user={{
-            _id: this.state.author.username, // sent messages should have same user._id
+            _id: this.state.author.username // sent messages should have same user._id
           }}
           text={this.state.inputText}
           renderActions={this.renderCustomActions}
@@ -466,19 +459,14 @@ class ChatScreen extends Component {
           maxInputLength={240}
           renderInputToolbar={this.renderInputToolbar}
           parsePatterns={(linkStyle) => [
-            { type: 'url', style: linkStyle, onPress: this.onPressUrl },
+            { type: 'url', style: linkStyle, onPress: this.onPressUrl }
           ]}
           onInputTextChanged={text => this.setCustomText(text)}
           onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
         />
       </View>
-    );
+    )
   }
-}
-
-const drawerStyles = {
-  drawer: { shadowColor: '#000000', shadowOpacity: 0.8, shadowRadius: 3},
-  main: {paddingLeft: 3},
 }
 
 const mapStateToProps = (state) => {
@@ -490,7 +478,7 @@ const mapStateToProps = (state) => {
     publicKey: EngineSelectors.getPublicKey(state),
     bearerToken: EngineSelectors.getBearerToken(state),
     dappUrl: DappSelectors.getDappUrl(state),
-    dappMessage: DappSelectors.getDappMessage(state),
+    dappMessage: DappSelectors.getDappMessage(state)
   }
 }
 
@@ -502,7 +490,7 @@ const mapDispatchToProps = (dispatch) => {
     handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),
     updateContactPubKey: (aContactId) => dispatch(EngineActions.updateContactPubKey(aContactId)),
     setDappUrl: (dappUrl) => dispatch(DappActions.setDappUrl(dappUrl)),
-    setDappMessage: (dappMessage) => dispatch(DappActions.setDappMessage(dappMessage)),
+    setDappMessage: (dappMessage) => dispatch(DappActions.setDappMessage(dappMessage))
   }
 }
 

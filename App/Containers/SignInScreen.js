@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import {
   AsyncStorage,
   StyleSheet,
@@ -6,64 +6,51 @@ import {
   View,
   ScrollView,
   Image,
-  WebView,
   Linking,
-  NativeModules,
-  Platform,
-} from 'react-native';
-import { Icon, Button, Overlay, SocialIcon } from 'react-native-elements'
+  NativeModules
+} from 'react-native'
+import { Button, SocialIcon } from 'react-native-elements'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
+import chatIcon from '../Images/blue512.png'
+import AwesomeAlert from 'react-native-awesome-alerts'
 
-const common = require('./../common.js');
-const utils = require('./../Engine/misc/utils.js');
-const { firebaseInstance } = require('../Engine/firebaseWrapper.js');
-
-// import FAQ from '../Components/FAQ'
-
-import laptop from '../Images/laptopChat.png';
-import chatIcon from '../Images/blue512.png';
-import chatV1 from '../Images/StealthyV1.png';
-import flow from '../Images/rStealthyFlow.jpg';
-import graphitePlugin from '../Images/plugin.jpg';
-import AwesomeAlert from 'react-native-awesome-alerts';
+const utils = require('./../Engine/misc/utils.js')
+const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 
 class SignInScreen extends React.Component {
   static navigationOptions = {
-    header: null,
+    header: null
   };
-  constructor(props) {
-    super(props);
+  constructor (props) {
+    super(props)
     this.state = {
       error: false,
-      errorText: '',
-    };
+      errorText: ''
+    }
   }
-  render() {
+  render () {
     const oldPad = utils.is_oldPad()
     const marginBottom = (oldPad) ? 50 : 80
     if (this.state.error) {
       return (
-          <AwesomeAlert
-            show={this.state.error}
-            showProgress={false}
-            title="Stealthy Error"
-            message={this.state.errorText}
-            closeOnTouchOutside={false}
-            closeOnHardwareBackPress={false}
-            showCancelButton={true}
-            showConfirmButton={true}
-            cancelText="Close"
-            cancelButtonColor="#DD6B55"
-            confirmText="More Info"
-            confirmButtonColor="#34bbed"
-            onCancelPressed={() => {
-              this.setState({error: false, errorText: ''})
-            }}
-            onCancelPressed={() => {
-              this.setState({error: false, errorText: ''})
-            }}
-            onConfirmPressed={() => Linking.openURL('https://www.stealthy.im/badIdError1.jpg').catch(err => console.error('An error occurred', err))}
+        <AwesomeAlert
+          show={this.state.error}
+          showProgress={false}
+          title='Stealthy Error'
+          message={this.state.errorText}
+          closeOnTouchOutside={false}
+          closeOnHardwareBackPress={false}
+          showCancelButton
+          showConfirmButton
+          cancelText='Close'
+          cancelButtonColor='#DD6B55'
+          confirmText='More Info'
+          confirmButtonColor='#34bbed'
+          onCancelPressed={() => {
+            this.setState({error: false, errorText: ''})
+          }}
+          onConfirmPressed={() => Linking.openURL('https://www.stealthy.im/badIdError1.jpg').catch(err => console.error('An error occurred', err))}
           />
       )
     }
@@ -82,15 +69,15 @@ class SignInScreen extends React.Component {
           />
           <Button
             onPress={this._signInAsync}
-            title={(oldPad) ? "Login" : "Blockstack Login"}
-            textStyle={{ fontSize: 18, fontWeight: "900", color: "#34bbed"}}
-            icon={{name: 'input', color: "#34bbed"}}
+            title={(oldPad) ? 'Login' : 'Blockstack Login'}
+            textStyle={{ fontSize: 18, fontWeight: '900', color: '#34bbed' }}
+            icon={{name: 'input', color: '#34bbed'}}
             buttonStyle={{
               marginLeft: 20,
               width: (oldPad) ? 150 : 200,
               height: 50,
-              backgroundColor: "white",
-              borderColor: "#34bbed",
+              backgroundColor: 'white',
+              borderColor: '#34bbed',
               borderWidth: 2,
               borderRadius: 5,
               marginTop: 5
@@ -107,14 +94,14 @@ class SignInScreen extends React.Component {
         <Text style={{ fontWeight: 'bold', fontSize: (oldPad) ? 20 : 24, color: 'grey', marginBottom }}>Decentralized Communication</Text>
         <Button
           onPress={this._signInAsync}
-          title="Create Account"
-          textStyle={{ fontSize: 18, fontWeight: "900", color: "white"}}
-          icon={{name: 'create', color: "white"}}
+          title='Create Account'
+          textStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
+          icon={{name: 'create', color: 'white'}}
           buttonStyle={{
-            backgroundColor: "#34bbed",
+            backgroundColor: '#34bbed',
             width: 180,
             height: 50,
-            borderColor: "transparent",
+            borderColor: 'transparent',
             borderWidth: 0,
             borderRadius: 5,
             marginTop: (oldPad) ? 10 : 25
@@ -122,25 +109,25 @@ class SignInScreen extends React.Component {
         />
         <Button
           onPress={() => Linking.openURL('https://www.youtube.com/watch?v=V9-egxTCFFE').catch(err => console.error('An error occurred', err))}
-          title="Watch Demo"
-          textStyle={{ fontSize: 18, fontWeight: "900", color: "black"}}
-          icon={{name: 'featured-video', color: "black"}}
+          title='Watch Demo'
+          textStyle={{ fontSize: 18, fontWeight: '900', color: 'black' }}
+          icon={{name: 'featured-video', color: 'black'}}
           buttonStyle={{
-            backgroundColor: "white",
+            backgroundColor: 'white',
             width: 180,
             height: 50,
-            borderColor: "black",
+            borderColor: 'black',
             borderWidth: 2,
             borderRadius: 5,
             marginTop: (oldPad) ? 10 : 25
           }}
         />
       </ScrollView>
-    );
+    )
   }
   // iOS specific (possibly works on web too)
   _getUserData = async () => {
-    const {BlockstackNativeModule} = NativeModules;
+    const {BlockstackNativeModule} = NativeModules
     BlockstackNativeModule.getUserData((error, userData) => {
       if (error) {
         // throw(`Failed to get user data.  ${error}`);
@@ -157,16 +144,14 @@ class SignInScreen extends React.Component {
               this.setState({error: true, errorText: 'Failed to get public key from private.'})
               this.props.setSignInPending(false)
               this.props.setSpinnerData(false, '')
-            }
-            else {
-              userData['appPublicKey'] = publicKey;
-              AsyncStorage.setItem('userData', JSON.stringify(userData));
+            } else {
+              userData['appPublicKey'] = publicKey
+              AsyncStorage.setItem('userData', JSON.stringify(userData))
               this.props.screenProps.authWork(userData)
             }
-        });
+          })
       }
-    });
-    return;
+    })
   };
   _getChannelsData = async () => {
     let channels = {}
@@ -177,7 +162,7 @@ class SignInScreen extends React.Component {
         const channel = childSnapshot.val()
         channels[name] = channel
       })
-      AsyncStorage.setItem('channels', JSON.stringify(channels));
+      AsyncStorage.setItem('channels', JSON.stringify(channels))
       this.props.setChannelsData(channels)
     })
   }
@@ -186,8 +171,8 @@ class SignInScreen extends React.Component {
     this.props.setSignInPending(true)
     const method = 'SignInScreen::_signInAsync'
     this._getChannelsData()
-    const {BlockstackNativeModule} = NativeModules;
-    const baseUrl = "https://www.stealthy.im"
+    const {BlockstackNativeModule} = NativeModules
+    const baseUrl = 'https://www.stealthy.im'
 
     if (utils.isAndroid()) {
       // Need to populate userData as follows:
@@ -209,8 +194,8 @@ class SignInScreen extends React.Component {
         userData.username = androidUserData.username
       } catch (error) {
         this.props.setSignInPending(false)
-        throw utils.fmtErrorStr('Failed to sign in to Blockstack.', method, error)
         this.props.setSpinnerData(false, '')
+        throw utils.fmtErrorStr('Failed to sign in to Blockstack.', method, error)
       }
 
       try {
@@ -218,14 +203,13 @@ class SignInScreen extends React.Component {
         userData.appPublicKey = publicKey
       } catch (error) {
         this.props.setSignInPending(false)
-        throw utils.fmtErrorStr('Failed to get public key.', method, error)
         this.props.setSpinnerData(false, '')
+        throw utils.fmtErrorStr('Failed to get public key.', method, error)
       }
-      if (userData.username === "null") {
+      if (userData.username === 'null') {
         this.setState({error: true, errorText: 'User data not found. Please ensure you have a valid Blockstack username. E-mail support@stealthy.im for further help.'})
-      }
-      else {
-        AsyncStorage.setItem('userData', JSON.stringify(userData));
+      } else {
+        AsyncStorage.setItem('userData', JSON.stringify(userData))
         this.props.screenProps.authWork(userData)
       }
       this.props.setSignInPending(false)
@@ -234,12 +218,11 @@ class SignInScreen extends React.Component {
       await BlockstackNativeModule.signIn(`${baseUrl}/redirect.html`, baseUrl, null, (error, events) => {
         if (!error) {
           this._getUserData()
-        }
-        else {
+        } else {
           this.props.setSignInPending(false)
           this.props.setSpinnerData(false, '')
         }
-      });
+      })
     }
   }
 }
@@ -249,13 +232,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    alignItems: 'center',
-  },
-});
+    alignItems: 'center'
+  }
+})
 
 const mapStateToProps = (state) => {
   return {
-    spinner: EngineSelectors.getSignInPending(state),
+    spinner: EngineSelectors.getSignInPending(state)
   }
 }
 
@@ -263,7 +246,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     setSignInPending: (flag) => dispatch(EngineActions.setSignInPending(flag)),
     setChannelsData: (channels) => dispatch(EngineActions.setChannelsData(channels)),
-    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),
+    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message))
     // setEngineFault: (flag) => dispatch(EngineActions.setEngineFault(flag)),
   }
 }

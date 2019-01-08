@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { TouchableOpacity, Text } from 'react-native';
+import { TouchableOpacity, Text } from 'react-native'
 
 const Color = {
   defaultColor: '#b2b2b2',
@@ -15,42 +15,42 @@ const Color = {
   turquoise: '#1abc9c',
   midnightBlue: '#2c3e50',
   optionTintColor: '#007AFF',
-  timeTextColor: '#aaa',
+  timeTextColor: '#aaa'
 }
 
-const { carrot, emerald, peterRiver, wisteria, alizarin, turquoise, midnightBlue } = Color;
+const { carrot, emerald, peterRiver, wisteria, alizarin, turquoise, midnightBlue } = Color
 
 export default class LetterAvatar extends Component {
   setAvatarColor = (username) => {
-    const name = username.toUpperCase().split(' ');
+    const name = username.toUpperCase().split(' ')
     if (name.length === 1) {
-      this.avatarName = `${name[0].charAt(0)}`;
+      this.avatarName = `${name[0].charAt(0)}`
     } else if (name.length > 1) {
-      this.avatarName = `${name[0].charAt(0)}${name[1].charAt(0)}`;
+      this.avatarName = `${name[0].charAt(0)}${name[1].charAt(0)}`
     } else {
-      this.avatarName = '';
+      this.avatarName = ''
     }
 
-    let sumChars = 0;
+    let sumChars = 0
     for (let i = 0; i < username.length; i += 1) {
-      sumChars += username.charCodeAt(i);
+      sumChars += username.charCodeAt(i)
     }
 
     // inspired by https://github.com/wbinnssmith/react-user-avatar
     // colors from https://flatuicolors.com/
-    const colors = [carrot, emerald, peterRiver, wisteria, alizarin, turquoise, midnightBlue];
+    const colors = [carrot, emerald, peterRiver, wisteria, alizarin, turquoise, midnightBlue]
 
-    this.avatarColor = colors[sumChars % colors.length];
+    this.avatarColor = colors[sumChars % colors.length]
   }
   renderInitials = (username) => {
-    return <Text style={[styles.textStyle, this.props.textStyle]}>{this.avatarName}</Text>;
+    return <Text style={[styles.textStyle, this.props.textStyle]}>{this.avatarName}</Text>
   }
-  render() {
+  render () {
     const { username } = this.props
-    this.setAvatarColor(username);
+    this.setAvatarColor(username)
     return (
       <TouchableOpacity
-        disabled={true}
+        disabled
         onPress={() => console.log('clicked')}
         style={[styles.avatarStyle, { backgroundColor: this.avatarColor }]}
       >
@@ -66,15 +66,15 @@ const styles = {
     alignItems: 'center',
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 20
   },
   avatarTransparent: {
-    backgroundColor: Color.backgroundTransparent,
+    backgroundColor: Color.backgroundTransparent
   },
   textStyle: {
     color: Color.white,
     fontSize: 16,
     backgroundColor: Color.backgroundTransparent,
-    fontWeight: '100',
-  },
-};
+    fontWeight: '100'
+  }
+}
