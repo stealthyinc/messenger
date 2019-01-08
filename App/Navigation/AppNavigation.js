@@ -18,7 +18,7 @@ import BlockContactSearch from '../Containers/BlockContactSearch'
 import DappScreen from '../Containers/DappScreen'
 import DappData from '../Containers/DappData'
 import DappStore from '../Containers/DappStore'
-import Introduction from '../Components/Introduction'
+// import Introduction from '../Components/Introduction'
 
 console.disableYellowBox = true
 
@@ -87,7 +87,7 @@ const PrimaryNav = StackNavigator({
 })
 
 const AuthStack = StackNavigator({
-  Intro: { screen: Introduction },
+  // Intro: { screen: Introduction },
   SignIn: { screen: SignInScreen },
   Demo: { screen: DemoScreen },
   initialRouteName: 'Intro',
