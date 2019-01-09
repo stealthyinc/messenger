@@ -238,12 +238,13 @@ function * fetchAmaData (action) {
 }
 
 function * getToken () {
-  const url = Config.ACCESS_TOKEN_URL
-  console.log('PBJURL', url, Config.APP_URL)
-  const api = API.getAccessToken(url)
-  const response = yield call(api.token)
-  if (response.ok) {
-    yield put(EngineActions.setBearerToken(response.data))
+  if (process.env.NODE_ENV === 'production') {
+    const url = Config.ACCESS_TOKEN_URL
+    const api = API.getAccessToken(url)
+    const response = yield call(api.token)
+    if (response.ok) {
+      yield put(EngineActions.setBearerToken(response.data))
+    }
   }
 }
 
@@ -252,10 +253,12 @@ function * sendNotificationWorker (action) {
   // - check fb under /global/notifications/senderPK
   // - decrypt data and look up receiver's user device token
   // - send a request to fb server to notify the person of a new message
-  const { recepientToken, publicKey, bearerToken } = action
-  const pk = publicKey.substr(publicKey.length - 4)
-  const api = API.notification(Config.SEND_NOTIFICATION_URL, recepientToken, pk, bearerToken)
-  const response = yield call(api.send)
+  if (process.env.NODE_ENV === 'production') {
+    const { recepientToken, publicKey, bearerToken } = action
+    const pk = publicKey.substr(publicKey.length - 4)
+    const api = API.notification(Config.SEND_NOTIFICATION_URL, recepientToken, pk, bearerToken)
+    const response = yield call(api.send)
+  }
 }
 
 function * backgroundTasks () {
@@ -272,16 +275,18 @@ function * getIntegrationData () {
 }
 
 function * checkToken () {
-  const bearerToken = yield select(EngineSelectors.getBearerToken)
-  const baseUrl = Config.CHECK_TOKEN_URL + bearerToken
-  const api = API.checkAccessToken(baseUrl)
-  const response = yield call(api.access)
-  try {
-    if (response.data.error) {
+  if (process.env.NODE_ENV === 'production') {
+    const bearerToken = yield select(EngineSelectors.getBearerToken)
+    const baseUrl = Config.CHECK_TOKEN_URL + bearerToken
+    const api = API.checkAccessToken(baseUrl)
+    const response = yield call(api.access)
+    try {
+      if (response.data.error) {
+        yield call(getToken)
+      }
+    } catch (error) {
       yield call(getToken)
     }
-  } catch (error) {
-    yield call(getToken)
   }
 }
 

@@ -36,7 +36,7 @@ class AuthLoadingScreen extends React.Component {
       }
 
       if (!hasSession) {
-        const baseUrl = Config.APP_URL
+        const baseUrl = 'https://www.stealthy.im'
 
         // Unfortunately this doesn't seem to work, so we've hard-coded some
         // stuff from @Friedger into the Kotlin that gets called by the

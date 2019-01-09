@@ -240,7 +240,7 @@ module.exports = class GaiaIO extends BaseIO {
     })
   }
 
-  getGaiaHubUrl (aUserName, anAppUrl = Config.APP_URL, useCache = true) {
+  getGaiaHubUrl (aUserName, anAppUrl = 'https://www.stealthy.im', useCache = true) {
     return new Promise((resolve, reject) => {
       if (!aUserName) {
         reject('aUserName is not defined')
