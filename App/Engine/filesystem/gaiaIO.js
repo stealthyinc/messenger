@@ -1,5 +1,6 @@
 import { NativeModules } from 'react-native'
 import API from './../../Services/Api'
+import Config from 'react-native-config'
 const BaseIO = require('./baseIO.js')
 const utils = require('./../misc//utils.js')
 
@@ -239,7 +240,7 @@ module.exports = class GaiaIO extends BaseIO {
     })
   }
 
-  getGaiaHubUrl (aUserName, anAppUrl = 'https://www.stealthy.im', useCache = true) {
+  getGaiaHubUrl (aUserName, anAppUrl = Config.APP_URL, useCache = true) {
     return new Promise((resolve, reject) => {
       if (!aUserName) {
         reject('aUserName is not defined')

@@ -19,6 +19,7 @@ import {
 } from 'react-native'
 import API from '../Services/Api'
 import DebugConfig from '../Config/DebugConfig'
+import Config from 'react-native-config'
 
 const common = require('./../common.js')
 
@@ -237,7 +238,9 @@ function * fetchAmaData (action) {
 }
 
 function * getToken () {
-  const api = API.getAccessToken('https://us-central1-coldmessage-ae5bc.cloudfunctions.net/getAccessToken')
+  const url = Config.ACCESS_TOKEN_URL
+  console.log('PBJURL', url, Config.APP_URL)
+  const api = API.getAccessToken(url)
   const response = yield call(api.token)
   if (response.ok) {
     yield put(EngineActions.setBearerToken(response.data))
@@ -251,7 +254,7 @@ function * sendNotificationWorker (action) {
   // - send a request to fb server to notify the person of a new message
   const { recepientToken, publicKey, bearerToken } = action
   const pk = publicKey.substr(publicKey.length - 4)
-  const api = API.notification('https://fcm.googleapis.com/v1/projects/coldmessage-ae5bc/messages:send', recepientToken, pk, bearerToken)
+  const api = API.notification(Config.SEND_NOTIFICATION_URL, recepientToken, pk, bearerToken)
   const response = yield call(api.send)
 }
 
@@ -270,7 +273,7 @@ function * getIntegrationData () {
 
 function * checkToken () {
   const bearerToken = yield select(EngineSelectors.getBearerToken)
-  const baseUrl = 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=' + bearerToken
+  const baseUrl = Config.CHECK_TOKEN_URL + bearerToken
   const api = API.checkAccessToken(baseUrl)
   const response = yield call(api.access)
   try {

@@ -55,6 +55,7 @@
 		751F45252130D958009F3658 /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 751F44F82130D958009F3658 /* Social.framework */; };
 		751F456F2130E4B9009F3658 /* KDSocialShare.m in Sources */ = {isa = PBXBuildFile; fileRef = 751F456E2130E4B9009F3658 /* KDSocialShare.m */; };
 		7526ECD120F7B8F400DA857E /* FirebaseFunctions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7526ECD020F7B8F400DA857E /* FirebaseFunctions.framework */; };
+		7541C5F021E5607400B04B30 /* libReactNativeConfig.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7541C5ED21E5606400B04B30 /* libReactNativeConfig.a */; };
 		7546978021693D59007837F8 /* libRNCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7546977B21693D32007837F8 /* libRNCamera.a */; };
 		754C0C2120D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 754C0BF620D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m */; };
 		7578E71720AA27D600D60C9A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7578E71620AA27D600D60C9A /* GoogleService-Info.plist */; };
@@ -376,6 +377,20 @@
 			remoteGlobalIDString = 00E356EE1AD99517003FC87E;
 			remoteInfo = ReactNativeSocialShareTests;
 		};
+		7541C5EC21E5606400B04B30 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7541C5E721E5606300B04B30 /* ReactNativeConfig.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = EB2648DF1C7BE17A00B8F155;
+			remoteInfo = ReactNativeConfig;
+		};
+		7541C5EE21E5606400B04B30 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7541C5E721E5606300B04B30 /* ReactNativeConfig.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3DF7F6AC203AA09B00D0EAB7;
+			remoteInfo = "ReactNativeConfig-tvOS";
+		};
 		7546977A21693D32007837F8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7546974C21693D32007837F8 /* RNCamera.xcodeproj */;
@@ -515,6 +530,7 @@
 		751F456E2130E4B9009F3658 /* KDSocialShare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KDSocialShare.m; path = "../node_modules/react-native-social-share/iOS/KDSocialShare.m"; sourceTree = "<group>"; };
 		7526ECD020F7B8F400DA857E /* FirebaseFunctions.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FirebaseFunctions.framework; sourceTree = "<group>"; };
 		753E71819135E1A15C288F57 /* Pods-stealthy.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-stealthy.release.xcconfig"; path = "Pods/Target Support Files/Pods-stealthy/Pods-stealthy.release.xcconfig"; sourceTree = "<group>"; };
+		7541C5E721E5606300B04B30 /* ReactNativeConfig.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeConfig.xcodeproj; path = "../node_modules/react-native-config/ios/ReactNativeConfig.xcodeproj"; sourceTree = "<group>"; };
 		7546974C21693D32007837F8 /* RNCamera.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RNCamera.xcodeproj"; sourceTree = "<group>"; };
 		754C0BF620D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RNBackgroundFetch+AppDelegate.m"; path = "../node_modules/react-native-background-fetch/ios/RNBackgroundFetch/RNBackgroundFetch+AppDelegate.m"; sourceTree = "<group>"; };
 		7578E71620AA27D600D60C9A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -581,6 +597,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7541C5F021E5607400B04B30 /* libReactNativeConfig.a in Frameworks */,
 				759DC9562170F95B0010129D /* libRCTCameraRoll.a in Frameworks */,
 				7546978021693D59007837F8 /* libRNCamera.a in Frameworks */,
 				75B13AE3215AA26400893974 /* libRNFetchBlob.a in Frameworks */,
@@ -863,6 +880,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		7541C5E821E5606300B04B30 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7541C5ED21E5606400B04B30 /* libReactNativeConfig.a */,
+				7541C5EF21E5606400B04B30 /* libReactNativeConfig-tvOS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		7546974D21693D32007837F8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -943,6 +969,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				7541C5E721E5606300B04B30 /* ReactNativeConfig.xcodeproj */,
 				759DC9212170F94D0010129D /* RCTCameraRoll.xcodeproj */,
 				7546974C21693D32007837F8 /* RNCamera.xcodeproj */,
 				75B13ADD215AA24800893974 /* RNFetchBlob.xcodeproj */,
@@ -1211,6 +1238,10 @@
 				{
 					ProductGroup = 146834001AC3E56700842450 /* Products */;
 					ProjectRef = 146833FF1AC3E56700842450 /* React.xcodeproj */;
+				},
+				{
+					ProductGroup = 7541C5E821E5606300B04B30 /* Products */;
+					ProjectRef = 7541C5E721E5606300B04B30 /* ReactNativeConfig.xcodeproj */;
 				},
 				{
 					ProductGroup = 751F44D5212DF17C009F3658 /* Products */;
@@ -1509,6 +1540,20 @@
 			fileType = wrapper.cfbundle;
 			path = ReactNativeSocialShareTests.xctest;
 			remoteRef = 751F44DB212DF17C009F3658 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		7541C5ED21E5606400B04B30 /* libReactNativeConfig.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libReactNativeConfig.a;
+			remoteRef = 7541C5EC21E5606400B04B30 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		7541C5EF21E5606400B04B30 /* libReactNativeConfig-tvOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libReactNativeConfig-tvOS.a";
+			remoteRef = 7541C5EE21E5606400B04B30 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		7546977B21693D32007837F8 /* libRNCamera.a */ = {
@@ -1935,6 +1980,9 @@
 					"$(SRCROOT)/../node_modules/react-native-social-share/iOS",
 				);
 				INFOPLIST_FILE = stealthy/Info.plist;
+				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "";
+				INFOPLIST_PREFIX_HEADER = "";
+				INFOPLIST_PREPROCESS = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -1992,6 +2040,9 @@
 					"$(SRCROOT)/../node_modules/react-native-social-share/iOS",
 				);
 				INFOPLIST_FILE = stealthy/Info.plist;
+				INFOPLIST_OTHER_PREPROCESSOR_FLAGS = "";
+				INFOPLIST_PREFIX_HEADER = "";
+				INFOPLIST_PREPROCESS = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (

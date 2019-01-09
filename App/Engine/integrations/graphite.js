@@ -5,8 +5,8 @@ const utils = require('./../misc/utils.js')
 //
 // relay.id's graphite hub for initital testing / dev work (weird netlify link--don't delete until
 // condition described above working)
-const RELAY_GRAPHITE_HUB = 'https://gaia.blockstack.org/hub/1PeNcCQXdg7t8iNmK7XqGVt8UyEDo4d3mF/'
-const SIMULATE_DATA = false
+// const RELAY_GRAPHITE_HUB = 'https://gaia.blockstack.org/hub/1PeNcCQXdg7t8iNmK7XqGVt8UyEDo4d3mF/'
+// const SIMULATE_DATA = false
 // publicShare is what we're currently using for demos. This will change when we
 // start encrypting.
 // const RELAY_DOC_BASES = {
@@ -38,9 +38,6 @@ class Graphite {
 
   // Throws!
   async readIndexData () {
-    if (SIMULATE_DATA) {
-      this.indexData = Graphite._getSimulatedIntermediateGraphiteData()
-    } else {
       try {
         console.log('readIndexData')
         const graphiteIndex = await this._readIndexFile()
@@ -48,79 +45,8 @@ class Graphite {
       } catch (error) {
         throw (`ERROR(graphite.js::readIndexData): unable to refresh index data from index file.\n${error}`)
       }
-    }
 
     return this.indexData
-  }
-
-  static _getSimulatedIntermediateGraphiteData () {
-    return {
-      'relay.id-1532144113901': {
-        title: 'Test Stealthy Integration 2',
-        description: '',
-        author: 'relay.id',
-        decryptable: {
-          user: 'TBD',
-          key: 'Graphite'
-        },
-        fileUrl: 'https://app.graphitedocs.com/shared/docs/relay.id-1532144113901',
-        version: '',
-        appMetadata: {
-          title: 'Test Stealthy Integration 2',
-          id: '1532144113901',
-          updated: '7/21/2018',
-          words: '11',
-          sharedWith: '',
-          singleDocIsPublic: 'true',
-          author: 'relay.id',
-          tags: '',
-          fileType: 'documents'
-        }
-      },
-      'relay.id-1532196940159': {
-        title: 'Delete Facebook Movement Spreads Worldwide',
-        description: '',
-        author: 'relay.id',
-        decryptable: {
-          user: 'TBD',
-          key: 'Graphite'
-        },
-        fileUrl: 'https://app.graphitedocs.com/shared/docs/relay.id-1532196940159',
-        version: '',
-        appMetadata: {
-          title: 'Delete Facebook Movement Spreads Worldwide',
-          id: '1532196940159',
-          updated: '7/21/2018',
-          words: '23',
-          sharedWith: '',
-          singleDocIsPublic: 'true',
-          author: 'relay.id',
-          tags: '',
-          fileType: 'documents'
-        }
-      },
-      'relay.id-1532197099770': {
-        title: 'Data Breaches on the Rise Worldwide',
-        description: '',
-        author: 'relay.id',
-        decryptable: {
-          user: 'TBD',
-          key: 'Graphite'
-        },
-        fileUrl: 'https://app.graphitedocs.com/shared/docs/relay.id-1532197099770',
-        version: '',
-        appMetadata: {
-          title: 'Data Breaches on the Rise Worldwide',
-          id: '1532197099770',
-          updated: '7/21/2018',
-          words: '35',
-          sharedWith: '',
-          author: 'relay.id',
-          tags: '',
-          fileType: 'documents'
-        }
-      }
-    }
   }
 
   _getDataFromGraphiteIndex (aGraphiteIndex) {

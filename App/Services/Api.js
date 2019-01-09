@@ -1,6 +1,7 @@
 // a library to wrap and simplify api calls
 import apisauce from 'apisauce'
 import RNFetchBlob from 'rn-fetch-blob'
+import Config from 'react-native-config'
 
 // our "constructor"
 const create = (baseURL = 'https://core.blockstack.org') => {
@@ -44,7 +45,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   //  const getUserProfile = (username) => api.get(`/v1/users/${username}`)
   //
   // Replacing it with the method below
-  const getUserProfile = async (aUserName, anAppUrl = 'https://www.stealthy.im') => {
+  const getUserProfile = async (aUserName, anAppUrl = Config.APP_URL) => {
     const methodName = 'Api::getUserProfile'
     let profileData
     try {
@@ -140,7 +141,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
   //     before passing it as the query.
   //   - endpoint returns multiple results so we comb through that and find the exact match
   //   - we return the specific user's gaia hub for specified app
-  const getUserGaiaNS = async (aUserName, anAppUrl = 'https://www.stealthy.im') => {
+  const getUserGaiaNS = async (aUserName, anAppUrl = Config.APP_URL) => {
     const methodName = 'Api::getUserGaiaNS'
     let profileData
     try {
@@ -332,28 +333,6 @@ const checkAccessToken = (baseURL) => {
 
 // our "constructor"
 const notification = (baseURL, token, pk, bearerToken) => {
-  // ------
-  // STEP 1
-  // ------
-  //
-  // Create and configure an apisauce-based api object.
-  //
-  // Test this below if shit doesn't work
-  // curl -X POST -H "Authorization: Bearer ya29.c.Elr2BS8k3XudE24_ZkKhnwT_MrIiiQkuKBK5proXokDc68aflEuHvdIFOq_1dZFyqYHKBz_5gmAN943iR3NXLkxWk0ahDb1bG857r1aZc3XrY1FHgPeSgkHU7Bs" -H "Content-Type: application/json" -d '{
-  // "message":{
-  //   "notification": {
-  //     "title": "New Message",
-  //   },
-  //   "data": {
-  //    "test": "blues",
-  //   },
-  //   "apns": {
-  //     "payload": {"aps":{"badge":1,"sound":"default"}},
-  //   },
-  //   "token": "cKJhfsmPh9I:APA91bH_YPje6gPkob6lyK82EUubDy_XbGjwSnJbEA98wlAGbnCjtLF7QHkDDUkBORoVfRvV-0_iP2d0IR3sTP2RowlFZe4UyVncsChKgSBxDOtuaymcyqz8uPcBm8B5CrnOiB-b8O1pO9zTpUUgABWHcjk8Bx7aeQ"
-  //   }
-  // }' "https://fcm.googleapis.com/v1/projects/coldmessage-ae5bc/messages:send"
-
   // console.log("info", baseURL, token, pk, bearerToken)
   const api = apisauce.create({
     // base URL is read from the "constructor"

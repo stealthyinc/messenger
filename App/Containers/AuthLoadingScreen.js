@@ -8,6 +8,7 @@ import {
 } from 'react-native'
 import { connect } from 'react-redux'
 import EngineActions from '../Redux/EngineRedux'
+import Config from 'react-native-config'
 
 const utils = require('./../Engine/misc/utils.js')
 
@@ -35,7 +36,7 @@ class AuthLoadingScreen extends React.Component {
       }
 
       if (!hasSession) {
-        const baseUrl = 'https://www.stealthy.im'
+        const baseUrl = Config.APP_URL
 
         // Unfortunately this doesn't seem to work, so we've hard-coded some
         // stuff from @Friedger into the Kotlin that gets called by the

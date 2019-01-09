@@ -24,6 +24,8 @@ project.xcworkspace
 ios/Pods/
 ios/Podfile.lock
 package-lock.json
+GoogleService-Info.plist
+yarn.lock
 
 # Android/IntelliJ
 #
@@ -62,7 +64,7 @@ buck-out/
 
 # Misc
 #
-.env
+.env*
 
 # Haul
 #

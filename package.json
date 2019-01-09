@@ -43,7 +43,7 @@
     "react-native-background-fetch": "^2.4.3",
     "react-native-camera": "^1.3.0",
     "react-native-communications": "^2.2.1",
-    "react-native-config": "^0.10.0",
+    "react-native-config": "^0.11.7",
     "react-native-drawer": "^2.5.1",
     "react-native-elements": "^0.19.1",
     "react-native-exit-app": "^1.0.0",
