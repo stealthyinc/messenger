@@ -13,9 +13,11 @@ Android Download: https://play.google.com/store/apps/details?id=com.stealthy
 
 **Step 2:** cd to the cloned repo:
 
-**Step 3:** Install the Application with `yarn` or `npm i`
+**Step 3:** get the development branch: `git checkout development`
 
-**Step 4:** cd into iOS and pod install
+**Step 4:** Install the Application with `yarn` or `npm i`
+
+**Step 5:** cd into iOS: `cd ios` and `pod install`
 
 
 ## How to Run App
