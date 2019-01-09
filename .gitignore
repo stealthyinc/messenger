@@ -26,6 +26,7 @@ ios/Podfile.lock
 package-lock.json
 GoogleService-Info.plist
 yarn.lock
+.firebaserc
 
 # Android/IntelliJ
 #
