@@ -6,6 +6,29 @@ iOS Download: https://itunes.apple.com/us/app/stealthy-im/id1382310437?ls=1&mt=8
 
 Android Download: https://play.google.com/store/apps/details?id=com.stealthy
 
+
+## How to Setup
+
+**Step 1:** git clone this repo:
+
+**Step 2:** cd to the cloned repo:
+
+**Step 3:** Install the Application with `yarn` or `npm i`
+
+**Step 4:** cd into iOS and pod install
+
+
+## How to Run App
+
+1. cd to the repo
+2. Run Build for either OS
+  * for iOS
+    * run `react-native run-ios`
+  * for Android
+    * Run Genymotion
+    * run `react-native run-android`
+
+
 ## How to videos
 
 | Create Account | dApp Integrations | Social Share | Send Message | 
