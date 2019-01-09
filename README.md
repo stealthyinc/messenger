@@ -9,20 +9,24 @@ Android Download: https://play.google.com/store/apps/details?id=com.stealthy
 
 ## How to Setup
 
-**Step 1:** git clone this repo:
+**Step 1:** git clone this repo: `git clone https://github.com/stealthyim/mobile`
 
-**Step 2:** cd to the cloned repo:
+**Step 2:** cd to the cloned repo: `cd mobile`
 
 **Step 3:** get the development branch: `git checkout development`
 
 **Step 4:** Install the Application with `yarn` or `npm i`
+
+### IOS Only
+
+**Optional** Install pod: https://cocoapods.org
 
 **Step 5:** cd into iOS: `cd ios` and `pod install`
 
 
 ## How to Run App
 
-1. cd to the repo
+1. cd to the repo root
 2. Run Build for either OS
   * for iOS
     * run `react-native run-ios`
