@@ -39,7 +39,6 @@ public class MainApplication extends Application implements ReactApplication {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
             new RNVersionNumberPackage(),
-            new ReactNativeConfigPackage(),
             new RNFetchBlobPackage(),
             new VectorIconsPackage(),
             new KDSocialShare(),

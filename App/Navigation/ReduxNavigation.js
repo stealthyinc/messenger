@@ -243,7 +243,8 @@ class ReduxNavigation extends React.Component {
       }
       this.publicKey = undefined
 
-      if (utils.is_iOS()) { this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' }) } else { RNExitApp.exitApp() }
+      // if (utils.is_iOS()) { this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' }) } else { RNExitApp.exitApp() }
+      this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Auth' })
     }
   }
 
