@@ -20,7 +20,7 @@ class ProfileScreen extends React.Component {
       headerBackTitle: 'Back',
       headerRight: (
         <TouchableOpacity onPress={() => params.logout()} style={{marginRight: 10}}>
-          <Ionicons name="ios-log-out" size={30} color='white'/>
+          <Ionicons name="md-exit" size={30} color='white'/>
         </TouchableOpacity>
       ),
       headerTintColor: 'white',
