@@ -153,6 +153,8 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-device-info')
+    compile project(':react-native-version-number')
     compile project(':react-native-config')
     implementation project(':react-native-camera')
     implementation project(':rn-fetch-blob')

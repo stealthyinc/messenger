@@ -1,5 +1,5 @@
 import React from 'react'
-import { AsyncStorage, BackHandler, NativeModules, View, Text, Image, Platform, PushNotificationIOS, NetInfo } from 'react-native'
+import { Linking, AsyncStorage, BackHandler, NativeModules, View, Text, Image, Platform, PushNotificationIOS, NetInfo } from 'react-native'
 import { addNavigationHelpers } from 'react-navigation'
 import { createReduxBoundAddListener } from 'react-navigation-redux-helpers'
 import { connect } from 'react-redux'
@@ -280,7 +280,8 @@ class ReduxNavigation extends React.Component {
           }}
         />
       )
-    } else if (!this.state.isConnected) {
+    } 
+    else if (!this.state.isConnected) {
       return (
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
           <Image
@@ -293,15 +294,17 @@ class ReduxNavigation extends React.Component {
         </View>
       )
     }
-    return (
-      <Root>
-        <Spinner visible={this.props.spinnerFlag} textContent={this.props.spinnerMessage} textStyle={{color: '#FFF'}} />
-        <AppNavigation
-          screenProps={{logout: () => this.___startLogOutSequence(), authWork: (userData) => this._authWork(userData)}}
-          navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root')})}
-        />
-      </Root>
-    )
+    else {
+      return (
+        <Root>
+          <Spinner visible={this.props.spinnerFlag} textContent={this.props.spinnerMessage} textStyle={{color: '#FFF'}} />
+          <AppNavigation
+            screenProps={{logout: () => this.___startLogOutSequence(), authWork: (userData) => this._authWork(userData)}}
+            navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root')})}
+          />
+        </Root>
+      )
+    }
   }
 }
 
@@ -316,6 +319,7 @@ const mapStateToProps = (state) => {
     engineShutdown: EngineSelectors.getEngineShutdown(state),
     userData: EngineSelectors.getUserData(state),
     token: EngineSelectors.getToken(state),
+    appVersion: EngineSelectors.getAppVersion(state),
     channels: EngineSelectors.getChannelsData(state)
   }
 }

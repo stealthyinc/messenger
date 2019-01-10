@@ -77,6 +77,7 @@
 		75A52FBA20A9311100AC6DAD /* BlockstackNativeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 75A52FB820A930CC00AC6DAD /* BlockstackNativeModule.m */; };
 		75A52FC420A932E200AC6DAD /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A52FC120A932D800AC6DAD /* libRCTPushNotification.a */; };
 		75B13AE3215AA26400893974 /* libRNFetchBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75B13AE2215AA24800893974 /* libRNFetchBlob.a */; };
+		75B7D23921E7134000BDF075 /* libRNVersionNumber.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75B7D23621E7133000BDF075 /* libRNVersionNumber.a */; };
 		75C3EB3E20E1B12400F5E81F /* libcryptopp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C3EB3D20E1B12400F5E81F /* libcryptopp.a */; settings = {ATTRIBUTES = (Required, ); }; };
 		75F0E51220AB428000CB49D4 /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75F0E51020AB424300CB49D4 /* libRNFirebase.a */; };
 		793936C820E2DB3400268769 /* CryptoECIES.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 793936C620E2DB3400268769 /* CryptoECIES.cpp */; };
@@ -440,6 +441,20 @@
 			remoteGlobalIDString = A15C300E1CD25C330074CB35;
 			remoteInfo = RNFetchBlob;
 		};
+		75B7D23521E7133000BDF075 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 75B7D1FD21E7132F00BDF075 /* RNVersionNumber.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNVersionNumber;
+		};
+		75B7D23721E7133000BDF075 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 75B7D1FD21E7132F00BDF075 /* RNVersionNumber.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2858ECD01F8B91B400610575;
+			remoteInfo = "RNVersionNumber-tvOS";
+		};
 		75F0E50F20AB424300CB49D4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B796142E6E41EDA79519D7 /* RNFirebase.xcodeproj */;
@@ -554,6 +569,7 @@
 		75A52FBB20A932D800AC6DAD /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		75A52FFD20A9355900AC6DAD /* stealthy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = stealthy.entitlements; path = stealthy/stealthy.entitlements; sourceTree = "<group>"; };
 		75B13ADD215AA24800893974 /* RNFetchBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFetchBlob.xcodeproj; path = "../node_modules/rn-fetch-blob/ios/RNFetchBlob.xcodeproj"; sourceTree = "<group>"; };
+		75B7D1FD21E7132F00BDF075 /* RNVersionNumber.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNVersionNumber.xcodeproj; path = "../node_modules/react-native-version-number/ios/RNVersionNumber.xcodeproj"; sourceTree = "<group>"; };
 		75C3EB3D20E1B12400F5E81F /* libcryptopp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcryptopp.a; path = "../../../../../usr/local/cryptopp-ios/lib/libcryptopp.a"; sourceTree = "<group>"; };
 		75CB635A5D65494A95309E91 /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
@@ -597,6 +613,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				75B7D23921E7134000BDF075 /* libRNVersionNumber.a in Frameworks */,
 				7541C5F021E5607400B04B30 /* libReactNativeConfig.a in Frameworks */,
 				759DC9562170F95B0010129D /* libRCTCameraRoll.a in Frameworks */,
 				7546978021693D59007837F8 /* libRNCamera.a in Frameworks */,
@@ -949,6 +966,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		75B7D1FE21E7132F00BDF075 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				75B7D23621E7133000BDF075 /* libRNVersionNumber.a */,
+				75B7D23821E7133000BDF075 /* libRNVersionNumber-tvOS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		75F0E4E420AB424300CB49D4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -969,6 +995,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				75B7D1FD21E7132F00BDF075 /* RNVersionNumber.xcodeproj */,
 				7541C5E721E5606300B04B30 /* ReactNativeConfig.xcodeproj */,
 				759DC9212170F94D0010129D /* RCTCameraRoll.xcodeproj */,
 				7546974C21693D32007837F8 /* RNCamera.xcodeproj */,
@@ -1270,6 +1297,10 @@
 				{
 					ProductGroup = 757B49232095225200B18E99 /* Products */;
 					ProjectRef = C2B92B492DA14A0DA1A68079 /* RNVectorIcons.xcodeproj */;
+				},
+				{
+					ProductGroup = 75B7D1FE21E7132F00BDF075 /* Products */;
+					ProjectRef = 75B7D1FD21E7132F00BDF075 /* RNVersionNumber.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -1603,6 +1634,20 @@
 			fileType = archive.ar;
 			path = libRNFetchBlob.a;
 			remoteRef = 75B13AE1215AA24800893974 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		75B7D23621E7133000BDF075 /* libRNVersionNumber.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNVersionNumber.a;
+			remoteRef = 75B7D23521E7133000BDF075 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		75B7D23821E7133000BDF075 /* libRNVersionNumber-tvOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libRNVersionNumber-tvOS.a";
+			remoteRef = 75B7D23721E7133000BDF075 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		75F0E51020AB424300CB49D4 /* libRNFirebase.a */ = {

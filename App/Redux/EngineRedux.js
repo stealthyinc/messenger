@@ -8,6 +8,7 @@ import Immutable from 'seamless-immutable'
 //
 const { Types, Creators } = createActions({
   setEngineFailure: null,
+  setAppVersion: ['appVersion'],
   setUserData: ['userData'],
   addContactId: ['id'],
   setPublicKey: ['publicKey'],
@@ -76,12 +77,14 @@ export const INITIAL_STATE = Immutable({
   amaStatus: undefined,
   channels: null,
   spinnerFlag: false,
-  spinnerMessage: ''
+  spinnerMessage: '',
+  appVersion: '',
 })
 
 /* ------------- Selectors ------------- */
 
 export const EngineSelectors = {
+  getAppVersion: state => state.engine.appVersion,
   getUserProfile: state => state.engine.userProfile,
   getActiveUserProfile: state => state.engine.activeUserProfile,
   getUserData: state => state.engine.userData,
@@ -115,6 +118,10 @@ export const setContactId = (state, { id }) => {
 
 export const setCurrentPlatform = (state, { currentPlatform }) => {
   return state.merge({ currentPlatform })
+}
+
+export const setAppVersion = (state, { appVersion }) => {
+  return state.merge({ appVersion })
 }
 
 // set sign in pending flag

@@ -11,6 +11,7 @@ import AuthLoadingScreen from '../Containers/AuthLoadingScreen'
 import DemoScreen from '../Components/DemoScreen'
 import SignInScreen from '../Containers/SignInScreen'
 import TabScreen from '../Containers/TabScreen'
+import UpdateScreen from '../Containers/UpdateScreen'
 import BlockScreen from '../Containers/BlockScreen'
 import ChatScreen from '../Containers/ChatScreen'
 import ContactProfile from '../Containers/ContactProfile'
@@ -74,6 +75,7 @@ const PrimaryNav = StackNavigator({
   Tab: { screen: TabScreen },
   ChatRoom: { screen: ChatScreen },
   Camera: { screen: CameraScreen },
+  Update: { screen: UpdateScreen },
   CameraRoll: { screen: CameraRollScreen },
   ContactProfile: { screen: ContactProfile },
   BlockContactSearch: { screen: BlockContactSearch },

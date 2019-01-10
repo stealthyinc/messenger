@@ -14,6 +14,7 @@ import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import chatIcon from '../Images/blue512.png'
 import AwesomeAlert from 'react-native-awesome-alerts'
+import VersionNumber from 'react-native-version-number';
 
 const utils = require('./../Engine/misc/utils.js')
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
@@ -28,10 +29,11 @@ class SignInScreen extends React.Component {
       error: false,
       errorText: ''
     }
+    this.props.setSpinnerData(false, '')
   }
   render () {
     const oldPad = utils.is_oldPad()
-    const marginBottom = (oldPad) ? 50 : 80
+    const marginBottom = 50
     if (this.state.error) {
       return (
         <AwesomeAlert
@@ -148,6 +150,7 @@ class SignInScreen extends React.Component {
               userData['appPublicKey'] = publicKey
               AsyncStorage.setItem('userData', JSON.stringify(userData))
               this.props.screenProps.authWork(userData)
+              AsyncStorage.setItem('appVersion', JSON.stringify(VersionNumber.appVersion))
             }
           })
       }
@@ -173,7 +176,6 @@ class SignInScreen extends React.Component {
     this._getChannelsData()
     const {BlockstackNativeModule} = NativeModules
     const baseUrl = 'https://www.stealthy.im'
-
     if (utils.isAndroid()) {
       // Need to populate userData as follows:
       // {

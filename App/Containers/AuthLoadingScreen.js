@@ -7,19 +7,38 @@ import {
   View
 } from 'react-native'
 import { connect } from 'react-redux'
-import EngineActions from '../Redux/EngineRedux'
+import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import Config from 'react-native-config'
+import { getAppstoreAppVersion } from "react-native-appstore-version-checker";
 
 const utils = require('./../Engine/misc/utils.js')
 
 class AuthLoadingScreen extends React.Component {
   constructor (props) {
     super(props)
-    this._bootstrapAsync()
+    this.checkAppVersion()
   }
-
+  checkAppVersion = async () => {
+    let appName = ''
+    if (utils.is_iOS()) {
+      appName = '1382310437'
+    }
+    else {
+      appName = 'com.stealthy'
+    }
+    getAppstoreAppVersion(appName) //put any apps packageId here
+    .then(appVersion => {
+      console.log("stealthy app version on app store", appVersion);
+      //pb's hack for version checking
+      this._bootstrapAsync(appVersion)
+    })
+    .catch(err => {
+      console.log("app store error occurred", err);
+      this._bootstrapAsync(null)
+    });
+  }
   // Fetch the token from storage then navigate to our appropriate place
-  _bootstrapAsync = async () => {
+  _bootstrapAsync = async (onlineAppVersion) => {
     const method = 'AuthLoadingScreen::_bootstrapAsync'
     // Android specific session creation. This has to be done or you end up with
     // lazyinit errors. It's here b/c we don't always reavist the sign in code.
@@ -74,11 +93,17 @@ class AuthLoadingScreen extends React.Component {
     //   undefined : JSON.parse(await AsyncStorage.getItem('userData'));
     const userData = JSON.parse(await AsyncStorage.getItem('userData'))
     const channels = JSON.parse(await AsyncStorage.getItem('channels'))
+    const appVersion = JSON.parse(await AsyncStorage.getItem('appVersion'))
+    this.props.setAppVersion(appVersion)
     if (channels) { this.props.setChannelsData(channels) }
 
     if (!userData) {
       this.props.navigation.navigate('Auth')
-    } else {
+    } 
+    else if (parseFloat(appVersion) < parseFloat(onlineAppVersion)) {
+      this.props.navigation.navigate('Update')
+    }
+    else {
       this.props.screenProps.authWork(userData)
     }
   };
@@ -103,11 +128,13 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
   return {
+    appVersion: EngineSelectors.getAppVersion(state)
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    setAppVersion: (appVersion) => dispatch(EngineActions.setAppVersion(appVersion)),
     setChannelsData: (channels) => dispatch(EngineActions.setChannelsData(channels)),
     setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message))
   }
