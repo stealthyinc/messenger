@@ -44,7 +44,8 @@ const { Types, Creators } = createActions({
   setAmaStatus: ['amaStatus'],
   sendAmaInfo: ['msgAddress', 'amaId', 'amaUserId'],
   setChannelsData: ['channels'],
-  setSpinnerData: ['spinnerFlag', 'spinnerMessage']
+  setSpinnerData: ['spinnerFlag', 'spinnerMessage'],
+  setToastData: ['toastFlag', 'toastMessage']
 })
 
 export const EngineTypes = Types
@@ -78,6 +79,8 @@ export const INITIAL_STATE = Immutable({
   channels: null,
   spinnerFlag: false,
   spinnerMessage: '',
+  toastFlag: false,
+  toastMessage: '',
   appVersion: '',
 })
 
@@ -106,7 +109,9 @@ export const EngineSelectors = {
   getAmaStatus: state => state.engine.amaStatus,
   getChannelsData: state => state.engine.channels,
   getSpinnerFlag: state => state.engine.spinnerFlag,
-  getSpinnerMessage: state => state.engine.spinnerMessage
+  getSpinnerMessage: state => state.engine.spinnerMessage,
+  getToastFlag: state => state.engine.toastFlag,
+  getToastMessage: state => state.engine.toastMessage
 }
 
 /* ------------- Reducers ------------- */
@@ -232,6 +237,11 @@ export const setSpinnerData = (state, { spinnerFlag, spinnerMessage }) => {
   return state.merge({ spinnerFlag, spinnerMessage })
 }
 
+// set Toast Data
+export const setToastData = (state, { toastFlag, toastMessage }) => {
+  return state.merge({ toastFlag, toastMessage })
+}
+
 /* ------------- Hookup Reducers To Types ------------- */
 
 export const reducer = createReducer(INITIAL_STATE, {
@@ -258,5 +268,6 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_ENGINE_FAULT]: setEngineFault,
   [Types.RESTART_ENGINE]: restartEngine,
   [Types.SET_CHANNELS_DATA]: setChannelsData,
-  [Types.SET_SPINNER_DATA]: setSpinnerData
+  [Types.SET_SPINNER_DATA]: setSpinnerData,
+  [Types.SET_TOAST_DATA]: setToastData
 })

@@ -145,17 +145,18 @@ class ConversationScreen extends React.Component {
       // )
       // this.props.setSpinnerData(true, 'Loading contacts...')
     // }
-    if (activateShare && !userSettings.twitterShare) {
-      this.props.setSpinnerData(false, '')
-      return (
-        <TwitterShareModal
-          shareDecline={() => {
-            this.props.shareDecline()
-            this.props.updateUserSettings('twitterShare')
-          }}
-          shareSuccess={this.sendToTwitter} />
-      )
-    } else if (engineInit) {
+    // if (activateShare && !userSettings.twitterShare) {
+    //   this.props.setSpinnerData(false, '')
+    //   return (
+    //     <TwitterShareModal
+    //       shareDecline={() => {
+    //         this.props.shareDecline()
+    //         this.props.updateUserSettings('twitterShare')
+    //       }}
+    //       shareSuccess={this.sendToTwitter} />
+    //   )
+    // } else 
+    if (engineInit) {
       return (
         <Drawer
           ref={(ref) => this._drawer = ref}

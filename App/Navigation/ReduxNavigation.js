@@ -11,6 +11,7 @@ import RNExitApp from 'react-native-exit-app'
 import chatIcon from '../Images/blue512.png'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import Spinner from 'react-native-loading-spinner-overlay'
+import Toast from 'react-native-root-toast';
 
 const common = require('./../common.js')
 const utils = require('./../Engine/misc/utils.js')
@@ -21,12 +22,14 @@ class ReduxNavigation extends React.Component {
     super(props)
     this.state = {
       fbListner: false,
-      isConnected: true
+      isConnected: true,
+      visible: false
     }
     this.publicKey = undefined
     this.ref = undefined
     this.shutDownSignOut = false
     this.terminateSpinner = false
+    this.terminateToast = false
   }
   componentWillMount () {
     if (!utils.is_iOS()) {
@@ -92,12 +95,21 @@ class ReduxNavigation extends React.Component {
       //              data.
       this.___finishLogOutSequence()
     }
-    else if (!this.terminateSpinner && nextProps.spinnerFlag) {
+    // spinner 
+    if (!this.terminateSpinner && nextProps.spinnerFlag) {
       this.terminateSpinner = true
       setTimeout(() => {
         this.props.dispatch(EngineActions.setSpinnerData(false, ''))
         this.terminateSpinner = false
       }, 7000);
+    }
+    // toast 
+    if (!this.terminateToast && nextProps.toastFlag) {
+      this.terminateToast = true
+      setTimeout(() => {
+        this.terminateToast = false
+        this.props.dispatch(EngineActions.setToastData(false, ''))
+      }, 5000); // hide toast after 5s
     }
   }
 
@@ -309,6 +321,18 @@ class ReduxNavigation extends React.Component {
       return (
         <Root>
           <Spinner visible={this.props.spinnerFlag} textContent={this.props.spinnerMessage} textStyle={{color: '#FFF'}} />
+          <Toast
+            visible={this.props.toastFlag}
+            position={-50}
+            shadow={false}
+            animation={false}
+            hideOnPress={true}
+            backgroundColor='#49c649'
+          >
+            <Text style={{fontWeight: 'bold'}}>
+              {this.props.toastMessage}
+            </Text>
+          </Toast>
           <AppNavigation
             screenProps={{logout: () => this.___startLogOutSequence(), authWork: (userData) => this._authWork(userData)}}
             navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root')})}
@@ -324,6 +348,8 @@ const mapStateToProps = (state) => {
     nav: state.nav,
     spinnerFlag: EngineSelectors.getSpinnerFlag(state),
     spinnerMessage: EngineSelectors.getSpinnerMessage(state),
+    toastFlag: EngineSelectors.getToastFlag(state),
+    toastMessage: EngineSelectors.getToastMessage(state),
     contactMgr: EngineSelectors.getContactMgr(state),
     publicKey: EngineSelectors.getPublicKey(state),
     engineFault: EngineSelectors.getEngineFault(state),

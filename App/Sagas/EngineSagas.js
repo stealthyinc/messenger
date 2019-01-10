@@ -42,6 +42,20 @@ const createEngine = (userData) => {
                             )
 }
 
+function * watchEngineMessageChannel () {
+  const channel = eventChannel(emitter => {
+    EngineInstance.on('me-engine-status', (statusMessage) => emitter(statusMessage))
+    return () => {
+      console.log(`Messaging Engine AMA Updated`)
+    }
+  })
+  while (true) {
+    const statusMessage = yield take(channel)
+    if (statusMessage)
+      yield put(EngineActions.setToastData(true, statusMessage))
+  }
+}
+
 function * watchAmaDataChannel () {
   const channel = eventChannel(emitter => {
     EngineInstance.on('me-update-ama-data', (amaData) => emitter(amaData))
