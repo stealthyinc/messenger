@@ -117,7 +117,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 27
         versionCode 30
-        versionName "1.7"
+        versionName "1.9"
         multiDexEnabled true
         ndk {
             abiFilters "armeabi-v7a", "x86"
@@ -153,9 +153,7 @@ android {
 }
 
 dependencies {
-    compile project(':react-native-device-info')
-    compile project(':react-native-version-number')
-    compile project(':react-native-config')
+    implementation project(':react-native-version-number')
     implementation project(':react-native-camera')
     implementation project(':rn-fetch-blob')
     implementation project(':react-native-exit-app')
