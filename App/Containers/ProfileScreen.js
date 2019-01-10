@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, StyleSheet, Platform } from 'react-native'
+import { View, StyleSheet, Platform, TouchableOpacity } from 'react-native'
 import { Avatar, Button, Text, Icon } from 'react-native-elements'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
@@ -8,20 +8,21 @@ import { shareOnTwitter } from 'react-native-social-share'
 import Communications from 'react-native-communications'
 import ActionSheet from 'react-native-actionsheet'
 import QRCode from 'react-native-qrcode'
+import Ionicons from 'react-native-vector-icons/Ionicons'
 
 const utils = require('./../Engine/misc/utils.js')
 
 class ProfileScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
-    // const params = navigation.state.params || {}
+    const params = navigation.state.params || {}
     return {
-      headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Profile</Text>,
+      headerTitle: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Profile</Text>,
       headerBackTitle: 'Back',
-      // headerRight: (
-      //   <TouchableOpacity onPress={() => params.showOverlay()} style={{marginRight: 10}}>
-      //     <Ionicons name="ios-information-circle" size={30} color='white'/>
-      //   </TouchableOpacity>
-      // ),
+      headerRight: (
+        <TouchableOpacity onPress={() => params.logout()} style={{marginRight: 10}}>
+          <Ionicons name="ios-log-out" size={30} color='white'/>
+        </TouchableOpacity>
+      ),
       headerTintColor: 'white',
       headerStyle: {
         backgroundColor: '#34bbed'
@@ -37,7 +38,11 @@ class ProfileScreen extends React.Component {
     }
   }
   componentWillMount () {
-    this.props.navigation.setParams({ showOverlay: this.showOverlay })
+    this.props.navigation.setParams({ showOverlay: this.showOverlay, logout: this.runLogout })
+  }
+  runLogout = () => {
+    this.props.setSpinnerData(true, 'Logging out...')
+    this.props.screenProps.logout()
   }
   showOverlay = () => {
     this.setState({isVisible: !this.state.isVisible})
@@ -46,7 +51,6 @@ class ProfileScreen extends React.Component {
     this.ActionSheet.show()
   }
   render () {
-    console.log('ProfileScreen render')
     const { userProfile, userData, userSettings } = this.props
     if (!userProfile) { return null }
     const { discovery, notifications, analytics } = userSettings
@@ -57,7 +61,7 @@ class ProfileScreen extends React.Component {
     const shareText = 'You can securely message me at: ' + username + ' on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im'
     // const shareText1 = 'Come chat with me on Stealthy.IM! Add me: ' + username
     const oldPad = utils.is_oldPad()
-    const margin = (oldPad) ? 20 : 30
+    const margin = 20
     const marginTop = (oldPad) ? 0 : 15
     const marginBottom = (oldPad) ? 2 : 15
     const flex = (oldPad) ? 5 : 10
@@ -173,7 +177,7 @@ class ProfileScreen extends React.Component {
             textStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
             title='Share On'
           />
-          <Button
+          {/*<Button
             onPress={() => {
               this.props.setSpinnerData(true, 'Logging out...')
               this.props.screenProps.logout()
@@ -182,7 +186,7 @@ class ProfileScreen extends React.Component {
             buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#34bbed'}}
             textStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
             title='Log Out'
-          />
+          />*/}
         </View>
         <View style={{flex: 20}} />
         <ActionSheet

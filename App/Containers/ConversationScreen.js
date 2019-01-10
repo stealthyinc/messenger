@@ -18,7 +18,12 @@ class ConversationScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {}
     return {
-      headerLeft: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Messages</Text>,
+      headerLeft: (
+        <TouchableOpacity onPress={() => params.drawer()} style={{marginLeft: 10}}>
+          <Ionicons name='ios-radio' size={30} color='white' />
+        </TouchableOpacity>
+      ),
+      headerTitle: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Messages</Text>,
       headerBackTitle: 'Back',
       headerRight: (
         // params.sendMessage()
@@ -44,7 +49,7 @@ class ConversationScreen extends React.Component {
     this.props.setSpinnerData(true, 'Loading contacts...')
   }
   async componentWillMount () {
-    this.props.navigation.setParams({ navigation: this.props.navigation, sendMessage: this.sendTestMessageToFirebase })
+    this.props.navigation.setParams({ navigation: this.props.navigation, sendMessage: this.sendTestMessageToFirebase, drawer: this.toggleDrawer })
   }
   componentWillReceiveProps (nextProps) {
     const { contactMgr, engineInit, navigation } = nextProps
@@ -113,19 +118,19 @@ class ConversationScreen extends React.Component {
   };
   render () {
     const { contactMgr, activateShare, userSettings, engineInit } = this.props
-    const channelButton = (this.state.drawerOpen) ? (
-      <Button onPress={() => this.openDrawer()} iconLeft block danger style={{borderRadius: 5, borderWidth: 2, borderColor: 'grey'}}>
-        <Icon name='ios-arrow-down' />
-        <Icon />
-        <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>Cancel</Text>
-      </Button>
-    ) : (
-      <Button onPress={() => this.openDrawer()} iconLeft block success style={{borderRadius: 5, borderWidth: 2, borderColor: 'grey'}}>
-        <Icon name='ios-radio' />
-        <Icon />
-        <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>Add Channels</Text>
-      </Button>
-    )
+    // const channelButton = (this.state.drawerOpen) ? (
+    //   <Button onPress={() => this.openDrawer()} iconLeft block danger style={{borderRadius: 5, borderWidth: 2, borderColor: 'grey'}}>
+    //     <Icon name='ios-arrow-down' />
+    //     <Icon />
+    //     <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>Cancel</Text>
+    //   </Button>
+    // ) : (
+    //   <Button onPress={() => this.openDrawer()} iconLeft block success style={{borderRadius: 5, borderWidth: 2, borderColor: 'grey'}}>
+    //     <Icon name='ios-radio' />
+    //     <Icon />
+    //     <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>Add Channels</Text>
+    //   </Button>
+    // )
     // if (!engineInit) {
     //   this.props.setSpinnerData(true, 'Loading contacts...')
     // }
@@ -156,7 +161,7 @@ class ConversationScreen extends React.Component {
           ref={(ref) => this._drawer = ref}
           type='overlay'
           tapToClose
-          openDrawerOffset={0.07} // 20% gap on the right side of drawer
+          openDrawerOffset={0.01} // 20% gap on the right side of drawer
           panCloseMask={0.2}
           closedDrawerOffset={-3}
           styles={drawerStyles}
@@ -176,7 +181,6 @@ class ConversationScreen extends React.Component {
         >
           <Container style={{backgroundColor: 'white'}}>
             <Content>
-              {channelButton}
               <List
                 removeClippedSubviews={false}
                 dataSource={this.ds.cloneWithRows(this.state.listViewData)}

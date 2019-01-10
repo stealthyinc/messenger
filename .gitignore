@@ -23,6 +23,7 @@ DerivedData
 project.xcworkspace
 ios/Pods/
 ios/Podfile.lock
+ios/Index/
 package-lock.json
 GoogleService-Info.plist
 yarn.lock
