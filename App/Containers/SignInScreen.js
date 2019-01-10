@@ -213,6 +213,7 @@ class SignInScreen extends React.Component {
       } else {
         AsyncStorage.setItem('userData', JSON.stringify(userData))
         this.props.screenProps.authWork(userData)
+        AsyncStorage.setItem('appVersion', JSON.stringify(VersionNumber.appVersion))
       }
       this.props.setSignInPending(false)
       this.props.setSpinnerData(false, '')
