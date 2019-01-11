@@ -11,11 +11,14 @@ import RNExitApp from 'react-native-exit-app'
 import chatIcon from '../Images/blue512.png'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import Spinner from 'react-native-loading-spinner-overlay'
-import Toast from 'react-native-root-toast';
+import Toast from 'react-native-root-toast'
 
 const common = require('./../common.js')
 const utils = require('./../Engine/misc/utils.js')
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
+
+const SPINNER_TIMEOUT = 7000       // milliseconds
+const STATUS_BAR_TIMEOUT = 3500    // milliseconds
 
 class ReduxNavigation extends React.Component {
   constructor (props) {
@@ -28,9 +31,14 @@ class ReduxNavigation extends React.Component {
     this.publicKey = undefined
     this.ref = undefined
     this.shutDownSignOut = false
-    this.allowSpinnerTimeout = false
-    this.spinnerTimerRunning = false
-    this.terminateToast = false
+    //
+    // IMPORTANT: we disallow timeout below b/c it results in interuption of
+    //            the blockstack login process by causing a re-render with new
+    //            props to componentWillMount ....
+    //
+    // Spinner / Activity Monitor controlling flags:
+    this.spinnerTimeoutAllowed = false
+    this.spinnerTimeoutRunning = false
   }
   componentWillMount () {
     if (!utils.is_iOS()) {
@@ -97,24 +105,14 @@ class ReduxNavigation extends React.Component {
       this.___finishLogOutSequence()
     }
     // spinner
-    if (this.allowSpinnerTimeout &&
-        !this.spinnerTimerRunning &&
+    if (this.spinnerTimeoutAllowed &&
+        !this.spinnerTimeoutRunning &&
         nextProps.spinnerFlag) {
-      this.spinnerTimerRunning = true
-      console.log("SETTING TIMER")
+      this.spinnerTimeoutRunning = true
       setTimeout(() => {
-        console.log("TIMER HAPPENED")
         this.props.dispatch(EngineActions.setSpinnerData(false, ''))
-        this.spinnerTimerRunning = false
-      }, 7000);
-    }
-    // toast
-    if (!this.terminateToast && nextProps.toastFlag) {
-      this.terminateToast = true
-      setTimeout(() => {
-        this.terminateToast = false
-        this.props.dispatch(EngineActions.setToastData(false, ''))
-      }, 5000); // hide toast after 5s
+        this.spinnerTimeoutRunning = false
+      }, SPINNER_TIMEOUT);
     }
   }
 
@@ -136,7 +134,7 @@ class ReduxNavigation extends React.Component {
     //
     // const SKIP_SESSION_BLOCK_PAGE_FOR_DEV = (process.env.NODE_ENV !== 'production')
     // pbj disabling this due to app background crashing
-    this.allowSpinnerTimeout = false    // Never stop the spinner on login
+    this.spinnerTimeoutAllowed = false    // Never stop the spinner on login
     const SKIP_SESSION_BLOCK_PAGE_FOR_DEV = true
 
     this.shutDownSignOut = false
@@ -186,7 +184,7 @@ class ReduxNavigation extends React.Component {
     firebaseInstance.setFirebaseData(notificationPath, {token, enabled: true})
     this.props.dispatch(EngineActions.setToken(token))
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'App' })
-    this.allowSpinnerTimeout = true    // Never stop the spinner on login
+    this.spinnerTimeoutAllowed = true    // Never stop the spinner on login
   }
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -207,7 +205,7 @@ class ReduxNavigation extends React.Component {
 /// /////////////////////////////////////////////////////////////////////////////
 
   ___startLogOutSequence = async () => {
-    this.allowSpinnerTimeout = false    // Never stop the spinner on logouts
+    this.spinnerTimeoutAllowed = false    // Never stop the spinner on logouts
     const method = 'ReduxNavigation::___startLogOutSequence'
     if (this.ref) {
       this.ref.off()
@@ -221,7 +219,7 @@ class ReduxNavigation extends React.Component {
     } catch (error) {
       console.log(`ERROR(${method}): error during wait for engine shutdown.\n${error}`)
     } finally {
-      this.allowSpinnerTimeout = true    // Never stop the spinner on logouts
+      this.spinnerTimeoutAllowed = true    // Never stop the spinner on logouts
       // Only call ___finishLogOutSequence once (it may have been called before the
       // timer above resolves):
       if (!this.shutDownSignOut) {
@@ -325,21 +323,24 @@ class ReduxNavigation extends React.Component {
       )
     }
     else {
+      if (this.props.toastFlag) {
+        let toast = Toast.show(
+          this.props.toastMessage,
+          {
+            duration: STATUS_BAR_TIMEOUT,
+            position: 0,
+            animation: false,
+            shadow: false,
+            backgroundColor: '#49c649',
+            hideOnPress: true,
+            opacity: 0.95
+          }
+        )
+      }
       return (
         <Root>
           <Spinner visible={this.props.spinnerFlag} textContent={this.props.spinnerMessage} textStyle={{color: '#FFF'}} />
-          <Toast
-            visible={this.props.toastFlag}
-            position={-50}
-            shadow={false}
-            animation={false}
-            hideOnPress={true}
-            backgroundColor='#49c649'
-          >
-            <Text style={{fontWeight: 'bold'}}>
-              {this.props.toastMessage}
-            </Text>
-          </Toast>
+
           <AppNavigation
             screenProps={{logout: () => this.___startLogOutSequence(), authWork: (userData) => this._authWork(userData)}}
             navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root')})}

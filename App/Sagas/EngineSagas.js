@@ -309,6 +309,7 @@ export function * startEngine (action) {
   EngineInstance = yield call(createEngine, userData)
   // const engineInit = yield select(EngineSelectors.getEngineInit)
   EngineInstance.componentDidMountWork(false, userData['username'])
+  yield fork(watchEngineMessageChannel)
   yield fork(watchAmaDataChannel)
   yield fork(watchAmaStatusChannel)
   yield fork(watchEngineFaultChannel)

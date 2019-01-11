@@ -118,6 +118,11 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
   }
 
+  // Status Display to User
+  reportStatus = (message) => {
+    this.emit('me-engine-status', message)
+  }
+
   //
   //  API Events
   // ////////////////////////////////////////////////////////////////////////////
@@ -237,6 +242,15 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     this.userId = userId
     this._configureIO()
+
+    // setTimeout(() => {
+    //   if (this.contactMgr) {
+    //     // Test handleMobileNotifications mods (noitifications can't be simulated
+    //     // in debug config at the moment):
+    //     //    feb9 --> PBJ
+    //     this.handleMobileNotifications('feb9')
+    //   }
+    // }, 10000)
   }
 
   //
@@ -773,10 +787,30 @@ export class MessagingEngine extends EventEmitterAdapter {
   handleMobileNotifications (senderInfo) {
     const logPrefix = 'INFO(engine.js::handleMobileNotifications)'
     console.log(`${logPrefix}: received notification ${senderInfo}`)
-    let contactsToCheck
+    let contactsToCheck = undefined
     if (senderInfo) {
       contactsToCheck = this.contactMgr.getContactsWithMatchingPKMask(senderInfo)
     }
+
+
+    // Compose a message to display to the user while we fetch messages related
+    // to the notification we received:
+    //
+    let contactIdList = ''
+    let numContacts = (contactsToCheck) ? contactsToCheck.length : 0
+    for (let idxContact = 0; idxContact < numContacts; idxContact++) {
+      contactIdList += contactsToCheck[idxContact].id + '👤 '
+      if (idxContact < numContacts-1) {
+        contactIdList += ' or '
+      }
+    }
+    //
+    let statusMsg = '✉️ 📲 Fetching new message(s)'
+    if (contactIdList) {
+      statusMsg += ` from ${contactIdList}`
+    } // TODO: should this else to ' statusMsg += ' from new contact'
+    this.reportStatus(statusMsg)
+
 
     if (this && this.offlineMsgSvc && !this.offlineMsgSvc.isReceiving()) {
       this.offlineMsgSvc.pauseRecvService()
