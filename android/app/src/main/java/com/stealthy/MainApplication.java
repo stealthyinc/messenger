@@ -4,6 +4,7 @@ import android.app.Application;
 import com.stealthy.sdk.BlockstackPackage;
 
 import com.facebook.react.ReactApplication;
+import com.masteratul.RNAppstoreVersionCheckerPackage;
 import com.sudoplz.reactnativeamplitudeanalytics.RNAmplitudeSDKPackage;
 import com.apsl.versionnumber.RNVersionNumberPackage;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
@@ -39,7 +40,8 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-            new RNAmplitudeSDKPackage(),
+            new RNAppstoreVersionCheckerPackage(),
+            new RNAmplitudeSDKPackage(MainApplication.this),
             new RNVersionNumberPackage(),
             new RNFetchBlobPackage(),
             new VectorIconsPackage(),

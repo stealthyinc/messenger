@@ -201,7 +201,7 @@ class ConversationScreen extends React.Component {
                       <Text style={{fontWeight: 'bold', fontSize: 18}}>{(item.title) ? item.title : item.id}</Text>
                       <Text note>{item.summary}</Text>
                     </Body>
-                    {(item.unread > 0) ? <Right>
+                    {(item.unread > 0) ? <Right style={{ top: -5}}>
                       <Badge style={{ backgroundColor: 'red' }}>
                         <Text style={{color: 'white'}}>{item.unread}</Text>
                       </Badge>

@@ -26,6 +26,7 @@ ios/Podfile.lock
 ios/Index/
 package-lock.json
 GoogleService-Info.plist
+ios/GoogleService-Info.plist
 yarn.lock
 .firebaserc
 
