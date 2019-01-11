@@ -18,7 +18,7 @@ const utils = require('./../Engine/misc/utils.js')
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 
 const SPINNER_TIMEOUT = 7000       // milliseconds
-const STATUS_BAR_TIMEOUT = 3500    // milliseconds
+const TOAST_TIMEOUT = 5000    // milliseconds
 
 class ReduxNavigation extends React.Component {
   constructor (props) {
@@ -39,6 +39,9 @@ class ReduxNavigation extends React.Component {
     // Spinner / Activity Monitor controlling flags:
     this.spinnerTimeoutAllowed = false
     this.spinnerTimeoutRunning = false
+    //
+    this.toastTimeoutAllowed = false
+    this.toastTimeoutRunning = false
   }
   componentWillMount () {
     if (!utils.is_iOS()) {
@@ -114,6 +117,16 @@ class ReduxNavigation extends React.Component {
         this.spinnerTimeoutRunning = false
       }, SPINNER_TIMEOUT);
     }
+    // toast
+    if (this.toastTimeoutAllowed &&
+        !this.toastTimeoutRunning &&
+        nextProps.toastFlag) {
+      this.toastTimeoutRunning = true
+      setTimeout(() => {
+        this.props.dispatch(EngineActions.setToastData(false, ''))
+        this.toastTimeoutRunning = false
+      }, TOAST_TIMEOUT);
+	  }
   }
 
   componentWillUnmount () {
@@ -135,6 +148,7 @@ class ReduxNavigation extends React.Component {
     // const SKIP_SESSION_BLOCK_PAGE_FOR_DEV = (process.env.NODE_ENV !== 'production')
     // pbj disabling this due to app background crashing
     this.spinnerTimeoutAllowed = false    // Never stop the spinner on login
+    this.toastTimeoutAllowed = false
     const SKIP_SESSION_BLOCK_PAGE_FOR_DEV = true
 
     this.shutDownSignOut = false
@@ -185,6 +199,7 @@ class ReduxNavigation extends React.Component {
     this.props.dispatch(EngineActions.setToken(token))
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'App' })
     this.spinnerTimeoutAllowed = true    // Never stop the spinner on login
+    this.toastTimeoutAllowed = true
   }
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -206,6 +221,7 @@ class ReduxNavigation extends React.Component {
 
   ___startLogOutSequence = async () => {
     this.spinnerTimeoutAllowed = false    // Never stop the spinner on logouts
+    this.toastTimeoutAllowed = false
     const method = 'ReduxNavigation::___startLogOutSequence'
     if (this.ref) {
       this.ref.off()
@@ -220,6 +236,7 @@ class ReduxNavigation extends React.Component {
       console.log(`ERROR(${method}): error during wait for engine shutdown.\n${error}`)
     } finally {
       this.spinnerTimeoutAllowed = true    // Never stop the spinner on logouts
+      this.toastTimeoutAllowed = true
       // Only call ___finishLogOutSequence once (it may have been called before the
       // timer above resolves):
       if (!this.shutDownSignOut) {
@@ -323,24 +340,20 @@ class ReduxNavigation extends React.Component {
       )
     }
     else {
-      if (this.props.toastFlag) {
-        let toast = Toast.show(
-          this.props.toastMessage,
-          {
-            duration: STATUS_BAR_TIMEOUT,
-            position: 0,
-            animation: false,
-            shadow: false,
-            backgroundColor: '#49c649',
-            hideOnPress: true,
-            opacity: 0.95
-          }
-        )
-      }
       return (
         <Root>
           <Spinner visible={this.props.spinnerFlag} textContent={this.props.spinnerMessage} textStyle={{color: '#FFF'}} />
-
+          <Toast
+	            visible={this.props.toastFlag}
+	            position={0}
+	            shadow={false}
+	            animation={false}
+	            hideOnPress={true}
+	            backgroundColor='#49c649'>
+            <Text style={{fontWeight: 'bold'}}>
+              {this.props.toastMessage}
+            </Text>
+          </Toast>
           <AppNavigation
             screenProps={{logout: () => this.___startLogOutSequence(), authWork: (userData) => this._authWork(userData)}}
             navigation={addNavigationHelpers({dispatch: this.props.dispatch, state: this.props.nav, addListener: createReduxBoundAddListener('root')})}
