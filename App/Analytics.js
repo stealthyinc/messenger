@@ -1,10 +1,14 @@
 // const MAX_QUEUE = 100
 const { firebaseInstance } = require('./Engine/firebaseWrapper.js')
+import RNAmplitude from 'react-native-amplitude-analytics';
+import Config from 'react-native-config'
 
 class Anonalytics {
   constructor (publicKey = undefined) {
     this.publicKey = publicKey
     this.firAnalytics = firebaseInstance.getFirebaseAnalytics()
+    const amplitudeKey = (process.env.NODE_ENV === 'production') ? Config.AMPLITUDE_API : '87e274cd59ac20f4151369e7e658aaaf'
+    this.amplitude = new RNAmplitude(amplitudeKey);
     if (process.env.NODE_ENV === 'production') {
       this.aeEnable()
     } else {
@@ -14,10 +18,14 @@ class Anonalytics {
 
   aeEnable = () => {
     this.firAnalytics.setAnalyticsCollectionEnabled(true)
+    this.amplitude.setOptOut(false);
   }
 
   aeDisable = () => {
     this.firAnalytics.setAnalyticsCollectionEnabled(false)
+    if (process.env.NODE_ENV === 'production') {
+      this.amplitude.setOptOut(true);
+    }
   }
 
   // Homepage Events:
@@ -145,18 +153,22 @@ class Anonalytics {
         const d = new Date()
         const dateStamp = d.toDateString()
         this.firAnalytics.setUserId(this.publicKey)
+        this.amplitude.setUserId(this.publicKey)
         if (aString) {
           let awsCleanString = (aString.length >= AWS_LIMIT)
             ? aString.substring(0, AWS_LIMIT - 2)
             : aString
           this.firAnalytics.logEvent(anEventName, {attributes: {data: awsCleanString, id: this.publicKey, dateStamp}})
+          this.amplitude.logEvent(anEventName, {attributes: {data: awsCleanString, id: this.publicKey, dateStamp}})
         } else {
           this.firAnalytics.logEvent(anEventName, {attributes: {id: this.publicKey, dateStamp}})
+          this.amplitude.logEvent(anEventName, {attributes: {id: this.publicKey, dateStamp}})
         }
       }
     } catch (error) {
       // const eventTimeMs = Date.now()
       this.firAnalytics.logEvent('error', error)
+      this.amplitude.logEvent('error', error)
     }
   }
 }

@@ -39,6 +39,7 @@
     "react": "16.3.1",
     "react-native": "^0.55.4",
     "react-native-actionsheet": "^2.4.2",
+    "react-native-amplitude-analytics": "^0.2.6",
     "react-native-appstore-version-checker": "^2.7.0",
     "react-native-awesome-alerts": "^1.1.1",
     "react-native-background-fetch": "^2.4.3",

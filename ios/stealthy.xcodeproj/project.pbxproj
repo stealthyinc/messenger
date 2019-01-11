@@ -80,6 +80,7 @@
 		75B7D23921E7134000BDF075 /* libRNVersionNumber.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75B7D23621E7133000BDF075 /* libRNVersionNumber.a */; };
 		75C3EB3E20E1B12400F5E81F /* libcryptopp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C3EB3D20E1B12400F5E81F /* libcryptopp.a */; settings = {ATTRIBUTES = (Required, ); }; };
 		75F0E51220AB428000CB49D4 /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75F0E51020AB424300CB49D4 /* libRNFirebase.a */; };
+		75F4999F21E865B00091DEFB /* libRNAmplitudeSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75F4999521E865A10091DEFB /* libRNAmplitudeSDK.a */; };
 		793936C820E2DB3400268769 /* CryptoECIES.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 793936C620E2DB3400268769 /* CryptoECIES.cpp */; };
 		793936F420E2FD5200268769 /* CryptoECIESWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 793936F320E2FD5200268769 /* CryptoECIESWrapper.mm */; };
 		7E7B15E340FF4A17BC21AEB9 /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63157C5EDFFC41D1A751CEF9 /* SimpleLineIcons.ttf */; };
@@ -462,6 +463,13 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RNFirebase;
 		};
+		75F4999421E865A10091DEFB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 75F4996421E865A10091DEFB /* RNAmplitudeSDK.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNAmplitudeSDK;
+		};
 		78C398B81ACF4ADC00677621 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */;
@@ -572,6 +580,7 @@
 		75B7D1FD21E7132F00BDF075 /* RNVersionNumber.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNVersionNumber.xcodeproj; path = "../node_modules/react-native-version-number/ios/RNVersionNumber.xcodeproj"; sourceTree = "<group>"; };
 		75C3EB3D20E1B12400F5E81F /* libcryptopp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcryptopp.a; path = "../../../../../usr/local/cryptopp-ios/lib/libcryptopp.a"; sourceTree = "<group>"; };
 		75CB635A5D65494A95309E91 /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
+		75F4996421E865A10091DEFB /* RNAmplitudeSDK.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNAmplitudeSDK.xcodeproj; path = "../node_modules/react-native-amplitude-analytics/ios/RNAmplitudeSDK.xcodeproj"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		793936C620E2DB3400268769 /* CryptoECIES.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CryptoECIES.cpp; sourceTree = "<group>"; };
 		793936C720E2DB3400268769 /* CryptoECIES.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = CryptoECIES.hpp; sourceTree = "<group>"; };
@@ -613,6 +622,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				75F4999F21E865B00091DEFB /* libRNAmplitudeSDK.a in Frameworks */,
 				75B7D23921E7134000BDF075 /* libRNVersionNumber.a in Frameworks */,
 				7541C5F021E5607400B04B30 /* libReactNativeConfig.a in Frameworks */,
 				759DC9562170F95B0010129D /* libRCTCameraRoll.a in Frameworks */,
@@ -983,6 +993,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		75F4996521E865A10091DEFB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				75F4999521E865A10091DEFB /* libRNAmplitudeSDK.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		78C398B11ACF4ADC00677621 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -995,6 +1013,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				75F4996421E865A10091DEFB /* RNAmplitudeSDK.xcodeproj */,
 				75B7D1FD21E7132F00BDF075 /* RNVersionNumber.xcodeproj */,
 				7541C5E721E5606300B04B30 /* ReactNativeConfig.xcodeproj */,
 				759DC9212170F94D0010129D /* RCTCameraRoll.xcodeproj */,
@@ -1273,6 +1292,10 @@
 				{
 					ProductGroup = 751F44D5212DF17C009F3658 /* Products */;
 					ProjectRef = 346FA43D49D54F0C99600EBB /* ReactNativeSocialShare.xcodeproj */;
+				},
+				{
+					ProductGroup = 75F4996521E865A10091DEFB /* Products */;
+					ProjectRef = 75F4996421E865A10091DEFB /* RNAmplitudeSDK.xcodeproj */;
 				},
 				{
 					ProductGroup = 7502F89120D0C9F000232E72 /* Products */;
@@ -1657,6 +1680,13 @@
 			remoteRef = 75F0E50F20AB424300CB49D4 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		75F4999521E865A10091DEFB /* libRNAmplitudeSDK.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNAmplitudeSDK.a;
+			remoteRef = 75F4999421E865A10091DEFB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		78C398B91ACF4ADC00677621 /* libRCTLinking.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1787,11 +1817,13 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-stealthy/Pods-stealthy-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Amplitude-iOS/Amplitude_iOS.framework",
 				"${BUILT_PRODUCTS_DIR}/Blockstack/Blockstack.framework",
 				"${BUILT_PRODUCTS_DIR}/secp256k1.swift/secp256k1.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Amplitude_iOS.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Blockstack.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/secp256k1.framework",
 			);
