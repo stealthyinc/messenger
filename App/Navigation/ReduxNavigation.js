@@ -17,7 +17,7 @@ const common = require('./../common.js')
 const utils = require('./../Engine/misc/utils.js')
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 
-const SPINNER_TIMEOUT = 7000       // milliseconds
+const SPINNER_TIMEOUT_S = 5        // seconds
 const TOAST_TIMEOUT = 2500    // milliseconds
 
 class ReduxNavigation extends React.Component {
@@ -39,6 +39,7 @@ class ReduxNavigation extends React.Component {
     // Spinner / Activity Monitor controlling flags:
     this.spinnerTimeoutAllowed = false
     this.spinnerTimeoutRunning = false
+    this.spinnerTimeoutCount = 0
     //
     this.toastTimeoutAllowed = false
     this.toastTimeoutRunning = false
@@ -108,14 +109,8 @@ class ReduxNavigation extends React.Component {
       this.___finishLogOutSequence()
     }
     // spinner
-    if (this.spinnerTimeoutAllowed &&
-        !this.spinnerTimeoutRunning &&
-        nextProps.spinnerFlag) {
-      this.spinnerTimeoutRunning = true
-      setTimeout(() => {
-        this.props.dispatch(EngineActions.setSpinnerData(false, ''))
-        this.spinnerTimeoutRunning = false
-      }, SPINNER_TIMEOUT);
+    if (this.spinnerTimeoutAllowed && nextProps.spinnerFlag) {
+      this._setSpinnerTimeout(SPINNER_TIMEOUT_S)
     }
     // toast
     if (this.toastTimeoutAllowed &&
@@ -134,6 +129,36 @@ class ReduxNavigation extends React.Component {
       BackHandler.removeEventListener('hardwareBackPress')
     }
     NetInfo.isConnected.removeEventListener('connectionChange', this.handleConnectivityChange)
+  }
+
+  // A timeout timer that can have the timeout duration updated while it's counting.
+  // On timeout, dispatches an engine action that results in new props to disable
+  // the spinner in the render method:
+  //
+  _setSpinnerTimeout = async (durationSec) => {
+    // Update the timeout timer on the spinner (prevents flicker and shortened
+    // time-out intervals on subsequent calls before expiry)
+    this.spinnerTimeoutCount = durationSec
+
+    // Block subsequent calls to this method from starting a second time-out loop
+    // count.
+    if (!this.spinnerTimeoutRunning) {
+      this.spinnerTimeoutRunning = true
+
+      try {
+        // Loop countdown until timeout and then dispatch a prop change to make
+        // the spinner disappear
+        while (this.spinnerTimeoutCount > 0) {
+          const sleepResult = await utils.resolveAfterMilliseconds(1000)
+          this.spinnerTimeoutCount--
+        }
+        this.props.dispatch(EngineActions.setSpinnerData(false, ''))
+      } catch (error) {
+        // suppress
+      } finally {
+        this.spinnerTimeoutRunning = false
+      }
+    }
   }
 
   _authWork = async (userData) => {
@@ -198,7 +223,7 @@ class ReduxNavigation extends React.Component {
     firebaseInstance.setFirebaseData(notificationPath, {token, enabled: true})
     this.props.dispatch(EngineActions.setToken(token))
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'App' })
-    this.spinnerTimeoutAllowed = true    // Never stop the spinner on login
+    this.spinnerTimeoutAllowed = true    // The spinner can timout after login complete
     this.toastTimeoutAllowed = true
   }
 
@@ -235,8 +260,6 @@ class ReduxNavigation extends React.Component {
     } catch (error) {
       console.log(`ERROR(${method}): error during wait for engine shutdown.\n${error}`)
     } finally {
-      this.spinnerTimeoutAllowed = true    // Never stop the spinner on logouts
-      this.toastTimeoutAllowed = true
       // Only call ___finishLogOutSequence once (it may have been called before the
       // timer above resolves):
       if (!this.shutDownSignOut) {
