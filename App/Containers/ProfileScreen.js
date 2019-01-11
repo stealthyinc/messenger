@@ -16,6 +16,11 @@ class ProfileScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {}
     return {
+      headerLeft: (
+        <TouchableOpacity onPress={() => params.share()} style={{marginLeft: 10}}>
+          <Ionicons name="md-share" size={28} color='white'/>
+        </TouchableOpacity>
+      ),
       headerTitle: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Profile</Text>,
       headerBackTitle: 'Back',
       headerRight: (
@@ -38,7 +43,7 @@ class ProfileScreen extends React.Component {
     }
   }
   componentWillMount () {
-    this.props.navigation.setParams({ showOverlay: this.showOverlay, logout: this.runLogout })
+    this.props.navigation.setParams({ showOverlay: this.showOverlay, logout: this.runLogout, share: this.showActionSheet })
   }
   runLogout = () => {
     this.props.setSpinnerData(true, 'Logging out...')
@@ -175,7 +180,7 @@ class ProfileScreen extends React.Component {
             icon={{name: 'share', color: 'white'}}
             buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 180, height: 50, backgroundColor: '#34bbed'}}
             textStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
-            title='Share On'
+            title='Share ID'
           />
           {/*<Button
             onPress={() => {

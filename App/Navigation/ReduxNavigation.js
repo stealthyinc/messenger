@@ -28,7 +28,7 @@ class ReduxNavigation extends React.Component {
     this.publicKey = undefined
     this.ref = undefined
     this.shutDownSignOut = false
-    this.allowSpinnerTimeout = true
+    this.allowSpinnerTimeout = false
     this.spinnerTimerRunning = false
     this.terminateToast = false
   }
@@ -101,7 +101,9 @@ class ReduxNavigation extends React.Component {
         !this.spinnerTimerRunning &&
         nextProps.spinnerFlag) {
       this.spinnerTimerRunning = true
+      console.log("SETTING TIMER")
       setTimeout(() => {
+        console.log("TIMER HAPPENED")
         this.props.dispatch(EngineActions.setSpinnerData(false, ''))
         this.spinnerTimerRunning = false
       }, 7000);
@@ -134,6 +136,7 @@ class ReduxNavigation extends React.Component {
     //
     // const SKIP_SESSION_BLOCK_PAGE_FOR_DEV = (process.env.NODE_ENV !== 'production')
     // pbj disabling this due to app background crashing
+    this.allowSpinnerTimeout = false    // Never stop the spinner on login
     const SKIP_SESSION_BLOCK_PAGE_FOR_DEV = true
 
     this.shutDownSignOut = false
@@ -183,6 +186,7 @@ class ReduxNavigation extends React.Component {
     firebaseInstance.setFirebaseData(notificationPath, {token, enabled: true})
     this.props.dispatch(EngineActions.setToken(token))
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'App' })
+    this.allowSpinnerTimeout = true    // Never stop the spinner on login
   }
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -203,7 +207,7 @@ class ReduxNavigation extends React.Component {
 /// /////////////////////////////////////////////////////////////////////////////
 
   ___startLogOutSequence = async () => {
-    this.allowSpinnerTimeout = true    // Never stop the spinner on logouts
+    this.allowSpinnerTimeout = false    // Never stop the spinner on logouts
     const method = 'ReduxNavigation::___startLogOutSequence'
     if (this.ref) {
       this.ref.off()
@@ -217,7 +221,7 @@ class ReduxNavigation extends React.Component {
     } catch (error) {
       console.log(`ERROR(${method}): error during wait for engine shutdown.\n${error}`)
     } finally {
-      this.allowSpinnerTimeout = false    // Never stop the spinner on logouts
+      this.allowSpinnerTimeout = true    // Never stop the spinner on logouts
       // Only call ___finishLogOutSequence once (it may have been called before the
       // timer above resolves):
       if (!this.shutDownSignOut) {
