@@ -28,7 +28,8 @@ class ReduxNavigation extends React.Component {
     this.publicKey = undefined
     this.ref = undefined
     this.shutDownSignOut = false
-    this.terminateSpinner = false
+    this.allowSpinnerTimeout = true
+    this.spinnerTimerRunning = false
     this.terminateToast = false
   }
   componentWillMount () {
@@ -89,21 +90,23 @@ class ReduxNavigation extends React.Component {
     this.setState({ isConnected })
   };
 
-  componentWillReceiveProps (nextProps) {
+  componentWillReceiveProps = (nextProps) => {
     if (nextProps.engineShutdown) {
       // #FearThis  - Changes can result in loss of time, efficiency, users &
       //              data.
       this.___finishLogOutSequence()
     }
-    // spinner 
-    if (!this.terminateSpinner && nextProps.spinnerFlag) {
-      this.terminateSpinner = true
+    // spinner
+    if (this.allowSpinnerTimeout &&
+        !this.spinnerTimerRunning &&
+        nextProps.spinnerFlag) {
+      this.spinnerTimerRunning = true
       setTimeout(() => {
         this.props.dispatch(EngineActions.setSpinnerData(false, ''))
-        this.terminateSpinner = false
+        this.spinnerTimerRunning = false
       }, 7000);
     }
-    // toast 
+    // toast
     if (!this.terminateToast && nextProps.toastFlag) {
       this.terminateToast = true
       setTimeout(() => {
@@ -200,7 +203,7 @@ class ReduxNavigation extends React.Component {
 /// /////////////////////////////////////////////////////////////////////////////
 
   ___startLogOutSequence = async () => {
-    this.terminateSpinner = true    // Never stop the spinner on logouts
+    this.allowSpinnerTimeout = true    // Never stop the spinner on logouts
     const method = 'ReduxNavigation::___startLogOutSequence'
     if (this.ref) {
       this.ref.off()
@@ -214,7 +217,7 @@ class ReduxNavigation extends React.Component {
     } catch (error) {
       console.log(`ERROR(${method}): error during wait for engine shutdown.\n${error}`)
     } finally {
-      this.terminateSpinner = false    // Never stop the spinner on logouts
+      this.allowSpinnerTimeout = false    // Never stop the spinner on logouts
       // Only call ___finishLogOutSequence once (it may have been called before the
       // timer above resolves):
       if (!this.shutDownSignOut) {
@@ -303,7 +306,7 @@ class ReduxNavigation extends React.Component {
           }}
         />
       )
-    } 
+    }
     else if (!this.state.isConnected) {
       return (
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}} >
