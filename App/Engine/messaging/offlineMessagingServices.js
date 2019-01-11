@@ -166,6 +166,10 @@ class OfflineMessagingServices extends EventEmitterAdapter {
     //   <channel.id>: <utc>
     // }
     this.amaUpdateTimes = {}
+
+    // A queue of contacts to receive messages from. It's a class member now to
+    // allow us to insert into the queue during a receive cycle
+    this.contactReceiveQueue = []
   }
 
   log (...args) {
@@ -365,9 +369,7 @@ class OfflineMessagingServices extends EventEmitterAdapter {
     while (this.enableRecvService) {
       if (!this.skipRecvService) {
         this.log('Offline Messaging Receive Service:')
-        this.receiving = true
         await this.receiveMessages()
-        this.receiving = false
       }
 
       if (this.contactArr && this.contactArr.length <= 5) {
@@ -386,130 +388,161 @@ class OfflineMessagingServices extends EventEmitterAdapter {
     this.skipRecvService = false
   }
 
+  priorityReceiveMessages(contacts) {
+    // Wipes out existing receive queue and moves our priority folks to the top
+    // of our receive queue. (allowable b/c code run on one proc--one thread)
+    this.contactReceiveQueue = contacts
+  }
+
   async receiveMessages (contacts) {
-    if (!contacts || contacts.length === 0) {
-      contacts = this.contactArr
-    }
+    // Problems in this loop must be suppressed for continuity of operation
+    try {
+      // Only one instance of this loop can be running at any time
+      if (this.receiving) {
+        return
+      }
+      this.receiving = true
 
-    const isFirebase = this.idxIoInst.isFirebase()
-    const chatMessagesReadPromises = []
 
-    for (const contact of contacts) {
-      // TODO: refactor proocol constants
-      if (contact.protocol && utils.isChannelOrAma(contact.protocol)) {
-        if (!ENABLE_CHANNELS_V2_0) {
-          continue
-        }
+      if (!contacts || contacts.length === 0) {
+        contacts = this.contactArr
+      }
 
-        const contactId = contact.id
 
-        let remoteStatusData
-        try {
-          const stringifiedStatusData =
-            await this.ioInst.robustRemoteRead(contactId, ChannelServicesV2.getStatusFilePath())
-          remoteStatusData = JSON.parse(stringifiedStatusData)
-          if (!remoteStatusData) {
+      // Put the contacts to receive messages into our receive queue. The queue is
+      // managed such that at any time, a contact can be pushed to the top for immediate
+      // response (when that happens, other queued recipients may be dropped for faster
+      // response time):
+      this.contactReceiveQueue = contacts.slice()   // shallow copy
+
+      const isFirebase = this.idxIoInst.isFirebase()
+      const chatMessagesReadPromises = []
+
+      while (this.contactReceiveQueue.length > 0) {
+        const contact = this.contactReceiveQueue.shift()
+
+        // TODO: refactor proocol constants
+        if (contact.protocol && utils.isChannelOrAma(contact.protocol)) {
+          if (!ENABLE_CHANNELS_V2_0) {
             continue
           }
-        } catch (error) {
-          // Suppress
-          // throw `ERROR(${method}): failed to read ${ChannelServicesV2.getStatusFilePath()}.\n${error}`
-          continue
-        }
 
-        // TODO: optimize so we're not creating this every time. First get it working
-        //       though
-        const channelMgr = new ChannelServicesV2()
-        channelMgr.setLastMsgAddress(remoteStatusData)
-        const messageFilePaths = channelMgr.getMsgFilePaths(this.channelAddresses[contactId])
+          const contactId = contact.id
 
-        // TODO: Yuck! Fix this to be more sensible and less dangerous--out of time
-        //       and doing this for speed purposes
-        if (utils.isAma(contact.protocol) && remoteStatusData.hasOwnProperty('updated')) {
-          const updateTime = remoteStatusData.updated
-          const lastUpdateTime = (this.amaUpdateTimes.hasOwnProperty(contactId))
-            ? this.amaUpdateTimes[contactId] : 0
-
-          if (updateTime !== lastUpdateTime) {
-            this.amaUpdateTimes[contactId] = updateTime
-            this.emit('ama updated', {contactId, updateTime})
+          let remoteStatusData
+          try {
+            const stringifiedStatusData =
+              await this.ioInst.robustRemoteRead(contactId, ChannelServicesV2.getStatusFilePath())
+            remoteStatusData = JSON.parse(stringifiedStatusData)
+            if (!remoteStatusData) {
+              continue
+            }
+          } catch (error) {
+            // Suppress
+            // throw `ERROR(${method}): failed to read ${ChannelServicesV2.getStatusFilePath()}.\n${error}`
+            continue
           }
-        }
 
-        for (const messageFilePath of messageFilePaths) {
-          console.log(`messageFilePath: ${messageFilePath}`)
-          chatMessagesReadPromises.push(
-            new Promise((resolve, reject) => {
-              this.ioInst.robustRemoteRead(contactId, messageFilePath)
-              .then((data) => {
-                let channelChatMsg
-                try {
-                  channelChatMsg = JSON.parse(data)
-                } catch (error) {
-                  // Suppress
-                }
-                resolve(channelChatMsg)
-              })
-              .catch((error) => {
-                resolve(undefined)
-              })
-            })
-          )
-        }
-      } else {
-        // Using Contact obj. here for future expansion w.r.t. heartBeat.
-        const contactId = contact.id
-        const offlineDirPath = `${this.userId}/conversations/offline`
+          // TODO: optimize so we're not creating this every time. First get it working
+          //       though
+          const channelMgr = new ChannelServicesV2()
+          channelMgr.setLastMsgAddress(remoteStatusData)
+          const messageFilePaths = channelMgr.getMsgFilePaths(this.channelAddresses[contactId])
 
-        let indexData
-        try {
-          indexData = await this.idxIoInst.readRemoteIndex(contactId, offlineDirPath)
-          this.log(`   Finished reading remote index of ${contactId} (${offlineDirPath}).`)
-        } catch (err) {
-          // Suppress 404 for users who haven't written a sharedIndex yet.
-          // Also suppress errors here as they do not effect stored data (i.e. a
-          // subsequent read will pick up where this failure occurred)
-        }
+          // TODO: Yuck! Fix this to be more sensible and less dangerous--out of time
+          //       and doing this for speed purposes
+          if (utils.isAma(contact.protocol) && remoteStatusData.hasOwnProperty('updated')) {
+            const updateTime = remoteStatusData.updated
+            const lastUpdateTime = (this.amaUpdateTimes.hasOwnProperty(contactId))
+              ? this.amaUpdateTimes[contactId] : 0
 
-        if (indexData && indexData.active) {
-          for (const chatMsgFileName in indexData.active) {
-            const msgIdForFile = OfflineMessagingServices._getNameMinusExtension(chatMsgFileName, isFirebase)
-            if (!this.rcvdOfflineMsgs.hasMessage(contactId, msgIdForFile)) {
-              const chatMsgFilePath = `${offlineDirPath}/${chatMsgFileName}`
+            if (updateTime !== lastUpdateTime) {
+              this.amaUpdateTimes[contactId] = updateTime
+              this.emit('ama updated', {contactId, updateTime})
+            }
+          }
 
-              // Add the promise with a catch to bypass the fail fast behavior of Promise.all below
-              chatMessagesReadPromises.push(
-                this.idxIoInst.readRemoteFile(contactId, chatMsgFilePath)
-                .catch(error => {
-                  console.log(`INFO(offlineMessagingServices): unable to read ${chatMsgFilePath} from ${contactId}.\n  ERROR reported: ${error}`)
-                  return undefined
+          for (const messageFilePath of messageFilePaths) {
+            console.log(`messageFilePath: ${messageFilePath}`)
+            chatMessagesReadPromises.push(
+              new Promise((resolve, reject) => {
+                this.ioInst.robustRemoteRead(contactId, messageFilePath)
+                .then((data) => {
+                  let channelChatMsg
+                  try {
+                    channelChatMsg = JSON.parse(data)
+                  } catch (error) {
+                    // Suppress
+                  }
+                  resolve(channelChatMsg)
                 })
-              )
+                .catch((error) => {
+                  resolve(undefined)
+                })
+              })
+            )
+          }
+        } else {
+          // Using Contact obj. here for future expansion w.r.t. heartBeat.
+          const contactId = contact.id
+          const offlineDirPath = `${this.userId}/conversations/offline`
+
+          let indexData
+          try {
+            indexData = await this.idxIoInst.readRemoteIndex(contactId, offlineDirPath)
+            this.log(`   Finished reading remote index of ${contactId} (${offlineDirPath}).`)
+          } catch (err) {
+            // Suppress 404 for users who haven't written a sharedIndex yet.
+            // Also suppress errors here as they do not effect stored data (i.e. a
+            // subsequent read will pick up where this failure occurred)
+          }
+
+          if (indexData && indexData.active) {
+            for (const chatMsgFileName in indexData.active) {
+              const msgIdForFile = OfflineMessagingServices._getNameMinusExtension(chatMsgFileName, isFirebase)
+              if (!this.rcvdOfflineMsgs.hasMessage(contactId, msgIdForFile)) {
+                const chatMsgFilePath = `${offlineDirPath}/${chatMsgFileName}`
+
+                // Add the promise with a catch to bypass the fail fast behavior of Promise.all below
+                chatMessagesReadPromises.push(
+                  this.idxIoInst.readRemoteFile(contactId, chatMsgFilePath)
+                  .catch(error => {
+                    console.log(`INFO(offlineMessagingServices): unable to read ${chatMsgFilePath} from ${contactId}.\n  ERROR reported: ${error}`)
+                    return undefined
+                  })
+                )
+              }
             }
           }
         }
       }
-    }
+      this.receiving = false
 
-    return Promise.all(chatMessagesReadPromises)
-    .then((chatMessageObjs) => {
-      let count = 0
-      for (const chatMsg of chatMessageObjs) {
-        // Check if chatMsg is defined too (failed reads make it undefined)
-        if (chatMsg && this.rcvdOfflineMsgs.addMessage(chatMsg)) {
-          count++
+      return Promise.all(chatMessagesReadPromises)
+      .then((chatMessageObjs) => {
+        let count = 0
+        for (const chatMsg of chatMessageObjs) {
+          // Check if chatMsg is defined too (failed reads make it undefined)
+          if (chatMsg && this.rcvdOfflineMsgs.addMessage(chatMsg)) {
+            count++
+          }
         }
-      }
 
-      if (count) {
-        this.log(`   received ${count} offline messages.`)
-        const allMessages = this.rcvdOfflineMsgs.getAllMessages()
-        this.emit('new messages', allMessages)
-      }
-    })
-    .catch((err) => {
-      this.logger(`ERROR: offline messaging services failed to read chat messages.\n${err}.`)
-    })
+        if (count) {
+          this.log(`   received ${count} offline messages.`)
+          const allMessages = this.rcvdOfflineMsgs.getAllMessages()
+          this.emit('new messages', allMessages)
+        }
+      })
+      .catch((err) => {
+        this.logger(`ERROR: offline messaging services failed to read chat messages.\n${err}.`)
+      })
+
+    } catch (error) {
+
+    } finally {
+      this.receiving = false
+    }
   }
 
   stopRecvService () {

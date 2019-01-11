@@ -811,21 +811,23 @@ export class MessagingEngine extends EventEmitterAdapter {
     } // TODO: should this else to ' statusMsg += ' from new contact'
     this.reportStatus(statusMsg)
 
-
-    if (this && this.offlineMsgSvc && !this.offlineMsgSvc.isReceiving()) {
-      this.offlineMsgSvc.pauseRecvService()
-
-      this.offlineMsgSvc.receiveMessages(contactsToCheck)
-      .then(() => {
-        this.offlineMsgSvc.resumeRecvService()
-      })
-      .catch((err) => {
-        console.log(`ERROR:(engine.js::handleMobileNotifications): ${err}`)
-        this.offlineMsgSvc.resumeRecvService()
-      })
-      console.log(`${logPrefix}: shortcutting offline message service with fast read.`)
-    } else {
-      console.log(`${logPrefix}: offline message service already receiving.`)
+    if (this && this.offlineMsgSvc) {
+      if (this.offlineMsgSvc.isReceiving()) {
+        // TODO: -push the contact to the top of the queue.
+        //       -optionally, wipe the bottome of the queue for faster results
+        this.offlineMsgSvc.priorityReceiveMessages(contactsToCheck)
+      } else {
+        this.offlineMsgSvc.pauseRecvService()
+        this.offlineMsgSvc.receiveMessages(contactsToCheck)
+        .then(() => {
+          this.offlineMsgSvc.resumeRecvService()
+        })
+        .catch((err) => {
+          console.log(`ERROR:(engine.js::handleMobileNotifications): ${err}`)
+          this.offlineMsgSvc.resumeRecvService()
+        })
+        console.log(`${logPrefix}: shortcutting offline message service with fast read.`)
+      }
     }
 
     this.discovery.checkInvitations(this.contactMgr)

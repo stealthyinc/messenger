@@ -18,7 +18,7 @@ const utils = require('./../Engine/misc/utils.js')
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 
 const SPINNER_TIMEOUT = 7000       // milliseconds
-const TOAST_TIMEOUT = 5000    // milliseconds
+const TOAST_TIMEOUT = 2500    // milliseconds
 
 class ReduxNavigation extends React.Component {
   constructor (props) {
@@ -345,7 +345,7 @@ class ReduxNavigation extends React.Component {
           <Spinner visible={this.props.spinnerFlag} textContent={this.props.spinnerMessage} textStyle={{color: '#FFF'}} />
           <Toast
 	            visible={this.props.toastFlag}
-	            position={0}
+	            position={-60}
 	            shadow={false}
 	            animation={false}
 	            hideOnPress={true}
