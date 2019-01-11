@@ -21,7 +21,9 @@ import API from '../Services/Api'
 import DebugConfig from '../Config/DebugConfig'
 import Config from 'react-native-config'
 
-const OVERRIDE_NOTIFICATIONS = true
+// This var when set to true allows push notifications in developer builds. When
+// set to false, push notifications will only work in production builds:
+const OVERRIDE_NOTIFICATIONS = false
 
 const common = require('./../common.js')
 
