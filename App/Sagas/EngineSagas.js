@@ -21,6 +21,8 @@ import API from '../Services/Api'
 import DebugConfig from '../Config/DebugConfig'
 import Config from 'react-native-config'
 
+const OVERRIDE_NOTIFICATIONS = false
+
 const common = require('./../common.js')
 
 let EngineInstance
@@ -252,7 +254,7 @@ function * fetchAmaData (action) {
 }
 
 function * getToken () {
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production' || OVERRIDE_NOTIFICATIONS) {
     const url = Config.ACCESS_TOKEN_URL
     const api = API.getAccessToken(url)
     const response = yield call(api.token)
@@ -267,7 +269,7 @@ function * sendNotificationWorker (action) {
   // - check fb under /global/notifications/senderPK
   // - decrypt data and look up receiver's user device token
   // - send a request to fb server to notify the person of a new message
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production' || OVERRIDE_NOTIFICATIONS) {
     const { recepientToken, publicKey, bearerToken } = action
     const pk = publicKey.substr(publicKey.length - 4)
     const api = API.notification(Config.SEND_NOTIFICATION_URL, recepientToken, pk, bearerToken)
@@ -289,7 +291,7 @@ function * getIntegrationData () {
 }
 
 function * checkToken () {
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production' || OVERRIDE_NOTIFICATIONS) {
     const bearerToken = yield select(EngineSelectors.getBearerToken)
     const baseUrl = Config.CHECK_TOKEN_URL + bearerToken
     const api = API.checkAccessToken(baseUrl)
@@ -307,7 +309,6 @@ function * checkToken () {
 export function * startEngine (action) {
   const { userData } = action
   EngineInstance = yield call(createEngine, userData)
-  // const engineInit = yield select(EngineSelectors.getEngineInit)
   EngineInstance.componentDidMountWork(false, userData['username'])
   yield fork(watchEngineMessageChannel)
   yield fork(watchAmaDataChannel)
