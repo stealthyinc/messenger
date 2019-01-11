@@ -21,7 +21,7 @@ import API from '../Services/Api'
 import DebugConfig from '../Config/DebugConfig'
 import Config from 'react-native-config'
 
-const OVERRIDE_NOTIFICATIONS = false
+const OVERRIDE_NOTIFICATIONS = true
 
 const common = require('./../common.js')
 
