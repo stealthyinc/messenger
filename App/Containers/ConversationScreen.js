@@ -155,8 +155,10 @@ class ConversationScreen extends React.Component {
     //       }}
     //       shareSuccess={this.sendToTwitter} />
     //   )
-    // } else 
+    // } else
     if (engineInit) {
+      const badgeAlignWorkaround = utils.isAndroid() ? -1 : -5
+
       return (
         <Drawer
           ref={(ref) => this._drawer = ref}
@@ -199,9 +201,9 @@ class ConversationScreen extends React.Component {
                     </Left>
                     <Body>
                       <Text style={{fontWeight: 'bold', fontSize: 18}}>{(item.title) ? item.title : item.id}</Text>
-                      <Text note>{item.summary}</Text>
+                      <Text note numberOfLines={1}>{item.summary}</Text>
                     </Body>
-                    {(item.unread > 0) ? <Right style={{ top: -5}}>
+                    {(item.unread > 0) ? <Right style={{ top: badgeAlignWorkaround}}>
                       <Badge style={{ backgroundColor: 'red' }}>
                         <Text style={{color: 'white'}}>{item.unread}</Text>
                       </Badge>
