@@ -254,7 +254,11 @@ class ReduxNavigation extends React.Component {
     }
     this.props.dispatch(EngineActions.initShutdown())
 
-    const TIMEOUT_BEFORE_SHUTDOWN_MS = 6 * 1000
+    // Give Android more time (we've disabled the emit event for android in the
+    // engine, b/c it gets cached/stored and on the next sign in, comes into
+    // componentWillReceiveProps in this class and calls sign out, resulting in
+    // a crash)
+    const TIMEOUT_BEFORE_SHUTDOWN_MS = (utils.isAndroid()) ? 10 * 1000 : 6 * 1000
     try {
       await utils.resolveAfterMilliseconds(TIMEOUT_BEFORE_SHUTDOWN_MS)
     } catch (error) {

@@ -717,7 +717,13 @@ export class MessagingEngine extends EventEmitterAdapter {
       console.log(`ERROR(engine.js::handleShutDownRequest): ${error}`)
     } finally {
       this.offlineMsgSvc = undefined
-      this.emit('me-shutdown-complete', true)
+
+      // Don't issue this in Android (if we timed out on the UI, this gets
+      // cached and causes an immediate sign out on the next sign in, resulting
+      // in a crash)
+      if (!utils.isAndroid()) {
+        this.emit('me-shutdown-complete', true)
+      }
     }
 
     // This code has to be last or at least after we emit 'me-shutdown-complete'.
