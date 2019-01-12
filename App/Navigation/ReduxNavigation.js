@@ -328,11 +328,12 @@ class ReduxNavigation extends React.Component {
 /// /////////////////////////////////////////////////////////////////////////////
 
   render () {
-    if (this.props.engineFault) {
+    const hasEngineFault = !!this.props.engineFault
+    if (hasEngineFault) {
       // console.log("Engine Fault", this.props.engineFault, this.props.userData)
       return (
         <AwesomeAlert
-          show={this.props.engineFault}
+          show={hasEngineFault}
           showProgress={false}
           title='Stealthy Error'
           message='Engine in a bad state'
