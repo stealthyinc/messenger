@@ -12,6 +12,7 @@ import chatIcon from '../Images/blue512.png'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import Spinner from 'react-native-loading-spinner-overlay'
 import Toast from 'react-native-root-toast'
+import firebase from 'react-native-firebase'
 
 const common = require('./../common.js')
 const utils = require('./../Engine/misc/utils.js')
@@ -43,6 +44,7 @@ class ReduxNavigation extends React.Component {
     //
     this.toastTimeoutAllowed = false
     this.toastTimeoutRunning = false
+    this.token = ''
   }
   componentWillMount () {
     if (!utils.is_iOS()) {
@@ -77,7 +79,17 @@ class ReduxNavigation extends React.Component {
     }, (error) => {
       console.log('[js] RNBackgroundFetch failed to start')
     })
-
+    this.onTokenRefreshListener = firebase.messaging().onTokenRefresh(fcmToken => {
+      // Process your token as required
+      firebase.messaging().getToken()
+      .then(token => {
+        if (token) {
+          AsyncStorage.setItem('token', token)
+          // console.log("firebase token re-generated", token)
+          this.token = token
+        }
+      })
+    })
     // Optional: Query the authorization status.
     BackgroundFetch.status((status) => {
       switch (status) {
@@ -129,6 +141,7 @@ class ReduxNavigation extends React.Component {
       BackHandler.removeEventListener('hardwareBackPress')
     }
     NetInfo.isConnected.removeEventListener('connectionChange', this.handleConnectivityChange)
+    this.onTokenRefreshListener()
   }
 
   // A timeout timer that can have the timeout duration updated while it's counting.
@@ -161,6 +174,19 @@ class ReduxNavigation extends React.Component {
     }
   }
 
+  _tokenRefresh = (publicKey) => {
+    if (this.token) {
+      console.log("firebase token re-generated", this.token)
+      const notificationPath = common.getDbNotificationPath(publicKey)
+      const ref = firebaseInstance.getFirebaseRef(notificationPath)
+      ref.set({token: this.token, enabled: true})
+      .then(() => {
+        console.log('PB REF IS SET')
+      })
+      .catch(error => console.log('PB FB ERROR', error))
+    }
+  }
+
   _authWork = async (userData) => {
     // This variable controls whether or not you are presented with a page
     // if another session ID is in the database. If you are developing and
@@ -190,15 +216,18 @@ class ReduxNavigation extends React.Component {
         ref.set(common.getSessionId())
         this._setupVars(userData, common.getSessionId())
         this.___installSessionLossListener()
+        this._tokenRefresh(this.publicKey)
       } else if (snapshot.exists() && (snapshot.val() === common.getSessionId())) {
         // authloading screen
         this._setupVars(userData, common.getSessionId())
         this.___installSessionLossListener()
+        this._tokenRefresh(this.publicKey)
       } else {
         if (SKIP_SESSION_BLOCK_PAGE_FOR_DEV) {
           ref.set(common.getSessionId())
           this._setupVars(userData, common.getSessionId())
           this.___installSessionLossListener()
+          this._tokenRefresh(this.publicKey)
         } else {
           this.props.dispatch(EngineActions.setSession(snapshot.val()))
           this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Block' })
@@ -216,12 +245,9 @@ class ReduxNavigation extends React.Component {
     if (userProfile) {
       this.props.dispatch(EngineActions.setUserProfile(userProfile))
     }
-    const token = await AsyncStorage.getItem('token')
+    // const token = await AsyncStorage.getItem('token')
     // console.log("firebase token readback", token)
-    const { publicKey } = this.props
-    const notificationPath = common.getDbNotificationPath(publicKey)
-    firebaseInstance.setFirebaseData(notificationPath, {token, enabled: true})
-    this.props.dispatch(EngineActions.setToken(token))
+    this.props.dispatch(EngineActions.setToken(this.token))
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'App' })
     this.spinnerTimeoutAllowed = true    // The spinner can timout after login complete
     this.toastTimeoutAllowed = true

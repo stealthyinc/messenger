@@ -27,7 +27,6 @@ class FirebaseWrapper {
   }
 
   cleanNotificationListeners () {
-    this.onTokenRefreshListener()
     this.notificationListener()
     this.notificationOpenedListener()
     this.notificationDisplayedListener()
@@ -60,13 +59,6 @@ class FirebaseWrapper {
       firebase.messaging().getToken().then(token => {
         AsyncStorage.setItem('token', token)
         // console.log("firebase token generated", token)
-      })
-      this.onTokenRefreshListener = firebase.messaging().onTokenRefresh(fcmToken => {
-        // Process your token as required
-        firebase.messaging().getToken().then(token => {
-          AsyncStorage.setItem('token', token)
-          // console.log("firebase token re-generated", token)
-        })
       })
       // console.log("user has permissions")
     } else {
