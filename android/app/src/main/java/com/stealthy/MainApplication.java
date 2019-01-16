@@ -4,6 +4,7 @@ import android.app.Application;
 import com.stealthy.sdk.BlockstackPackage;
 
 import com.facebook.react.ReactApplication;
+import org.reactnative.camera.RNCameraPackage;
 import com.masteratul.RNAppstoreVersionCheckerPackage;
 import com.sudoplz.reactnativeamplitudeanalytics.RNAmplitudeSDKPackage;
 import com.apsl.versionnumber.RNVersionNumberPackage;
@@ -13,7 +14,6 @@ import com.oblador.vectoricons.VectorIconsPackage;
 import com.barefootcoders.android.react.KDSocialShare.KDSocialShare;
 import io.invertase.firebase.RNFirebasePackage;
 import com.github.wumke.RNExitApp.RNExitAppPackage;
-import org.reactnative.camera.RNCameraPackage;
 import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
 import io.invertase.firebase.notifications.RNFirebaseNotificationsPackage;
 import com.facebook.react.ReactNativeHost;
