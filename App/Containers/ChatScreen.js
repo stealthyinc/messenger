@@ -435,37 +435,39 @@ class ChatScreen extends Component {
         </View>
       )
     }
-    return (
-      <View id='GiftedChatContainer'
-        style={{flex: 1,
-          backgroundColor: 'white'}}>
-        <GiftedChat
-          ref={(ref) => this._giftedChat = ref}
-          messages={this.state.messages}
-          onSend={this.onSend}
-          loadEarlier={this.state.loadEarlier}
-          onLoadEarlier={this.onLoadEarlier}
-          onPressAvatar={() => this.props.navigation.navigate('ContactProfile')}
-          isLoadingEarlier={this.state.isLoadingEarlier}
-          user={{
-            _id: this.state.author.username // sent messages should have same user._id
-          }}
-          text={this.state.inputText}
-          renderActions={this.renderCustomActions}
-          renderBubble={this.renderBubble}
-          renderSystemMessage={this.renderSystemMessage}
-          renderMessageImage={this.renderCustomView}
-          renderFooter={this.renderFooter}
-          maxInputLength={240}
-          renderInputToolbar={this.renderInputToolbar}
-          parsePatterns={(linkStyle) => [
-            { type: 'url', style: linkStyle, onPress: this.onPressUrl }
-          ]}
-          onInputTextChanged={text => this.setCustomText(text)}
-          onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
-        />
-      </View>
-    )
+    else {
+      this.props.setSpinnerData(false, '')
+      return (
+        <View id='GiftedChatContainer'
+          style={{flex: 1,
+            backgroundColor: 'white'}}>
+          <GiftedChat
+            ref={(ref) => this._giftedChat = ref}
+            messages={this.state.messages}
+            onSend={this.onSend}
+            loadEarlier={this.state.loadEarlier}
+            onLoadEarlier={this.onLoadEarlier}
+            onPressAvatar={() => this.props.navigation.navigate('ContactProfile')}
+            isLoadingEarlier={this.state.isLoadingEarlier}
+            user={{
+              _id: this.state.author.username // sent messages should have same user._id
+            }}
+            text={this.state.inputText}
+            renderActions={this.renderCustomActions}
+            renderBubble={this.renderBubble}
+            renderSystemMessage={this.renderSystemMessage}
+            renderMessageImage={this.renderCustomView}
+            renderFooter={this.renderFooter}
+            maxInputLength={240}
+            renderInputToolbar={this.renderInputToolbar}
+            parsePatterns={(linkStyle) => [
+              { type: 'url', style: linkStyle, onPress: this.onPressUrl }
+            ]}
+            onInputTextChanged={text => this.setCustomText(text)}
+          />
+        </View>
+      )
+    }
   }
 }
 
@@ -490,7 +492,8 @@ const mapDispatchToProps = (dispatch) => {
     handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),
     updateContactPubKey: (aContactId) => dispatch(EngineActions.updateContactPubKey(aContactId)),
     setDappUrl: (dappUrl) => dispatch(DappActions.setDappUrl(dappUrl)),
-    setDappMessage: (dappMessage) => dispatch(DappActions.setDappMessage(dappMessage))
+    setDappMessage: (dappMessage) => dispatch(DappActions.setDappMessage(dappMessage)),
+    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message))
   }
 }
 

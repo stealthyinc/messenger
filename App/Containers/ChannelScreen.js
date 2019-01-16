@@ -27,6 +27,7 @@ const utils = require('./../Engine/misc/utils.js')
 const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js')
 const slideAnimation = new SlideAnimation({ slideFrom: 'bottom' })
 const { width } = Dimensions.get('window')
+const runes = require('runes')
 
 class ChannelScreen extends Component {
   static navigationOptions = ({ navigation }) => {
@@ -186,7 +187,7 @@ class ChannelScreen extends Component {
   }
   componentWillUnmount () {
     this._isMounted = false
-    this.props.handleContactClick()
+    // this.props.handleContactClick()
   }
   parseJargon = (message) => {
     const { body, time, contentType } = message
@@ -433,10 +434,26 @@ class ChannelScreen extends Component {
       <SlackMessage {...props} messageTextStyle={messageTextStyle} />
     )
   }
+  contactAddLogic = (userId) => {
+    if (this.props.contactMgr.isExistingContactId(userId)) {
+      const theNextActiveContact = this.props.contactMgr.getContact(userId)
+      this.props.handleContactClick(theNextActiveContact)
+      if (theNextActiveContact) {
+        this.props.navigation.navigate('ChatRoom')
+      } else {
+        this.props.navigation.goBack()
+      }
+    }
+    else {
+      this.props.addContactId(userId)
+      this.props.setSpinnerData(true, 'Adding contact...')
+      this.props.navigation.goBack()
+    }
+  }
   handleUserActionSheet = (index) => {
     switch (index) {
       case 0: {
-        this.props.addContactId(this.state.user.name)
+        this.contactAddLogic(this.state.user.name)
         break
       }
     }
@@ -457,6 +474,39 @@ class ChannelScreen extends Component {
   //     />
   //   );
   // }
+  onLongPress = (context, currentMessage) => {
+    const options = [
+      'Reply To',
+      'Quote Text',
+      'Direct Message',
+      'Copy Text',
+      'Cancel',
+    ];
+    const cancelButtonIndex = options.length - 1;
+    const destructiveButtonIndex = options.length - 1
+    context.actionSheet().showActionSheetWithOptions(
+      { options, destructiveButtonIndex },
+      (buttonIndex) => {
+        const userId = currentMessage.user._id
+        let index = userId.indexOf(".")
+        let id = runes.substr(userId, 0, index)
+        if (buttonIndex === 0) {
+          this.setState({inputText: `@${id} `})
+          this._giftedChat.textInput.focus()
+        }
+        else if (buttonIndex === 1) {
+          this.setState({inputText: `@${id} "${currentMessage.text}" `})
+          this._giftedChat.textInput.focus()
+        }
+        else if (buttonIndex === 2) {
+          this.contactAddLogic(userId)
+        }
+        else if (buttonIndex === 3) {
+          Clipboard.setString(currentMessage.text);
+        }
+      }
+    );
+  }
   render () {
     const amaButton = (this.amaTitleIndex[this.state.amaTitle]) ? (
       <Button
@@ -538,7 +588,7 @@ class ChannelScreen extends Component {
         <ActionSheet
           ref={o => this.ActionSheet = o}
           title={`Would you like to add this user?`}
-          options={['Add', 'Cancel']}
+          options={['Add Contact', 'Cancel']}
           cancelButtonIndex={1}
           destructiveButtonIndex={1}
           onPress={(index) => this.handleUserActionSheet(index)}
@@ -569,7 +619,7 @@ class ChannelScreen extends Component {
           ]}
           onInputTextChanged={text => this.setCustomText(text)}
           textInputProps={{editable: (!disableAmaFeatures)}}
-          onLongPress={(ctx, currentMessage) => console.log(ctx, currentMessage)}
+          onLongPress={this.onLongPress}
         />
       </View>
     )
@@ -596,7 +646,7 @@ const mapDispatchToProps = (dispatch) => {
     handleOutgoingMessage: (text, json) => dispatch(EngineActions.setOutgoingMessage(text, json)),
     sendAmaInfo: (msgAddress, amaId, amaUserId) => dispatch(EngineActions.sendAmaInfo(msgAddress, amaId, amaUserId)),
     sendNotification: (token, publicKey, bearerToken) => dispatch(EngineActions.sendNotification(token, publicKey, bearerToken)),
-    handleContactClick: () => dispatch(EngineActions.setActiveContact(undefined)),
+    handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
     updateContactPubKey: (aContactId) => dispatch(EngineActions.updateContactPubKey(aContactId)),
     setDappUrl: (dappUrl) => dispatch(DappActions.setDappUrl(dappUrl)),
     setDappMessage: (dappMessage) => dispatch(DappActions.setDappMessage(dappMessage)),
