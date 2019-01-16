@@ -911,7 +911,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
   }
 
-  async handleContactAdd (contact, makeActiveContact = true) {
+  async handleContactAdd(contact, makeActiveContact = true) {
     const method = 'MessagingEngine::handleContactAdd'
 
     this.logger(`DEBUG(${method}): starting contact add for ${contact.id}.`)
@@ -1042,6 +1042,52 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     this.logger(`DEBUG(${method}): updating contacts in offline messaging service ...`)
     this.offlineMsgSvc.setContacts(this.contactMgr.getContacts())
+
+    // TODO: Think about only doing this quick fetch for contact invitations (it
+    // may also make sense for contact adds so I'm doing it all the time at present.)
+    //
+    // If the contact added was done through discovery, quickly fetch messages
+    // from them:  (TODO: AC refactor this to common code with the other instance
+    // of it.)
+    const contactAdded = this.contactMgr.getContact(contact.id)
+    const contactsToCheck = [contactAdded]
+
+    // Compose a message to display to the user while we fetch messages related
+    // to the notification we received:
+    //
+    let contactIdList = ''
+    let numContacts = (contactsToCheck) ? contactsToCheck.length : 0
+    for (let idxContact = 0; idxContact < numContacts; idxContact++) {
+      contactIdList += contactsToCheck[idxContact].id + '👤 '
+      if (idxContact < numContacts-1) {
+        contactIdList += ' or '
+      }
+    }
+    //
+    let statusMsg = '✉️ 📲 Checking for new message(s)'
+    if (contactIdList) {
+      statusMsg += ` from ${contactIdList}`
+    } // TODO: should this else to ' statusMsg += ' from new contact'
+    this.reportStatus(statusMsg)
+
+    if (contactAdded && this && this.offlineMsgSvc) {
+      if (this.offlineMsgSvc.isReceiving()) {
+        // TODO: -push the contact to the top of the queue.
+        //       -optionally, wipe the bottome of the queue for faster results
+        this.offlineMsgSvc.priorityReceiveMessages(contactsToCheck)
+      } else {
+        this.offlineMsgSvc.pauseRecvService()
+        this.offlineMsgSvc.receiveMessages(contactsToCheck)
+        .then(() => {
+          this.offlineMsgSvc.resumeRecvService()
+        })
+        .catch((err) => {
+          console.log(`ERROR:(${method}): ${err}`)
+          this.offlineMsgSvc.resumeRecvService()
+        })
+        console.log(`DEBUG(${method}): shortcutting offline message service with fast read after discovery.`)
+      }
+    }
 
     // IMPORTANT (even for Prabhaav):
     // - Do not change the order of these updates. The UI depends on
