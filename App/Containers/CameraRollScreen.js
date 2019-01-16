@@ -13,7 +13,7 @@ class CameraRollScreen extends Component {
     return {
       headerLeft: (
         <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
-          <Ionicons name='ios-arrow-dropleft' size={32} color='white' />
+          <Ionicons name='md-arrow-back' size={32} color='white' />
         </TouchableOpacity>
       ),
       headerTitle: (<Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Camera Roll</Text>),

@@ -10,7 +10,7 @@ class DappScreen extends Component {
     return {
       headerLeft: (
         <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
-          <Ionicons name='ios-arrow-dropleft' size={32} color='white' />
+          <Ionicons name='md-arrow-back' size={32} color='white' />
         </TouchableOpacity>
       ),
       headerTintColor: 'white',

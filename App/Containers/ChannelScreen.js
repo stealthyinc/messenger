@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Dimensions, Keyboard, Platform, TouchableOpacity, View, Text } from 'react-native'
+import { Clipboard, Dimensions, Keyboard, Platform, TouchableOpacity, View, Text } from 'react-native'
 import { connect } from 'react-redux'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { Button } from 'react-native-elements'
@@ -35,7 +35,7 @@ class ChannelScreen extends Component {
     return {
       headerLeft: (
         <TouchableOpacity onPress={() => params.navigation.goBack()} style={{marginLeft: 10}}>
-          <Ionicons name='ios-arrow-dropleft' size={32} color='white' />
+          <Ionicons name='md-arrow-back' size={32} color='white' />
         </TouchableOpacity>
       ),
       headerTitle: params.name,
