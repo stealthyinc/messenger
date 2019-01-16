@@ -482,7 +482,10 @@ class OfflineMessagingServices extends EventEmitterAdapter {
               })
             )
           }
-        } else {
+        } else if (contact.hasOwnProperty('id')) {
+          // We check for property 'id' above to prevent crash / loop fails on
+          // zombie contacts like the incomplete channels that affected Raji.
+
           // Using Contact obj. here for future expansion w.r.t. heartBeat.
           const contactId = contact.id
           const offlineDirPath = `${this.userId}/conversations/offline`

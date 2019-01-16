@@ -253,7 +253,25 @@ export class MessagingEngine extends EventEmitterAdapter {
     // }, 10000)
   }
 
+  // Iterate over a contact array and make sure it's values are reasonable and
+  // correct for contacts (otherwise, bugs like the channel with missing
+  // profile add that affected Raji can occur.) Omit unreasonable values.
   //
+  static sanitizeContactArr(aContactArr) {
+    let cleanContactArr = []
+
+    for (const contact of aContactArr) {
+      if (contact &&
+          contact.hasOwnProperty('title') &&
+          contact.hasOwnProperty('description') &&
+          contact.hasOwnProperty('id')) {
+        cleanContactArr.push(contact)
+      }
+    }
+
+    return cleanContactArr
+  }
+
   //  Initialization
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
@@ -637,7 +655,8 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
     this.myTimer.logEvent('_fetchDataAndCompleteInit    (After decrypting contacts.json data)')
 
-    this._initWithContacts(contactArr)
+    const sanoContactArr = MessagingEngine.sanitizeContactArr(contactArr)
+    this._initWithContacts(sanoContactArr)
   }
 
   //

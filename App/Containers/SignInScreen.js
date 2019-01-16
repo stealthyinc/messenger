@@ -163,7 +163,11 @@ class SignInScreen extends React.Component {
       snapshot.forEach(childSnapshot => {
         const name = childSnapshot.key
         const channel = childSnapshot.val()
-        channels[name] = channel
+        if (channel.hasOwnProperty('title') &&
+            channel.hasOwnProperty('description') &&
+            channel.hasOwnProperty('base64')) {
+          channels[name] = channel
+        }
       })
       AsyncStorage.setItem('channels', JSON.stringify(channels))
       this.props.setChannelsData(channels)
