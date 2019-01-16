@@ -1,6 +1,7 @@
 const utils = require('./../misc/utils.js')
 const constants = require('./../misc/constants.js')
 const statusIndicators = constants.statusIndicators
+const runes = require('runes')
 const RNFetchBlob = require('rn-fetch-blob').default
 const SUMMARY_LEN = 27
 const LEAN_PLUGIN = false
@@ -399,7 +400,11 @@ class ContactManager {
   }
 
   setSummary = (aContactId, aSummaryStr) => {
-    const summaryStr = ContactManager._getTruncatedMessage(aSummaryStr)
+    // TODO: Introduce code to see if this is a channel before producing the
+    //       truncated summary string from the id removal regex
+    const noIdSummaryStr = aSummaryStr.replace(/^.* says: /, '')
+    const summaryStr = ContactManager._getTruncatedMessage(noIdSummaryStr)
+
     this._setterWithChecks(aContactId, 'summary', summaryStr)
   }
 
@@ -524,7 +529,7 @@ class ContactManager {
   static _getTruncatedMessage (aMessageStr) {
     if (aMessageStr) {
       if (aMessageStr.length > SUMMARY_LEN) {
-        return (`${aMessageStr.substring(0, SUMMARY_LEN)} ...`)
+        return (runes.substr(aMessageStr, 0, SUMMARY_LEN) + ' ...')
       }
       return aMessageStr
     }

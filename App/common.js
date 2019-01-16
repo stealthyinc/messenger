@@ -2,9 +2,12 @@ import {Platform} from 'react-native'
 
 export const NO_SESSION = 'none'
 
+const USE_PRODUCTION_FIREBASE_IN_DEV = false
+
 module.exports.getDbRootPath = function (aPublicKey) {
   // ud --> user data:
-  const context = (process.env.NODE_ENV !== 'development')
+  const context = ((process.env.NODE_ENV !== 'development') ||
+                   USE_PRODUCTION_FIREBASE_IN_DEV)
     ? 'ud' : 'development/ud'
 
   return `/global/${context}/${aPublicKey}`
@@ -33,7 +36,8 @@ module.exports.getDbExistingDataPath = function (aPublicKey) {
 module.exports.getDbChannelRootPath = function (aPublicKey,
                                                aChannelProtocol = 'public_channel_v2_0') {
   // ud --> user data:
-  const context = (process.env.NODE_ENV !== 'development')
+  const context = ((process.env.NODE_ENV !== 'development') ||
+                   USE_PRODUCTION_FIREBASE_IN_DEV)
     ? `${aChannelProtocol}/ud` : `development/${aChannelProtocol}/ud`
 
   return `/global/${context}/${aPublicKey}`
