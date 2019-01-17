@@ -117,7 +117,7 @@ android {
         applicationId "com.stealthy"
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 32
+        versionCode 36
         versionName "1.9"
         multiDexEnabled true
         ndk {
@@ -190,7 +190,7 @@ dependencies {
 //    implementation 'com.github.AC-FTW:blockstack-android:develop-SNAPSHOT'
     implementation "com.github.AC-FTW:blockstack-android:6a34b6a"
     implementation "com.facebook.react:react-native:+"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 // Run this once to be able to run the application with BUCK

@@ -436,7 +436,6 @@ class ChatScreen extends Component {
       )
     }
     else {
-      this.props.setSpinnerData(false, '')
       return (
         <View id='GiftedChatContainer'
           style={{flex: 1,

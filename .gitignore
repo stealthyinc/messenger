@@ -29,6 +29,7 @@ GoogleService-Info.plist
 ios/GoogleService-Info.plist
 yarn.lock
 .firebaserc
+PBJ*
 
 # Android/IntelliJ
 #
