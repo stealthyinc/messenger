@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Stealthy.IM</string>
+    <string name="stealthy_splash">\@string/app_name</string>
+</resources>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AD_UNIT_ID_FOR_BANNER_TEST</key>
+	<string>ca-app-pub-3940256099942544/2934735716</string>
+	<key>AD_UNIT_ID_FOR_INTERSTITIAL_TEST</key>
+	<string>ca-app-pub-3940256099942544/4411468910</string>
+	<key>CLIENT_ID</key>
+	<string>1097699670593-ct5mdv8h53jio6c7hpms6c0r51n5qc9r.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1097699670593-ct5mdv8h53jio6c7hpms6c0r51n5qc9r</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAQQ5p-nkGSE-4Qa3H4dc8EWIdvvURK3rc</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1097699670593</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>stealthy-im</string>
+	<key>PROJECT_ID</key>
+	<string>coldmessage-development</string>
+	<key>STORAGE_BUCKET</key>
+	<string>coldmessage-development.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<false/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1097699670593:ios:4f36b6961aa5da87</string>
+	<key>DATABASE_URL</key>
+	<string>https://coldmessage-development.firebaseio.com</string>
+</dict>
+</plist>

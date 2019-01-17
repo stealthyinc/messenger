@@ -6,6 +6,39 @@ iOS Download: https://itunes.apple.com/us/app/stealthy-im/id1382310437?ls=1&mt=8
 
 Android Download: https://play.google.com/store/apps/details?id=com.stealthy
 
+
+## How to Setup
+
+**Step 1:** git clone this repo: `git clone https://github.com/stealthyim/mobile`
+
+**Step 2:** cd to the cloned repo: `cd mobile`
+
+**Step 3:** get the development branch: `git checkout development`
+
+**Step 4:** Install the Application with `yarn` or `npm i`
+
+### IOS Only
+
+**Optional** Install pod: https://cocoapods.org
+
+**Step 5:** cd into iOS: `cd ios` and `pod install`
+
+
+## How to Run App
+
+1. cd to the repo root
+2. Run Build for either OS
+  * for iOS
+    * run `react-native run-ios`
+  * for Android
+    * Run Genymotion
+    * run `react-native run-android`
+
+
+## Common Build Error Solutions
+
+1. `Print: Entry, ":CFBundleIdentifier", Does Not Exist`: https://stackoverflow.com/questions/37461703/print-entry-cfbundleidentifier-does-not-exist?page=1&tab=votes#tab-top
+
 ## How to videos
 
 | Create Account | dApp Integrations | Social Share | Send Message | 
