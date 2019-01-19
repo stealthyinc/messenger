@@ -4,7 +4,7 @@ import {NavigationActions} from 'react-navigation'
 const paths = [
   {
     routeName: 'Messages',
-    path: new Path('/messages/:id/')
+    path: new Path('/:id/')
   }
 ]
 

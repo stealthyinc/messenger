@@ -110,7 +110,7 @@ class SignInScreen extends React.Component {
           }}
         />
         <Button
-          onPress={() => Linking.openURL('https://www.youtube.com/watch?v=V9-egxTCFFE').catch(err => console.error('An error occurred', err))}
+          onPress={() => Linking.openURL('https://www.youtube.com/watch?v=4rLdMIrVBrw').catch(err => console.error('An error occurred', err))}
           title='Watch Demo'
           textStyle={{ fontSize: 18, fontWeight: '900', color: 'black' }}
           icon={{name: 'featured-video', color: 'black'}}

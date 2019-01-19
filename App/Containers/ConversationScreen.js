@@ -47,6 +47,7 @@ class ConversationScreen extends React.Component {
       drawerOpen: false
     }
     this.props.setSpinnerData(true, 'Loading contacts...')
+    this.linkId = ''
   }
   async componentWillMount () {
     this.props.navigation.setParams({ navigation: this.props.navigation, sendMessage: this.sendTestMessageToFirebase, drawer: this.toggleDrawer })
@@ -58,9 +59,11 @@ class ConversationScreen extends React.Component {
       this.setState({listViewData})
     }
     const { params } = navigation.state
-    if (params && params.id && contactMgr && !contactMgr.isExistingContactId(params.id)) {
+    if (params && params.id && contactMgr && !contactMgr.isExistingContactId(params.id) && this.linkId !== params.id) {
       this.props.addContactId(params.id)
       this.props.navigation.setParams({ id: '' })
+      this.props.setSpinnerData(true, 'Adding contact...')
+      this.linkId = params.id
     }
   }
   contactSelected = (id) => {
@@ -79,7 +82,9 @@ class ConversationScreen extends React.Component {
     // check for channel and subscribe
     // today this is only a .stealthy.id
     if (deleteContactId.indexOf('.stealthy.id') > -1) {
-      firebaseInstance.unsubscribeFromTopic(deleteContactId)
+      const { contactMgr } = this.props
+      const theNextActiveContact = contactMgr.getContact(deleteContactId)
+      this.props.handleContactMute(theNextActiveContact)
     }
   }
   deleteRow = (data, secId, rowId, rowMap) => {
@@ -88,7 +93,10 @@ class ConversationScreen extends React.Component {
     const deleteContact = contactMgr.getContact(deleteContactId)
     // check for channel and subscribe
     // today this is only a .stealthy.id
-    if (deleteContactId.indexOf('.stealthy.id') > -1) { firebaseInstance.unsubscribeFromTopic(deleteContactId) }
+    if (deleteContactId.indexOf('.stealthy.id') > -1) { 
+      const theNextActiveContact = contactMgr.getContact(deleteContactId)
+      this.props.handleContactMute(theNextActiveContact)
+    }
     this.props.handleDeleteContact(deleteContact)
     rowMap[`${secId}${rowId}`].props.closeRow()
     const newData = [...this.state.listViewData]
@@ -254,7 +262,9 @@ const mapDispatchToProps = (dispatch) => {
     handleDeleteContact: (contact) => dispatch(EngineActions.handleDeleteContact(contact)),
     handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
     updateUserSettings: (radio) => dispatch(EngineActions.updateUserSettings(radio)),
-    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message))
+    setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message)),
+    handleContactMute: (contact) => dispatch(EngineActions.handleContactMute(contact)),
+    handleContactUnmute: (contact) => dispatch(EngineActions.handleContactUnmute(contact))
   }
 }
 

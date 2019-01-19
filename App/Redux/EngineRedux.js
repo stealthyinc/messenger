@@ -11,6 +11,8 @@ const { Types, Creators } = createActions({
   setAppVersion: ['appVersion'],
   setUserData: ['userData'],
   addContactId: ['id'],
+  handleContactMute: ['contact'],
+  handleContactUnmute: ['contact'],
   setPublicKey: ['publicKey'],
   setEngineInitial: ['engineInit'],
   setEngineContactMgr: ['contactMgr'],

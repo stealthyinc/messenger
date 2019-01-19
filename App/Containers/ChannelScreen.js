@@ -122,14 +122,12 @@ class ChannelScreen extends Component {
       userImage
     }
     // user added to the channel notification topic
-    // firebaseInstance.subscribeToTopic(username);
     const { contactMgr } = this.props
     const activeContact = (contactMgr && contactMgr.getActiveContact())
       ? contactMgr.getActiveContact() : undefined
     const administrable = !!((activeContact && contactMgr.isAdministrable(activeContact.id)))
     if (activeContact) {
       this.configWithActiveContact(activeContact, administrable)
-      // firebaseInstance.subscribeToTopic(activeContact.id);
       const { messages } = this.props
       if (messages) {
         this.state.messages = this.setupMessages(messages).reverse()

@@ -199,6 +199,16 @@ function * watchIntegrationDataChannel () {
   }
 }
 
+function * handleContactMute (action) {
+  const { contact } = action
+  EngineInstance.handleContactMute(contact)
+}
+
+function * handleContactUnmute (action) {
+  const { contact } = action
+  EngineInstance.handleContactUnmute(contact)
+}
+
 function * addContactId (action) {
   const { id } = action
   EngineInstance.handleContactInvitation(undefined, id)
@@ -325,6 +335,8 @@ export function * startEngine (action) {
   yield fork(watchIntegrationDataChannel)
   yield takeLatest(DappTypes.REFRESH_INTEGRATION_DATA, getIntegrationData)
   yield takeLatest(EngineTypes.INIT_SHUTDOWN, handleShutDownRequest)
+  yield takeLatest(EngineTypes.HANDLE_CONTACT_UNMUTE, handleContactUnmute)
+  yield takeLatest(EngineTypes.HANDLE_CONTACT_MUTE, handleContactMute)
   yield takeLatest(EngineTypes.ADD_CONTACT_ID, addContactId)
   yield takeLatest(EngineTypes.SET_ACTIVE_CONTACT, handleContactClick)
   yield takeLatest(EngineTypes.SET_OUTGOING_MESSAGE, handleOutgoingMessage)

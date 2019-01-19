@@ -181,7 +181,7 @@ class ReduxNavigation extends React.Component {
       const ref = firebaseInstance.getFirebaseRef(notificationPath)
       ref.set({token: this.token, enabled: true})
       .then(() => {
-        console.log('PB REF IS SET')
+        console.log('REF IS SET')
       })
       .catch(error => console.log('PB FB ERROR', error))
     }
@@ -313,7 +313,8 @@ class ReduxNavigation extends React.Component {
       // unsubscribe from all channels
       for (let ch in this.props.channels) {
         const {id} = this.props.channels[ch]
-        firebaseInstance.unsubscribeFromTopic(id)
+        const theNextActiveContact = this.props.contactMgr.getContact(id)
+        this.props.dispatch(EngineActions.handleContactMute(theNextActiveContact))
       }
 
       await AsyncStorage.clear()
