@@ -459,6 +459,14 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
     this.myTimer.logEvent('_initWithContacts    (after monitorInvitations)')
 
+    for (const contactId of this.contactMgr.getContactIds()) {
+      const contactProtocol = this.contactMgr.getProtocol(contactId.id)
+      if (utils.isChannelOrAma(contactProtocol)
+          && this.contactMgr.isNotifications(contactId)) {
+        firebaseInstance.subscribeToTopic(contactId)
+      }
+    }
+
     // Indicate to FB that we've completed init and are no longer a first time user
     // (used to handle IO errors specially)
     const dbExistingDataPath = common.getDbExistingDataPath(this.publicKey)
@@ -629,6 +637,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     let contactArr = []
     let contactsData
     try {
+      this.myTimer.logEvent('_fetchDataAndCompleteInit    (Before attempting to read contacts.json)')
       const maxAttempts = 5
       contactsData = await this.io.robustLocalRead(this.userId, 'contacts.json', maxAttempts)
       this.myTimer.logEvent('_fetchDataAndCompleteInit    (After successfully reading contacts.json)')
@@ -1140,6 +1149,22 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     this.updateContactMgr()
     this.updateMessages(activeUser ? activeUser.id : undefined)
+  }
+
+  handleContactMute(aContact) {
+    if (aContact && aContact.id) {
+      this.contactMgr.setNotifications(aContact.id, false)
+      firebaseInstance.unsubscribeFromTopic(aContact.id)
+      this.updateContactMgr()
+    }
+  }
+
+  handleContactUnmute(aContact) {
+    if (aContact && aContact.id) {
+      this.contactMgr.setNotifications(aContact.id)
+      firebaseInstance.subscribeToTopic(aContact.id)
+      this.updateContactMgr()
+    }
   }
 
   handleRadio = async (e, { name }) => {
