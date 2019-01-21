@@ -84,7 +84,11 @@ class ConversationScreen extends React.Component {
     if (deleteContactId.indexOf('.stealthy.id') > -1) {
       const { contactMgr } = this.props
       const theNextActiveContact = contactMgr.getContact(deleteContactId)
-      this.props.handleContactMute(theNextActiveContact)
+      if (contactMgr.isNotifications(deleteContactId)) {
+        this.props.handleContactMute(theNextActiveContact)
+      } else {
+        this.props.handleContactUnmute(theNextActiveContact)
+      }
     }
   }
   deleteRow = (data, secId, rowId, rowMap) => {
@@ -93,7 +97,7 @@ class ConversationScreen extends React.Component {
     const deleteContact = contactMgr.getContact(deleteContactId)
     // check for channel and subscribe
     // today this is only a .stealthy.id
-    if (deleteContactId.indexOf('.stealthy.id') > -1) { 
+    if (deleteContactId.indexOf('.stealthy.id') > -1) {
       const theNextActiveContact = contactMgr.getContact(deleteContactId)
       this.props.handleContactMute(theNextActiveContact)
     }

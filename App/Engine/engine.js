@@ -392,6 +392,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
         channelAddresses[contactId] = msgAddress
         if (this.contactMgr.isNotifications(contactId)) {
+          this.contactMgr.setNotifications(contactId)
           firebaseInstance.subscribeToTopic(contactId)
         }
       }
@@ -461,14 +462,6 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.discovery.monitorInvitations()
     }
     this.myTimer.logEvent('_initWithContacts    (after monitorInvitations)')
-
-    // for (const contactId of this.contactMgr.getContactIds()) {
-    //   const contactProtocol = this.contactMgr.getProtocol(contactId)
-    //   if (utils.isChannelOrAma(contactProtocol)
-    //       && this.contactMgr.isNotifications(contactId)) {
-    //     firebaseInstance.subscribeToTopic(contactId)
-    //   }
-    // }
 
     // Indicate to FB that we've completed init and are no longer a first time user
     // (used to handle IO errors specially)
@@ -1159,6 +1152,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.contactMgr.setNotifications(aContact.id, false)
       firebaseInstance.unsubscribeFromTopic(aContact.id)
       this.updateContactMgr()
+      this._writeContactList(this.contactMgr.getAllContacts())
     }
   }
 
@@ -1167,6 +1161,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.contactMgr.setNotifications(aContact.id)
       firebaseInstance.subscribeToTopic(aContact.id)
       this.updateContactMgr()
+      this._writeContactList(this.contactMgr.getAllContacts())
     }
   }
 
