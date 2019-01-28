@@ -17,6 +17,7 @@ import { Container, Content, Form, Textarea } from 'native-base'
 import ActionSheet from 'react-native-actionsheet'
 import emojiUtils from 'emoji-utils'
 import SlackMessage from './chat/SlackMessage'
+import ChatFooter from './chat/ChatFooter'
 import styles from './Styles/ChatStyle'
 import {GiftedChat, InputToolbar} from 'react-native-gifted-chat'
 import TwitterShareActions from '../Redux/TwitterShareRedux'
@@ -68,7 +69,9 @@ class ChannelScreen extends Component {
       drawerDisabled: false,
       inputText: '',
       user: '',
-      visible: false
+      visible: false,
+      replyMsg: '',
+      replyTo: ''
     }
 
     this._isMounted = false
@@ -189,13 +192,15 @@ class ChannelScreen extends Component {
   }
   parseJargon = (message) => {
     const { body, time, contentType } = message
-    let url, gimage, text
+    let url, gimage, text, replyMsg, replyTo
     if (contentType === 'TEXT') {
       text = body
       url = ''
       gimage = ''
     } else if (contentType === 'TEXT_JSON') {
       text = body.text
+      replyMsg = body.replyMsg
+      replyTo = body.replyTo
       //
       // Handle AMA message objects
       if (body.type === 'public ama 1.0') {
@@ -212,7 +217,7 @@ class ChannelScreen extends Component {
       url = body.url
       gimage = body.image
     }
-    return { url, gimage, text, time }
+    return { url, gimage, text, time, replyMsg, replyTo }
   }
   setupMessages = (inputMessages) => {
     let messages = []
@@ -221,7 +226,7 @@ class ChannelScreen extends Component {
       let { author, image, state } = message
       const sent = (state === MESSAGE_STATE.SENT_OFFLINE || state === MESSAGE_STATE.SENT_REALTIME || state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
       const received = (state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
-      let { url, gimage, text, time } = this.parseJargon(message)
+      let { url, gimage, text, time, replyMsg, replyTo } = this.parseJargon(message)
       if (author === id) {
         if (this.protocol) {
           const newText = text
@@ -237,6 +242,8 @@ class ChannelScreen extends Component {
           _id: Math.round(Math.random() * 1000000),
           text,
           url,
+          replyMsg,
+          replyTo,
           image: gimage,
           createdAt: time,
           sent: sent,
@@ -252,6 +259,8 @@ class ChannelScreen extends Component {
           _id: Math.round(Math.random() * 1000000),
           text,
           url,
+          replyMsg,
+          replyTo,
           image: gimage,
           createdAt: time,
           sent: sent,
@@ -287,14 +296,22 @@ class ChannelScreen extends Component {
   }
   onSend = (messages = [], json) => {
     const {text, image, url} = messages[0]
-    if (image && url) {
+    const {replyTo, replyMsg} = this.state
+    if (replyMsg && replyTo) {
+      messages[0].replyMsg = replyMsg
+      messages[0].replyTo = replyTo
+    }
+
+    if (image && url || replyMsg) {
       this.props.handleOutgoingMessage(undefined, messages[0])
     } else if (text) {
       this.props.handleOutgoingMessage(text, undefined)
     }
     this.setState((previousState) => {
       return {
-        messages: GiftedChat.append(previousState.messages, messages)
+        messages: GiftedChat.append(previousState.messages, messages),
+        replyMsg: '',
+        replyTo: ''
       }
     })
     // call twitter share after first send
@@ -305,7 +322,7 @@ class ChannelScreen extends Component {
     let updatedMessages = []
     if (this.protocol) {
       for (let message of newMessages) {
-        let {text, user, createdAt, _id} = message
+        let {text, user, createdAt, _id, replyTo, replyMsg} = message
         const index = text.indexOf(' says: ')
         let newId = ''
         let newText = text
@@ -319,6 +336,8 @@ class ChannelScreen extends Component {
         let crap = {
           user,
           text: newText,
+          replyMsg,
+          replyMsg,
           createdAt,
           _id
         }
@@ -460,22 +479,23 @@ class ChannelScreen extends Component {
     this.setState({ user })
     this.ActionSheet.show()
   }
-  // renderBubble = (props) => {
-  //   return (
-  //     <Bubble
-  //       {...props}
-  //       wrapperStyle={{
-  //         left: {
-  //           backgroundColor: '#f0f0f0',
-  //         }
-  //       }}
-  //     />
-  //   );
-  // }
+  renderChatFooter = (props) => {
+    const {replyTo, replyMsg} = this.state
+    if (replyMsg) {
+      return (
+        <ChatFooter
+          replyTo={replyTo}
+          replyMsg={replyMsg}
+          dismiss={() => this.setState({replyTo: '', replyMsg: ''})}
+        />
+      );
+    }
+    else
+      return null
+  }
   onLongPress = (context, currentMessage) => {
     const options = [
       'Reply To',
-      'Quote Text',
       'Direct Message',
       'Copy Text',
       'Cancel',
@@ -489,14 +509,9 @@ class ChannelScreen extends Component {
         let index = userId.indexOf(".")
         let id = runes.substr(userId, 0, index)
         if (buttonIndex === 0) {
-          this.setState({inputText: `@${id} `})
-          this._giftedChat.textInput.focus()
+          this.setState({replyTo: userId, replyMsg: currentMessage.text})
         }
         else if (buttonIndex === 1) {
-          this.setState({inputText: `@${id} "${currentMessage.text}" `})
-          this._giftedChat.textInput.focus()
-        }
-        else if (buttonIndex === 2) {
           this.contactAddLogic(userId)
         }
         else if (buttonIndex === 3) {
@@ -618,6 +633,7 @@ class ChannelScreen extends Component {
           onInputTextChanged={text => this.setCustomText(text)}
           textInputProps={{editable: (!disableAmaFeatures)}}
           onLongPress={this.onLongPress}
+          renderChatFooter={this.renderChatFooter}
         />
       </View>
     )

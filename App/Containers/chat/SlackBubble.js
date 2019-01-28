@@ -47,14 +47,61 @@ export default class Bubble extends React.Component {
       if (this.props.renderMessageText) {
         return this.props.renderMessageText(messageTextProps)
       }
-      return (
-        <MessageText
-          {...messageTextProps}
-          textStyle={{
-            left: [styles.standardFont, styles.slackMessageText, messageTextProps.textStyle, messageTextStyle]
-          }}
-        />
-      )
+      const {replyTo, replyMsg} = this.props.currentMessage
+      if (replyMsg) {
+        let height = 50
+        const { length } = replyMsg
+        if (length < 35) {
+          height = 50
+        }
+        else if (length < 70) {
+          height = 65
+        }
+        else if (length < 105) {
+          height = 85
+        }
+        else if (length < 140) {
+          height = 105
+        }
+        else if (length < 175) {
+          height = 125
+        }
+        else if (length < 210) {
+          height = 145
+        }
+        else if (length < 245) {
+          height = 165
+        }
+        return (
+          <View style={[styles.container, this.props.containerStyle]}>
+            <View style={{backgroundColor: 'white'}}>
+              <View style={{flexDirection: 'row'}}>
+                <View style={{height, width: 10, backgroundColor: '#147efb', borderTopLeftRadius: 15, borderBottomLeftRadius: 15}} />
+                <View style={{flexDirection: 'column', backgroundColor: '#D3D3D3', }}>
+                  <Text style={{color: 'black', paddingHorizontal: 10, paddingTop: 5, fontWeight: '700'}}>{replyTo}</Text>
+                  <Text style={{color: 'black', paddingHorizontal: 10, paddingTop: 5}}>{replyMsg}</Text>
+                </View>
+              </View>
+              <MessageText
+                {...messageTextProps}
+                textStyle={{
+                  left: [styles.standardFont, styles.slackMessageText, messageTextProps.textStyle, messageTextStyle]
+                }}
+              />
+            </View>
+          </View>
+        )
+      }
+      else {
+        return (
+          <MessageText
+            {...messageTextProps}
+            textStyle={{
+              left: [styles.standardFont, styles.slackMessageText, messageTextProps.textStyle, messageTextStyle]
+            }}
+          />
+        )
+      }
     }
     return null
   }

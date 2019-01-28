@@ -14,10 +14,14 @@ import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import chatIcon from '../Images/blue512.png'
 import AwesomeAlert from 'react-native-awesome-alerts'
-import VersionNumber from 'react-native-version-number';
+import VersionNumber from 'react-native-version-number'
+import { copilot, walkthroughable, CopilotStep } from '@okgrow/react-native-copilot'
 
 const utils = require('./../Engine/misc/utils.js')
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
+
+const WalkthroughableText = walkthroughable(Text);
+const WalkthroughableImage = walkthroughable(Image);
 
 class SignInScreen extends React.Component {
   static navigationOptions = {
@@ -30,6 +34,12 @@ class SignInScreen extends React.Component {
       errorText: ''
     }
     this.props.setSpinnerData(false, '')
+  }
+  componentDidMount() {
+    this.props.copilotEvents.on('stepChange', this.handleStepChange);
+  }
+  handleStepChange = (step) => {
+    console.log(`Current step is: ${step.name}`);
   }
   render () {
     const oldPad = utils.is_oldPad()
@@ -58,33 +68,26 @@ class SignInScreen extends React.Component {
     }
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={{flexDirection: 'row', marginTop: 40}}>
-          <SocialIcon
-            style={{width: 45, height: 45}}
-            type='twitter'
-            onPress={() => Linking.openURL('https://twitter.com/stealthyim').catch(err => console.error('An error occurred', err))}
-          />
-          <SocialIcon
-            style={{width: 45, height: 45}}
-            type='medium'
-            onPress={() => Linking.openURL('https://medium.com/@stealthyim').catch(err => console.error('An error occurred', err))}
-          />
-          <Button
-            onPress={this._signInAsync}
-            title={(oldPad) ? 'Login' : 'Blockstack Login'}
-            textStyle={{ fontSize: 18, fontWeight: '900', color: '#34bbed' }}
-            icon={{name: 'input', color: '#34bbed'}}
-            buttonStyle={{
-              marginLeft: 20,
-              width: (oldPad) ? 150 : 200,
-              height: 50,
-              backgroundColor: 'white',
-              borderColor: '#34bbed',
-              borderWidth: 2,
-              borderRadius: 5,
-              marginTop: 5
-            }}
-          />
+        <View style={{flexDirection: 'row', marginTop: 40, justifyContent: 'space-between', alignItems: 'stretch'}}>
+          <CopilotStep text="Follow us on Twitter to keep up with the latest updates" order={4} name="twitter" style={{justifyContent: 'flex-start'}}>
+            <WalkthroughableText style={styles.title}>
+              <SocialIcon
+                style={{width: 45, height: 45}}
+                type='twitter'
+                onPress={() => Linking.openURL('https://twitter.com/stealthyim').catch(err => console.error('An error occurred', err))}
+              />
+            </WalkthroughableText>
+          </CopilotStep>
+          <CopilotStep text="You can watch a video to learn about the features" order={3} name="youtube" style={{justifyContent: 'flex-end'}}>
+            <WalkthroughableText style={styles.title}>
+              <SocialIcon
+                style={{width: 45, height: 45}}
+                reverse
+                type='youtube'
+                onPress={() => Linking.openURL('https://www.youtube.com/watch?v=4rLdMIrVBrw').catch(err => console.error('An error occurred', err))}
+              />
+            </WalkthroughableText>
+          </CopilotStep>
         </View>
         <View style={{flexDirection: 'row', marginTop: (oldPad) ? 50 : 120}}>
           <Image
@@ -94,26 +97,30 @@ class SignInScreen extends React.Component {
           <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: (oldPad) ? 50 : 80, marginTop: 5 }}>Hi Stealthy 👋</Text>
         </View>
         <Text style={{ fontWeight: 'bold', fontSize: (oldPad) ? 20 : 24, color: 'grey', marginBottom }}>Decentralized Communication</Text>
+        <CopilotStep text="Hey! Welcome to the tour! Click here to create an account or login" order={1} name="createAccount">
+          <WalkthroughableText style={styles.title}>
+            <Button
+              onPress={this._signInAsync}
+              title='Sign In/Up'
+              titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
+              icon={{name: 'input', color: 'white'}}
+              buttonStyle={{
+                backgroundColor: '#34bbed',
+                width: 180,
+                height: 50,
+                borderColor: 'transparent',
+                borderWidth: 0,
+                borderRadius: 5,
+                marginTop: (oldPad) ? 10 : 25
+              }}
+            />
+          </WalkthroughableText>
+        </CopilotStep>
         <Button
-          onPress={this._signInAsync}
-          title='Create Account'
-          textStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
-          icon={{name: 'create', color: 'white'}}
-          buttonStyle={{
-            backgroundColor: '#34bbed',
-            width: 180,
-            height: 50,
-            borderColor: 'transparent',
-            borderWidth: 0,
-            borderRadius: 5,
-            marginTop: (oldPad) ? 10 : 25
-          }}
-        />
-        <Button
-          onPress={() => Linking.openURL('https://www.youtube.com/watch?v=4rLdMIrVBrw').catch(err => console.error('An error occurred', err))}
-          title='Watch Demo'
-          textStyle={{ fontSize: 18, fontWeight: '900', color: 'black' }}
-          icon={{name: 'featured-video', color: 'black'}}
+          onPress={() => this.props.start()}
+          title='Walk Through'
+          titleStyle={{ fontSize: 18, fontWeight: '900', color: 'black' }}
+          icon={{name: 'help', color: 'black'}}
           buttonStyle={{
             backgroundColor: 'white',
             width: 180,
@@ -240,8 +247,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     alignItems: 'center'
-  }
+  },
+  title: {
+    fontSize: 24,
+    textAlign: 'center',
+  },
+  tabItem: {
+    flex: 1,
+    textAlign: 'center',
+    alignItems: 'center'
+  },
 })
+
+const SignInScreenExplained = copilot({ animated: true, overlay: 'svg' })(SignInScreen);
 
 const mapStateToProps = (state) => {
   return {
@@ -258,4 +276,4 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SignInScreen)
+export default connect(mapStateToProps, mapDispatchToProps)(SignInScreenExplained)

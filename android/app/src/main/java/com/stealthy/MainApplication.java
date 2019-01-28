@@ -4,17 +4,18 @@ import android.app.Application;
 import com.stealthy.sdk.BlockstackPackage;
 
 import com.facebook.react.ReactApplication;
-import org.reactnative.camera.RNCameraPackage;
-import com.masteratul.RNAppstoreVersionCheckerPackage;
-import com.sudoplz.reactnativeamplitudeanalytics.RNAmplitudeSDKPackage;
-import com.apsl.versionnumber.RNVersionNumberPackage;
-import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
+import com.horcrux.svg.SvgPackage;
 import com.RNFetchBlob.RNFetchBlobPackage;
+import com.apsl.versionnumber.RNVersionNumberPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.barefootcoders.android.react.KDSocialShare.KDSocialShare;
 import io.invertase.firebase.RNFirebasePackage;
-import com.github.wumke.RNExitApp.RNExitAppPackage;
+import com.reactnativedocumentpicker.ReactNativeDocumentPicker;
+import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
+import org.reactnative.camera.RNCameraPackage;
 import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
+import com.masteratul.RNAppstoreVersionCheckerPackage;
+import com.sudoplz.reactnativeamplitudeanalytics.RNAmplitudeSDKPackage;
 import io.invertase.firebase.notifications.RNFirebaseNotificationsPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -40,17 +41,18 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-            new RNAppstoreVersionCheckerPackage(),
-            new RNAmplitudeSDKPackage(MainApplication.this),
-            new RNVersionNumberPackage(),
+            new SvgPackage(),
+            new ReactNativeDocumentPicker(),
             new RNFetchBlobPackage(),
+            new RNVersionNumberPackage(),
             new VectorIconsPackage(),
             new KDSocialShare(),
             new RNFirebasePackage(),
-            new RNExitAppPackage(),
             new ReactNativeConfigPackage(),
             new RNCameraPackage(),
             new RNBackgroundFetchPackage(),
+            new RNAppstoreVersionCheckerPackage(),
+            new RNAmplitudeSDKPackage(MainApplication.this),
             new BlockstackPackage(),
             new RNFirebaseAuthPackage(),
             new RNFirebaseMessagingPackage(),

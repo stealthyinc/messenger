@@ -117,7 +117,7 @@ android {
         applicationId "com.stealthy"
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 36
+        versionCode 37
         versionName "1.9"
         multiDexEnabled true
         ndk {
@@ -154,12 +154,13 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-svg')
+    implementation project(':react-native-document-picker')
     implementation project(':react-native-appstore-version-checker')
     implementation project(':react-native-amplitude-analytics')
     implementation project(':react-native-version-number')
     implementation project(':react-native-camera')
     implementation project(':rn-fetch-blob')
-    implementation project(':react-native-exit-app')
     implementation project(':react-native-social-share')
     implementation project(':react-native-vector-icons')
     implementation project(':react-native-background-fetch')
