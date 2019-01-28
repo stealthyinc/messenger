@@ -2,6 +2,8 @@ import AmaCommands from './misc/amaCommands.js'
 
 import API from './../Services/Api'
 
+import {AsyncStorage} from 'react-native'
+
 const platform = require('platform')
 
 // Platform dependent (commented out parts are for other platforms)
@@ -47,6 +49,10 @@ const { Timer } = require('./misc/timer.js')
 
 const common = require('./../common.js')
 const api = API.create()
+
+// TODO: figure out how to only include/build this for development
+const ENABLE_MEASUREMENTS = false
+const measureIO = require('./measure/measureIOSpeed.js')
 
 //
 const ENCRYPT_INDEXED_IO = true
@@ -290,6 +296,15 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.contactMgr.setActiveContact(undefined)
     }
     this.updateContactMgr()
+
+
+    // Never in production:
+    if (process.env.NODE_ENV !== 'production' &&
+        ENABLE_MEASUREMENTS) {
+      await measureIO.asyncIoVsGaiaIo(this.userId, this.contactMgr.getContacts(), this.io)
+    }
+
+
 
     this.offlineMsgSvc =
       new OfflineMessagingServices(this.logger,
