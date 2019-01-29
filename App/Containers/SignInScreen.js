@@ -21,7 +21,6 @@ const utils = require('./../Engine/misc/utils.js')
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 
 const WalkthroughableText = walkthroughable(Text);
-const WalkthroughableImage = walkthroughable(Image);
 
 class SignInScreen extends React.Component {
   static navigationOptions = {

@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Image, ListView, TouchableOpacity } from 'react-native'
+import { View, Image, ListView, TouchableOpacity, StyleSheet, Text as AText } from 'react-native'
 import TwitterShareModal from '../Components/TwitterShareModal'
 import { Text } from 'react-native-elements'
 import { Button, Badge, Container, Content, List, ListItem, Left, Body, Right, Icon, Thumbnail } from 'native-base'
@@ -8,15 +8,11 @@ import Ionicons from 'react-native-vector-icons/Ionicons'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import TwitterShareActions, { TwitterShareSelectors } from '../Redux/TwitterShareRedux'
 import { shareOnTwitter } from 'react-native-social-share'
-import Drawer from 'react-native-drawer'
 import QRCode from 'react-native-qrcode'
-import DiscoverScreen from './DiscoverScreen'
-import { copilot, walkthroughable, CopilotStep } from '@okgrow/react-native-copilot'
+import { copilot, CopilotStep } from '@okgrow/react-native-copilot'
 
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 const utils = require('./../Engine/misc/utils.js')
-const WalkthroughableText = walkthroughable(Text);
-const WalkthroughableImage = walkthroughable(Image);
 
 class ConversationScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -47,11 +43,11 @@ class ConversationScreen extends React.Component {
     this.state = {
       basic: true,
       listViewData: [],
-      loaded: false,
-      drawerOpen: false
+      loaded: false
     }
     this.props.setSpinnerData(true, 'Loading contacts...')
     this.linkId = ''
+    this.dynamicList = undefined
   }
   async componentDidMount () {
     this.props.copilotEvents.on('stepChange', this.handleStepChange);
@@ -74,15 +70,16 @@ class ConversationScreen extends React.Component {
       this.linkId = params.id
     }
   }
-  contactSelected = (id) => {
+  contactSelected = (data, secId, rowId, rowMap) => {
     const { contactMgr } = this.props
     if (contactMgr) {
-      const theNextActiveContactId = id
+      const theNextActiveContactId = data.id
       const theNextActiveContact = contactMgr.getContact(theNextActiveContactId)
       this.props.handleContactClick(theNextActiveContact)
       this.protocol = (theNextActiveContact)
         ? utils.isChannelOrAma(theNextActiveContact.protocol) : false
       if (this.protocol) { this.props.navigation.navigate('ChannelRoom') } else { this.props.navigation.navigate('ChatRoom') }
+      rowMap[`${secId}${rowId}`].props.closeRow()
     }
   }
   muteRow = (data, secId, rowId, rowMap) => {
@@ -98,6 +95,7 @@ class ConversationScreen extends React.Component {
         this.props.handleContactUnmute(theNextActiveContact)
       }
     }
+    rowMap[`${secId}${rowId}`].props.closeRow()
   }
   deleteRow = (data, secId, rowId, rowMap) => {
     const { contactMgr } = this.props
@@ -127,132 +125,78 @@ class ConversationScreen extends React.Component {
       this.props.updateUserSettings('twitterShare')
     })
   }
-  toggleDrawer = () => {
-    if (this.state.drawerOpen) { this.closeDrawer() } else { this.openDrawer() }
-  };
-  closeDrawer = () => {
-    this._drawer.close()
-  };
-  openDrawer = () => {
-    this._drawer.open()
-  };
   render () {
     const { contactMgr, activateShare, userSettings, engineInit } = this.props
-    // const channelButton = (this.state.drawerOpen) ? (
-    //   <Button onPress={() => this.openDrawer()} iconLeft block danger style={{borderRadius: 5, borderWidth: 2, borderColor: 'grey'}}>
-    //     <Icon name='ios-arrow-down' />
-    //     <Icon />
-    //     <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>Cancel</Text>
-    //   </Button>
-    // ) : (
-    //   <Button onPress={() => this.openDrawer()} iconLeft block success style={{borderRadius: 5, borderWidth: 2, borderColor: 'grey'}}>
-    //     <Icon name='ios-radio' />
-    //     <Icon />
-    //     <Text style={{fontWeight: 'bold', fontSize: 18, color: 'white'}}>Add Channels</Text>
-    //   </Button>
-    // )
-    // if (!engineInit) {
-    //   this.props.setSpinnerData(true, 'Loading contacts...')
-    // }
-    // else {
-    //   this.props.setSpinnerData(false, '')
-    // }
-    // console.log(`INFO:  spinner ${!!this.state.showSpinner}  |  conMgr ${!!contactMgr}  |  actCtc ${!!activeContact}  |  engIni ${!!engineInit}`)
-    // if (!contactMgr || activeContact || !engineInit) {
-      // console.log('INFO: spinner should show')
-      // return (
-      //   <Spinner key="convSpinner" visible={this.state.showSpinner} textContent={'Loading contacts...'} textStyle={{color: '#FFF'}} />
-      // )
-      // this.props.setSpinnerData(true, 'Loading contacts...')
-    // }
-    // if (activateShare && !userSettings.twitterShare) {
-    //   this.props.setSpinnerData(false, '')
-    //   return (
-    //     <TwitterShareModal
-    //       shareDecline={() => {
-    //         this.props.shareDecline()
-    //         this.props.updateUserSettings('twitterShare')
-    //       }}
-    //       shareSuccess={this.sendToTwitter} />
-    //   )
-    // } else
     if (engineInit) {
       const badgeAlignWorkaround = utils.isAndroid() ? -1 : -5
-
+      const CustomComponent = ({ copilot }) => (
+        <View {...copilot}>
+          <List
+            removeClippedSubviews={false}
+            closeOnRowBeginSwipe={true}
+            closeOnRowPress={true}
+            ref={(c) => { this.dynamicList = c }}
+            dataSource={this.ds.cloneWithRows(this.state.listViewData)}
+            renderRow={(item, secId, rowId, rowMap) =>
+              <ListItem style={{marginLeft: 5}} avatar onPress={_ => this.contactSelected(item, secId, rowId, rowMap)}>
+                <Left>
+                  {(item.base64 || item.image) ? (<Thumbnail square source={{ uri: (item.base64) ? item.base64 : item.image }} />)
+                  : (<QRCode
+                    value={item.id}
+                    size={55}
+                    bgColor='black'
+                    fgColor='white'
+                  />)
+                }
+                </Left>
+                <Body>
+                  <Text style={{fontWeight: 'bold', fontSize: 18}}>{(item.title) ? item.title : item.id}</Text>
+                  <Text note numberOfLines={1}>{item.summary}</Text>
+                </Body>
+                {(item.unread > 0) ? <Right style={{ top: badgeAlignWorkaround}}>
+                  <Badge style={{ backgroundColor: 'red' }}>
+                    <Text style={{color: 'white'}}>{item.unread}</Text>
+                  </Badge>
+                </Right> : null}
+              </ListItem>}
+            renderLeftHiddenRow={(data, secId, rowId, rowMap) =>
+              <Button full warning onPress={_ => this.muteRow(data, secId, rowId, rowMap)}>
+                <Icon active name='notifications-off' />
+              </Button>}
+            leftOpenValue={75}
+            renderRightHiddenRow={(data, secId, rowId, rowMap) =>
+              <Button full danger onPress={_ => this.deleteRow(data, secId, rowId, rowMap)}>
+                <Icon active name='trash' />
+              </Button>}
+            rightOpenValue={-75}
+          />
+        </View>
+      )
       return (
-        <Drawer
-          ref={(ref) => this._drawer = ref}
-          type='overlay'
-          tapToClose
-          openDrawerOffset={0.01} // 20% gap on the right side of drawer
-          panCloseMask={0.2}
-          closedDrawerOffset={-3}
-          styles={drawerStyles}
-          tweenHandler={(ratio) => ({
-            main: { opacity: (2 - ratio) / 2 }
-          })}
-          content={
-            <DiscoverScreen contactMgr={contactMgr} closeDrawer={this.closeDrawer} />
-          }
-          onOpen={() => {
-            this.setState({drawerOpen: true})
-          }}
-          onClose={() => {
-            this.setState({drawerOpen: false})
-          }}
-          side='bottom'
-        >
-          <Container style={{backgroundColor: 'white'}}>
-            <Content>
-              <List
-                removeClippedSubviews={false}
-                dataSource={this.ds.cloneWithRows(this.state.listViewData)}
-                renderRow={item =>
-                  <ListItem style={{marginLeft: 5}} avatar onPress={this.contactSelected.bind(this, item.id)}>
-                    <Left>
-                      {(item.base64 || item.image) ? (<Thumbnail square source={{ uri: (item.base64) ? item.base64 : item.image }} />)
-                      : (<QRCode
-                        value={item.id}
-                        size={55}
-                        bgColor='black'
-                        fgColor='white'
-                      />)
-                    }
-                    </Left>
-                    <Body>
-                      <Text style={{fontWeight: 'bold', fontSize: 18}}>{(item.title) ? item.title : item.id}</Text>
-                      <Text note numberOfLines={1}>{item.summary}</Text>
-                    </Body>
-                    {(item.unread > 0) ? <Right style={{ top: badgeAlignWorkaround}}>
-                      <Badge style={{ backgroundColor: 'red' }}>
-                        <Text style={{color: 'white'}}>{item.unread}</Text>
-                      </Badge>
-                    </Right> : null}
-                  </ListItem>}
-                renderLeftHiddenRow={(data) =>
-                  <Button full warning onPress={_ => this.muteRow(data)}>
-                    <Icon active name='notifications-off' />
-                  </Button>}
-                leftOpenValue={75}
-                renderRightHiddenRow={(data, secId, rowId, rowMap) =>
-                  <Button full danger onPress={_ => this.deleteRow(data, secId, rowId, rowMap)}>
-                    <Icon active name='trash' />
-                  </Button>}
-                rightOpenValue={-75}
-              />
-            </Content>
-          </Container>
-        </Drawer>
+        <Container style={{backgroundColor: 'white'}}>
+          <Content>
+            <CopilotStep text="This where you can view your contacts. Swipe the contact left to mute, and right to delete" order={1} name="contacts">
+              <CustomComponent />
+            </CopilotStep>
+          </Content>
+        </Container>
       )
     }
     return null
   }
 }
 
-const drawerStyles = {
-  drawer: { shadowColor: '#000000', shadowOpacity: 0.8, shadowRadius: 3 },
-  main: {paddingLeft: 3}
-}
+const styles = StyleSheet.create({
+  title: {
+    fontSize: 24,
+    textAlign: 'center',
+  },
+  tabItem: {
+    flex: 1,
+    textAlign: 'center',
+    alignItems: 'center'
+  },
+})
 
 const mapStateToProps = (state) => {
   return {

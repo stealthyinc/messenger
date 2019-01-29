@@ -1,6 +1,6 @@
 import React from 'react'
-import { Image, View, StyleSheet, Platform, TouchableOpacity, Text } from 'react-native'
-import { Avatar, Button, Icon } from 'react-native-elements'
+import { Image, View, StyleSheet, Platform, TouchableOpacity, Text as AText } from 'react-native'
+import { Avatar, Button, Icon, Text } from 'react-native-elements'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import { Toast } from 'native-base'
@@ -13,8 +13,7 @@ import AwesomeAlert from 'react-native-awesome-alerts'
 import { copilot, walkthroughable, CopilotStep } from '@okgrow/react-native-copilot'
 
 const utils = require('./../Engine/misc/utils.js')
-const WalkthroughableText = walkthroughable(Text);
-const WalkthroughableImage = walkthroughable(Image);
+const WalkthroughableText = walkthroughable(AText);
 
 class ProfileScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -25,7 +24,7 @@ class ProfileScreen extends React.Component {
           <Ionicons name='md-help-circle' size={30} color='white' />
         </TouchableOpacity>
       ),
-      headerTitle: <Text h4 style={{fontSize: 25, fontWeight: 'bold', color: 'white'}}>Profile</Text>,
+      headerTitle: <Text h4 style={{fontWeight: 'bold', color: 'white'}}>Profile</Text>,
       headerBackTitle: 'Back',
       headerRight: (
         <TouchableOpacity onPress={() => params.logout()} style={{marginRight: 10}}>

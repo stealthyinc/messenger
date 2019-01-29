@@ -7,6 +7,9 @@ import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import Communications from 'react-native-communications'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import FIcon from 'react-native-vector-icons/dist/FontAwesome'
+import Drawer from 'react-native-drawer'
+import DiscoverScreen from './DiscoverScreen'
+import channel from '../Images/channel.png'
 
 import {
   ActivityIndicator,
@@ -55,7 +58,8 @@ class BlockContactSearch extends Component {
     super(props)
     this.state = {
       showLoading: false,
-      showNothing: true
+      showNothing: true,
+      drawerOpen: false
     }
     this.search = undefined
     this.numContacts = (props.contactMgr)
@@ -121,7 +125,15 @@ class BlockContactSearch extends Component {
     const { payload } = this.props
     const { showNothing, showLoading } = this.state
     if (showNothing) {
-      return <ListItem>{null}</ListItem>
+      return (
+        <ListItem key='channel' onPress={this.toggleDrawer}>
+          <Thumbnail square size={80} source={channel} />
+          <Body>
+            <Text>Add Public Channels</Text>
+            <Text note>You can chat with other Blockstack users about various topics in a public forum</Text>
+          </Body>
+        </ListItem>
+      )
     } else if (payload && payload.length) {
       return payload.map((item, i) => (
         <ListItem key={i} onPress={this.parseContact.bind(this, item)}>
@@ -179,28 +191,66 @@ class BlockContactSearch extends Component {
     this.props.clear()
     // this.search.clear()
   }
+  toggleDrawer = () => {
+    if (this.state.drawerOpen) { this.closeDrawer() } else { this.openDrawer() }
+  };
+  closeDrawer = () => {
+    this._drawer.close()
+  };
+  openDrawer = () => {
+    this._drawer.open()
+  };
   render () {
+    const { contactMgr } = this.props
     return (
-      <Container style={{backgroundColor: 'white'}}>
-        <SearchBar
-          containerStyle={{backgroundColor: '#F5F5F5'}}
-          inputContainerStyle={{backgroundColor: 'white'}}
-          lightTheme
-          clearIcon={null}
-          platform={Platform.OS}
-          ref={search => this.search = search}
-          icon={{ type: 'material', name: 'search', size: 28 }}
-          onChangeText={this.onChangeText}
-          autoCorrect={false}
-          autoCapitalize='none'
-          onCancel={this.onClear}
-          placeholder='Search for contacts...' />
-        <Content>
-          {this.createListItem(this.props.contact)}
-        </Content>
-      </Container>
+      <Drawer
+        ref={(ref) => this._drawer = ref}
+        type='overlay'
+        tapToClose
+        openDrawerOffset={0.25} // 20% gap on the right side of drawer
+        panCloseMask={0.25}
+        closedDrawerOffset={-3}
+        styles={drawerStyles}
+        tweenHandler={(ratio) => ({
+          main: { opacity: (2 - ratio) / 2 }
+        })}
+        content={
+          <DiscoverScreen contactMgr={contactMgr} closeDrawer={this.closeDrawer} />
+        }
+        onOpen={() => {
+          this.setState({drawerOpen: true})
+        }}
+        onClose={() => {
+          this.setState({drawerOpen: false})
+        }}
+        side='bottom'
+      >
+        <Container style={{backgroundColor: 'white'}}>
+          <SearchBar
+            containerStyle={{backgroundColor: '#F5F5F5'}}
+            inputContainerStyle={{backgroundColor: 'white'}}
+            lightTheme
+            clearIcon={null}
+            platform={Platform.OS}
+            ref={search => this.search = search}
+            icon={{ type: 'material', name: 'search', size: 28 }}
+            onChangeText={this.onChangeText}
+            autoCorrect={false}
+            autoCapitalize='none'
+            onCancel={this.onClear}
+            placeholder='Search for contacts...' />
+          <Content>
+            {this.createListItem(this.props.contact)}
+          </Content>
+        </Container>
+      </Drawer>
     )
   }
+}
+
+const drawerStyles = {
+  drawer: { shadowColor: '#000000', shadowOpacity: 0.8, shadowRadius: 3 },
+  main: {paddingLeft: 3}
 }
 
 const mapStateToProps = (state) => {

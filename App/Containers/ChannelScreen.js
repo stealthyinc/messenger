@@ -23,6 +23,7 @@ import {GiftedChat, InputToolbar} from 'react-native-gifted-chat'
 import TwitterShareActions from '../Redux/TwitterShareRedux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import DappActions, { DappSelectors } from '../Redux/DappRedux'
+import { copilot, CopilotStep } from '@okgrow/react-native-copilot'
 const utils = require('./../Engine/misc/utils.js')
 
 const { MESSAGE_STATE } = require('./../Engine/messaging/chatMessage.js')
@@ -39,11 +40,11 @@ class ChannelScreen extends Component {
           <Ionicons name='md-arrow-back' size={32} color='white' />
         </TouchableOpacity>
       ),
-      headerTitle: params.name,
+      headerTitle: <Text style={{fontSize: 24, fontWeight: 'bold', color: 'white'}}>{params.name}</Text>,
       headerRight: (
         // <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
-        <TouchableOpacity onPress={() => alert('Public Unencrypted Channels')} style={{marginRight: 10}}>
-          <Ionicons name='ios-help-buoy' size={28} color='white' />
+        <TouchableOpacity onPress={() => params.start()} style={{marginRight: 10}}>
+          <Ionicons name='md-help-circle' size={30} color='white' />
         </TouchableOpacity>
       ),
       headerTintColor: 'white',
@@ -52,7 +53,6 @@ class ChannelScreen extends Component {
       }
     }
   };
-
   constructor (props) {
     super(props)
     this.state = {
@@ -73,14 +73,12 @@ class ChannelScreen extends Component {
       replyMsg: '',
       replyTo: ''
     }
-
     this._isMounted = false
     this._isAlright = null
     this.activeContact = undefined
     this.publicKey = undefined
     this.displayname = ''
     this.delegate = false
-
     // Stores AMA id values for each
     // AMA title (used to pass id in for navigation):
     //
@@ -89,15 +87,11 @@ class ChannelScreen extends Component {
   configWithActiveContact = (anActiveContact, administrable = false, force = false, callSetState = false) => {
     const method = 'ChannelScreen::configWithActiveContact'
     console.log(`INFO(${method}): anActiveContact=${anActiveContact}`)
-
     if ((this.activeContact && !force) || !anActiveContact) {
       return
     }
-
     this.delegate = administrable
-
     console.log(`INFO(${method}): anActiveContact.id=${anActiveContact.id}`)
-
     this.activeContact = anActiveContact
     this.publicKey = (this.activeContact) ? this.activeContact.publicKey : undefined
     this.isAma = utils.isAma(this.activeContact.protocol)
@@ -136,6 +130,13 @@ class ChannelScreen extends Component {
         this.state.messages = this.setupMessages(messages).reverse()
       }
     }
+  }
+  componentDidMount () {
+    this.props.copilotEvents.on('stepChange', this.handleStepChange)
+    this.props.navigation.setParams({ navigation: this.props.navigation, name: this.displayname, start: this.props.start })
+  }
+  handleStepChange = (step) => {
+    console.log(`Current step is: ${step.name}`);
   }
   componentWillReceiveProps (nextProps) {
     if (!this.activeContact) {
@@ -533,6 +534,39 @@ class ChannelScreen extends Component {
       />
     ) : null
     const disableAmaFeatures = this.isAma && !this.delegate
+    const CustomComponent = ({ copilot }) => (
+      <View id='copilotview' style={{flex: 1}} {...copilot}>
+        <GiftedChat
+          ref={(ref) => this._giftedChat = ref}
+          messages={this.state.messages}
+          onSend={this.onSend}
+          loadEarlier={this.state.loadEarlier}
+          onLoadEarlier={this.onLoadEarlier}
+          onPressAvatar={(this.protocol) ? (user) => this.showActionSheet(user)
+           : () => this.props.navigation.navigate('ContactProfile')}
+          isLoadingEarlier={this.state.isLoadingEarlier}
+          user={{
+            _id: this.state.author.username // sent messages should have same user._id
+          }}
+          showAvatarForEveryMessage
+          renderAvatarOnTop
+          text={this.state.inputText}
+          renderBubble={this.renderBubble}
+          renderActions={(!disableAmaFeatures) ? this.renderCustomActions : null}
+          renderMessage={this.renderMessage}
+          renderFooter={this.renderFooter}
+          maxInputLength={240}
+          renderInputToolbar={this.renderInputToolbar}
+          parsePatterns={(linkStyle) => [
+            { pattern: /AMA:.*\n\n.*/, style: linkStyle, onPress: this.onPressAma }
+          ]}
+          onInputTextChanged={text => this.setCustomText(text)}
+          textInputProps={{editable: (!disableAmaFeatures)}}
+          onLongPress={this.onLongPress}
+          renderChatFooter={this.renderChatFooter}
+        />
+      </View>
+    )
     return (
       <View id='GiftedChatContainer'
         style={{flex: 1,
@@ -606,35 +640,9 @@ class ChannelScreen extends Component {
           destructiveButtonIndex={1}
           onPress={(index) => this.handleUserActionSheet(index)}
         />
-        <GiftedChat
-          ref={(ref) => this._giftedChat = ref}
-          messages={this.state.messages}
-          onSend={this.onSend}
-          loadEarlier={this.state.loadEarlier}
-          onLoadEarlier={this.onLoadEarlier}
-          onPressAvatar={(this.protocol) ? (user) => this.showActionSheet(user)
-           : () => this.props.navigation.navigate('ContactProfile')}
-          isLoadingEarlier={this.state.isLoadingEarlier}
-          user={{
-            _id: this.state.author.username // sent messages should have same user._id
-          }}
-          showAvatarForEveryMessage
-          renderAvatarOnTop
-          text={this.state.inputText}
-          renderBubble={this.renderBubble}
-          renderActions={(!disableAmaFeatures) ? this.renderCustomActions : null}
-          renderMessage={this.renderMessage}
-          renderFooter={this.renderFooter}
-          maxInputLength={240}
-          renderInputToolbar={this.renderInputToolbar}
-          parsePatterns={(linkStyle) => [
-            { pattern: /AMA:.*\n\n.*/, style: linkStyle, onPress: this.onPressAma }
-          ]}
-          onInputTextChanged={text => this.setCustomText(text)}
-          textInputProps={{editable: (!disableAmaFeatures)}}
-          onLongPress={this.onLongPress}
-          renderChatFooter={this.renderChatFooter}
-        />
+        <CopilotStep text="This where you can read messages from other users. Click and hold the message for more options." order={1} name="channels">
+          <CustomComponent />
+        </CopilotStep>
       </View>
     )
   }
@@ -668,4 +676,6 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ChannelScreen)
+const ChannelScreenExplained = copilot({ animated: true, overlay: 'svg' })(ChannelScreen);
+
+export default connect(mapStateToProps, mapDispatchToProps)(ChannelScreenExplained)
