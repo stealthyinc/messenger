@@ -24,7 +24,7 @@ class ConversationScreen extends React.Component {
     return {
       headerLeft: (
         <TouchableOpacity onPress={() => params.start()} style={{marginLeft: 10}}>
-          <Ionicons name='ios-help-buoy' size={30} color='white' />
+          <Ionicons name='md-help-circle' size={30} color='white' />
         </TouchableOpacity>
       ),
       headerTitle: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Messages</Text>,

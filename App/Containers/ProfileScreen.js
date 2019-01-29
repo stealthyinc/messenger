@@ -1,6 +1,6 @@
 import React from 'react'
-import { Image, View, StyleSheet, Platform, TouchableOpacity } from 'react-native'
-import { Avatar, Button, Text, Icon } from 'react-native-elements'
+import { Image, View, StyleSheet, Platform, TouchableOpacity, Text } from 'react-native'
+import { Avatar, Button, Icon } from 'react-native-elements'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import { Toast } from 'native-base'
@@ -22,10 +22,10 @@ class ProfileScreen extends React.Component {
     return {
       headerLeft: (
         <TouchableOpacity onPress={() => params.start()} style={{marginLeft: 10}}>
-          <Ionicons name='ios-help-buoy' size={28} color='white'/>
+          <Ionicons name='md-help-circle' size={30} color='white' />
         </TouchableOpacity>
       ),
-      headerTitle: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Profile</Text>,
+      headerTitle: <Text h4 style={{fontSize: 25, fontWeight: 'bold', color: 'white'}}>Profile</Text>,
       headerBackTitle: 'Back',
       headerRight: (
         <TouchableOpacity onPress={() => params.logout()} style={{marginRight: 10}}>
@@ -92,6 +92,29 @@ class ProfileScreen extends React.Component {
     // const qrText = `stealthy://messages/`+username+`/`
     const qrText = username
     const { showQR, showAlert } = this.state
+    if (showAlert) {
+      return (
+        <AwesomeAlert
+          show={showAlert}
+          showProgress={false}
+          title="Logout"
+          message="Are you sure you want to log out?"
+          closeOnTouchOutside={true}
+          closeOnHardwareBackPress={false}
+          showCancelButton={true}
+          showConfirmButton={true}
+          cancelText="No, cancel"
+          confirmText="Yes, logout"
+          confirmButtonColor="#DD6B55"
+          onCancelPressed={() => {
+            this.hideAlert()
+          }}
+          onConfirmPressed={() => {
+            this.runLogout()
+          }}
+        />
+      )
+    }
     // const qrText = "http://facebook.github.io/react-native/"
     const avatarSize = (showQR || !base64) ? (
       <QRCode
@@ -121,33 +144,22 @@ class ProfileScreen extends React.Component {
     )
     return (
       <View style={styles.container}>
-        <AwesomeAlert
-          show={showAlert}
-          showProgress={false}
-          title="Logout"
-          message="Are you sure you want to log out?"
-          closeOnTouchOutside={true}
-          closeOnHardwareBackPress={false}
-          showCancelButton={true}
-          showConfirmButton={true}
-          cancelText="No, cancel"
-          confirmText="Yes, logout"
-          confirmButtonColor="#DD6B55"
-          onCancelPressed={() => {
-            this.hideAlert()
-          }}
-          onConfirmPressed={() => {
-            this.runLogout()
-          }}
-        />
         <View style={{flex: flex}} />
-        {!showAlert ? (<View style={{flex: 60, alignItems: 'center'}}>
-          {avatarSize}
+        <View style={{flex: 60, alignItems: 'center'}}>
+          <CopilotStep text="This is your profile picture or QRCode" order={1} name="profilePicture">
+            <WalkthroughableText style={styles.title}>
+              {avatarSize}
+            </WalkthroughableText>
+          </CopilotStep>
           <Text h4 style={{marginTop, marginBottom}}>{fullName}</Text>
-          <Text h4 style={{marginBottom, fontWeight: 'bold'}}>({username})</Text>
+          <CopilotStep text="This is your Blockstack User ID" order={2} name="userid">
+            <WalkthroughableText style={styles.title}>
+              <Text h4 style={{marginBottom, fontWeight: 'bold'}}>({username})</Text>
+            </WalkthroughableText>
+          </CopilotStep>
           <View style={{flexDirection: 'row', margin: margin}}>
-            <CopilotStep text="Click here to show your QR code" order={1} name="qrcode">
-              <WalkthroughableText style={styles.tabItem}>
+            <CopilotStep text="Click here to show your QR code" order={3} name="qrcode">
+              <WalkthroughableText style={styles.title}>
                 <Icon
                   reverse
                   name='qrcode'
@@ -164,8 +176,8 @@ class ProfileScreen extends React.Component {
                 />
               </WalkthroughableText>
             </CopilotStep>
-            <CopilotStep text="Click here to toggle contact discovery" order={2} name="discover">
-              <WalkthroughableText style={styles.tabItem}>
+            <CopilotStep text="Click here to toggle contact discovery" order={4} name="discover">
+              <WalkthroughableText style={styles.title}>
                 <Icon
                   reverse
                   name='connectdevelop'
@@ -181,8 +193,8 @@ class ProfileScreen extends React.Component {
                 />
               </WalkthroughableText>
             </CopilotStep>
-            <CopilotStep text="Click here to toggle notification settings" order={3} name="notification">
-              <WalkthroughableText style={styles.tabItem}>
+            <CopilotStep text="Click here to toggle notification settings" order={5} name="notification">
+              <WalkthroughableText style={styles.title}>
                 <Icon
                   reverse
                   name='bell'
@@ -198,8 +210,8 @@ class ProfileScreen extends React.Component {
                 />
               </WalkthroughableText>
             </CopilotStep>
-            <CopilotStep text="Click here to toggle analytics settings" order={4} name="analytics">
-              <WalkthroughableText style={styles.tabItem}>
+            <CopilotStep text="Click here to toggle analytics settings" order={6} name="analytics">
+              <WalkthroughableText style={styles.title}>
                 <Icon
                   reverse
                   name='pie-chart'
@@ -216,24 +228,18 @@ class ProfileScreen extends React.Component {
               </WalkthroughableText>
             </CopilotStep>
           </View>
-          <Button
-            onPress={this.props.start}
-            icon={{name: 'share', color: 'white'}}
-            buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 180, height: 50, backgroundColor: '#34bbed'}}
-            titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
-            title='Share ID'
-          />
-          {/*<Button
-            onPress={() => {
-              this.props.setSpinnerData(true, 'Logging out...')
-              this.props.screenProps.logout()
-            }}
-            icon={{name: 'launch', color: 'white'}}
-            buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#34bbed'}}
-            textStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
-            title='Log Out'
-          />*/}
-        </View>) : null}
+          <CopilotStep text="Share your Blockstack ID with your friends" order={7} name="share">
+            <WalkthroughableText style={styles.title}>
+              <Button
+                onPress={this.showActionSheet}
+                icon={{name: 'share', color: 'white'}}
+                buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 180, height: 50, backgroundColor: '#34bbed'}}
+                titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
+                title='Share ID'
+              />
+            </WalkthroughableText>
+          </CopilotStep>
+        </View>
         <View style={{flex: 20}} />
         <ActionSheet
           ref={o => this.ActionSheet = o}

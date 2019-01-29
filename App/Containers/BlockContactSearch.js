@@ -39,6 +39,7 @@ class BlockContactSearch extends Component {
           <Ionicons name='md-arrow-back' size={32} color='white' />
         </TouchableOpacity>
       ),
+      headerTitle: <Text h4 style={{fontSize: 25, fontWeight: 'bold', color: 'white'}}>Add Contacts</Text>,
       headerRight: (
         <TouchableOpacity onPress={() => params.navigation.navigate('Camera')} style={{marginRight: 10}}>
           <FIcon name='qrcode' size={30} color='white' />
