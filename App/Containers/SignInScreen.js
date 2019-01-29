@@ -66,10 +66,20 @@ class SignInScreen extends React.Component {
           />
       )
     }
+
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={{flexDirection: 'row', marginTop: 40, justifyContent: 'space-between', alignItems: 'stretch'}}>
-          <CopilotStep text="Follow us on Twitter to keep up with the latest updates" order={4} name="twitter" style={{justifyContent: 'flex-start'}}>
+        <View style={{flexDirection: 'row',
+                      marginTop: 40,
+                      justifyContent: 'space-between',
+                      alignItems: 'stretch',
+                      width: '100%'}}>
+
+          <View
+            style={{flex: 0.025}}/>
+
+          <CopilotStep text="Follow us on Twitter to keep up with the latest updates" order={4} name="twitter"
+                       style={{justifyContent: 'flex-start'}}>
             <WalkthroughableText style={styles.title}>
               <SocialIcon
                 style={{width: 45, height: 45}}
@@ -78,7 +88,12 @@ class SignInScreen extends React.Component {
               />
             </WalkthroughableText>
           </CopilotStep>
-          <CopilotStep text="You can watch a video to learn about the features" order={3} name="youtube" style={{justifyContent: 'flex-end'}}>
+
+          <View
+            style={{flex: 0.95}}/>
+
+          <CopilotStep text="You can watch a video to learn about the features" order={3} name="youtube"
+                       style={{justifyContent: 'flex-end'}}>
             <WalkthroughableText style={styles.title}>
               <SocialIcon
                 style={{width: 45, height: 45}}
@@ -88,6 +103,10 @@ class SignInScreen extends React.Component {
               />
             </WalkthroughableText>
           </CopilotStep>
+
+          <View
+            style={{flex: 0.025}}/>
+
         </View>
         <View style={{flexDirection: 'row', marginTop: (oldPad) ? 50 : 120}}>
           <Image
