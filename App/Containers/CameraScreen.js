@@ -77,7 +77,19 @@ class CameraScreen extends Component {
           captureAudio={false}
           permissionDialogTitle={'Permission to use camera'}
           permissionDialogMessage={'We need your permission to use your camera phone'}
-        />) : null}
+          >
+            {(status) => {
+              if (status === 'READY') {
+                return (
+                  <View style={{ flex: 0, flexDirection: 'row', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 14 }}> SCAN QR </Text>
+                  </View>
+                );
+              }
+            }}
+          </RNCamera>
+          ) : null
+        }
       </View>
     )
   }

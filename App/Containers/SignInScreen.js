@@ -21,7 +21,6 @@ const utils = require('./../Engine/misc/utils.js')
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 
 const WalkthroughableText = walkthroughable(Text);
-const WalkthroughableImage = walkthroughable(Image);
 
 class SignInScreen extends React.Component {
   static navigationOptions = {
@@ -278,8 +277,6 @@ const styles = StyleSheet.create({
   },
 })
 
-const SignInScreenExplained = copilot({ animated: true, overlay: 'svg' })(SignInScreen);
-
 const mapStateToProps = (state) => {
   return {
     spinner: EngineSelectors.getSignInPending(state)
@@ -294,5 +291,7 @@ const mapDispatchToProps = (dispatch) => {
     // setEngineFault: (flag) => dispatch(EngineActions.setEngineFault(flag)),
   }
 }
+
+const SignInScreenExplained = copilot({ animated: true, overlay: 'svg' })(SignInScreen);
 
 export default connect(mapStateToProps, mapDispatchToProps)(SignInScreenExplained)
