@@ -2,14 +2,19 @@
 // the device that Stealthy is operating on.
 //
 // Presently it wraps React Native's AsyncStorage and provides a specific root
-// key under which file paths are converted to keys for storing data.
+// key under which file paths are converted to keys for storing data. The root
+// key also takes into account different user's ids--i.e. if you log in as pbj.id
+// and write contacts, you then log out and log in as schmooop.id, you would have
+// problems decrypting and over-writing pbj.id's local storage. We key around that
+// with unique paths for each local user.
 //
-// All local data is encrypted / decrypted when written / read with the user's
+// All local data should be encrypted / decrypted when written / read with the user's
 // key pair to prevent snooping etc. by other processes.
 //
 import {AsyncStorage} from 'react-native'
+const BaseIO = require('./baseIO.js')
 
-const asyncStorageRoot = '@DeviceStorage'
+const asyncStorageRoot = '@StealthyDeviceStorage'
 // TODO: need to separate this by platform (i.e. Desktop won't be using react
 //       native AsyncStorage).
 //
@@ -21,12 +26,11 @@ const asyncStorageRoot = '@DeviceStorage'
 class LocalIO extends BaseIO {
   constructor() {
     super()
-
   }
 
   async writeLocalFile(localUser, filename, data) {
     try {
-      const keyPath = `${asyncStorageRoot}/${fileName}`
+      const keyPath = this.getKeyPath(localUser, fileName)
       await AsyncStorage.setItem(keyPath, data)
     } catch (error) {
       // TODO:
@@ -38,7 +42,7 @@ class LocalIO extends BaseIO {
   async readLocalFile(localUser, filename) {
     let data = undefined
     try {
-      const keyPath = `${asyncStorageRoot}/${fileName}`
+      const keyPath = this.getKeyPath(localUser, fileName)
       data = await AsyncStorage.getItem(keyPath)
     } catch (error) {
       // TODO:
@@ -49,7 +53,7 @@ class LocalIO extends BaseIO {
 
   async deleteLocalFile(localUser, filename) {
     try {
-      const keyPath = `${asyncStorageRoot}/${fileName}`
+      const keyPath = this.getKeyPath(localUser, fileName)
       await AsyncStorage.removeItem(keyPath)
     } catch (error) {
       // TODO:
@@ -61,6 +65,10 @@ class LocalIO extends BaseIO {
   readRemoteFile() {
     // NO-OP (Unsupported - implies reading from a different device than the
     //        one we are operating on.)
+  }
+
+  static getKeyPath(aLocalUserId, aFileName) {
+    return `${asyncStorageRoot}:${aLocalUserId}:${aFileName}`
   }
 }
 

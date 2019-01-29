@@ -39,6 +39,7 @@ const utils = require('./misc/utils.js')
 const FirebaseIO = require('./filesystem/firebaseIO.js')
 const GaiaIO = require('./filesystem/gaiaIO.js')
 const { IndexedIO } = require('./filesystem/indexedIO.js')
+const { LocalIO } = require('./filesystem/localIO.js')
 
 const constants = require('./misc/constants.js')
 
@@ -101,6 +102,8 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.io = undefined
     this.shuttingDown = false
     this.anonalytics = undefined
+
+    this.deviceIO = undefined
 
     this.indexIntegrations = {}
 
@@ -516,6 +519,8 @@ export class MessagingEngine extends EventEmitterAdapter {
       ? new GaiaIO(this.logger, LOG_GAIAIO)
       : new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO)
 
+    this.deviceIO = new LocalIO()
+
     await this._mobileGaiaTest()
     await this._fetchUserSettings()
   }
@@ -563,7 +568,9 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     let encSettingsData
     try {
+      this.myTimer.logEvent('_fetchUserSettings    (Before attempting to read settings.json)')
       encSettingsData = await this.io.robustLocalRead(this.userId, 'settings.json')
+      this.myTimer.logEvent('_fetchUserSettings    (After successful reading settings.json)')
       // readLocalFile returns undefined on BlobNotFound, so set new user:
       this.newUser = !(encSettingsData)
     } catch (error) {
@@ -602,10 +609,12 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.newUser = !test1Passed && !test2Passed
     }
 
+    this.myTimer.logEvent('_fetchUserSettings    (After attempting to read settings.json)')
     if (encSettingsData) {
       try {
         this.settings = await utils.decryptObj(
           this.privateKey, encSettingsData, ENCRYPT_SETTINGS)
+        this.myTimer.logEvent('_fetchUserSettings    (After decrypting settings.json)')
       } catch (err) {
         // Problem if here is likely that another account wrote to the current
         // account's gaia with it's own encryption, resulting in a mac mismatch:
