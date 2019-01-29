@@ -50,6 +50,10 @@ class CameraRollScreen extends Component {
     return (
       <PhotoBrowser
         startOnGrid
+        alwaysShowControls
+        displayActionButton
+        displayNavArrows
+        alwaysDisplayStatusBar
         mediaList={this.state.media}
       />
     )

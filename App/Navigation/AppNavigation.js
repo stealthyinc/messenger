@@ -19,7 +19,7 @@ import BlockContactSearch from '../Containers/BlockContactSearch'
 import DappScreen from '../Containers/DappScreen'
 import DappData from '../Containers/DappData'
 import DappStore from '../Containers/DappStore'
-// import Introduction from '../Components/Introduction'
+import Introduction from '../Components/Introduction'
 
 console.disableYellowBox = true
 

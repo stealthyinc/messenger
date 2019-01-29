@@ -64,7 +64,7 @@ class BlockContactSearch extends Component {
     this.props.navigation.setParams({ navigation: this.props.navigation })
   }
   componentDidMount () {
-    this.search.input.focus()
+    this.search.focus()
     this.props.request('')
   }
   componentWillReceiveProps (nextProps) {
@@ -176,23 +176,23 @@ class BlockContactSearch extends Component {
     this.props.request('')
     this.setState({showLoading: false, showNothing: true})
     this.props.clear()
-    this.search.input.clear()
+    // this.search.clear()
   }
   render () {
     return (
       <Container style={{backgroundColor: 'white'}}>
         <SearchBar
-          containerStyle={{backgroundColor: '#D3D3D3'}}
-          inputStyle={{backgroundColor: 'white'}}
+          containerStyle={{backgroundColor: '#F5F5F5'}}
+          inputContainerStyle={{backgroundColor: 'white'}}
           lightTheme
-          cancelButtonTitle='Cancel'
+          clearIcon={null}
           platform={Platform.OS}
           ref={search => this.search = search}
           icon={{ type: 'material', name: 'search', size: 28 }}
-          searchIcon={{ color: 'white', size: 24 }}
           onChangeText={this.onChangeText}
           autoCorrect={false}
           autoCapitalize='none'
+          onCancel={this.onClear}
           placeholder='Search for contacts...' />
         <Content>
           {this.createListItem(this.props.contact)}

@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, StyleSheet, Platform, TouchableOpacity } from 'react-native'
+import { Image, View, StyleSheet, Platform, TouchableOpacity } from 'react-native'
 import { Avatar, Button, Text, Icon } from 'react-native-elements'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
@@ -9,8 +9,12 @@ import Communications from 'react-native-communications'
 import ActionSheet from 'react-native-actionsheet'
 import QRCode from 'react-native-qrcode'
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import AwesomeAlert from 'react-native-awesome-alerts'
+import { copilot, walkthroughable, CopilotStep } from '@okgrow/react-native-copilot'
 
 const utils = require('./../Engine/misc/utils.js')
+const WalkthroughableText = walkthroughable(Text);
+const WalkthroughableImage = walkthroughable(Image);
 
 class ProfileScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -18,7 +22,7 @@ class ProfileScreen extends React.Component {
     return {
       headerLeft: (
         <TouchableOpacity onPress={() => params.share()} style={{marginLeft: 10}}>
-          <Ionicons name="md-share" size={28} color='white'/>
+          <Ionicons name='ios-help-buoy' size={28} color='white'/>
         </TouchableOpacity>
       ),
       headerTitle: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Profile</Text>,
@@ -39,11 +43,18 @@ class ProfileScreen extends React.Component {
     this.state = {
       showToast: false,
       showQR: false,
-      isVisible: false
+      isVisible: false,
+      showAlert: false
     }
   }
   componentWillMount () {
-    this.props.navigation.setParams({ showOverlay: this.showOverlay, logout: this.runLogout, share: this.showActionSheet })
+    this.props.navigation.setParams({ showOverlay: this.showOverlay, logout: this.showAlert, share: this.showActionSheet })
+  }
+  componentDidMount() {
+    this.props.copilotEvents.on('stepChange', this.handleStepChange);
+  }
+  handleStepChange = (step) => {
+    console.log(`Current step is: ${step.name}`);
   }
   runLogout = () => {
     this.props.setSpinnerData(true, 'Logging out...')
@@ -54,6 +65,16 @@ class ProfileScreen extends React.Component {
   }
   showActionSheet = () => {
     this.ActionSheet.show()
+  }
+  showAlert = () => {
+    this.setState({
+      showAlert: true
+    })
+  }
+  hideAlert = () => {
+    this.setState({
+      showAlert: false
+    })
   }
   render () {
     const { userProfile, userData, userSettings } = this.props
@@ -72,7 +93,7 @@ class ProfileScreen extends React.Component {
     const flex = (oldPad) ? 5 : 10
     // const qrText = `stealthy://messages/`+username+`/`
     const qrText = username
-    const { showQR } = this.state
+    const { showQR, showAlert } = this.state
     // const qrText = "http://facebook.github.io/react-native/"
     const avatarSize = (showQR || !base64) ? (
       <QRCode
@@ -102,8 +123,27 @@ class ProfileScreen extends React.Component {
     )
     return (
       <View style={styles.container}>
+        <AwesomeAlert
+          show={showAlert}
+          showProgress={false}
+          title="Logout"
+          message="Are you sure you want to log out?"
+          closeOnTouchOutside={true}
+          closeOnHardwareBackPress={false}
+          showCancelButton={true}
+          showConfirmButton={true}
+          cancelText="No, cancel"
+          confirmText="Yes, logout"
+          confirmButtonColor="#DD6B55"
+          onCancelPressed={() => {
+            this.hideAlert()
+          }}
+          onConfirmPressed={() => {
+            this.runLogout()
+          }}
+        />
         <View style={{flex: flex}} />
-        <View style={{flex: 60, alignItems: 'center'}}>
+        {!showAlert ? (<View style={{flex: 60, alignItems: 'center'}}>
           {avatarSize}
           <Text h4 style={{marginTop, marginBottom}}>{fullName}</Text>
           <Text h4 style={{marginBottom, fontWeight: 'bold'}}>({username})</Text>
@@ -133,8 +173,8 @@ class ProfileScreen extends React.Component {
                   duration: 1500
                 })
                 this.props.updateUserSettings('discovery')
-              }
-              } />
+              }}
+            />
             <Icon
               reverse
               name='bell'
@@ -146,8 +186,8 @@ class ProfileScreen extends React.Component {
                   duration: 1500
                 })
                 this.props.updateUserSettings('notifications')
-              }
-              } />
+              }}
+            />
             <Icon
               reverse
               name='pie-chart'
@@ -159,8 +199,8 @@ class ProfileScreen extends React.Component {
                   duration: 1500
                 })
                 this.props.updateUserSettings('analytics')
-              }
-                } />
+              }}
+            />
             {/* <Icon
                 reverse
                 name='twitter'
@@ -179,7 +219,7 @@ class ProfileScreen extends React.Component {
             onPress={this.showActionSheet}
             icon={{name: 'share', color: 'white'}}
             buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 180, height: 50, backgroundColor: '#34bbed'}}
-            textStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
+            titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
             title='Share ID'
           />
           {/*<Button
@@ -192,7 +232,7 @@ class ProfileScreen extends React.Component {
             textStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
             title='Log Out'
           />*/}
-        </View>
+        </View>) : null}
         <View style={{flex: 20}} />
         <ActionSheet
           ref={o => this.ActionSheet = o}
@@ -232,8 +272,19 @@ const styles = StyleSheet.create({
     paddingTop: 100,
     backgroundColor: 'white',
     alignItems: 'center'
-  }
+  },
+  title: {
+    fontSize: 24,
+    textAlign: 'center',
+  },
+  tabItem: {
+    flex: 1,
+    textAlign: 'center',
+    alignItems: 'center'
+  },
 })
+
+const ProfileScreenExplained = copilot({ animated: true, overlay: 'svg' })(ProfileScreen);
 
 const mapStateToProps = (state) => {
   return {
@@ -251,4 +302,4 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ProfileScreen)
+export default connect(mapStateToProps, mapDispatchToProps)(ProfileScreenExplained)
