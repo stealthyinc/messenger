@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { ListView, TouchableOpacity } from 'react-native'
+import { Image, ListView, TouchableOpacity } from 'react-native'
 import TwitterShareModal from '../Components/TwitterShareModal'
 import { Text } from 'react-native-elements'
 import { Button, Badge, Container, Content, List, ListItem, Left, Body, Right, Icon, Thumbnail } from 'native-base'
@@ -11,16 +11,20 @@ import { shareOnTwitter } from 'react-native-social-share'
 import Drawer from 'react-native-drawer'
 import QRCode from 'react-native-qrcode'
 import DiscoverScreen from './DiscoverScreen'
+import { copilot, walkthroughable, CopilotStep } from '@okgrow/react-native-copilot'
+
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 const utils = require('./../Engine/misc/utils.js')
+const WalkthroughableText = walkthroughable(Text);
+const WalkthroughableImage = walkthroughable(Image);
 
 class ConversationScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {}
     return {
       headerLeft: (
-        <TouchableOpacity onPress={() => params.drawer()} style={{marginLeft: 10}}>
-          <Ionicons name='md-globe' size={30} color='white' />
+        <TouchableOpacity onPress={() => params.start()} style={{marginLeft: 10}}>
+          <Ionicons name='ios-help-buoy' size={30} color='white' />
         </TouchableOpacity>
       ),
       headerTitle: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Messages</Text>,
@@ -49,8 +53,12 @@ class ConversationScreen extends React.Component {
     this.props.setSpinnerData(true, 'Loading contacts...')
     this.linkId = ''
   }
-  async componentWillMount () {
-    this.props.navigation.setParams({ navigation: this.props.navigation, sendMessage: this.sendTestMessageToFirebase, drawer: this.toggleDrawer })
+  async componentDidMount () {
+    this.props.copilotEvents.on('stepChange', this.handleStepChange);
+    this.props.navigation.setParams({ navigation: this.props.navigation, sendMessage: this.sendTestMessageToFirebase, start: this.props.start })
+  }
+  handleStepChange = (step) => {
+    console.log(`Current step is: ${step.name}`);
   }
   componentWillReceiveProps (nextProps) {
     const { contactMgr, engineInit, navigation } = nextProps
@@ -272,4 +280,6 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ConversationScreen)
+const ConversationScreenExplained = copilot({ animated: true, overlay: 'svg' })(ConversationScreen);
+
+export default connect(mapStateToProps, mapDispatchToProps)(ConversationScreenExplained)

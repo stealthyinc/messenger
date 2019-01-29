@@ -21,7 +21,7 @@ class ProfileScreen extends React.Component {
     const params = navigation.state.params || {}
     return {
       headerLeft: (
-        <TouchableOpacity onPress={() => params.share()} style={{marginLeft: 10}}>
+        <TouchableOpacity onPress={() => params.start()} style={{marginLeft: 10}}>
           <Ionicons name='ios-help-buoy' size={28} color='white'/>
         </TouchableOpacity>
       ),
@@ -47,11 +47,9 @@ class ProfileScreen extends React.Component {
       showAlert: false
     }
   }
-  componentWillMount () {
-    this.props.navigation.setParams({ showOverlay: this.showOverlay, logout: this.showAlert, share: this.showActionSheet })
-  }
   componentDidMount() {
     this.props.copilotEvents.on('stepChange', this.handleStepChange);
+    this.props.navigation.setParams({ showOverlay: this.showOverlay, logout: this.showAlert, start: this.props.start })
   }
   handleStepChange = (step) => {
     console.log(`Current step is: ${step.name}`);
@@ -148,75 +146,78 @@ class ProfileScreen extends React.Component {
           <Text h4 style={{marginTop, marginBottom}}>{fullName}</Text>
           <Text h4 style={{marginBottom, fontWeight: 'bold'}}>({username})</Text>
           <View style={{flexDirection: 'row', margin: margin}}>
-            <Icon
-              reverse
-              name='qrcode'
-              type='font-awesome'
-              disabled={!base64}
-              color={(showQR) ? '#34bbed' : 'grey'}
-              onPress={() => {
-                Toast.show({
-                  text: (showQR) ? 'Hide QR Code' : 'Show QR Code',
-                  duration: 1500
-                })
-                this.setState({showQR: !showQR})
-              }
-              } />
-            <Icon
-              reverse
-              name='connectdevelop'
-              type='font-awesome'
-              color={(discovery) ? '#34bbed' : 'grey'}
-              onPress={() => {
-                Toast.show({
-                  text: (discovery) ? 'Discovery Setting Disabled!' : 'Discovery Setting Enabled!',
-                  duration: 1500
-                })
-                this.props.updateUserSettings('discovery')
-              }}
-            />
-            <Icon
-              reverse
-              name='bell'
-              type='font-awesome'
-              color={(notifications) ? '#34bbed' : 'grey'}
-              onPress={() => {
-                Toast.show({
-                  text: (notifications) ? 'Notifications Setting Disabled!' : 'Notifications Setting Enabled!',
-                  duration: 1500
-                })
-                this.props.updateUserSettings('notifications')
-              }}
-            />
-            <Icon
-              reverse
-              name='pie-chart'
-              type='font-awesome'
-              color={(analytics) ? '#34bbed' : 'grey'}
-              onPress={() => {
-                Toast.show({
-                  text: (analytics) ? 'Analytics Setting Disabled!' : 'Analytics Setting Enabled!',
-                  duration: 1500
-                })
-                this.props.updateUserSettings('analytics')
-              }}
-            />
-            {/* <Icon
-                reverse
-                name='twitter'
-                type='font-awesome'
-                color='#34bbed'
-                onPress={() =>
-                  shareOnTwitter({
-                    'text': shareText,
-                  },
-                  (results) => {
-                    console.log(results);
-                  }
-              )} /> */}
+            <CopilotStep text="Click here to show your QR code" order={1} name="qrcode">
+              <WalkthroughableText style={styles.tabItem}>
+                <Icon
+                  reverse
+                  name='qrcode'
+                  type='font-awesome'
+                  disabled={!base64}
+                  color={(showQR) ? '#34bbed' : 'grey'}
+                  onPress={() => {
+                    Toast.show({
+                      text: (showQR) ? 'Hide QR Code' : 'Show QR Code',
+                      duration: 1500
+                    })
+                    this.setState({showQR: !showQR})
+                  }} 
+                />
+              </WalkthroughableText>
+            </CopilotStep>
+            <CopilotStep text="Click here to toggle contact discovery" order={2} name="discover">
+              <WalkthroughableText style={styles.tabItem}>
+                <Icon
+                  reverse
+                  name='connectdevelop'
+                  type='font-awesome'
+                  color={(discovery) ? '#34bbed' : 'grey'}
+                  onPress={() => {
+                    Toast.show({
+                      text: (discovery) ? 'Discovery Setting Disabled!' : 'Discovery Setting Enabled!',
+                      duration: 1500
+                    })
+                    this.props.updateUserSettings('discovery')
+                  }}
+                />
+              </WalkthroughableText>
+            </CopilotStep>
+            <CopilotStep text="Click here to toggle notification settings" order={3} name="notification">
+              <WalkthroughableText style={styles.tabItem}>
+                <Icon
+                  reverse
+                  name='bell'
+                  type='font-awesome'
+                  color={(notifications) ? '#34bbed' : 'grey'}
+                  onPress={() => {
+                    Toast.show({
+                      text: (notifications) ? 'Notifications Setting Disabled!' : 'Notifications Setting Enabled!',
+                      duration: 1500
+                    })
+                    this.props.updateUserSettings('notifications')
+                  }}
+                />
+              </WalkthroughableText>
+            </CopilotStep>
+            <CopilotStep text="Click here to toggle analytics settings" order={4} name="analytics">
+              <WalkthroughableText style={styles.tabItem}>
+                <Icon
+                  reverse
+                  name='pie-chart'
+                  type='font-awesome'
+                  color={(analytics) ? '#34bbed' : 'grey'}
+                  onPress={() => {
+                    Toast.show({
+                      text: (analytics) ? 'Analytics Setting Disabled!' : 'Analytics Setting Enabled!',
+                      duration: 1500
+                    })
+                    this.props.updateUserSettings('analytics')
+                  }}
+                />
+              </WalkthroughableText>
+            </CopilotStep>
           </View>
           <Button
-            onPress={this.showActionSheet}
+            onPress={this.props.start}
             icon={{name: 'share', color: 'white'}}
             buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 180, height: 50, backgroundColor: '#34bbed'}}
             titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
@@ -284,8 +285,6 @@ const styles = StyleSheet.create({
   },
 })
 
-const ProfileScreenExplained = copilot({ animated: true, overlay: 'svg' })(ProfileScreen);
-
 const mapStateToProps = (state) => {
   return {
     userProfile: EngineSelectors.getUserProfile(state),
@@ -301,5 +300,7 @@ const mapDispatchToProps = (dispatch) => {
     setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message))
   }
 }
+
+const ProfileScreenExplained = copilot({ animated: true, overlay: 'svg' })(ProfileScreen);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProfileScreenExplained)
