@@ -16,6 +16,7 @@ import chatIcon from '../Images/blue512.png'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import VersionNumber from 'react-native-version-number'
 import { copilot, walkthroughable, CopilotStep } from '@okgrow/react-native-copilot'
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const utils = require('./../Engine/misc/utils.js')
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
@@ -75,36 +76,67 @@ class SignInScreen extends React.Component {
                       width: '100%'}}>
 
           <View
-            style={{flex: 0.025}}/>
+            style={{flex: 0.05}}/>
 
-          <CopilotStep text="Follow us on Twitter to keep up with the latest updates" order={4} name="twitter"
+          <CopilotStep text="Follow us on Twitter to keep up with the latest updates" order={6} name="twitter"
                        style={{justifyContent: 'flex-start'}}>
             <WalkthroughableText style={styles.title}>
-              <SocialIcon
-                style={{width: 45, height: 45}}
-                type='twitter'
+              <Icon
+                size={40} 
+                name='twitter'
+                color='#38A1F3'
                 onPress={() => Linking.openURL('https://twitter.com/stealthyim').catch(err => console.error('An error occurred', err))}
               />
             </WalkthroughableText>
           </CopilotStep>
 
           <View
-            style={{flex: 0.95}}/>
+            style={{flex: 0.05}}/>
+
+          <CopilotStep text="Read about our Product Hunt mobile launch" order={5} name="product-hunt"
+                       style={{justifyContent: 'flex-start'}}>
+            <WalkthroughableText style={styles.title}>
+              <Icon
+                size={40} 
+                name='product-hunt'
+                color='#da552f'
+                onPress={() => Linking.openURL('https://www.producthunt.com/posts/stealthy-im').catch(err => console.error('An error occurred', err))}
+              />
+            </WalkthroughableText>
+          </CopilotStep>
+
+          <View
+            style={{flex: 0.90}}/>
+
+          <CopilotStep text="Read our engineering blog about the underlying technology of Stealthy" order={4} name="medium"
+                       style={{justifyContent: 'flex-end'}}>
+            <WalkthroughableText style={styles.title}>
+              <Icon
+                size={40} 
+                name='medium'
+                color='#00ab6c'
+                onPress={() => Linking.openURL('https://medium.com/@stealthyim').catch(err => console.error('An error occurred', err))}
+              />
+            </WalkthroughableText>
+          </CopilotStep>
+
+          <View
+            style={{flex: 0.05}}/>
 
           <CopilotStep text="You can watch a video to learn about the features" order={3} name="youtube"
                        style={{justifyContent: 'flex-end'}}>
             <WalkthroughableText style={styles.title}>
-              <SocialIcon
-                style={{width: 45, height: 45}}
-                reverse
-                type='youtube'
+              <Icon
+                size={40} 
+                name='youtube-play'
+                color='#ED3833'
                 onPress={() => Linking.openURL('https://www.youtube.com/watch?v=4rLdMIrVBrw').catch(err => console.error('An error occurred', err))}
               />
             </WalkthroughableText>
           </CopilotStep>
 
           <View
-            style={{flex: 0.025}}/>
+            style={{flex: 0.05}}/>
 
         </View>
         <View style={{flexDirection: 'row', marginTop: (oldPad) ? 50 : 120}}>
