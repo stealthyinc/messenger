@@ -78,7 +78,7 @@ class ProfileScreen extends React.Component {
     if (!userProfile) { return null }
     const { discovery, notifications, analytics } = userSettings
     const { profile, base64 } = userProfile
-    const { username } = userData
+    let { username } = userData
     const { name } = profile
     const fullName = (name) || null
     const shareText = 'You can securely message me at: ' + username + ' on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im'
@@ -125,7 +125,6 @@ class ProfileScreen extends React.Component {
       ) : (oldPad || (Platform.OS !== 'ios')) ? (
         <Avatar
           size='large'
-          rounded
           source={{uri: base64}}
           onPress={() => console.log('Works!')}
           activeOpacity={0.7}
@@ -134,13 +133,15 @@ class ProfileScreen extends React.Component {
     ) : (
       <Avatar
         size='xlarge'
-        rounded
         source={{uri: base64}}
         onPress={() => console.log('Works!')}
         activeOpacity={0.7}
         containerStyle={{marginBottom: 15}}
       />
     )
+    if (username.length > 24) {
+      username = username.substring(0, 21) + '...'
+    }
     return (
       <View style={styles.container}>
         <View style={{flex: flex}} />
@@ -232,7 +233,7 @@ class ProfileScreen extends React.Component {
               <Button
                 onPress={this.showActionSheet}
                 icon={{name: 'share', color: 'white'}}
-                buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 180, height: 50, backgroundColor: '#34bbed'}}
+                buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 150, height: 50, backgroundColor: '#34bbed'}}
                 titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
                 title='Share ID'
               />

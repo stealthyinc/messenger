@@ -76,9 +76,9 @@ class SignInScreen extends React.Component {
                       width: '100%'}}>
 
           <View
-            style={{flex: 0.05}}/>
+            style={{flex: 0.1}}/>
 
-          <CopilotStep text="Follow us on Twitter to keep up with the latest updates" order={6} name="twitter"
+          <CopilotStep text="Follow us on Twitter to keep up with the latest updates" order={2} name="twitter"
                        style={{justifyContent: 'flex-start'}}>
             <WalkthroughableText style={styles.title}>
               <Icon
@@ -91,9 +91,9 @@ class SignInScreen extends React.Component {
           </CopilotStep>
 
           <View
-            style={{flex: 0.05}}/>
+            style={{flex: 0.1}}/>
 
-          <CopilotStep text="Read about our Product Hunt mobile launch" order={5} name="product-hunt"
+          <CopilotStep text="Read about our Product Hunt mobile launch" order={3} name="product-hunt"
                        style={{justifyContent: 'flex-start'}}>
             <WalkthroughableText style={styles.title}>
               <Icon
@@ -108,7 +108,7 @@ class SignInScreen extends React.Component {
           <View
             style={{flex: 0.90}}/>
 
-          <CopilotStep text="Read our engineering blog about the underlying technology of Stealthy" order={4} name="medium"
+          <CopilotStep text="Read our engineering blog to understand the technology powering Stealthy" order={4} name="medium"
                        style={{justifyContent: 'flex-end'}}>
             <WalkthroughableText style={styles.title}>
               <Icon
@@ -121,9 +121,9 @@ class SignInScreen extends React.Component {
           </CopilotStep>
 
           <View
-            style={{flex: 0.05}}/>
+            style={{flex: 0.1}}/>
 
-          <CopilotStep text="You can watch a video to learn about the features" order={3} name="youtube"
+          <CopilotStep text="You can watch a video to learn about the features" order={5} name="youtube"
                        style={{justifyContent: 'flex-end'}}>
             <WalkthroughableText style={styles.title}>
               <Icon
@@ -136,7 +136,7 @@ class SignInScreen extends React.Component {
           </CopilotStep>
 
           <View
-            style={{flex: 0.05}}/>
+            style={{flex: 0.1}}/>
 
         </View>
         <View style={{flexDirection: 'row', marginTop: (oldPad) ? 50 : 120}}>
@@ -144,10 +144,11 @@ class SignInScreen extends React.Component {
             source={chatIcon}
             style={{width: 50, height: 50}}
           />
-          <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: (oldPad) ? 50 : 80, marginTop: 5 }}>Hi Stealthy 👋</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: (oldPad) ? 40 : 65, marginTop: 5 }}>Hi Stealthy 👋</Text>
         </View>
-        <Text style={{ fontWeight: 'bold', fontSize: (oldPad) ? 20 : 24, color: 'grey', marginBottom }}>Decentralized Communication</Text>
-        <CopilotStep text="Hey! Welcome to the tour! Click here to create an account or login" order={1} name="createAccount">
+        <Text style={{ fontWeight: 'bold', fontSize: (oldPad) ? 24 : 32, color: 'grey', marginBottom: 10 }}>Encrypted Messaging</Text>
+        <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: (oldPad) ? 16 : 20, color: 'grey', marginBottom }}>Enabled by blockchain, owned by you</Text>
+        <CopilotStep text="Hey! Welcome to Stealthy! Click here to create an account or login" order={1} name="createAccount">
           <WalkthroughableText style={styles.title}>
             <Button
               onPress={this._signInAsync}
