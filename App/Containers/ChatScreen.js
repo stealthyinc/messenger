@@ -26,7 +26,7 @@ class ChatScreen extends Component {
           <Ionicons name='md-arrow-back' size={32} color='white' />
         </TouchableOpacity>
       ),
-      headerTitle: params.name,
+      headerTitle: <Text style={{fontSize: 24, fontWeight: 'bold', color: 'white'}}>{params.name}</Text>,
       // headerRight: (
       //   // <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
       //   <TouchableOpacity onPress={() => params.navigation.navigate("ContactProfile")} style={{marginRight: 10}}>
@@ -39,7 +39,6 @@ class ChatScreen extends Component {
       }
     }
   };
-
   constructor (props) {
     super(props)
     this.state = {
@@ -323,6 +322,7 @@ class ChatScreen extends Component {
     this.setState({modalVisible: flag})
   }
   renderCustomActions = (props) => {
+    return null
     return (
       <TouchableOpacity
         style={[styles.chatContainer, this.props.containerStyle]}
@@ -463,6 +463,7 @@ class ChatScreen extends Component {
               { type: 'url', style: linkStyle, onPress: this.onPressUrl }
             ]}
             onInputTextChanged={text => this.setCustomText(text)}
+            textInputAutoFocus={true}
           />
         </View>
       )

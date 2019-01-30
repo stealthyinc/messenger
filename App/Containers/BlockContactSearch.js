@@ -125,14 +125,50 @@ class BlockContactSearch extends Component {
     const { payload } = this.props
     const { showNothing, showLoading } = this.state
     if (showNothing) {
+      const profileImage1 = "https://gaia.blockstack.org/hub/12ELFuCsjCx5zxVDyNxttnYe9VLrRbLuMm/0/avatar-0"
+      const item1 = {
+        fullyQualifiedName: "pbj.id",
+        username: "pbj",
+        profile: {
+          name: "Prabhaav Bhardwaj",
+          image: [{contentUrl: profileImage1}],
+          description: "Success is not final, failure is not fatal; it is the courage to continue that counts."
+        }
+      }
+      const profileImage2 = "https://gaia.blockstack.org/hub/1CdAz6hrRA2Uf51QAaTZBD1z7xeZfZ1Wiz//avatar-0"
+      const item2 = {
+        fullyQualifiedName: "relay.id",
+        username: "relay",
+        profile: {
+          name: "Ice Bat",
+          image: [{contentUrl: profileImage2}],
+          description: ""
+        }
+      }
       return (
-        <ListItem key='channel' onPress={this.toggleDrawer}>
-          <Thumbnail square size={80} source={channel} />
-          <Body>
-            <Text>Add Public Channels</Text>
-            <Text note>You can chat with other Blockstack users about various topics in a public forum</Text>
-          </Body>
-        </ListItem>
+        <View>
+          <ListItem key='channel' onPress={this.toggleDrawer}>
+            <Thumbnail square size={80} source={channel} />
+            <Body>
+              <Text>Add Public Channels</Text>
+              <Text note>You can chat with other Blockstack users about various topics in a public forum</Text>
+            </Body>
+          </ListItem>
+          <ListItem key='pbj' onPress={() => this.parseContact(item1)}>
+            <Thumbnail square size={80} source={{uri: profileImage1}} />
+            <Body>
+              <Text>Private Chat with PBJ</Text>
+              <Text note>You can chat privately with one of the founders of Stealthy</Text>
+            </Body>
+          </ListItem>
+          <ListItem key='ayc' onPress={() => this.parseContact(item2)}>
+            <Thumbnail square size={80} source={{uri: profileImage2}} />
+            <Body>
+              <Text>Private Chat with AYC</Text>
+              <Text note>You can chat privately with one of the founders of Stealthy</Text>
+            </Body>
+          </ListItem>
+        </View>
       )
     } else if (payload && payload.length) {
       return payload.map((item, i) => (
@@ -199,6 +235,7 @@ class BlockContactSearch extends Component {
   };
   openDrawer = () => {
     this._drawer.open()
+    this.search.blur()
   };
   render () {
     const { contactMgr } = this.props
@@ -208,7 +245,7 @@ class BlockContactSearch extends Component {
         type='overlay'
         tapToClose
         openDrawerOffset={0.25} // 20% gap on the right side of drawer
-        panCloseMask={0.25}
+        panCloseMask={0.35}
         closedDrawerOffset={-3}
         styles={drawerStyles}
         tweenHandler={(ratio) => ({

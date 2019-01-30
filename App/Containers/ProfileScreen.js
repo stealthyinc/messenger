@@ -124,7 +124,7 @@ class ProfileScreen extends React.Component {
         />
       ) : (oldPad || (Platform.OS !== 'ios')) ? (
         <Avatar
-          large
+          size='large'
           rounded
           source={{uri: base64}}
           onPress={() => console.log('Works!')}
@@ -133,7 +133,7 @@ class ProfileScreen extends React.Component {
       />
     ) : (
       <Avatar
-        xlarge
+        size='xlarge'
         rounded
         source={{uri: base64}}
         onPress={() => console.log('Works!')}
