@@ -45,29 +45,19 @@ const styles = StyleSheet.create({
 
 const slides = [
   {
-    key: 'DApp Integration',
-    title: 'DApp Integration',
-    text: 'Description.\nSay something cool',
-    image: dapp,
+    key: 'Blockchain Identity',
+    title: 'Blockchain Identity',
+    text: 'Your identity is written to the blockchain',
+    image: blockchain,
     imageStyle: styles.image,
     titleStyle: styles.title,
     textStyle: styles.text,
-    backgroundColor: '#59b2ab'
-  },
-  {
-    key: 'Content Monetization',
-    title: 'Content Monetization',
-    text: 'Other cool stuff',
-    image: bitcoin,
-    imageStyle: styles.image,
-    titleStyle: styles.title,
-    textStyle: styles.text,
-    backgroundColor: '#4F00BC'
+    backgroundColor: '#29ABE2'
   },
   {
     key: 'Distributed Storage',
     title: 'Distributed Storage',
-    text: 'I\'m already out of descriptions\n\nLorem ipsum bla bla bla',
+    text: 'Your data is stored in your personal cloud drive',
     image: folder,
     imageStyle: styles.image,
     titleStyle: styles.title,
@@ -75,19 +65,9 @@ const slides = [
     backgroundColor: '#22bcb5'
   },
   {
-    key: 'Blockchain Identity',
-    title: 'Blockchain Identity',
-    text: 'React-native-app-intro-slider is easy to setup with a small footprint and no dependencies. And it comes with good default layouts!',
-    image: blockchain,
-    imageStyle: styles.image,
-    titleStyle: styles.title,
-    textStyle: styles.text,
-    backgroundColor: '#63E2FF'
-  },
-  {
     key: 'Decentralized Keys',
     title: 'Decentralized Keys',
-    text: 'The component is also super customizable, so you can adapt it to cover your needs and wants.',
+    text: 'Only you have access to your encyrption keys',
     image: security,
     imageStyle: styles.image,
     titleStyle: styles.title,
@@ -97,12 +77,12 @@ const slides = [
   {
     key: 'Censorship Free',
     title: 'Censorship Free',
-    text: 'Usage is all free',
+    text: 'Nobody can interfere or prohibit your speech',
     image: censor,
     imageStyle: styles.image,
     titleStyle: styles.title,
     textStyle: styles.text,
-    backgroundColor: '#febe29'
+    backgroundColor: '#ffc62b'
   },
 ];
 

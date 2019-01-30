@@ -89,7 +89,7 @@ const PrimaryNav = StackNavigator({
 })
 
 const AuthStack = StackNavigator({
-  // Intro: { screen: Introduction },
+  Intro: { screen: Introduction },
   SignIn: { screen: SignInScreen },
   Demo: { screen: DemoScreen },
   initialRouteName: 'Intro',
