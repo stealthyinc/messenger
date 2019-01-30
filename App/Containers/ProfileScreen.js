@@ -85,12 +85,14 @@ class ProfileScreen extends React.Component {
     // const shareText1 = 'Come chat with me on Stealthy.IM! Add me: ' + username
     const oldPad = utils.is_oldPad()
     const margin = 20
-    const marginTop = (oldPad) ? 0 : 15
+    const marginTop = (oldPad) ? 5 : 15
     const marginBottom = (oldPad) ? 2 : 15
-    const flex = (oldPad) ? 5 : 10
+    const mainContainerTopPadding = (oldPad) ? '8%' : '13%'
+    const buttonRowWidth = (oldPad) ? '98%' : '90%'
     // const qrText = `stealthy://messages/`+username+`/`
     const qrText = username
     const { showQR, showAlert } = this.state
+    const borderAccentColor='#C2C2C2'
     if (showAlert) {
       return (
         <AwesomeAlert
@@ -114,133 +116,158 @@ class ProfileScreen extends React.Component {
         />
       )
     }
-    // const qrText = "http://facebook.github.io/react-native/"
-    const avatarSize = (showQR || !base64) ? (
-      <QRCode
-        value={qrText}
-        size={160}
-        bgColor='black'
-        fgColor='white'
-        />
-      ) : (oldPad || (Platform.OS !== 'ios')) ? (
+    let avatarElement = undefined
+    if (showQR || !base64) {
+      avatarElement = (
+        <QRCode value={qrText} size={160} bgColor='black' fgColor='white' />)
+    } else {
+      let marginBottomVal = (oldPad || (Platform.OS !== 'ios')) ? 5 : 15
+      let sizeVal = (oldPad || (Platform.OS !== 'ios')) ? 'large' : 'xlarge'
+      avatarElement = (
         <Avatar
-          size='large'
+          size={sizeVal}
           source={{uri: base64}}
-          onPress={() => console.log('Works!')}
-          activeOpacity={0.7}
-          containerStyle={{marginBottom: 5}}
-      />
-    ) : (
-      <Avatar
-        size='xlarge'
-        source={{uri: base64}}
-        onPress={() => console.log('Works!')}
-        activeOpacity={0.7}
-        containerStyle={{marginBottom: 15}}
-      />
-    )
+          overlayContainerStyle={{backgroundColor: 'white'}}
+          containerStyle={{marginBottom: marginBottomVal}}
+          avatarStyle={{borderColor: borderAccentColor,
+                        borderRadius: 15,
+                        borderWidth: 1}} />)
+    }
     if (username.length > 24) {
       username = username.substring(0, 21) + '...'
     }
     return (
       <View style={styles.container}>
-        <View style={{flex: flex}} />
-        <View style={{flex: 60, alignItems: 'center'}}>
-          <CopilotStep text="This is your profile picture or QRCode" order={1} name="profilePicture">
-            <WalkthroughableText style={styles.title}>
-              {avatarSize}
-            </WalkthroughableText>
-          </CopilotStep>
-          <Text h4 style={{marginTop, marginBottom}}>{fullName}</Text>
-          <CopilotStep text="This is your Blockstack User ID" order={2} name="userid">
-            <WalkthroughableText style={styles.title}>
-              <Text h4 style={{marginBottom, fontWeight: 'bold'}}>({username})</Text>
-            </WalkthroughableText>
-          </CopilotStep>
-          <View style={{flexDirection: 'row', margin: margin}}>
-            <CopilotStep text="Click here to show your QR code" order={3} name="qrcode">
+        <View style={{flex: 1,
+                      width: '100%',
+                      alignItems: 'center'}}>
+
+          <View style={{flex: 0.5}} />
+
+          <View style={{alignItems: 'center'}}>
+            <CopilotStep text="This is your profile picture or QRCode" order={1} name="profilePicture">
               <WalkthroughableText style={styles.title}>
-                <Icon
-                  reverse
-                  name='qrcode'
-                  type='font-awesome'
-                  disabled={!base64}
-                  color={(showQR) ? '#34bbed' : 'grey'}
-                  onPress={() => {
-                    Toast.show({
-                      text: (showQR) ? 'Hide QR Code' : 'Show QR Code',
-                      duration: 1500
-                    })
-                    this.setState({showQR: !showQR})
-                  }} 
-                />
+                {avatarElement}
               </WalkthroughableText>
             </CopilotStep>
-            <CopilotStep text="Click here to toggle contact discovery" order={4} name="discover">
+            <CopilotStep text="This is your Blockstack User ID" order={2} name="userid">
               <WalkthroughableText style={styles.title}>
-                <Icon
-                  reverse
-                  name='connectdevelop'
-                  type='font-awesome'
-                  color={(discovery) ? '#34bbed' : 'grey'}
-                  onPress={() => {
-                    Toast.show({
-                      text: (discovery) ? 'Discovery Setting Disabled!' : 'Discovery Setting Enabled!',
-                      duration: 1500
-                    })
-                    this.props.updateUserSettings('discovery')
-                  }}
-                />
+                <Text h4 style={{marginTop, marginBottom, fontWeight: 'bold'}}>{username}</Text>
               </WalkthroughableText>
             </CopilotStep>
-            <CopilotStep text="Click here to toggle notification settings" order={5} name="notification">
-              <WalkthroughableText style={styles.title}>
-                <Icon
-                  reverse
-                  name='bell'
-                  type='font-awesome'
-                  color={(notifications) ? '#34bbed' : 'grey'}
-                  onPress={() => {
-                    Toast.show({
-                      text: (notifications) ? 'Notifications Setting Disabled!' : 'Notifications Setting Enabled!',
-                      duration: 1500
-                    })
-                    this.props.updateUserSettings('notifications')
-                  }}
-                />
-              </WalkthroughableText>
-            </CopilotStep>
-            <CopilotStep text="Click here to toggle analytics settings" order={6} name="analytics">
-              <WalkthroughableText style={styles.title}>
-                <Icon
-                  reverse
-                  name='pie-chart'
-                  type='font-awesome'
-                  color={(analytics) ? '#34bbed' : 'grey'}
-                  onPress={() => {
-                    Toast.show({
-                      text: (analytics) ? 'Analytics Setting Disabled!' : 'Analytics Setting Enabled!',
-                      duration: 1500
-                    })
-                    this.props.updateUserSettings('analytics')
-                  }}
-                />
-              </WalkthroughableText>
-            </CopilotStep>
+            <Text h4 style={{fontStyle: 'italic'}}>{fullName}</Text>
           </View>
-          <CopilotStep text="Share your Blockstack ID with your friends" order={7} name="share">
-            <WalkthroughableText style={styles.title}>
-              <Button
-                onPress={this.showActionSheet}
-                icon={{name: 'share', color: 'white'}}
-                buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 150, height: 50, backgroundColor: '#34bbed'}}
-                titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
-                title='Share ID'
-              />
-            </WalkthroughableText>
-          </CopilotStep>
+
+          <View style={{flex: 0.25}} />
+
+          <View style={{alignItems: 'center'}}>
+            <CopilotStep text="Share your Blockstack ID with your friends" order={7} name="share">
+              <WalkthroughableText style={styles.title}>
+                <Button
+                  onPress={this.showActionSheet}
+                  icon={{name: 'share', color: 'white'}}
+                  buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 150, height: 50, backgroundColor: '#34bbed'}}
+                  titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
+                  title='Share ID'
+                />
+              </WalkthroughableText>
+            </CopilotStep>
+
+            <View style={{width: buttonRowWidth,
+                          flexDirection: 'row',
+                          justifyContent: 'space-around',
+                          borderRadius: 15,
+                          borderWidth: 1,
+                          borderStyle: 'solid',
+                          borderColor: borderAccentColor}}>
+              <View style={{flexDirection: 'column', alignItems: 'center'}}>
+                <CopilotStep text="Click here to show your QR code" order={3} name="qrcode">
+                  <WalkthroughableText style={styles.title}>
+                    <Icon
+                      reverse
+                      name='qrcode'
+                      type='font-awesome'
+                      disabled={!base64}
+                      color={(showQR) ? '#34bbed' : 'grey'}
+                      onPress={() => {
+                        Toast.show({
+                          text: (showQR) ? 'Hide QR Code' : 'Show QR Code',
+                          duration: 1500
+                        })
+                        this.setState({showQR: !showQR})
+                      }}
+                    />
+                  </WalkthroughableText>
+                </CopilotStep>
+                <Text style={{color: borderAccentColor}}>QR Code</Text>
+              </View>
+              <View style={{flexDirection: 'column', alignItems: 'center'}}>
+                <CopilotStep text="Click here to toggle contact discovery" order={4} name="discover">
+                  <WalkthroughableText style={styles.title}>
+                    <Icon
+                      reverse
+                      name='connectdevelop'
+                      type='font-awesome'
+                      color={(discovery) ? '#34bbed' : 'grey'}
+                      onPress={() => {
+                        Toast.show({
+                          text: (discovery) ? 'Discovery Setting Disabled!' : 'Discovery Setting Enabled!',
+                          duration: 1500
+                        })
+                        this.props.updateUserSettings('discovery')
+                      }}
+                    />
+                  </WalkthroughableText>
+                </CopilotStep>
+                <Text style={{color: borderAccentColor}}>Discovery</Text>
+              </View>
+              <View style={{flexDirection: 'column', alignItems: 'center'}}>
+                <CopilotStep text="Click here to toggle notifications" order={5} name="notification">
+                  <WalkthroughableText style={styles.title}>
+                    <Icon
+                      reverse
+                      name='bell'
+                      type='font-awesome'
+                      color={(notifications) ? '#34bbed' : 'grey'}
+                      onPress={() => {
+                        Toast.show({
+                          text: (notifications) ? 'Notifications Setting Disabled!' : 'Notifications Setting Enabled!',
+                          duration: 1500
+                        })
+                        this.props.updateUserSettings('notifications')
+                      }}
+                    />
+                  </WalkthroughableText>
+                </CopilotStep>
+                <Text style={{color: borderAccentColor}}>Notifications</Text>
+              </View>
+              <View style={{flexDirection: 'column', alignItems: 'center'}}>
+                <CopilotStep text="Click here to toggle analytics" order={6} name="analytics">
+                  <WalkthroughableText style={styles.title}>
+                    <Icon
+                      reverse
+                      name='pie-chart'
+                      type='font-awesome'
+                      color={(analytics) ? '#34bbed' : 'grey'}
+                      onPress={() => {
+                        Toast.show({
+                          text: (analytics) ? 'Analytics Setting Disabled!' : 'Analytics Setting Enabled!',
+                          duration: 1500
+                        })
+                        this.props.updateUserSettings('analytics')
+                      }}
+                    />
+                  </WalkthroughableText>
+                </CopilotStep>
+                <Text style={{color: borderAccentColor}}>Analytics</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={{flex: 0.25}} />
+
         </View>
-        <View style={{flex: 20}} />
+
         <ActionSheet
           ref={o => this.ActionSheet = o}
           title={'Sharing Options'}
