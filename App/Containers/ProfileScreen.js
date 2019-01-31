@@ -161,7 +161,7 @@ class ProfileScreen extends React.Component {
           <View style={{flex: 0.25}} />
 
           <View style={{alignItems: 'center'}}>
-            <CopilotStep text="Share your Blockstack ID with your friends" order={7} name="share">
+            <CopilotStep text="Share your Blockstack ID with your friends" order={3} name="share">
               <WalkthroughableText style={styles.title}>
                 <Button
                   onPress={this.showActionSheet}
@@ -181,7 +181,7 @@ class ProfileScreen extends React.Component {
                           borderStyle: 'solid',
                           borderColor: borderAccentColor}}>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
-                <CopilotStep text="Click here to show your QR code" order={3} name="qrcode">
+                <CopilotStep text="Click here to show your QR code" order={4} name="qrcode">
                   <WalkthroughableText style={styles.title}>
                     <Icon
                       reverse
@@ -202,7 +202,7 @@ class ProfileScreen extends React.Component {
                 <Text style={{color: borderAccentColor}}>QR Code</Text>
               </View>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
-                <CopilotStep text="Click here to toggle contact discovery" order={4} name="discover">
+                <CopilotStep text="Click here to toggle contact discovery" order={5} name="discover">
                   <WalkthroughableText style={styles.title}>
                     <Icon
                       reverse
@@ -222,7 +222,7 @@ class ProfileScreen extends React.Component {
                 <Text style={{color: borderAccentColor}}>Discovery</Text>
               </View>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
-                <CopilotStep text="Click here to toggle notifications" order={5} name="notification">
+                <CopilotStep text="Click here to toggle notifications" order={6} name="notification">
                   <WalkthroughableText style={styles.title}>
                     <Icon
                       reverse
@@ -242,7 +242,7 @@ class ProfileScreen extends React.Component {
                 <Text style={{color: borderAccentColor}}>Notifications</Text>
               </View>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
-                <CopilotStep text="Click here to toggle analytics" order={6} name="analytics">
+                <CopilotStep text="Click here to toggle analytics" order={7} name="analytics">
                   <WalkthroughableText style={styles.title}>
                     <Icon
                       reverse
@@ -264,7 +264,17 @@ class ProfileScreen extends React.Component {
             </View>
           </View>
 
-          <View style={{flex: 0.25}} />
+          <View style={{flex: 0.15}} />
+          
+          <View style={{alignItems: 'flex-end', justifyContent: 'flex-end', textAlign: 'right', alignSelf: 'stretch', marginRight: 20}}>
+            <CopilotStep text="The version of Stealthy running" order={8} name="appVersion">
+              <WalkthroughableText style={styles.title}>
+                <Text h5 style={{color: borderAccentColor, fontStyle: 'italic', fontWeight: 'bold'}}>v{this.props.appVersion}</Text>
+              </WalkthroughableText>
+            </CopilotStep>
+          </View>
+
+          <View style={{flex: 0.1}} />
 
         </View>
 
@@ -320,6 +330,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
   return {
+    appVersion: EngineSelectors.getAppVersion(state),
     userProfile: EngineSelectors.getUserProfile(state),
     publicKey: EngineSelectors.getPublicKey(state),
     userData: EngineSelectors.getUserData(state),

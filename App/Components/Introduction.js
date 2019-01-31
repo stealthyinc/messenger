@@ -16,7 +16,8 @@ import bitcoin from '../Images/Icons/bitcoin.png'
 import folder from '../Images/Icons/folder.png'
 import blockchain from '../Images/Icons/blockchain.png'
 import security from '../Images/Icons/molecular.png'
-import censor from '../Images/Icons/chat.png'
+import censor from '../Images/Icons/censor.png'
+import chat from '../Images/Icons/chat.png'
 
 const utils = require('./../Engine/misc/utils.js')
 
@@ -45,19 +46,19 @@ const styles = StyleSheet.create({
 
 const slides = [
   {
-    key: 'Blockchain Identity',
-    title: 'Blockchain Identity',
-    text: 'Your identity is written to the blockchain',
-    image: blockchain,
+    key: 'Secure Messaging',
+    title: 'Secure Messaging',
+    text: 'Chat with your friends without Zuck snooping',
+    image: chat,
     imageStyle: styles.image,
     titleStyle: styles.title,
     textStyle: styles.text,
-    backgroundColor: '#29ABE2'
+    backgroundColor: '#3b5998'
   },
   {
-    key: 'Distributed Storage',
-    title: 'Distributed Storage',
-    text: 'Your data is stored in your personal cloud drive',
+    key: 'Private Cloud Storage',
+    title: 'Private Cloud Storage',
+    text: `You own your data,\naccessible by you alone`,
     image: folder,
     imageStyle: styles.image,
     titleStyle: styles.title,
@@ -65,9 +66,9 @@ const slides = [
     backgroundColor: '#22bcb5'
   },
   {
-    key: 'Decentralized Keys',
-    title: 'Decentralized Keys',
-    text: 'Only you have access to your encyrption keys',
+    key: 'Individual Encryption',
+    title: 'Individual Encryption',
+    text: 'You hold your encryption keys, not a big company',
     image: security,
     imageStyle: styles.image,
     titleStyle: styles.title,
@@ -75,14 +76,24 @@ const slides = [
     backgroundColor: '#A3A1FF'
   },
   {
+    key: 'Blockchain Identity',
+    title: 'Blockchain Identity',
+    text: 'Find your friends without a central database',
+    image: blockchain,
+    imageStyle: styles.image,
+    titleStyle: styles.title,
+    textStyle: styles.text,
+    backgroundColor: '#29ABE2'
+  },
+  {
     key: 'Censorship Free',
     title: 'Censorship Free',
-    text: 'Nobody can interfere or prohibit your speech',
+    text: 'Nobody can prohibit your freedom of expression',
     image: censor,
     imageStyle: styles.image,
     titleStyle: styles.title,
     textStyle: styles.text,
-    backgroundColor: '#ffc62b'
+    backgroundColor: '#8ac724'
   },
 ];
 

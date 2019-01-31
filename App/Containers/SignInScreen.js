@@ -139,49 +139,65 @@ class SignInScreen extends React.Component {
             style={{flex: 0.1}}/>
 
         </View>
-        <View style={{flexDirection: 'row', marginTop: (oldPad) ? 50 : 120}}>
-          <Image
-            source={chatIcon}
-            style={{width: 50, height: 50}}
-          />
-          <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: (oldPad) ? 40 : 65, marginTop: 5 }}>Hi Stealthy 👋</Text>
-        </View>
-        <Text style={{ fontWeight: 'bold', fontSize: (oldPad) ? 24 : 32, color: 'grey', marginBottom: 10 }}>Encrypted Messaging</Text>
-        <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: (oldPad) ? 16 : 20, color: 'grey', marginBottom }}>Enabled by blockchain, owned by you</Text>
-        <CopilotStep text="Hey! Welcome to Stealthy! Click here to create an account or login" order={1} name="createAccount">
-          <WalkthroughableText style={styles.title}>
-            <Button
-              onPress={this._signInAsync}
-              title='Sign In/Up'
-              titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
-              icon={{name: 'input', color: 'white'}}
-              buttonStyle={{
-                backgroundColor: '#34bbed',
-                width: 180,
-                height: 50,
-                borderColor: 'transparent',
-                borderWidth: 0,
-                borderRadius: 5,
-                marginTop: (oldPad) ? 10 : 25
-              }}
+        <View style={{flex: 1,
+                      width: '100%',
+                      alignItems: 'center'}}>
+
+          <View style={{flex: 0.3}} />
+
+          <View style={{flexDirection: 'row'}}>
+            <Image
+              source={chatIcon}
+              style={{width: 50, height: 50}}
             />
-          </WalkthroughableText>
-        </CopilotStep>
-        <Button
-          onPress={() => this.props.start()}
-          title='Walk Through'
-          titleStyle={{ fontSize: 18, fontWeight: '900', color: 'black' }}
-          icon={{name: 'help', color: 'black'}}
-          buttonStyle={{
-            backgroundColor: 'white',
-            width: 180,
-            height: 50,
-            borderColor: 'black',
-            borderWidth: 2,
-            borderRadius: 5,
-            marginTop: (oldPad) ? 10 : 25
-          }}
-        />
+            <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15 }}>Hi Stealthy 👋</Text>
+          </View>
+
+          <View style={{flex: 0.15}} />
+
+          <Text style={{ fontWeight: 'bold', fontSize: (oldPad) ? 24 : 32, color: 'grey', marginBottom: 10 }}>Encrypted Messaging</Text>
+
+          <View style={{flex: 0.02}} />
+
+          <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: (oldPad) ? 16 : 20, color: 'grey' }}>Enabled by blockchain, owned by you</Text>
+
+          <View style={{flex: 0.15}} />
+
+          <CopilotStep text="Hey! Welcome to Stealthy! Click here to create an account or login" order={1} name="createAccount">
+            <WalkthroughableText style={styles.title}>
+              <Button
+                onPress={this._signInAsync}
+                title='Sign In/Up'
+                titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
+                icon={{name: 'input', color: 'white'}}
+                buttonStyle={{
+                  backgroundColor: '#34bbed',
+                  width: 180,
+                  height: 50,
+                  borderColor: 'transparent',
+                  borderWidth: 0,
+                  borderRadius: 5,
+                }}
+              />
+            </WalkthroughableText>
+          </CopilotStep>
+          <View style={{flex: 0.05}} />
+          <Button
+            onPress={() => this.props.start()}
+            title='Walk Through'
+            titleStyle={{ fontSize: 18, fontWeight: '900', color: 'black' }}
+            icon={{name: 'help', color: 'black'}}
+            buttonStyle={{
+              backgroundColor: 'white',
+              width: 180,
+              height: 50,
+              borderColor: 'black',
+              borderWidth: 2,
+              borderRadius: 5,
+            }}
+          />
+          <View style={{flex: 0.23}} />
+        </View>
       </ScrollView>
     )
   }
