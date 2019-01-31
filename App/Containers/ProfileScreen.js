@@ -15,6 +15,19 @@ import { copilot, walkthroughable, CopilotStep } from '@okgrow/react-native-copi
 const utils = require('./../Engine/misc/utils.js')
 const WalkthroughableText = walkthroughable(AText);
 
+const CustomIcon = ({ copilot, disabled, name, flag, onPress }) => (
+  <View {...copilot} style={styles.title}>
+    <Icon
+      reverse
+      disabled={disabled}
+      name={name}
+      type='font-awesome'
+      color={(flag) ? '#34bbed' : 'grey'}
+      onPress={onPress}
+    />
+  </View>
+)
+
 class ProfileScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {}
@@ -116,23 +129,40 @@ class ProfileScreen extends React.Component {
         />
       )
     }
-    let avatarElement = undefined
+    let AvatarElement = undefined
     if (showQR || !base64) {
-      avatarElement = (
-        <QRCode value={qrText} size={160} bgColor='black' fgColor='white' />)
+      AvatarElement = ({ copilot }) => (
+        <View {...copilot}>
+          <QRCode value={qrText} size={160} bgColor='black' fgColor='white' />
+        </View>
+      )
     } else {
       let marginBottomVal = (oldPad || (Platform.OS !== 'ios')) ? 5 : 15
       let sizeVal = (oldPad || (Platform.OS !== 'ios')) ? 'large' : 'xlarge'
-      avatarElement = (
-        <Avatar
-          size={sizeVal}
-          source={{uri: base64}}
-          overlayContainerStyle={{backgroundColor: 'white'}}
-          containerStyle={{marginBottom: marginBottomVal}}
-          avatarStyle={{borderColor: borderAccentColor,
-                        borderRadius: 15,
-                        borderWidth: 1}} />)
+      AvatarElement = ({ copilot }) => (
+        <View {...copilot}>
+          <Avatar
+            size={sizeVal}
+            source={{uri: base64}}
+            overlayContainerStyle={{backgroundColor: 'white'}}
+            containerStyle={{marginBottom: marginBottomVal}}
+            avatarStyle={{borderColor: borderAccentColor,
+                          borderRadius: 15,
+                          borderWidth: 1}} />
+        </View>
+      )
     }
+    const CustomButton = ({ copilot }) => (
+      <View {...copilot} style={styles.title}>
+        <Button
+          onPress={this.showActionSheet}
+          icon={{name: 'share', color: 'white'}}
+          buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 150, height: 50, backgroundColor: '#34bbed'}}
+          titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
+          title='Share ID'
+        />
+      </View>
+    )
     if (username.length > 24) {
       username = username.substring(0, 21) + '...'
     }
@@ -146,9 +176,7 @@ class ProfileScreen extends React.Component {
 
           <View style={{alignItems: 'center'}}>
             <CopilotStep text="This is your profile picture or QRCode" order={1} name="profilePicture">
-              <WalkthroughableText style={styles.title}>
-                {avatarElement}
-              </WalkthroughableText>
+              <AvatarElement />
             </CopilotStep>
             <CopilotStep text="This is your Blockstack User ID" order={2} name="userid">
               <WalkthroughableText style={styles.title}>
@@ -159,18 +187,9 @@ class ProfileScreen extends React.Component {
           </View>
 
           <View style={{flex: 0.25}} />
-
           <View style={{alignItems: 'center'}}>
             <CopilotStep text="Share your Blockstack ID with your friends" order={3} name="share">
-              <WalkthroughableText style={styles.title}>
-                <Button
-                  onPress={this.showActionSheet}
-                  icon={{name: 'share', color: 'white'}}
-                  buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 150, height: 50, backgroundColor: '#34bbed'}}
-                  titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
-                  title='Share ID'
-                />
-              </WalkthroughableText>
+              <CustomButton />
             </CopilotStep>
 
             <View style={{width: buttonRowWidth,
@@ -182,82 +201,69 @@ class ProfileScreen extends React.Component {
                           borderColor: borderAccentColor}}>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <CopilotStep text="Click here to show your QR code" order={4} name="qrcode">
-                  <WalkthroughableText style={styles.title}>
-                    <Icon
-                      reverse
-                      name='qrcode'
-                      type='font-awesome'
-                      disabled={!base64}
-                      color={(showQR) ? '#34bbed' : 'grey'}
-                      onPress={() => {
-                        Toast.show({
-                          text: (showQR) ? 'Hide QR Code' : 'Show QR Code',
-                          duration: 1500
-                        })
-                        this.setState({showQR: !showQR})
-                      }}
-                    />
-                  </WalkthroughableText>
+                  <CustomIcon 
+                    name='qrcode'
+                    disabled={!base64}
+                    flag={showQR}
+                    onPress={() => {
+                      Toast.show({
+                        text: (showQR) ? 'Hide QR Code' : 'Show QR Code',
+                        duration: 1500
+                      })
+                      this.setState({showQR: !showQR})
+                    }}
+                  />
                 </CopilotStep>
                 <Text style={{color: borderAccentColor}}>QR Code</Text>
               </View>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <CopilotStep text="Click here to toggle contact discovery" order={5} name="discover">
-                  <WalkthroughableText style={styles.title}>
-                    <Icon
-                      reverse
-                      name='connectdevelop'
-                      type='font-awesome'
-                      color={(discovery) ? '#34bbed' : 'grey'}
-                      onPress={() => {
-                        Toast.show({
-                          text: (discovery) ? 'Discovery Setting Disabled!' : 'Discovery Setting Enabled!',
-                          duration: 1500
-                        })
-                        this.props.updateUserSettings('discovery')
-                      }}
-                    />
-                  </WalkthroughableText>
+                  <CustomIcon 
+                    name='connectdevelop'
+                    disabled={false}
+                    flag={discovery}
+                    onPress={() => {
+                      Toast.show({
+                        text: (discovery) ? 'Discovery Setting Disabled!' : 'Discovery Setting Enabled!',
+                        duration: 1500
+                      })
+                      this.props.updateUserSettings('discovery')
+                    }}
+                  />
                 </CopilotStep>
                 <Text style={{color: borderAccentColor}}>Discovery</Text>
               </View>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <CopilotStep text="Click here to toggle notifications" order={6} name="notification">
-                  <WalkthroughableText style={styles.title}>
-                    <Icon
-                      reverse
-                      name='bell'
-                      type='font-awesome'
-                      color={(notifications) ? '#34bbed' : 'grey'}
-                      onPress={() => {
-                        Toast.show({
-                          text: (notifications) ? 'Notifications Setting Disabled!' : 'Notifications Setting Enabled!',
-                          duration: 1500
-                        })
-                        this.props.updateUserSettings('notifications')
-                      }}
-                    />
-                  </WalkthroughableText>
+                  <CustomIcon 
+                    name='bell'
+                    disabled={false}
+                    flag={notifications}
+                    onPress={() => {
+                      Toast.show({
+                        text: (notifications) ? 'Notifications Setting Disabled!' : 'Notifications Setting Enabled!',
+                        duration: 1500
+                      })
+                      this.props.updateUserSettings('notifications')
+                    }}
+                  />
                 </CopilotStep>
                 <Text style={{color: borderAccentColor}}>Notifications</Text>
               </View>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <CopilotStep text="Click here to toggle analytics" order={7} name="analytics">
-                  <WalkthroughableText style={styles.title}>
-                    <Icon
-                      reverse
-                      name='pie-chart'
-                      type='font-awesome'
-                      color={(analytics) ? '#34bbed' : 'grey'}
-                      onPress={() => {
-                        Toast.show({
-                          text: (analytics) ? 'Analytics Setting Disabled!' : 'Analytics Setting Enabled!',
-                          duration: 1500
-                        })
-                        this.props.updateUserSettings('analytics')
-                      }}
-                    />
-                  </WalkthroughableText>
+                  <CustomIcon 
+                    name='pie-chart'
+                    disabled={false}
+                    flag={analytics}
+                    onPress={() => {
+                      Toast.show({
+                        text: (analytics) ? 'Analytics Setting Disabled!' : 'Analytics Setting Enabled!',
+                        duration: 1500
+                      })
+                      this.props.updateUserSettings('analytics')
+                    }}
+                  />
                 </CopilotStep>
                 <Text style={{color: borderAccentColor}}>Analytics</Text>
               </View>
@@ -266,16 +272,15 @@ class ProfileScreen extends React.Component {
 
           <View style={{flex: 0.15}} />
           
-          <View style={{alignItems: 'flex-end', justifyContent: 'flex-end', textAlign: 'right', alignSelf: 'stretch', marginRight: 20}}>
+          <View style={{alignItems: 'flex-end', justifyContent: 'flex-end', alignSelf: 'stretch', marginRight: 20}}>
             <CopilotStep text="The version of Stealthy running" order={8} name="appVersion">
               <WalkthroughableText style={styles.title}>
-                <Text h5 style={{color: borderAccentColor, fontStyle: 'italic', fontWeight: 'bold'}}>v{this.props.appVersion}</Text>
+                <Text h5 style={{color: borderAccentColor, fontStyle: 'italic', fontWeight: 'bold', textAlign: 'right'}}>v{this.props.appVersion}</Text>
               </WalkthroughableText>
             </CopilotStep>
           </View>
 
           <View style={{flex: 0.1}} />
-
         </View>
 
         <ActionSheet
@@ -345,6 +350,6 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-const ProfileScreenExplained = copilot({ animated: true, overlay: 'svg' })(ProfileScreen);
+const ProfileScreenExplained = copilot({ animated: true, androidStatusBarVisible: true, overlay: 'svg' })(ProfileScreen);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProfileScreenExplained)

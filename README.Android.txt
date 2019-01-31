@@ -18,3 +18,7 @@ Running Android from the Command Line
 From the stealthyMobile folder:
         react-native run-android
 (Doesn't work from another folder)
+
+
+If this is still an issue:
+https://github.com/magicismight/react-native-root-toast/pull/56/files

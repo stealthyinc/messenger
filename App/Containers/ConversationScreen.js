@@ -224,6 +224,6 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-const ConversationScreenExplained = copilot({ animated: true, overlay: 'svg' })(ConversationScreen);
+const ConversationScreenExplained = copilot({ animated: true, androidStatusBarVisible: true, overlay: 'svg' })(ConversationScreen);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConversationScreenExplained)

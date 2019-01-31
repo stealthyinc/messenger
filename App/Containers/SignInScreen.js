@@ -66,6 +66,24 @@ class SignInScreen extends React.Component {
           />
       )
     }
+    const CustomComponent = ({ copilot }) => (
+      <View {...copilot} style={styles.title}>
+        <Button
+          onPress={this._signInAsync}
+          title='Sign In/Up'
+          titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
+          icon={{name: 'input', color: 'white'}}
+          buttonStyle={{
+            backgroundColor: '#34bbed',
+            width: 180,
+            height: 50,
+            borderColor: 'transparent',
+            borderWidth: 0,
+            borderRadius: 5,
+          }}
+        />
+      </View>
+    )
 
     return (
       <ScrollView contentContainerStyle={styles.container}>
@@ -164,22 +182,7 @@ class SignInScreen extends React.Component {
           <View style={{flex: 0.15}} />
 
           <CopilotStep text="Hey! Welcome to Stealthy! Click here to create an account or login" order={1} name="createAccount">
-            <WalkthroughableText style={styles.title}>
-              <Button
-                onPress={this._signInAsync}
-                title='Sign In/Up'
-                titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
-                icon={{name: 'input', color: 'white'}}
-                buttonStyle={{
-                  backgroundColor: '#34bbed',
-                  width: 180,
-                  height: 50,
-                  borderColor: 'transparent',
-                  borderWidth: 0,
-                  borderRadius: 5,
-                }}
-              />
-            </WalkthroughableText>
+            <CustomComponent />
           </CopilotStep>
           <View style={{flex: 0.05}} />
           <Button
@@ -341,6 +344,6 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-const SignInScreenExplained = copilot({ animated: true, overlay: 'svg' })(SignInScreen);
+const SignInScreenExplained = copilot({ animated: true, androidStatusBarVisible: true, overlay: 'svg' })(SignInScreen);
 
 export default connect(mapStateToProps, mapDispatchToProps)(SignInScreenExplained)

@@ -51,7 +51,7 @@
     "react-native-config": "^0.11.7",
     "react-native-document-picker": "^2.2.0",
     "react-native-drawer": "^2.5.1",
-    "react-native-elements": "^1.0.0",
+    "react-native-elements": "1.0.0-beta7",
     "react-native-firebase": "^4.3.8",
     "react-native-gifted-chat": "^0.4.3",
     "react-native-loading-spinner-overlay": "^1.0.1",

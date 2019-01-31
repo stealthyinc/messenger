@@ -643,6 +643,6 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-const ChannelScreenExplained = copilot({ animated: true, overlay: 'svg' })(ChannelScreen);
+const ChannelScreenExplained = copilot({ animated: true, androidStatusBarVisible: true, overlay: 'svg' })(ChannelScreen);
 
 export default connect(mapStateToProps, mapDispatchToProps)(ChannelScreenExplained)
