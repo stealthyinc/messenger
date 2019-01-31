@@ -168,7 +168,7 @@ class SignInScreen extends React.Component {
               source={chatIcon}
               style={{width: 50, height: 50}}
             />
-            <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15 }}>Hi Stealthy 👋</Text>
+            <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15 }}>Hi Stealthy! 👋</Text>
           </View>
 
           <View style={{flex: 0.15}} />

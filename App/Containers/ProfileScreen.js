@@ -166,6 +166,7 @@ class ProfileScreen extends React.Component {
     if (username.length > 24) {
       username = username.substring(0, 21) + '...'
     }
+    const myAppVersion = v + this.props.appVersion
     return (
       <View style={styles.container}>
         <View style={{flex: 1,
@@ -275,7 +276,7 @@ class ProfileScreen extends React.Component {
           <View style={{alignItems: 'flex-end', justifyContent: 'flex-end', alignSelf: 'stretch', marginRight: 20}}>
             <CopilotStep text="The version of Stealthy running" order={8} name="appVersion">
               <WalkthroughableText style={styles.title}>
-                <Text h5 style={{color: borderAccentColor, fontStyle: 'italic', fontWeight: 'bold', textAlign: 'right'}}>v{this.props.appVersion}</Text>
+                <Text h5 style={{color: borderAccentColor, fontStyle: 'italic', fontWeight: 'bold', textAlign: 'right'}}>myAppVersion</Text>
               </WalkthroughableText>
             </CopilotStep>
           </View>
