@@ -16,7 +16,7 @@ const utils = require('./../Engine/misc/utils.js')
 const WalkthroughableText = walkthroughable(AText);
 
 const CustomIcon = ({ copilot, disabled, name, flag, onPress }) => (
-  <View {...copilot} style={styles.title}>
+  <View {...copilot}>
     <Icon
       reverse
       disabled={disabled}
@@ -153,7 +153,7 @@ class ProfileScreen extends React.Component {
       )
     }
     const CustomButton = ({ copilot }) => (
-      <View {...copilot} style={styles.title}>
+      <View {...copilot}>
         <Button
           onPress={this.showActionSheet}
           icon={{name: 'share', color: 'white'}}
@@ -202,7 +202,7 @@ class ProfileScreen extends React.Component {
                           borderColor: borderAccentColor}}>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <CopilotStep text="Click here to show your QR code" order={4} name="qrcode">
-                  <CustomIcon 
+                  <CustomIcon
                     name='qrcode'
                     disabled={!base64}
                     flag={showQR}
@@ -219,7 +219,7 @@ class ProfileScreen extends React.Component {
               </View>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <CopilotStep text="Click here to toggle contact discovery" order={5} name="discover">
-                  <CustomIcon 
+                  <CustomIcon
                     name='connectdevelop'
                     disabled={false}
                     flag={discovery}
@@ -236,7 +236,7 @@ class ProfileScreen extends React.Component {
               </View>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <CopilotStep text="Click here to toggle notifications" order={6} name="notification">
-                  <CustomIcon 
+                  <CustomIcon
                     name='bell'
                     disabled={false}
                     flag={notifications}
@@ -253,7 +253,7 @@ class ProfileScreen extends React.Component {
               </View>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <CopilotStep text="Click here to toggle analytics" order={7} name="analytics">
-                  <CustomIcon 
+                  <CustomIcon
                     name='pie-chart'
                     disabled={false}
                     flag={analytics}
@@ -272,7 +272,7 @@ class ProfileScreen extends React.Component {
           </View>
 
           <View style={{flex: 0.15}} />
-          
+
           <View style={{alignItems: 'flex-end', justifyContent: 'flex-end', alignSelf: 'stretch', marginRight: 20}}>
             <CopilotStep text="The version of Stealthy running" order={8} name="appVersion">
               <WalkthroughableText style={styles.title}>
