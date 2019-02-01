@@ -68,7 +68,7 @@ let ENCRYPT_SETTINGS = true
 let STEALTHY_PAGE = 'LOCALHOST'
 //
 // Logging Scopes
-const LOG_GAIAIO = true
+const LOG_GAIAIO = false
 const LOG_OFFLINEMESSAGING = false
 //
 const ENABLE_AMA = true
@@ -509,8 +509,8 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.userId, this.privateKey, this.io, 'https://app.travelstack.club')
     this.indexIntegrations['Travelstack'] = travelStackIntegration
 
-    this.refreshIntegrationData('Graphite')
-    this.refreshIntegrationData('Travelstack')
+    // this.refreshIntegrationData('Graphite')
+    // this.refreshIntegrationData('Travelstack')
   }
 
   async _configureIO () {
@@ -694,6 +694,9 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   //
   handleShutDownRequest = async () => {
+    const method = 'engine::handleShutDownRequest'
+    console.log(`INFO(${method}): called.`)
+
     if (this.offlineMsgSvc) {
       try {
         // Don't disable emit/listeners for the engine yet (we need to emit one
@@ -714,55 +717,91 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     }
 
+    console.log(`INFO(${method}): removed event listeners.`)
+
     if (this.offlineMsgSvc) {
       try {
-        this.offlineMsgSvc.skipSendService()
-        this.offlineMsgSvc.stopSendService()
+        this.offlineMsgSvc.clearReceiveMessageQueue()
         this.offlineMsgSvc.pauseRecvService()
         this.offlineMsgSvc.stopRecvService()
+        //
+        this.offlineMsgSvc.skipSendService()
+        this.offlineMsgSvc.stopSendService()
       } catch (err) {
         // do nothing, just don't prevent the code below from happening
       }
     }
 
-    const promises = []
-    if (this.offlineMsgSvc) {
-      promises.push(
-        this.offlineMsgSvc.sendMessagesToStorage()
-        .catch(err => {
-          console.log(`ERROR(engine.js::handleShutDownRequest): sending messages to storage. ${err}`)
-          return undefined
-        })
-      )
-    }
-    if (this.conversations) {
-      promises.push(
-        this._writeConversations()
-        .catch(err => {
-          console.log(`ERROR(engine.js::handleShutDownRequest): writing conversations. ${err}`)
-          return undefined
-        })
-      )
-    }
-    // We stopped doing this after every incoming msg etc. to
-    // speed things along, hence write here.
-    //   - to avoid the popup, we should have a timer periodically write
-    //     all these and use a dirty flag to determine if we even need to do this.
-    if (this.contactMgr) {
-      promises.push(
-        this._writeContactList(this.contactMgr.getAllContacts())
-        .catch(err => {
-          console.log(`ERROR(engine.js::handleShutDownRequest): writing contact list. ${err}`)
-          return undefined
-        })
-      )
+    console.log(`INFO(${method}): stopped offline msg send/receive service.`)
+
+
+    try {
+      await this.offlineMsgSvc.sendMessagesToStorage()
+      console.log(`INFO(${method}): wrote offline messages.`)
+    } catch (error) {
+      console.log(`ERROR(${method}): writing offline messages.`)
     }
 
     try {
-      await Promise.all(promises)
-      this.logger('INFO:(engine.js::handleShutDownRequest): engine shutdown successful.')
+      await this._writeConversations()
+      console.log(`INFO(${method}): wrote conversations.`)
     } catch (error) {
-      console.log(`ERROR(engine.js::handleShutDownRequest): ${error}`)
+      console.log(`ERROR(${method}): writing conversations.`)
+    }
+
+    try {
+      await this._writeContactList(this.contactMgr.getAllContacts())
+      console.log(`INFO(${method}): wrote contacts.`)
+    } catch (error) {
+      console.log(`ERROR(${method}): writing contacts.`)
+    }
+
+
+
+    // const promises = []
+    // if (this.offlineMsgSvc) {
+    //   promises.push(
+    //     this.offlineMsgSvc.sendMessagesToStorage()
+    //     .catch(err => {
+    //       console.log(`ERROR(engine.js::handleShutDownRequest): sending messages to storage. ${err}`)
+    //       return undefined
+    //     })
+    //   )
+    // }
+    // console.log(`INFO(${method}): writing offline messages.`)
+    //
+    // if (this.conversations) {
+    //   promises.push(
+    //     this._writeConversations()
+    //     .catch(err => {
+    //       console.log(`ERROR(engine.js::handleShutDownRequest): writing conversations. ${err}`)
+    //       return undefined
+    //     })
+    //   )
+    // }
+    // console.log(`INFO(${method}): writing conversations.`)
+    //
+    // // We stopped doing this after every incoming msg etc. to
+    // // speed things along, hence write here.
+    // //   - to avoid the popup, we should have a timer periodically write
+    // //     all these and use a dirty flag to determine if we even need to do this.
+    // if (this.contactMgr) {
+    //   promises.push(
+    //     this._writeContactList(this.contactMgr.getAllContacts())
+    //     .catch(err => {
+    //       console.log(`ERROR(${method}): writing contact list. ${err}`)
+    //       return undefined
+    //     })
+    //   )
+    // }
+    // console.log(`INFO(${method}): writing contacts.`)
+
+    try {
+      // this.logger(`INFO:(${method}): waiting on gaia related promises.`)
+      // await Promise.all(promises)
+      this.logger(`INFO:(${method}): engine shutdown successful.`)
+    } catch (error) {
+      console.log(`ERROR(${method}): ${error}`)
     } finally {
       this.offlineMsgSvc = undefined
 
@@ -779,6 +818,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.offAll()
     } catch (err) {
     }
+    console.log(`INFO(${method}): removed all event listeners.`)
   }
 
   //
