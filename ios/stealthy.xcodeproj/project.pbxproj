@@ -56,32 +56,32 @@
 		7502F8C220D0CA6200232E72 /* TSBackgroundFetch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7502F8C120D0CA6200232E72 /* TSBackgroundFetch.framework */; };
 		751F45252130D958009F3658 /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 751F44F82130D958009F3658 /* Social.framework */; };
 		751F456F2130E4B9009F3658 /* KDSocialShare.m in Sources */ = {isa = PBXBuildFile; fileRef = 751F456E2130E4B9009F3658 /* KDSocialShare.m */; };
-		7526ECD120F7B8F400DA857E /* FirebaseFunctions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7526ECD020F7B8F400DA857E /* FirebaseFunctions.framework */; };
 		7541C5F021E5607400B04B30 /* libReactNativeConfig.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7541C5ED21E5606400B04B30 /* libReactNativeConfig.a */; };
 		7546978021693D59007837F8 /* libRNCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7546977B21693D32007837F8 /* libRNCamera.a */; };
 		754C0C2120D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 754C0BF620D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m */; };
 		75683D9721FFA4850011F98E /* libRNSVG.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75683D9021FFA47C0011F98E /* libRNSVG.a */; };
 		7578E71720AA27D600D60C9A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7578E71620AA27D600D60C9A /* GoogleService-Info.plist */; };
 		759DC9562170F95B0010129D /* libRCTCameraRoll.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 759DC92B2170F94E0010129D /* libRCTCameraRoll.a */; };
-		75A1371820F4017F00D89EA6 /* FirebaseCoreDiagnostics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1370E20F4017D00D89EA6 /* FirebaseCoreDiagnostics.framework */; };
-		75A1371920F4017F00D89EA6 /* FirebaseInstanceID.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1370F20F4017E00D89EA6 /* FirebaseInstanceID.framework */; };
-		75A1371A20F4017F00D89EA6 /* GoogleToolboxForMac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371020F4017E00D89EA6 /* GoogleToolboxForMac.framework */; };
-		75A1371B20F4017F00D89EA6 /* FirebaseAuth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371120F4017E00D89EA6 /* FirebaseAuth.framework */; };
-		75A1371C20F4017F00D89EA6 /* FirebaseNanoPB.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371220F4017E00D89EA6 /* FirebaseNanoPB.framework */; };
-		75A1371D20F4017F00D89EA6 /* FirebaseCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371320F4017E00D89EA6 /* FirebaseCore.framework */; };
-		75A1371E20F4017F00D89EA6 /* FirebaseAnalytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371420F4017E00D89EA6 /* FirebaseAnalytics.framework */; };
-		75A1371F20F4017F00D89EA6 /* FirebaseMessaging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371520F4017E00D89EA6 /* FirebaseMessaging.framework */; };
-		75A1372020F4017F00D89EA6 /* FirebaseDatabase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371620F4017F00D89EA6 /* FirebaseDatabase.framework */; };
-		75A1372120F4017F00D89EA6 /* GTMSessionFetcher.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1371720F4017F00D89EA6 /* GTMSessionFetcher.framework */; };
-		75A1372520F401A100D89EA6 /* leveldb-library.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1372220F401A100D89EA6 /* leveldb-library.framework */; };
-		75A1372620F401A100D89EA6 /* nanopb.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1372320F401A100D89EA6 /* nanopb.framework */; };
-		75A1372720F401A100D89EA6 /* Protobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A1372420F401A100D89EA6 /* Protobuf.framework */; };
 		75A52FB920A930CC00AC6DAD /* BlockstackNativeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 75A52FB820A930CC00AC6DAD /* BlockstackNativeModule.m */; };
 		75A52FBA20A9311100AC6DAD /* BlockstackNativeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 75A52FB820A930CC00AC6DAD /* BlockstackNativeModule.m */; };
 		75A52FC420A932E200AC6DAD /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75A52FC120A932D800AC6DAD /* libRCTPushNotification.a */; };
 		75B13AE3215AA26400893974 /* libRNFetchBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75B13AE2215AA24800893974 /* libRNFetchBlob.a */; };
 		75B7D23921E7134000BDF075 /* libRNVersionNumber.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75B7D23621E7133000BDF075 /* libRNVersionNumber.a */; };
 		75C3EB3E20E1B12400F5E81F /* libcryptopp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C3EB3D20E1B12400F5E81F /* libcryptopp.a */; settings = {ATTRIBUTES = (Required, ); }; };
+		75C4E59A2203F6F000841275 /* FirebaseAuth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C4E58C2203F6EE00841275 /* FirebaseAuth.framework */; };
+		75C4E59B2203F6F000841275 /* FirebaseFunctions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C4E58D2203F6EE00841275 /* FirebaseFunctions.framework */; };
+		75C4E59C2203F6F000841275 /* FirebaseCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C4E58E2203F6EE00841275 /* FirebaseCore.framework */; };
+		75C4E59D2203F6F000841275 /* FirebaseCoreDiagnostics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C4E58F2203F6EE00841275 /* FirebaseCoreDiagnostics.framework */; };
+		75C4E59E2203F6F000841275 /* GTMSessionFetcher.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C4E5902203F6EE00841275 /* GTMSessionFetcher.framework */; };
+		75C4E59F2203F6F000841275 /* FirebaseInstanceID.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C4E5912203F6EE00841275 /* FirebaseInstanceID.framework */; };
+		75C4E5A02203F6F000841275 /* FirebaseDatabase.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C4E5922203F6EE00841275 /* FirebaseDatabase.framework */; };
+		75C4E5A12203F6F000841275 /* GoogleToolboxForMac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C4E5932203F6EF00841275 /* GoogleToolboxForMac.framework */; };
+		75C4E5A22203F6F000841275 /* leveldb-library.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C4E5942203F6EF00841275 /* leveldb-library.framework */; };
+		75C4E5A32203F6F000841275 /* FirebaseAnalytics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C4E5952203F6EF00841275 /* FirebaseAnalytics.framework */; };
+		75C4E5A42203F6F000841275 /* FirebaseNanoPB.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C4E5962203F6EF00841275 /* FirebaseNanoPB.framework */; };
+		75C4E5A52203F6F000841275 /* nanopb.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C4E5972203F6EF00841275 /* nanopb.framework */; };
+		75C4E5A62203F6F000841275 /* FirebaseMessaging.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C4E5982203F6EF00841275 /* FirebaseMessaging.framework */; };
+		75C4E5A72203F6F000841275 /* Protobuf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 75C4E5992203F6EF00841275 /* Protobuf.framework */; };
 		75F0E51220AB428000CB49D4 /* libRNFirebase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75F0E51020AB424300CB49D4 /* libRNFirebase.a */; };
 		75F4999F21E865B00091DEFB /* libRNAmplitudeSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 75F4999521E865A10091DEFB /* libRNAmplitudeSDK.a */; };
 		793936C820E2DB3400268769 /* CryptoECIES.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 793936C620E2DB3400268769 /* CryptoECIES.cpp */; };
@@ -99,7 +99,6 @@
 		AA7CDE08CB214CBC83327697 /* AntDesign.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 55BE67AA0604456EA758AB3F /* AntDesign.ttf */; };
 		AAA270767FAF48F5B46E0A68 /* EvilIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B53705AE14A347578F21410B /* EvilIcons.ttf */; };
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
-		B176D88A28E547E2B968C17F /* libRNExitApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0884104C37884DF0B655BD75 /* libRNExitApp.a */; };
 		C49A52CB10A2497EBF2CDE27 /* Roboto_medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6F8465CA384C4260AEB5CCC2 /* Roboto_medium.ttf */; };
 		CA6D6069300B4339BD76F8B1 /* FontAwesome5_Brands.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 58AAFEAE913440F2966C04CA /* FontAwesome5_Brands.ttf */; };
 		D74D73EF04B94F96A58B4753 /* MaterialCommunityIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 403D1E0A446C478FB77A85E1 /* MaterialCommunityIcons.ttf */; };
@@ -571,7 +570,6 @@
 		751F44F82130D958009F3658 /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
 		751F45412130E4B8009F3658 /* KDSocialShare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KDSocialShare.h; path = "../node_modules/react-native-social-share/iOS/KDSocialShare.h"; sourceTree = "<group>"; };
 		751F456E2130E4B9009F3658 /* KDSocialShare.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KDSocialShare.m; path = "../node_modules/react-native-social-share/iOS/KDSocialShare.m"; sourceTree = "<group>"; };
-		7526ECD020F7B8F400DA857E /* FirebaseFunctions.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FirebaseFunctions.framework; sourceTree = "<group>"; };
 		753E71819135E1A15C288F57 /* Pods-stealthy.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-stealthy.release.xcconfig"; path = "Pods/Target Support Files/Pods-stealthy/Pods-stealthy.release.xcconfig"; sourceTree = "<group>"; };
 		7541C5E721E5606300B04B30 /* ReactNativeConfig.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeConfig.xcodeproj; path = "../node_modules/react-native-config/ios/ReactNativeConfig.xcodeproj"; sourceTree = "<group>"; };
 		7546974C21693D32007837F8 /* RNCamera.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RNCamera.xcodeproj"; sourceTree = "<group>"; };
@@ -579,20 +577,6 @@
 		75683D5921FFA47C0011F98E /* RNSVG.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNSVG.xcodeproj; path = "../node_modules/react-native-svg/ios/RNSVG.xcodeproj"; sourceTree = "<group>"; };
 		7578E71620AA27D600D60C9A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		759DC9212170F94D0010129D /* RCTCameraRoll.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTCameraRoll.xcodeproj; path = "../node_modules/react-native/Libraries/CameraRoll/RCTCameraRoll.xcodeproj"; sourceTree = "<group>"; };
-		75A1370B20F3ECB800D89EA6 /* Firebase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Firebase.h; path = Firebase/Firebase.h; sourceTree = "<group>"; };
-		75A1370E20F4017D00D89EA6 /* FirebaseCoreDiagnostics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseCoreDiagnostics.framework; path = Firebase/FirebaseCoreDiagnostics.framework; sourceTree = "<group>"; };
-		75A1370F20F4017E00D89EA6 /* FirebaseInstanceID.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseInstanceID.framework; path = Firebase/FirebaseInstanceID.framework; sourceTree = "<group>"; };
-		75A1371020F4017E00D89EA6 /* GoogleToolboxForMac.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GoogleToolboxForMac.framework; path = Firebase/GoogleToolboxForMac.framework; sourceTree = "<group>"; };
-		75A1371120F4017E00D89EA6 /* FirebaseAuth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseAuth.framework; path = Firebase/FirebaseAuth.framework; sourceTree = "<group>"; };
-		75A1371220F4017E00D89EA6 /* FirebaseNanoPB.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseNanoPB.framework; path = Firebase/FirebaseNanoPB.framework; sourceTree = "<group>"; };
-		75A1371320F4017E00D89EA6 /* FirebaseCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseCore.framework; path = Firebase/FirebaseCore.framework; sourceTree = "<group>"; };
-		75A1371420F4017E00D89EA6 /* FirebaseAnalytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseAnalytics.framework; path = Firebase/FirebaseAnalytics.framework; sourceTree = "<group>"; };
-		75A1371520F4017E00D89EA6 /* FirebaseMessaging.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseMessaging.framework; path = Firebase/FirebaseMessaging.framework; sourceTree = "<group>"; };
-		75A1371620F4017F00D89EA6 /* FirebaseDatabase.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseDatabase.framework; path = Firebase/FirebaseDatabase.framework; sourceTree = "<group>"; };
-		75A1371720F4017F00D89EA6 /* GTMSessionFetcher.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GTMSessionFetcher.framework; path = Firebase/GTMSessionFetcher.framework; sourceTree = "<group>"; };
-		75A1372220F401A100D89EA6 /* leveldb-library.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "leveldb-library.framework"; path = "Firebase/leveldb-library.framework"; sourceTree = "<group>"; };
-		75A1372320F401A100D89EA6 /* nanopb.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = nanopb.framework; path = Firebase/nanopb.framework; sourceTree = "<group>"; };
-		75A1372420F401A100D89EA6 /* Protobuf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Protobuf.framework; path = Firebase/Protobuf.framework; sourceTree = "<group>"; };
 		75A52FB720A9309400AC6DAD /* BlockstackNativeModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BlockstackNativeModule.h; sourceTree = "<group>"; };
 		75A52FB820A930CC00AC6DAD /* BlockstackNativeModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BlockstackNativeModule.m; sourceTree = "<group>"; };
 		75A52FBB20A932D800AC6DAD /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
@@ -600,6 +584,21 @@
 		75B13ADD215AA24800893974 /* RNFetchBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFetchBlob.xcodeproj; path = "../node_modules/rn-fetch-blob/ios/RNFetchBlob.xcodeproj"; sourceTree = "<group>"; };
 		75B7D1FD21E7132F00BDF075 /* RNVersionNumber.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNVersionNumber.xcodeproj; path = "../node_modules/react-native-version-number/ios/RNVersionNumber.xcodeproj"; sourceTree = "<group>"; };
 		75C3EB3D20E1B12400F5E81F /* libcryptopp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcryptopp.a; path = "../../../../../usr/local/cryptopp-ios/lib/libcryptopp.a"; sourceTree = "<group>"; };
+		75C4E58C2203F6EE00841275 /* FirebaseAuth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseAuth.framework; path = Firebase/FirebaseAuth.framework; sourceTree = "<group>"; };
+		75C4E58D2203F6EE00841275 /* FirebaseFunctions.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseFunctions.framework; path = Firebase/FirebaseFunctions.framework; sourceTree = "<group>"; };
+		75C4E58E2203F6EE00841275 /* FirebaseCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseCore.framework; path = Firebase/FirebaseCore.framework; sourceTree = "<group>"; };
+		75C4E58F2203F6EE00841275 /* FirebaseCoreDiagnostics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseCoreDiagnostics.framework; path = Firebase/FirebaseCoreDiagnostics.framework; sourceTree = "<group>"; };
+		75C4E5902203F6EE00841275 /* GTMSessionFetcher.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GTMSessionFetcher.framework; path = Firebase/GTMSessionFetcher.framework; sourceTree = "<group>"; };
+		75C4E5912203F6EE00841275 /* FirebaseInstanceID.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseInstanceID.framework; path = Firebase/FirebaseInstanceID.framework; sourceTree = "<group>"; };
+		75C4E5922203F6EE00841275 /* FirebaseDatabase.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseDatabase.framework; path = Firebase/FirebaseDatabase.framework; sourceTree = "<group>"; };
+		75C4E5932203F6EF00841275 /* GoogleToolboxForMac.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GoogleToolboxForMac.framework; path = Firebase/GoogleToolboxForMac.framework; sourceTree = "<group>"; };
+		75C4E5942203F6EF00841275 /* leveldb-library.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "leveldb-library.framework"; path = "Firebase/leveldb-library.framework"; sourceTree = "<group>"; };
+		75C4E5952203F6EF00841275 /* FirebaseAnalytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseAnalytics.framework; path = Firebase/FirebaseAnalytics.framework; sourceTree = "<group>"; };
+		75C4E5962203F6EF00841275 /* FirebaseNanoPB.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseNanoPB.framework; path = Firebase/FirebaseNanoPB.framework; sourceTree = "<group>"; };
+		75C4E5972203F6EF00841275 /* nanopb.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = nanopb.framework; path = Firebase/nanopb.framework; sourceTree = "<group>"; };
+		75C4E5982203F6EF00841275 /* FirebaseMessaging.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FirebaseMessaging.framework; path = Firebase/FirebaseMessaging.framework; sourceTree = "<group>"; };
+		75C4E5992203F6EF00841275 /* Protobuf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Protobuf.framework; path = Firebase/Protobuf.framework; sourceTree = "<group>"; };
+		75C4E5A82203F6FD00841275 /* Firebase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Firebase.h; path = Firebase/Firebase.h; sourceTree = "<group>"; };
 		75CB635A5D65494A95309E91 /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
 		75F4996421E865A10091DEFB /* RNAmplitudeSDK.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNAmplitudeSDK.xcodeproj; path = "../node_modules/react-native-amplitude-analytics/ios/RNAmplitudeSDK.xcodeproj"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
@@ -646,6 +645,20 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				75C4E59A2203F6F000841275 /* FirebaseAuth.framework in Frameworks */,
+				75C4E59B2203F6F000841275 /* FirebaseFunctions.framework in Frameworks */,
+				75C4E59C2203F6F000841275 /* FirebaseCore.framework in Frameworks */,
+				75C4E59D2203F6F000841275 /* FirebaseCoreDiagnostics.framework in Frameworks */,
+				75C4E59E2203F6F000841275 /* GTMSessionFetcher.framework in Frameworks */,
+				75C4E59F2203F6F000841275 /* FirebaseInstanceID.framework in Frameworks */,
+				75C4E5A02203F6F000841275 /* FirebaseDatabase.framework in Frameworks */,
+				75C4E5A12203F6F000841275 /* GoogleToolboxForMac.framework in Frameworks */,
+				75C4E5A22203F6F000841275 /* leveldb-library.framework in Frameworks */,
+				75C4E5A32203F6F000841275 /* FirebaseAnalytics.framework in Frameworks */,
+				75C4E5A42203F6F000841275 /* FirebaseNanoPB.framework in Frameworks */,
+				75C4E5A52203F6F000841275 /* nanopb.framework in Frameworks */,
+				75C4E5A62203F6F000841275 /* FirebaseMessaging.framework in Frameworks */,
+				75C4E5A72203F6F000841275 /* Protobuf.framework in Frameworks */,
 				75683D9721FFA4850011F98E /* libRNSVG.a in Frameworks */,
 				75F4999F21E865B00091DEFB /* libRNAmplitudeSDK.a in Frameworks */,
 				75B7D23921E7134000BDF075 /* libRNVersionNumber.a in Frameworks */,
@@ -659,35 +672,20 @@
 				75F0E51220AB428000CB49D4 /* libRNFirebase.a in Frameworks */,
 				75A52FC420A932E200AC6DAD /* libRCTPushNotification.a in Frameworks */,
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,
-				75A1371F20F4017F00D89EA6 /* FirebaseMessaging.framework in Frameworks */,
 				5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */,
-				75A1372620F401A100D89EA6 /* nanopb.framework in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
-				75A1371B20F4017F00D89EA6 /* FirebaseAuth.framework in Frameworks */,
 				5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */,
-				75A1371A20F4017F00D89EA6 /* GoogleToolboxForMac.framework in Frameworks */,
 				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
 				00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */,
 				00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */,
 				133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */,
-				75A1371820F4017F00D89EA6 /* FirebaseCoreDiagnostics.framework in Frameworks */,
 				00C302E91ABCBA2D00DB3ED1 /* libRCTNetwork.a in Frameworks */,
 				139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */,
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
-				7526ECD120F7B8F400DA857E /* FirebaseFunctions.framework in Frameworks */,
-				75A1371C20F4017F00D89EA6 /* FirebaseNanoPB.framework in Frameworks */,
 				75C3EB3E20E1B12400F5E81F /* libcryptopp.a in Frameworks */,
-				75A1371920F4017F00D89EA6 /* FirebaseInstanceID.framework in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
 				F352F9D294F05CD267109619 /* Pods_stealthy.framework in Frameworks */,
-				75A1371D20F4017F00D89EA6 /* FirebaseCore.framework in Frameworks */,
-				75A1372020F4017F00D89EA6 /* FirebaseDatabase.framework in Frameworks */,
-				75A1372120F4017F00D89EA6 /* GTMSessionFetcher.framework in Frameworks */,
-				75A1371E20F4017F00D89EA6 /* FirebaseAnalytics.framework in Frameworks */,
-				75A1372520F401A100D89EA6 /* leveldb-library.framework in Frameworks */,
-				75A1372720F401A100D89EA6 /* Protobuf.framework in Frameworks */,
-				B176D88A28E547E2B968C17F /* libRNExitApp.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -799,7 +797,7 @@
 		13B07FAE1A68108700A75B9A /* stealthy */ = {
 			isa = PBXGroup;
 			children = (
-				75A1370B20F3ECB800D89EA6 /* Firebase.h */,
+				75C4E5A82203F6FD00841275 /* Firebase.h */,
 				793936C620E2DB3400268769 /* CryptoECIES.cpp */,
 				793936C720E2DB3400268769 /* CryptoECIES.hpp */,
 				754C0BF620D0B3D2004F83EE /* RNBackgroundFetch+AppDelegate.m */,
@@ -846,23 +844,23 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				75C4E5952203F6EF00841275 /* FirebaseAnalytics.framework */,
+				75C4E58C2203F6EE00841275 /* FirebaseAuth.framework */,
+				75C4E58E2203F6EE00841275 /* FirebaseCore.framework */,
+				75C4E58F2203F6EE00841275 /* FirebaseCoreDiagnostics.framework */,
+				75C4E5922203F6EE00841275 /* FirebaseDatabase.framework */,
+				75C4E58D2203F6EE00841275 /* FirebaseFunctions.framework */,
+				75C4E5912203F6EE00841275 /* FirebaseInstanceID.framework */,
+				75C4E5982203F6EF00841275 /* FirebaseMessaging.framework */,
+				75C4E5962203F6EF00841275 /* FirebaseNanoPB.framework */,
+				75C4E5932203F6EF00841275 /* GoogleToolboxForMac.framework */,
+				75C4E5902203F6EE00841275 /* GTMSessionFetcher.framework */,
+				75C4E5942203F6EF00841275 /* leveldb-library.framework */,
+				75C4E5972203F6EF00841275 /* nanopb.framework */,
+				75C4E5992203F6EF00841275 /* Protobuf.framework */,
 				751F44F82130D958009F3658 /* Social.framework */,
 				7502F8C120D0CA6200232E72 /* TSBackgroundFetch.framework */,
 				75C3EB3D20E1B12400F5E81F /* libcryptopp.a */,
-				75A1372220F401A100D89EA6 /* leveldb-library.framework */,
-				75A1372320F401A100D89EA6 /* nanopb.framework */,
-				75A1372420F401A100D89EA6 /* Protobuf.framework */,
-				75A1371420F4017E00D89EA6 /* FirebaseAnalytics.framework */,
-				75A1371120F4017E00D89EA6 /* FirebaseAuth.framework */,
-				75A1371320F4017E00D89EA6 /* FirebaseCore.framework */,
-				75A1371620F4017F00D89EA6 /* FirebaseDatabase.framework */,
-				75A1371520F4017E00D89EA6 /* FirebaseMessaging.framework */,
-				75A1371220F4017E00D89EA6 /* FirebaseNanoPB.framework */,
-				75A1370E20F4017D00D89EA6 /* FirebaseCoreDiagnostics.framework */,
-				75A1370F20F4017E00D89EA6 /* FirebaseInstanceID.framework */,
-				75A1371020F4017E00D89EA6 /* GoogleToolboxForMac.framework */,
-				7526ECD020F7B8F400DA857E /* FirebaseFunctions.framework */,
-				75A1371720F4017F00D89EA6 /* GTMSessionFetcher.framework */,
 				2D16E6891FA4F8E400B85C8A /* libReact.a */,
 				09E89F39247AAB3BC07F7EE1 /* Pods_stealthy.framework */,
 				7182A450258327CD189F21EF /* Pods_stealthyTests.framework */,

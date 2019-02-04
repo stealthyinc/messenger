@@ -187,12 +187,17 @@ class ProfileScreen extends React.Component {
             <Text h4 style={{fontStyle: 'italic'}}>{fullName}</Text>
           </View>
 
-          <View style={{flex: 0.25}} />
+          <View style={{flex: 0.2}} />
+
           <View style={{alignItems: 'center'}}>
             <CopilotStep text="Share your Blockstack ID with your friends" order={3} name="share">
               <CustomButton />
             </CopilotStep>
+          </View>
 
+          <View style={{flex: 0.05}} />
+
+          <View style={{alignItems: 'center'}}>
             <View style={{width: buttonRowWidth,
                           flexDirection: 'row',
                           justifyContent: 'space-around',

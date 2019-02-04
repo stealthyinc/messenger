@@ -42,11 +42,11 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>4</string>
 	<key>FIREBASE_ANALYTICS_COLLECTION_DEACTIVATED</key>
 	<true/>
 	<key>LSApplicationCategoryType</key>
-	<string/>
+	<string></string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>twitter</string>
@@ -70,6 +70,8 @@
 	<string>We only use your location when the app is running to help you send a map location to your friends.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We only use your location when the app is running to help you send a map location to your friends.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Your microphone might be used temporarily when the QR Scanner is active</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Stealthy needs to access your cameral roll to post photos</string>
 	<key>UIAppFonts</key>

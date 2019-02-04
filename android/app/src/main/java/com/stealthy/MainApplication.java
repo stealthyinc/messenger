@@ -10,7 +10,6 @@ import com.apsl.versionnumber.RNVersionNumberPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.barefootcoders.android.react.KDSocialShare.KDSocialShare;
 import io.invertase.firebase.RNFirebasePackage;
-import com.reactnativedocumentpicker.ReactNativeDocumentPicker;
 import com.lugg.ReactNativeConfig.ReactNativeConfigPackage;
 import org.reactnative.camera.RNCameraPackage;
 import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
@@ -42,7 +41,6 @@ public class MainApplication extends Application implements ReactApplication {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
             new SvgPackage(),
-            new ReactNativeDocumentPicker(),
             new RNFetchBlobPackage(),
             new RNVersionNumberPackage(),
             new VectorIconsPackage(),

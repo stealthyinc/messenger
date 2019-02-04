@@ -175,7 +175,7 @@ class ConversationScreen extends React.Component {
       return (
         <Container style={{backgroundColor: 'white'}}>
           <Content>
-            <CopilotStep text="This where you can view your contacts. Swipe the contact left to mute, and right to delete" order={1} name="contacts">
+            <CopilotStep text="This where you can view your contacts. Swipe the contact right to mute, and left to delete" order={1} name="contacts">
               <CustomComponent />
             </CopilotStep>
           </Content>

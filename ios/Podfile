@@ -13,9 +13,9 @@ target 'stealthy' do
 
   #pod 'react-native-camera', :path => '../node_modules/react-native-camera'
 
-  pod 'react-native-document-picker', :path => '../node_modules/react-native-document-picker'
+  #pod 'react-native-document-picker', :path => '../node_modules/react-native-document-picker'
 
-  pod 'RNSVG', :path => '../node_modules/react-native-svg'
+  #pod 'RNSVG', :path => '../node_modules/react-native-svg'
 
   post_install do |installer|
     installer.pods_project.targets.each do |target|

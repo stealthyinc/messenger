@@ -3,6 +3,7 @@ import Rehydration from '../Services/Rehydration'
 import ReduxPersist from '../Config/ReduxPersist'
 import Config from '../Config/DebugConfig'
 import createSagaMiddleware from 'redux-saga'
+// import SagaMonitor from '../SagaMonitor'
 import ScreenTracking from './ScreenTrackingMiddleware'
 import { createReactNavigationReduxMiddleware } from 'react-navigation-redux-helpers'
 
@@ -25,7 +26,8 @@ export default (rootReducer, rootSaga) => {
 
   /* ------------- Saga Middleware ------------- */
 
-  const sagaMonitor = Config.useReactotron ? console.tron.createSagaMonitor() : null
+  const sagaMonitor = (Config.useReactotron) ? console.tron.createSagaMonitor() : null
+  // const sagaMonitor =  (process.env.NODE_ENV === 'development') ? SagaMonitor : null
   const sagaMiddleware = createSagaMiddleware({ sagaMonitor })
   middleware.push(sagaMiddleware)
 
