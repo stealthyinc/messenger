@@ -5,7 +5,7 @@
 module.exports = class BaseIO {
   constructor () {
     if (this.constructor === BaseIO) {
-      throw new TypeError('Abstract class "IO" cannot be instantiated directly.')
+      throw new TypeError('Abstract class "BaseIO" cannot be instantiated directly.')
     }
 
     if (this.writeLocalFile === undefined) {

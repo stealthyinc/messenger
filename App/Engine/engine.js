@@ -2,6 +2,8 @@ import AmaCommands from './misc/amaCommands.js'
 
 import API from './../Services/Api'
 
+import {AsyncStorage} from 'react-native'
+
 const platform = require('platform')
 
 // Platform dependent (commented out parts are for other platforms)
@@ -37,6 +39,7 @@ const utils = require('./misc/utils.js')
 const FirebaseIO = require('./filesystem/firebaseIO.js')
 const GaiaIO = require('./filesystem/gaiaIO.js')
 const { IndexedIO } = require('./filesystem/indexedIO.js')
+const { LocalIO } = require('./filesystem/localIO.js')
 
 const constants = require('./misc/constants.js')
 
@@ -47,6 +50,10 @@ const { Timer } = require('./misc/timer.js')
 
 const common = require('./../common.js')
 const api = API.create()
+
+// TODO: figure out how to only include/build this for development
+const ENABLE_MEASUREMENTS = false
+const measureIO = require('./measure/measureIOSpeed.js')
 
 //
 const ENCRYPT_INDEXED_IO = true
@@ -61,7 +68,7 @@ let ENCRYPT_SETTINGS = true
 let STEALTHY_PAGE = 'LOCALHOST'
 //
 // Logging Scopes
-const LOG_GAIAIO = true
+const LOG_GAIAIO = false
 const LOG_OFFLINEMESSAGING = false
 //
 const ENABLE_AMA = true
@@ -95,6 +102,8 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.io = undefined
     this.shuttingDown = false
     this.anonalytics = undefined
+
+    this.deviceIO = undefined
 
     this.indexIntegrations = {}
 
@@ -291,6 +300,15 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
     this.updateContactMgr()
 
+
+    // Never in production:
+    if (process.env.NODE_ENV !== 'production' &&
+        ENABLE_MEASUREMENTS) {
+      await measureIO.asyncIoVsGaiaIo(this.userId, this.contactMgr.getContacts(), this.io)
+    }
+
+
+
     this.offlineMsgSvc =
       new OfflineMessagingServices(this.logger,
                                    this.userId,
@@ -391,6 +409,10 @@ export class MessagingEngine extends EventEmitterAdapter {
         }
 
         channelAddresses[contactId] = msgAddress
+        if (this.contactMgr.isNotifications(contactId)) {
+          this.contactMgr.setNotifications(contactId)
+          firebaseInstance.subscribeToTopic(contactId)
+        }
       }
 
       this.offlineMsgSvc.setChannelAddresses(channelAddresses)
@@ -487,8 +509,8 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.userId, this.privateKey, this.io, 'https://app.travelstack.club')
     this.indexIntegrations['Travelstack'] = travelStackIntegration
 
-    this.refreshIntegrationData('Graphite')
-    this.refreshIntegrationData('Travelstack')
+    // this.refreshIntegrationData('Graphite')
+    // this.refreshIntegrationData('Travelstack')
   }
 
   async _configureIO () {
@@ -496,6 +518,8 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.io = (ENABLE_GAIA)
       ? new GaiaIO(this.logger, LOG_GAIAIO)
       : new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO)
+
+    this.deviceIO = new LocalIO()
 
     await this._mobileGaiaTest()
     await this._fetchUserSettings()
@@ -544,7 +568,9 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     let encSettingsData
     try {
+      this.myTimer.logEvent('_fetchUserSettings    (Before attempting to read settings.json)')
       encSettingsData = await this.io.robustLocalRead(this.userId, 'settings.json')
+      this.myTimer.logEvent('_fetchUserSettings    (After successful reading settings.json)')
       // readLocalFile returns undefined on BlobNotFound, so set new user:
       this.newUser = !(encSettingsData)
     } catch (error) {
@@ -583,10 +609,12 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.newUser = !test1Passed && !test2Passed
     }
 
+    this.myTimer.logEvent('_fetchUserSettings    (After attempting to read settings.json)')
     if (encSettingsData) {
       try {
         this.settings = await utils.decryptObj(
           this.privateKey, encSettingsData, ENCRYPT_SETTINGS)
+        this.myTimer.logEvent('_fetchUserSettings    (After decrypting settings.json)')
       } catch (err) {
         // Problem if here is likely that another account wrote to the current
         // account's gaia with it's own encryption, resulting in a mac mismatch:
@@ -629,6 +657,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     let contactArr = []
     let contactsData
     try {
+      this.myTimer.logEvent('_fetchDataAndCompleteInit    (Before attempting to read contacts.json)')
       const maxAttempts = 5
       contactsData = await this.io.robustLocalRead(this.userId, 'contacts.json', maxAttempts)
       this.myTimer.logEvent('_fetchDataAndCompleteInit    (After successfully reading contacts.json)')
@@ -665,6 +694,9 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   //
   handleShutDownRequest = async () => {
+    const method = 'engine::handleShutDownRequest'
+    console.log(`INFO(${method}): called.`)
+
     if (this.offlineMsgSvc) {
       try {
         // Don't disable emit/listeners for the engine yet (we need to emit one
@@ -685,55 +717,91 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     }
 
+    console.log(`INFO(${method}): removed event listeners.`)
+
     if (this.offlineMsgSvc) {
       try {
-        this.offlineMsgSvc.skipSendService()
-        this.offlineMsgSvc.stopSendService()
+        this.offlineMsgSvc.clearReceiveMessageQueue()
         this.offlineMsgSvc.pauseRecvService()
         this.offlineMsgSvc.stopRecvService()
+        //
+        this.offlineMsgSvc.skipSendService()
+        this.offlineMsgSvc.stopSendService()
       } catch (err) {
         // do nothing, just don't prevent the code below from happening
       }
     }
 
-    const promises = []
-    if (this.offlineMsgSvc) {
-      promises.push(
-        this.offlineMsgSvc.sendMessagesToStorage()
-        .catch(err => {
-          console.log(`ERROR(engine.js::handleShutDownRequest): sending messages to storage. ${err}`)
-          return undefined
-        })
-      )
-    }
-    if (this.conversations) {
-      promises.push(
-        this._writeConversations()
-        .catch(err => {
-          console.log(`ERROR(engine.js::handleShutDownRequest): writing conversations. ${err}`)
-          return undefined
-        })
-      )
-    }
-    // We stopped doing this after every incoming msg etc. to
-    // speed things along, hence write here.
-    //   - to avoid the popup, we should have a timer periodically write
-    //     all these and use a dirty flag to determine if we even need to do this.
-    if (this.contactMgr) {
-      promises.push(
-        this._writeContactList(this.contactMgr.getAllContacts())
-        .catch(err => {
-          console.log(`ERROR(engine.js::handleShutDownRequest): writing contact list. ${err}`)
-          return undefined
-        })
-      )
+    console.log(`INFO(${method}): stopped offline msg send/receive service.`)
+
+
+    try {
+      await this.offlineMsgSvc.sendMessagesToStorage()
+      console.log(`INFO(${method}): wrote offline messages.`)
+    } catch (error) {
+      console.log(`ERROR(${method}): writing offline messages.`)
     }
 
     try {
-      await Promise.all(promises)
-      this.logger('INFO:(engine.js::handleShutDownRequest): engine shutdown successful.')
+      await this._writeConversations()
+      console.log(`INFO(${method}): wrote conversations.`)
     } catch (error) {
-      console.log(`ERROR(engine.js::handleShutDownRequest): ${error}`)
+      console.log(`ERROR(${method}): writing conversations.`)
+    }
+
+    try {
+      await this._writeContactList(this.contactMgr.getAllContacts())
+      console.log(`INFO(${method}): wrote contacts.`)
+    } catch (error) {
+      console.log(`ERROR(${method}): writing contacts.`)
+    }
+
+
+
+    // const promises = []
+    // if (this.offlineMsgSvc) {
+    //   promises.push(
+    //     this.offlineMsgSvc.sendMessagesToStorage()
+    //     .catch(err => {
+    //       console.log(`ERROR(engine.js::handleShutDownRequest): sending messages to storage. ${err}`)
+    //       return undefined
+    //     })
+    //   )
+    // }
+    // console.log(`INFO(${method}): writing offline messages.`)
+    //
+    // if (this.conversations) {
+    //   promises.push(
+    //     this._writeConversations()
+    //     .catch(err => {
+    //       console.log(`ERROR(engine.js::handleShutDownRequest): writing conversations. ${err}`)
+    //       return undefined
+    //     })
+    //   )
+    // }
+    // console.log(`INFO(${method}): writing conversations.`)
+    //
+    // // We stopped doing this after every incoming msg etc. to
+    // // speed things along, hence write here.
+    // //   - to avoid the popup, we should have a timer periodically write
+    // //     all these and use a dirty flag to determine if we even need to do this.
+    // if (this.contactMgr) {
+    //   promises.push(
+    //     this._writeContactList(this.contactMgr.getAllContacts())
+    //     .catch(err => {
+    //       console.log(`ERROR(${method}): writing contact list. ${err}`)
+    //       return undefined
+    //     })
+    //   )
+    // }
+    // console.log(`INFO(${method}): writing contacts.`)
+
+    try {
+      // this.logger(`INFO:(${method}): waiting on gaia related promises.`)
+      // await Promise.all(promises)
+      this.logger(`INFO:(${method}): engine shutdown successful.`)
+    } catch (error) {
+      console.log(`ERROR(${method}): ${error}`)
     } finally {
       this.offlineMsgSvc = undefined
 
@@ -750,6 +818,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.offAll()
     } catch (err) {
     }
+    console.log(`INFO(${method}): removed all event listeners.`)
   }
 
   //
@@ -1140,6 +1209,24 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     this.updateContactMgr()
     this.updateMessages(activeUser ? activeUser.id : undefined)
+  }
+
+  handleContactMute(aContact) {
+    if (aContact && aContact.id) {
+      this.contactMgr.setNotifications(aContact.id, false)
+      firebaseInstance.unsubscribeFromTopic(aContact.id)
+      this.updateContactMgr()
+      this._writeContactList(this.contactMgr.getAllContacts())
+    }
+  }
+
+  handleContactUnmute(aContact) {
+    if (aContact && aContact.id) {
+      this.contactMgr.setNotifications(aContact.id)
+      firebaseInstance.subscribeToTopic(aContact.id)
+      this.updateContactMgr()
+      this._writeContactList(this.contactMgr.getAllContacts())
+    }
   }
 
   handleRadio = async (e, { name }) => {

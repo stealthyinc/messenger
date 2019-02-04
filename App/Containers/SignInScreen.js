@@ -14,10 +14,14 @@ import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import chatIcon from '../Images/blue512.png'
 import AwesomeAlert from 'react-native-awesome-alerts'
-import VersionNumber from 'react-native-version-number';
+import VersionNumber from 'react-native-version-number'
+import { copilot, walkthroughable, CopilotStep } from '@okgrow/react-native-copilot'
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const utils = require('./../Engine/misc/utils.js')
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
+
+const WalkthroughableText = walkthroughable(Text);
 
 class SignInScreen extends React.Component {
   static navigationOptions = {
@@ -30,6 +34,12 @@ class SignInScreen extends React.Component {
       errorText: ''
     }
     this.props.setSpinnerData(false, '')
+  }
+  componentDidMount() {
+    this.props.copilotEvents.on('stepChange', this.handleStepChange);
+  }
+  handleStepChange = (step) => {
+    console.log(`Current step is: ${step.name}`);
   }
   render () {
     const oldPad = utils.is_oldPad()
@@ -56,49 +66,13 @@ class SignInScreen extends React.Component {
           />
       )
     }
-    return (
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={{flexDirection: 'row', marginTop: 40}}>
-          <SocialIcon
-            style={{width: 45, height: 45}}
-            type='twitter'
-            onPress={() => Linking.openURL('https://twitter.com/stealthyim').catch(err => console.error('An error occurred', err))}
-          />
-          <SocialIcon
-            style={{width: 45, height: 45}}
-            type='medium'
-            onPress={() => Linking.openURL('https://medium.com/@stealthyim').catch(err => console.error('An error occurred', err))}
-          />
-          <Button
-            onPress={this._signInAsync}
-            title={(oldPad) ? 'Login' : 'Blockstack Login'}
-            textStyle={{ fontSize: 18, fontWeight: '900', color: '#34bbed' }}
-            icon={{name: 'input', color: '#34bbed'}}
-            buttonStyle={{
-              marginLeft: 20,
-              width: (oldPad) ? 150 : 200,
-              height: 50,
-              backgroundColor: 'white',
-              borderColor: '#34bbed',
-              borderWidth: 2,
-              borderRadius: 5,
-              marginTop: 5
-            }}
-          />
-        </View>
-        <View style={{flexDirection: 'row', marginTop: (oldPad) ? 50 : 120}}>
-          <Image
-            source={chatIcon}
-            style={{width: 50, height: 50}}
-          />
-          <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15, marginBottom: (oldPad) ? 50 : 80, marginTop: 5 }}>Hi Stealthy 👋</Text>
-        </View>
-        <Text style={{ fontWeight: 'bold', fontSize: (oldPad) ? 20 : 24, color: 'grey', marginBottom }}>Decentralized Communication</Text>
+    const CustomComponent = ({ copilot }) => (
+      <View {...copilot}>
         <Button
           onPress={this._signInAsync}
-          title='Create Account'
-          textStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
-          icon={{name: 'create', color: 'white'}}
+          title='Sign In/Up'
+          titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
+          icon={{name: 'input', color: 'white'}}
           buttonStyle={{
             backgroundColor: '#34bbed',
             width: 180,
@@ -106,24 +80,127 @@ class SignInScreen extends React.Component {
             borderColor: 'transparent',
             borderWidth: 0,
             borderRadius: 5,
-            marginTop: (oldPad) ? 10 : 25
           }}
         />
-        <Button
-          onPress={() => Linking.openURL('https://www.youtube.com/watch?v=V9-egxTCFFE').catch(err => console.error('An error occurred', err))}
-          title='Watch Demo'
-          textStyle={{ fontSize: 18, fontWeight: '900', color: 'black' }}
-          icon={{name: 'featured-video', color: 'black'}}
-          buttonStyle={{
-            backgroundColor: 'white',
-            width: 180,
-            height: 50,
-            borderColor: 'black',
-            borderWidth: 2,
-            borderRadius: 5,
-            marginTop: (oldPad) ? 10 : 25
-          }}
-        />
+      </View>
+    )
+
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={{flexDirection: 'row',
+                      marginTop: 40,
+                      justifyContent: 'space-between',
+                      alignItems: 'stretch',
+                      width: '100%'}}>
+
+          <View
+            style={{flex: 0.1}}/>
+
+          <CopilotStep text="Follow us on Twitter to keep up with the latest updates" order={2} name="twitter"
+                       style={{justifyContent: 'flex-start'}}>
+            <WalkthroughableText style={styles.title}>
+              <Icon
+                size={40}
+                name='twitter'
+                color='#38A1F3'
+                onPress={() => Linking.openURL('https://twitter.com/stealthyim').catch(err => console.error('An error occurred', err))}
+              />
+            </WalkthroughableText>
+          </CopilotStep>
+
+          <View
+            style={{flex: 0.1}}/>
+
+          <CopilotStep text="Read about our Product Hunt mobile launch" order={3} name="product-hunt"
+                       style={{justifyContent: 'flex-start'}}>
+            <WalkthroughableText style={styles.title}>
+              <Icon
+                size={40}
+                name='product-hunt'
+                color='#da552f'
+                onPress={() => Linking.openURL('https://www.producthunt.com/posts/stealthy-im').catch(err => console.error('An error occurred', err))}
+              />
+            </WalkthroughableText>
+          </CopilotStep>
+
+          <View
+            style={{flex: 0.90}}/>
+
+          <CopilotStep text="Read our engineering blog to understand the technology powering Stealthy" order={4} name="medium"
+                       style={{justifyContent: 'flex-end'}}>
+            <WalkthroughableText style={styles.title}>
+              <Icon
+                size={40}
+                name='medium'
+                color='#00ab6c'
+                onPress={() => Linking.openURL('https://medium.com/@stealthyim').catch(err => console.error('An error occurred', err))}
+              />
+            </WalkthroughableText>
+          </CopilotStep>
+
+          <View
+            style={{flex: 0.1}}/>
+
+          <CopilotStep text="You can watch a video to learn about the features" order={5} name="youtube"
+                       style={{justifyContent: 'flex-end'}}>
+            <WalkthroughableText style={styles.title}>
+              <Icon
+                size={40}
+                name='youtube-play'
+                color='#ED3833'
+                onPress={() => Linking.openURL('https://www.youtube.com/watch?v=4rLdMIrVBrw').catch(err => console.error('An error occurred', err))}
+              />
+            </WalkthroughableText>
+          </CopilotStep>
+
+          <View
+            style={{flex: 0.1}}/>
+
+        </View>
+        <View style={{flex: 1,
+                      width: '100%',
+                      alignItems: 'center'}}>
+
+          <View style={{flex: 0.3}} />
+
+          <View style={{flexDirection: 'row'}}>
+            <Image
+              source={chatIcon}
+              style={{width: 50, height: 50}}
+            />
+            <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15 }}>Hi Stealthy! 👋</Text>
+          </View>
+
+          <View style={{flex: 0.15}} />
+
+          <Text style={{ fontWeight: 'bold', fontSize: (oldPad) ? 24 : 32, color: 'grey', marginBottom: 10 }}>Encrypted Messaging</Text>
+
+          <View style={{flex: 0.02}} />
+
+          <Text style={{ fontWeight: 'bold', fontStyle: 'italic', fontSize: (oldPad) ? 16 : 20, color: 'grey' }}>Enabled by blockchain, owned by you</Text>
+
+          <View style={{flex: 0.15}} />
+
+          <CopilotStep text="Hey! Welcome to Stealthy! Click here to create an account or login" order={1} name="createAccount">
+            <CustomComponent />
+          </CopilotStep>
+          <View style={{flex: 0.05}} />
+          <Button
+            onPress={() => this.props.start()}
+            title='Walk Through'
+            titleStyle={{ fontSize: 18, fontWeight: '900', color: 'black' }}
+            icon={{name: 'help', color: 'black'}}
+            buttonStyle={{
+              backgroundColor: 'white',
+              width: 180,
+              height: 50,
+              borderColor: 'black',
+              borderWidth: 2,
+              borderRadius: 5,
+            }}
+          />
+          <View style={{flex: 0.23}} />
+        </View>
       </ScrollView>
     )
   }
@@ -240,7 +317,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     alignItems: 'center'
-  }
+  },
+  title: {
+    fontSize: 24,
+    textAlign: 'center',
+  },
+  tabItem: {
+    flex: 1,
+    textAlign: 'center',
+    alignItems: 'center'
+  },
 })
 
 const mapStateToProps = (state) => {
@@ -258,4 +344,6 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SignInScreen)
+const SignInScreenExplained = copilot({ animated: true, androidStatusBarVisible: true, overlay: 'svg' })(SignInScreen);
+
+export default connect(mapStateToProps, mapDispatchToProps)(SignInScreenExplained)

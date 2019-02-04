@@ -7,7 +7,7 @@ import AppNavigation from './AppNavigation'
 import { Root } from 'native-base'
 import BackgroundFetch from 'react-native-background-fetch'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
-import RNExitApp from 'react-native-exit-app'
+// import RNExitApp from 'react-native-exit-app'
 import chatIcon from '../Images/blue512.png'
 import AwesomeAlert from 'react-native-awesome-alerts'
 import Spinner from 'react-native-loading-spinner-overlay'
@@ -181,7 +181,7 @@ class ReduxNavigation extends React.Component {
       const ref = firebaseInstance.getFirebaseRef(notificationPath)
       ref.set({token: this.token, enabled: true})
       .then(() => {
-        console.log('PB REF IS SET')
+        console.log('REF IS SET')
       })
       .catch(error => console.log('PB FB ERROR', error))
     }
@@ -313,7 +313,8 @@ class ReduxNavigation extends React.Component {
       // unsubscribe from all channels
       for (let ch in this.props.channels) {
         const {id} = this.props.channels[ch]
-        firebaseInstance.unsubscribeFromTopic(id)
+        const theNextActiveContact = this.props.contactMgr.getContact(id)
+        this.props.dispatch(EngineActions.handleContactMute(theNextActiveContact))
       }
 
       await AsyncStorage.clear()

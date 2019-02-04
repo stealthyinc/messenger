@@ -254,6 +254,23 @@ class ContactManager {
     return false
   }
 
+  //
+  isNotifications = (aContactId) => {
+    if (aContactId) {
+      const contact =
+        ContactManager._getContactForId(aContactId, this.contactArr)
+
+      if (contact &&
+          contact.hasOwnProperty('notifications')) {
+        return contact.notifications
+      }
+    }
+
+    // Notifications should be true unless set off. This defaults them
+    // to on if they've never been set.
+    return true
+  }
+
   addNewContact = async (aContact, id, publicKey, makeActiveContact = true) => {
     const newContact = utils.deepCopyObj(aContact)
     newContact.id = id
@@ -430,6 +447,16 @@ class ContactManager {
   // that is controlled on the channel/ama server).
   setAdministrable = (aContactId, administrable) => {
     this._setterWithChecks(aContactId, 'administrable', administrable)
+  }
+
+  // Only applicable to channels. Stores whether or not we've muted notifications
+  // for a channel so when we reinstall or upgrade, we can set the notification
+  // preferences accordingly.
+  setNotifications = (aContactId, enable=true) => {
+    const protocol = this.getProtocol(aContactId)
+    if (utils.isChannelOrAma(protocol)) {
+      this._setterWithChecks(aContactId, 'notifications', enable)
+    }
   }
 
   incrementUnread = (aContactId) => {

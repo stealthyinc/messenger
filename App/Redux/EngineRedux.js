@@ -11,6 +11,8 @@ const { Types, Creators } = createActions({
   setAppVersion: ['appVersion'],
   setUserData: ['userData'],
   addContactId: ['id'],
+  handleContactMute: ['contact'],
+  handleContactUnmute: ['contact'],
   setPublicKey: ['publicKey'],
   setEngineInitial: ['engineInit'],
   setEngineContactMgr: ['contactMgr'],
@@ -111,7 +113,8 @@ export const EngineSelectors = {
   getSpinnerFlag: state => state.engine.spinnerFlag,
   getSpinnerMessage: state => state.engine.spinnerMessage,
   getToastFlag: state => state.engine.toastFlag,
-  getToastMessage: state => state.engine.toastMessage
+  getToastMessage: state => state.engine.toastMessage,
+  getAppVersion: state => state.engine.appVersion
 }
 
 /* ------------- Reducers ------------- */
@@ -248,6 +251,7 @@ export const reducer = createReducer(INITIAL_STATE, {
   [Types.SET_USER_DATA]: setUserData,
   [Types.SET_PUBLIC_KEY]: setPublicKey,
   [Types.ADD_CONTACT_ID]: setContactId,
+  [Types.SET_APP_VERSION]: setAppVersion,
   [Types.SET_CURRENT_PLATFORM]: setCurrentPlatform,
   [Types.SET_SIGN_IN_PENDING]: setSignInPending,
   [Types.CLEAR_USER_DATA]: clearUserData,

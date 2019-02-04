@@ -1,6 +1,6 @@
 import React from 'react'
-import { View, StyleSheet, Platform, TouchableOpacity } from 'react-native'
-import { Avatar, Button, Text, Icon } from 'react-native-elements'
+import { Image, View, StyleSheet, Platform, TouchableOpacity, Text as AText } from 'react-native'
+import { Avatar, Button, Icon, Text } from 'react-native-elements'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import { Toast } from 'native-base'
@@ -9,19 +9,35 @@ import Communications from 'react-native-communications'
 import ActionSheet from 'react-native-actionsheet'
 import QRCode from 'react-native-qrcode'
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import AwesomeAlert from 'react-native-awesome-alerts'
+import { copilot, walkthroughable, CopilotStep } from '@okgrow/react-native-copilot'
 
 const utils = require('./../Engine/misc/utils.js')
+const WalkthroughableText = walkthroughable(AText);
+
+const CustomIcon = ({ copilot, disabled, name, flag, onPress }) => (
+  <View {...copilot}>
+    <Icon
+      reverse
+      disabled={disabled}
+      name={name}
+      type='font-awesome'
+      color={(flag) ? '#34bbed' : 'grey'}
+      onPress={onPress}
+    />
+  </View>
+)
 
 class ProfileScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
     const params = navigation.state.params || {}
     return {
       headerLeft: (
-        <TouchableOpacity onPress={() => params.share()} style={{marginLeft: 10}}>
-          <Ionicons name="md-share" size={28} color='white'/>
+        <TouchableOpacity onPress={() => params.start()} style={{marginLeft: 10}}>
+          <Ionicons name='md-help-circle' size={30} color='white' />
         </TouchableOpacity>
       ),
-      headerTitle: <Text h4 style={{marginLeft: 20, fontWeight: 'bold', color: 'white'}}>Profile</Text>,
+      headerTitle: <Text h4 style={{fontWeight: 'bold', color: 'white'}}>Profile</Text>,
       headerBackTitle: 'Back',
       headerRight: (
         <TouchableOpacity onPress={() => params.logout()} style={{marginRight: 10}}>
@@ -39,11 +55,16 @@ class ProfileScreen extends React.Component {
     this.state = {
       showToast: false,
       showQR: false,
-      isVisible: false
+      isVisible: false,
+      showAlert: false
     }
   }
-  componentWillMount () {
-    this.props.navigation.setParams({ showOverlay: this.showOverlay, logout: this.runLogout, share: this.showActionSheet })
+  componentDidMount() {
+    this.props.copilotEvents.on('stepChange', this.handleStepChange);
+    this.props.navigation.setParams({ showOverlay: this.showOverlay, logout: this.showAlert, start: this.props.start })
+  }
+  handleStepChange = (step) => {
+    console.log(`Current step is: ${step.name}`);
   }
   runLogout = () => {
     this.props.setSpinnerData(true, 'Logging out...')
@@ -55,145 +76,219 @@ class ProfileScreen extends React.Component {
   showActionSheet = () => {
     this.ActionSheet.show()
   }
+  showAlert = () => {
+    this.setState({
+      showAlert: true
+    })
+  }
+  hideAlert = () => {
+    this.setState({
+      showAlert: false
+    })
+  }
   render () {
     const { userProfile, userData, userSettings } = this.props
     if (!userProfile) { return null }
     const { discovery, notifications, analytics } = userSettings
     const { profile, base64 } = userProfile
-    const { username } = userData
+    let { username } = userData
     const { name } = profile
     const fullName = (name) || null
     const shareText = 'You can securely message me at: ' + username + ' on @stealthyim! #decentralize #takebackcontrol #controlyourdata https://www.stealthy.im'
     // const shareText1 = 'Come chat with me on Stealthy.IM! Add me: ' + username
     const oldPad = utils.is_oldPad()
     const margin = 20
-    const marginTop = (oldPad) ? 0 : 15
+    const marginTop = (oldPad) ? 5 : 15
     const marginBottom = (oldPad) ? 2 : 15
-    const flex = (oldPad) ? 5 : 10
+    const mainContainerTopPadding = (oldPad) ? '8%' : '13%'
+    const buttonRowWidth = (oldPad) ? '98%' : '90%'
     // const qrText = `stealthy://messages/`+username+`/`
     const qrText = username
-    const { showQR } = this.state
-    // const qrText = "http://facebook.github.io/react-native/"
-    const avatarSize = (showQR || !base64) ? (
-      <QRCode
-        value={qrText}
-        size={160}
-        bgColor='black'
-        fgColor='white'
+    const { showQR, showAlert } = this.state
+    const borderAccentColor='#C2C2C2'
+    if (showAlert) {
+      return (
+        <AwesomeAlert
+          show={showAlert}
+          showProgress={false}
+          title="Logout"
+          message="Are you sure you want to log out?"
+          closeOnTouchOutside={true}
+          closeOnHardwareBackPress={false}
+          showCancelButton={true}
+          showConfirmButton={true}
+          cancelText="No, cancel"
+          confirmText="Yes, logout"
+          confirmButtonColor="#DD6B55"
+          onCancelPressed={() => {
+            this.hideAlert()
+          }}
+          onConfirmPressed={() => {
+            this.runLogout()
+          }}
         />
-      ) : (oldPad || (Platform.OS !== 'ios')) ? (
-        <Avatar
-          large
-          rounded
-          source={{uri: base64}}
-          onPress={() => console.log('Works!')}
-          activeOpacity={0.7}
-          containerStyle={{marginBottom: 5}}
-      />
-    ) : (
-      <Avatar
-        xlarge
-        rounded
-        source={{uri: base64}}
-        onPress={() => console.log('Works!')}
-        activeOpacity={0.7}
-        containerStyle={{marginBottom: 15}}
-      />
+      )
+    }
+    let AvatarElement = undefined
+    if (showQR || !base64) {
+      AvatarElement = ({ copilot }) => (
+        <View {...copilot}>
+          <QRCode value={qrText} size={160} bgColor='black' fgColor='white' />
+        </View>
+      )
+    } else {
+      let marginBottomVal = (oldPad || (Platform.OS !== 'ios')) ? 5 : 15
+      let sizeVal = (oldPad || (Platform.OS !== 'ios')) ? 'large' : 'xlarge'
+      AvatarElement = ({ copilot }) => (
+        <View {...copilot}>
+          <Avatar
+            size={sizeVal}
+            source={{uri: base64}}
+            overlayContainerStyle={{backgroundColor: 'white'}}
+            containerStyle={{marginBottom: marginBottomVal}}
+            avatarStyle={{borderColor: borderAccentColor,
+                          borderRadius: 15,
+                          borderWidth: 1}} />
+        </View>
+      )
+    }
+    const CustomButton = ({ copilot }) => (
+      <View {...copilot}>
+        <Button
+          onPress={this.showActionSheet}
+          icon={{name: 'share', color: 'white'}}
+          buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 150, height: 50, backgroundColor: '#34bbed'}}
+          titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
+          title='Share ID'
+        />
+      </View>
     )
+    if (username.length > 24) {
+      username = username.substring(0, 21) + '...'
+    }
+    const myAppVersion = (this.props.appVersion) ? 'v' + this.props.appVersion : null
     return (
       <View style={styles.container}>
-        <View style={{flex: flex}} />
-        <View style={{flex: 60, alignItems: 'center'}}>
-          {avatarSize}
-          <Text h4 style={{marginTop, marginBottom}}>{fullName}</Text>
-          <Text h4 style={{marginBottom, fontWeight: 'bold'}}>({username})</Text>
-          <View style={{flexDirection: 'row', margin: margin}}>
-            <Icon
-              reverse
-              name='qrcode'
-              type='font-awesome'
-              disabled={!base64}
-              color={(showQR) ? '#34bbed' : 'grey'}
-              onPress={() => {
-                Toast.show({
-                  text: (showQR) ? 'Hide QR Code' : 'Show QR Code',
-                  duration: 1500
-                })
-                this.setState({showQR: !showQR})
-              }
-              } />
-            <Icon
-              reverse
-              name='connectdevelop'
-              type='font-awesome'
-              color={(discovery) ? '#34bbed' : 'grey'}
-              onPress={() => {
-                Toast.show({
-                  text: (discovery) ? 'Discovery Setting Disabled!' : 'Discovery Setting Enabled!',
-                  duration: 1500
-                })
-                this.props.updateUserSettings('discovery')
-              }
-              } />
-            <Icon
-              reverse
-              name='bell'
-              type='font-awesome'
-              color={(notifications) ? '#34bbed' : 'grey'}
-              onPress={() => {
-                Toast.show({
-                  text: (notifications) ? 'Notifications Setting Disabled!' : 'Notifications Setting Enabled!',
-                  duration: 1500
-                })
-                this.props.updateUserSettings('notifications')
-              }
-              } />
-            <Icon
-              reverse
-              name='pie-chart'
-              type='font-awesome'
-              color={(analytics) ? '#34bbed' : 'grey'}
-              onPress={() => {
-                Toast.show({
-                  text: (analytics) ? 'Analytics Setting Disabled!' : 'Analytics Setting Enabled!',
-                  duration: 1500
-                })
-                this.props.updateUserSettings('analytics')
-              }
-                } />
-            {/* <Icon
-                reverse
-                name='twitter'
-                type='font-awesome'
-                color='#34bbed'
-                onPress={() =>
-                  shareOnTwitter({
-                    'text': shareText,
-                  },
-                  (results) => {
-                    console.log(results);
-                  }
-              )} /> */}
+        <View style={{flex: 1,
+                      width: '100%',
+                      alignItems: 'center'}}>
+
+          <View style={{flex: 0.5}} />
+
+          <View style={{alignItems: 'center'}}>
+            <CopilotStep text="This is your profile picture or QRCode" order={1} name="profilePicture">
+              <AvatarElement />
+            </CopilotStep>
+            <CopilotStep text="This is your Blockstack User ID" order={2} name="userid">
+              <WalkthroughableText style={styles.title}>
+                <Text h4 style={{marginTop, marginBottom, fontWeight: 'bold'}}>{username}</Text>
+              </WalkthroughableText>
+            </CopilotStep>
+            <Text h4 style={{fontStyle: 'italic'}}>{fullName}</Text>
           </View>
-          <Button
-            onPress={this.showActionSheet}
-            icon={{name: 'share', color: 'white'}}
-            buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 180, height: 50, backgroundColor: '#34bbed'}}
-            textStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
-            title='Share ID'
-          />
-          {/*<Button
-            onPress={() => {
-              this.props.setSpinnerData(true, 'Logging out...')
-              this.props.screenProps.logout()
-            }}
-            icon={{name: 'launch', color: 'white'}}
-            buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 0, width: 180, height: 50, backgroundColor: '#34bbed'}}
-            textStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
-            title='Log Out'
-          />*/}
+
+          <View style={{flex: 0.2}} />
+
+          <View style={{alignItems: 'center'}}>
+            <CopilotStep text="Share your Blockstack ID with your friends" order={3} name="share">
+              <CustomButton />
+            </CopilotStep>
+          </View>
+
+          <View style={{flex: 0.05}} />
+
+          <View style={{alignItems: 'center'}}>
+            <View style={{width: buttonRowWidth,
+                          flexDirection: 'row',
+                          justifyContent: 'space-around',
+                          borderRadius: 15,
+                          borderWidth: 1,
+                          borderStyle: 'solid',
+                          borderColor: borderAccentColor}}>
+              <View style={{flexDirection: 'column', alignItems: 'center'}}>
+                <CopilotStep text="Click here to show your QR code" order={4} name="qrcode">
+                  <CustomIcon
+                    name='qrcode'
+                    disabled={!base64}
+                    flag={showQR}
+                    onPress={() => {
+                      Toast.show({
+                        text: (showQR) ? 'Hide QR Code' : 'Show QR Code',
+                        duration: 1500
+                      })
+                      this.setState({showQR: !showQR})
+                    }}
+                  />
+                </CopilotStep>
+                <Text style={{color: borderAccentColor}}>QR Code</Text>
+              </View>
+              <View style={{flexDirection: 'column', alignItems: 'center'}}>
+                <CopilotStep text="Click here to toggle contact discovery" order={5} name="discover">
+                  <CustomIcon
+                    name='connectdevelop'
+                    disabled={false}
+                    flag={discovery}
+                    onPress={() => {
+                      Toast.show({
+                        text: (discovery) ? 'Discovery Setting Disabled!' : 'Discovery Setting Enabled!',
+                        duration: 1500
+                      })
+                      this.props.updateUserSettings('discovery')
+                    }}
+                  />
+                </CopilotStep>
+                <Text style={{color: borderAccentColor}}>Discovery</Text>
+              </View>
+              <View style={{flexDirection: 'column', alignItems: 'center'}}>
+                <CopilotStep text="Click here to toggle notifications" order={6} name="notification">
+                  <CustomIcon
+                    name='bell'
+                    disabled={false}
+                    flag={notifications}
+                    onPress={() => {
+                      Toast.show({
+                        text: (notifications) ? 'Notifications Setting Disabled!' : 'Notifications Setting Enabled!',
+                        duration: 1500
+                      })
+                      this.props.updateUserSettings('notifications')
+                    }}
+                  />
+                </CopilotStep>
+                <Text style={{color: borderAccentColor}}>Notifications</Text>
+              </View>
+              <View style={{flexDirection: 'column', alignItems: 'center'}}>
+                <CopilotStep text="Click here to toggle analytics" order={7} name="analytics">
+                  <CustomIcon
+                    name='pie-chart'
+                    disabled={false}
+                    flag={analytics}
+                    onPress={() => {
+                      Toast.show({
+                        text: (analytics) ? 'Analytics Setting Disabled!' : 'Analytics Setting Enabled!',
+                        duration: 1500
+                      })
+                      this.props.updateUserSettings('analytics')
+                    }}
+                  />
+                </CopilotStep>
+                <Text style={{color: borderAccentColor}}>Analytics</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={{flex: 0.15}} />
+
+          <View style={{alignItems: 'flex-end', justifyContent: 'flex-end', alignSelf: 'stretch', marginRight: 20}}>
+            <CopilotStep text="The version of Stealthy running" order={8} name="appVersion">
+              <WalkthroughableText style={styles.title}>
+                <Text h5 style={{color: borderAccentColor, fontStyle: 'italic', fontWeight: 'bold', textAlign: 'right'}}>{myAppVersion}</Text>
+              </WalkthroughableText>
+            </CopilotStep>
+          </View>
+
+          <View style={{flex: 0.1}} />
         </View>
-        <View style={{flex: 20}} />
+
         <ActionSheet
           ref={o => this.ActionSheet = o}
           title={'Sharing Options'}
@@ -232,11 +327,21 @@ const styles = StyleSheet.create({
     paddingTop: 100,
     backgroundColor: 'white',
     alignItems: 'center'
-  }
+  },
+  title: {
+    fontSize: 24,
+    textAlign: 'center',
+  },
+  tabItem: {
+    flex: 1,
+    textAlign: 'center',
+    alignItems: 'center'
+  },
 })
 
 const mapStateToProps = (state) => {
   return {
+    appVersion: EngineSelectors.getAppVersion(state),
     userProfile: EngineSelectors.getUserProfile(state),
     publicKey: EngineSelectors.getPublicKey(state),
     userData: EngineSelectors.getUserData(state),
@@ -251,4 +356,6 @@ const mapDispatchToProps = (dispatch) => {
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ProfileScreen)
+const ProfileScreenExplained = copilot({ animated: true, androidStatusBarVisible: true, overlay: 'svg' })(ProfileScreen);
+
+export default connect(mapStateToProps, mapDispatchToProps)(ProfileScreenExplained)

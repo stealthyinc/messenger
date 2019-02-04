@@ -101,7 +101,7 @@ class DiscoverScreen extends Component {
     let newData = this.state.channels
     delete newData[rowId]
     this.setState({ channelClicked: true, channelId: data.id, channels: newData })
-    firebaseInstance.subscribeToTopic(data.id)
+    this.props.handleContactUnmute(data)
     // AC: Begin debug output
     console.log(`INFO(${method}): called setState channelClicked-->true for ${data.id}`)
     // AC: End debug output
@@ -175,7 +175,8 @@ const mapDispatchToProps = (dispatch) => {
     addNewContact: (contact, flag) => dispatch(EngineActions.addNewContact(contact, flag)),
     setContactAdded: (flag) => dispatch(EngineActions.setContactAdded(flag)),
     setActiveContact: (contact) => dispatch(EngineActions.setActiveContact(contact)),
-    handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact))
+    handleContactClick: (contact) => dispatch(EngineActions.setActiveContact(contact)),
+    handleContactUnmute: (contact) => dispatch(EngineActions.handleContactUnmute(contact))
   }
 }
 

@@ -388,6 +388,10 @@ class OfflineMessagingServices extends EventEmitterAdapter {
     this.skipRecvService = false
   }
 
+  clearReceiveMessageQueue() {
+    this.contactReceiveQueue = []
+  }
+
   priorityReceiveMessages(contacts) {
     // Wipes out existing receive queue and moves our priority folks to the top
     // of our receive queue. (allowable b/c code run on one proc--one thread)

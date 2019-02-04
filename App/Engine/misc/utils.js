@@ -18,18 +18,18 @@ module.exports.isChannelOrAma = function (protocolStr) {
          module.exports.isAma(protocolStr)
 }
 
-// module.exports.fmtErrorStr = function (anErrDescription,
-//                            aMethodName = undefined,
-//                            aCaughtErrDescription = undefined) {
-//   let description = (anErrDescription) || ''
-//   let method = (aMethodName) ? `(${aMethodName})` : ''
-//   let caughtDescription = (aCaughtErrDescription) || ''
+module.exports.fmtErrorStr = function (anErrDescription,
+                           aMethodName = undefined,
+                           aCaughtErrDescription = undefined) {
+  let description = (anErrDescription) || ''
+  let method = (aMethodName) ? `(${aMethodName})` : ''
+  let caughtDescription = (aCaughtErrDescription) || ''
 
-//   let errorString = `ERROR${method}: ${description}\n`
-//   if (caughtDescription) {
-//     errorString += caughtDescription
-//   }
-// }
+  let errorString = `ERROR${method}: ${description}\n`
+  if (caughtDescription) {
+    errorString += caughtDescription
+  }
+}
 
 // Determines if a js object is empty.
 //
@@ -87,8 +87,9 @@ module.exports.is_oldPad = function () {
   const {height, width} = Dimensions.get('window')
   // bad one
   // 480 320
+  // 568 320
   const aspectRatio = height / width
-  if (aspectRatio < 1.6 && height === 480) { return true }
+  if (aspectRatio < 1.777) { return true }
   return false
 }
 

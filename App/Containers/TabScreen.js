@@ -6,10 +6,7 @@ import ProfileScreen from './ProfileScreen'
 
 export default TabNavigator(
   {
-    // Channels: { screen: DiscoverScreen },
     Messages: { screen: ConversationScreen },
-    // Wallet: { screen: WalletScreen },
-    // dApps: { screen: DappStore },
     Profile: { screen: ProfileScreen }
   },
   {
@@ -20,20 +17,12 @@ export default TabNavigator(
         if (routeName === 'Messages') {
           iconName = `ios-chatbubbles`
         }
-        // else if (routeName === 'Wallet') {
-        //   iconName = `ios-cash${focused ? '' : '-outline'}`;
-        // }
-        else if (routeName === 'Channels') {
-          iconName = `ios-radio`
-        } else if (routeName === 'dApps') {
-          iconName = `ios-aperture`
-        } else if (routeName === 'Profile') {
+        else if (routeName === 'Profile') {
           iconName = `ios-contact`
         }
-
         // You can return any component that you like here! We usually use an
         // icon component from react-native-vector-icons
-        return <Ionicons name={iconName} size={28} color={tintColor} />
+        return <Ionicons name={iconName} size={30} color={tintColor} />
       }
     }),
     tabBarOptions: {

@@ -26,7 +26,7 @@ class ChatScreen extends Component {
           <Ionicons name='md-arrow-back' size={32} color='white' />
         </TouchableOpacity>
       ),
-      headerTitle: params.name,
+      headerTitle: <Text style={{fontSize: 24, fontWeight: 'bold', color: 'white'}}>{params.name}</Text>,
       // headerRight: (
       //   // <TouchableOpacity onPress={() => console.log('cool')} style={{marginRight: 10}}>
       //   <TouchableOpacity onPress={() => params.navigation.navigate("ContactProfile")} style={{marginRight: 10}}>
@@ -39,7 +39,6 @@ class ChatScreen extends Component {
       }
     }
   };
-
   constructor (props) {
     super(props)
     this.state = {
@@ -323,10 +322,11 @@ class ChatScreen extends Component {
     this.setState({modalVisible: flag})
   }
   renderCustomActions = (props) => {
+    return null
     return (
       <TouchableOpacity
         style={[styles.chatContainer, this.props.containerStyle]}
-        onPress={() => this.props.navigation.navigate('DappData')}
+        onPress={() => this.props.navigation.navigate('CameraRoll')}
       >
         <Ionicons name='ios-aperture' size={28} color='#34bbed' />
       </TouchableOpacity>
@@ -409,7 +409,7 @@ class ChatScreen extends Component {
           <Text style={{marginTop: 30, marginBottom: 20, marginRight: 5, marginLeft: 5, fontSize: 16}}>Invite {id} to securely chat with you!</Text>
           <View style={{flexDirection: 'row', margin: 5}}>
             <Button
-              backgroundColor={'#34bbed'}
+              buttonStyle={{backgroundColor: '#34bbed'}}
               onPress={() => {
                 console.log('refresh')
                 this.props.updateContactPubKey(id)
@@ -417,15 +417,18 @@ class ChatScreen extends Component {
               icon={{name: 'refresh', color: 'white'}}
               title='Refresh'
               raised
+              style={{marginRight: 5}}
             />
             <Button
-              backgroundColor={'#34bbed'}
+              buttonStyle={{backgroundColor: '#34bbed'}}
               onPress={() => Communications.text('')}
               icon={{name: 'chat', color: 'white'}}
               title='Text'
+              raised
+              style={{marginRight: 5}}
             />
             <Button
-              backgroundColor={'#34bbed'}
+              buttonStyle={{backgroundColor: '#34bbed'}}
               onPress={() => Communications.email([''], null, null, 'Add me on Stealthy IM', '')}
               icon={{name: 'email', color: 'white'}}
               title='Email'
