@@ -7,21 +7,21 @@
 	<key>AD_UNIT_ID_FOR_INTERSTITIAL_TEST</key>
 	<string>ca-app-pub-3940256099942544/4411468910</string>
 	<key>CLIENT_ID</key>
-	<string>574799779014-ec7vgiei40nfe8aukvgs9fq6a2tm85ch.apps.googleusercontent.com</string>
+	<string>1097699670593-ct5mdv8h53jio6c7hpms6c0r51n5qc9r.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.574799779014-ec7vgiei40nfe8aukvgs9fq6a2tm85ch</string>
+	<string>com.googleusercontent.apps.1097699670593-ct5mdv8h53jio6c7hpms6c0r51n5qc9r</string>
 	<key>API_KEY</key>
-	<string>AIzaSyBem-5mep8zsrcmjjiEX_NuzAWEfm3uVow</string>
+	<string>AIzaSyAQQ5p-nkGSE-4Qa3H4dc8EWIdvvURK3rc</string>
 	<key>GCM_SENDER_ID</key>
-	<string>574799779014</string>
+	<string>1097699670593</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>stealthy-im</string>
 	<key>PROJECT_ID</key>
-	<string>coldmessage-ae5bc</string>
+	<string>coldmessage-development</string>
 	<key>STORAGE_BUCKET</key>
-	<string>coldmessage-ae5bc.appspot.com</string>
+	<string>coldmessage-development.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false/>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -33,8 +33,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true/>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:574799779014:ios:4f36b6961aa5da87</string>
+	<string>1:1097699670593:ios:4f36b6961aa5da87</string>
 	<key>DATABASE_URL</key>
-	<string>https://coldmessage-ae5bc.firebaseio.com</string>
+	<string>https://coldmessage-development.firebaseio.com</string>
 </dict>
 </plist>
