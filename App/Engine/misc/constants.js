@@ -1,10 +1,3 @@
-export const statusIndicators = {
-  available: 'green',
-  busy: 'red',
-  inactive: 'yellow',
-  offline: 'grey'
-}
-
 export const defaultSettings = {
   notifications: true,
   analytics: true,
@@ -21,7 +14,6 @@ export const testContactArr = [
     summary: 'World Domination!',
     unread: 0,
     time: '2 mins ago',
-    status: statusIndicators.offline,
     publicKey: '0321f3753d7f1bde82672bbcca9363bc9f9f074ffdb5ec4741f76da47df97f90a8'
   },
   {
@@ -30,7 +22,6 @@ export const testContactArr = [
     summary: 'Ruff!',
     unread: 0,
     time: '2 mins ago',
-    status: statusIndicators.offline,
     publicKey: '0321f3753d7f1bde82672bbcca9363bc9f9f074ffdb5ec4741f76da47df97f90a8'
   },
   {
@@ -39,7 +30,6 @@ export const testContactArr = [
     summary: 'Food?',
     unread: 0,
     time: '7 mins ago',
-    status: statusIndicators.offline,
     publicKey: '0321f3753d7f1bde82672bbcca9363bc9f9f074ffdb5ec4741f76da47df97f90a8'
   }
 ]

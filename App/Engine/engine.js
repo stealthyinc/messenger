@@ -48,8 +48,14 @@ const { ContactManager } = require('./messaging/contactManager.js')
 const { Discovery } = require('./misc/discovery.js')
 const { Timer } = require('./misc/timer.js')
 
+import { SettingsDataObj } from './data/settingsDataObj'
+import { ContactsDataObj } from './data/contactsDataObj'
+
 const common = require('./../common.js')
 const api = API.create()
+
+const ENABLE_SETTINGS_LOCAL_STORE = false
+const ENABLE_CONTACTS_LOCAL_STORE = false
 
 // TODO: figure out how to only include/build this for development
 const ENABLE_MEASUREMENTS = false
@@ -68,7 +74,7 @@ let ENCRYPT_SETTINGS = true
 let STEALTHY_PAGE = 'LOCALHOST'
 //
 // Logging Scopes
-const LOG_GAIAIO = true
+const LOG_GAIAIO = false
 const LOG_OFFLINEMESSAGING = false
 //
 const ENABLE_AMA = true
@@ -90,7 +96,12 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.sessionId = sessionId
     this.discovery = undefined
 
-    this.settings = constants.defaultSettings
+    this.settings = new SettingsDataObj()
+    this.needSettingsSyncWithGaia = false
+    //
+    this.contacts = new ContactsDataObj()
+    this.needContactsSyncWithGaia = false
+
     this.contactMgr = undefined
 
     this.myTimer = new Timer('Enter MessagingEngine Ctor')
@@ -251,49 +262,21 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     this.userId = userId
     this._configureIO()
-
-    // setTimeout(() => {
-    //   if (this.contactMgr) {
-    //     // Test handleMobileNotifications mods (noitifications can't be simulated
-    //     // in debug config at the moment):
-    //     //    feb9 --> PBJ
-    //     this.handleMobileNotifications('feb9')
-    //   }
-    // }, 10000)
-  }
-
-  // Iterate over a contact array and make sure it's values are reasonable and
-  // correct for contacts (otherwise, bugs like the channel with missing
-  // profile add that affected Raji can occur.) Omit unreasonable values.
-  //
-  static sanitizeContactArr(aContactArr) {
-    let cleanContactArr = []
-
-    for (const contact of aContactArr) {
-      if (contact &&
-          contact.hasOwnProperty('title') &&
-          contact.hasOwnProperty('description') &&
-          contact.hasOwnProperty('id')) {
-        cleanContactArr.push(contact)
-      }
-    }
-
-    return cleanContactArr
   }
 
   //  Initialization
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   //
-  async _initWithContacts (contactArr) {
+  async _initWithContacts () {
     const method = 'engine::_initWithContacts'
     this.myTimer.logEvent('_initWithContacts    (Entered)')
 
     // In mobile we don't force an active contact
     const forceActiveContact = false
     this.contactMgr = new ContactManager(forceActiveContact)
-    this.contactMgr.initFromStoredArray(contactArr)
-    this.contactMgr.setAllContactsStatus()
+    ContactManager.sanitizeContactArr(this.contacts.getData())
+    this.contactMgr.initFromArray(this.contacts.getData())
     if (!forceActiveContact) {
       // No contact is selected initially in mobile, so unset the active contact
       this.contactMgr.setActiveContact(undefined)
@@ -365,7 +348,9 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.conversations = new ConversationManager(this.logger, this.userId, this.idxIo)
     if (!this.newUser) {
       try {
+        this.myTimer.logEvent('_initWithContacts    (Before attempting to load contact bundles.)')
         await this.conversations.loadContactBundles(this.contactMgr.getContactIds())
+        this.myTimer.logEvent('_initWithContacts    (After successfully loading contact bundles.)')
       } catch (error) {
         // suppress
         //   TODO: pull from async storage on fail
@@ -416,6 +401,22 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
 
       this.offlineMsgSvc.setChannelAddresses(channelAddresses)
+
+
+      // The next two if blocks only should be an issue if:
+      //   1. The user has multiple instances running (not yet?)
+      //   2. The user has deleted the app (but then it would load from
+      //      gaia anyway as there'd be no local storage)
+      //   3. The user made changes local that weren't saved to Gaia in time
+      //
+      if (this.needSettingsSyncWithGaia) {
+        // TODO: check gaia settings against current settings obj.
+        //       Or maybe not--maybe only for contacts?
+      }
+
+      if (this.needsContactsSyncWithGaia) {
+        // TODO: check gaia contacts against current and merge / sync
+      }
     }
 
     // TODO TODO TODO:  change this to be an emitter that sends the ids of sent
@@ -471,7 +472,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.myTimer.logEvent('_initWithContacts    (after updateContactMgr)')
 
     // Setup Discovery services:
-    if (this.settings.discovery) {
+    if (this.settings.getDiscovery()) {
       this.discovery = new Discovery(this.userId, this.publicKey, this.privateKey)
       this.discovery.on('new-invitation',
                         (theirPublicKey, theirUserId) =>
@@ -566,10 +567,20 @@ export class MessagingEngine extends EventEmitterAdapter {
     const method = 'engine.js::_fetchUserSettings'
     this.myTimer.logEvent('Enter _fetchUserSettings')
 
-    let encSettingsData
+    let encSettingsData = undefined
     try {
       this.myTimer.logEvent('_fetchUserSettings    (Before attempting to read settings.json)')
-      encSettingsData = await this.io.robustLocalRead(this.userId, 'settings.json')
+      if (ENABLE_SETTINGS_LOCAL_STORE) {
+        encSettingsData = await this.deviceIO.readLocalFile(this.userId, 'settings.json')
+        console.log('After trying to read settings from device.')
+      }
+      if (!encSettingsData) {
+        encSettingsData = await this.io.robustLocalRead(this.userId, 'settings.json')
+        console.log('After trying to read settings from GAIA.')
+      } else {
+        // TODO: write our gaia data to the device (since it's not on there yet)
+        this.needSettingsSyncWithGaia = true
+      }
       this.myTimer.logEvent('_fetchUserSettings    (After successful reading settings.json)')
       // readLocalFile returns undefined on BlobNotFound, so set new user:
       this.newUser = !(encSettingsData)
@@ -612,8 +623,10 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.myTimer.logEvent('_fetchUserSettings    (After attempting to read settings.json)')
     if (encSettingsData) {
       try {
-        this.settings = await utils.decryptObj(
+        const settingsData = await utils.decryptObj(
           this.privateKey, encSettingsData, ENCRYPT_SETTINGS)
+
+        this.settings.initFromObj(settingsData)
         this.myTimer.logEvent('_fetchUserSettings    (After decrypting settings.json)')
       } catch (err) {
         // Problem if here is likely that another account wrote to the current
@@ -627,7 +640,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     }
 
-    this.emit('me-update-settings', this.settings)
+    this.emit('me-update-settings', this.settings.getData())
     await this._fetchDataAndCompleteInit()
   }
 
@@ -651,15 +664,24 @@ export class MessagingEngine extends EventEmitterAdapter {
     await this.io.writeLocalFile(this.userId, 'pk.txt', this.publicKey)
     this.myTimer.logEvent('_fetchDataAndCompleteInit    (Wrote pk.txt)')
 
-    await this.writeSettings(this.settings)
+    await this.writeSettings()
     this.myTimer.logEvent('_fetchDataAndCompleteInit    (Wrote settings.json)')
 
-    let contactArr = []
-    let contactsData
+    let encContactsData = undefined
     try {
       this.myTimer.logEvent('_fetchDataAndCompleteInit    (Before attempting to read contacts.json)')
-      const maxAttempts = 5
-      contactsData = await this.io.robustLocalRead(this.userId, 'contacts.json', maxAttempts)
+      if (ENABLE_CONTACTS_LOCAL_STORE) {
+        encContactsData = await this.deviceIO.readLocalFile(this.userId, 'contacts.json')
+        console.log('After trying to read contacts from device.')
+      }
+      if (!encContactsData) {
+        const maxAttempts = 5
+        encContactsData = await this.io.robustLocalRead(this.userId, 'contacts.json', maxAttempts)
+        console.log('After trying to read contacts from GAIA.')
+      } else {
+        // TODO: write our gaia data to the device (since it's not on there yet)
+        this.needContactsSyncWithGaia
+      }
       this.myTimer.logEvent('_fetchDataAndCompleteInit    (After successfully reading contacts.json)')
     } catch (error) {
       // TODO:
@@ -672,9 +694,11 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
     this.myTimer.logEvent('_fetchDataAndCompleteInit    (After attempting to read contacts.json)')
 
-    if (contactsData) {
+    if (encContactsData) {
       try {
-        contactArr = await utils.decryptObj(this.privateKey, contactsData, ENCRYPT_CONTACTS)
+        const contactsData =
+          await utils.decryptObj(this.privateKey, encContactsData, ENCRYPT_CONTACTS)
+        this.contacts.initFromObj(contactsData)
       } catch (error) {
         // TODO:
         //   - see above about safe encryption and n-mod redudancy
@@ -684,8 +708,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
     this.myTimer.logEvent('_fetchDataAndCompleteInit    (After decrypting contacts.json data)')
 
-    const sanoContactArr = MessagingEngine.sanitizeContactArr(contactArr)
-    this._initWithContacts(sanoContactArr)
+    this._initWithContacts()
   }
 
   //
@@ -750,7 +773,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     //     all these and use a dirty flag to determine if we even need to do this.
     if (this.contactMgr) {
       promises.push(
-        this._writeContactList(this.contactMgr.getAllContacts())
+        this._writeContactList(this.contactMgr.getContacts())
         .catch(err => {
           console.log(`ERROR(engine.js::handleShutDownRequest): writing contact list. ${err}`)
           return undefined
@@ -1152,7 +1175,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     this.contactMgr.deleteContact(contact)
 
-    this._writeContactList(this.contactMgr.getAllContacts())
+    this._writeContactList(this.contactMgr.getContacts())
 
     this.conversations.removeConversation(contact.id)
     this._writeConversations()
@@ -1176,7 +1199,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.contactMgr.setNotifications(aContact.id, false)
       firebaseInstance.unsubscribeFromTopic(aContact.id)
       this.updateContactMgr()
-      this._writeContactList(this.contactMgr.getAllContacts())
+      this._writeContactList(this.contactMgr.getContacts())
     }
   }
 
@@ -1185,20 +1208,14 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.contactMgr.setNotifications(aContact.id)
       firebaseInstance.subscribeToTopic(aContact.id)
       this.updateContactMgr()
-      this._writeContactList(this.contactMgr.getAllContacts())
+      this._writeContactList(this.contactMgr.getContacts())
     }
   }
 
   handleRadio = async (e, { name }) => {
-    if (name === 'twitterShare') {
-      this.settings.twitterShare = !this.settings.twitterShare
-      this.anonalytics.aeSettings(`twitterShare:${this.settings.twitterShare}`)
-    } else if (name === 'console') {
-      this.settings.console = !this.settings.console
-      this.anonalytics.aeSettings(`console:${this.settings.console}`)
-    } else if (name === 'analytics') {
-      this.settings.analytics = !this.settings.analytics
-      if (this.settings.analytics) {
+    if (name === 'analytics') {
+      this.settings.toggleAnalytics()
+      if (this.settings.getAnalytics()) {
         this.anonalytics.aeEnable()
       } else {
         this.anonalytics.aeDisable()
@@ -1208,21 +1225,14 @@ export class MessagingEngine extends EventEmitterAdapter {
       await firebaseInstance.getFirebaseRef(`${notificationPath}`).once('value')
       .then((snapshot) => {
         const token = snapshot.child('token').val()
-        if (this.settings.notifications) {
-          firebaseInstance.getFirebaseRef(`${notificationPath}`).set({token, enabled: false})
-        } else {
-          firebaseInstance.getFirebaseRef(`${notificationPath}`).set({token, enabled: true})
-        }
-        this.settings.notifications = !this.settings.notifications
+        this.settings.toggleNotifications()
+        firebaseInstance.getFirebaseRef(`${notificationPath}`).set(
+          {token, enabled: this.settings.getNotifications()})
       })
-      // this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`);
-    } else if (name === 'search') {
-      this.settings.search = !this.settings.search
-      this.anonalytics.aeSettings(`passiveSearch:${this.settings.search}`)
     } else if (name === 'discovery') {
-      this.settings.discovery = !this.settings.discovery
-      this.anonalytics.aeSettings(`discovery:${this.settings.discovery}`)
-      if (this.settings.discovery) {
+      this.settings.toggleDiscovery()
+      this.anonalytics.aeSettings(`discovery:${this.settings.getDiscovery()}`)
+      if (this.settings.getDiscovery()) {
         if (!this.discovery) {
           this.discovery = new Discovery(this.userId, this.publicKey, this.privateKey)
 
@@ -1233,10 +1243,6 @@ export class MessagingEngine extends EventEmitterAdapter {
           this.discovery.monitorInvitations()
         }
       } else {
-        // TODO: discussion w/ PBJ about whether we should completely clear
-        //       all invitations in the user's firebase.
-        //       If we want to do this, call this.discovery.clearDiscoveryDb()
-        //
         this.discovery.off('new-invitation')
         this.discovery.stop()
         this.discovery.clearDiscoveryDb()
@@ -1244,8 +1250,8 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     } // webrtc, heartbeat is ignored
 
-    this.emit('me-update-settings', this.settings)
-    this.writeSettings(this.settings)
+    this.emit('me-update-settings', this.settings.getData())
+    this.writeSettings()
   }
 
   async updateContactPubKey (aContactId) {
@@ -1265,7 +1271,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.contactMgr.setPublicKey(aContactId, publicKey)
       this.updateContactMgr()
       try {
-        await this._writeContactList(this.contactMgr.getAllContacts())
+        await this._writeContactList(this.contactMgr.getContacts())
       } catch (error) {
         // Suppress for now
         // TODO: should this emit me-fault ?
@@ -1367,7 +1373,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
       this.contactMgr.moveContactToTop(outgoingUserId)
       this.contactMgr.setSummary(outgoingUserId, ChatMessage.getSummary(chatMsg))
-      this._writeContactList(this.contactMgr.getAllContacts())
+      this._writeContactList(this.contactMgr.getContacts())
 
       this.updateContactMgr()
       this.updateMessages(outgoingUserId)
@@ -1549,7 +1555,6 @@ export class MessagingEngine extends EventEmitterAdapter {
         this.conversations.markConversationModified(message)
       } else {
         this.contactMgr.incrementUnread(incomingId)
-        // const count = this.contactMgr.getAllUnread()
       }
 
       if (isLastOne) {
@@ -1564,7 +1569,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
     if (writeContacts) {
-      this._writeContactList(this.contactMgr.getAllContacts())
+      this._writeContactList(this.contactMgr.getContacts())
     }
 
     this.updateContactMgr()
@@ -1689,19 +1694,23 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
   }
 
-  async writeSettings (theSettings) {
+  async writeSettings() {
     const method = 'engine::writeSettings'
 
-    if (!theSettings || (theSettings === {})) {
-      theSettings = { time: Date.now() }
-    }
-
-    try {
-      let encSettingsData = await utils.encryptObj(this.publicKey, theSettings, ENCRYPT_SETTINGS)
-      await this.io.robustLocalWrite(this.userId, 'settings.json', encSettingsData)
-    } catch (error) {
-      const errMsg = `WARNING(${method}): failure storing settings.\n${error}`
-      console.log(errMsg)
+    if (this.settings &&
+        (this.settings.getTimeSaved() === undefined ||
+         this.settings.getTimeModified() !== undefined)) {
+      try {
+        this.settings.setTimeSaved()
+        const encSettings = await utils.encryptObj(this.publicKey, this.settings, ENCRYPT_SETTINGS)
+        if (ENABLE_SETTINGS_LOCAL_STORE) {
+          await this.deviceIO.writeLocalFile(this.userId, 'settings.json', encSettings)
+        }
+        await this.io.robustLocalWrite(this.userId, 'settings.json', encSettings)
+      } catch (error) {
+        const errMsg = `ERROR(${method})-suppressed: failed to write settings.\n${error}`
+        console.log(errMsg)
+      }
     }
   }
 

@@ -1,4 +1,5 @@
 // A class to hold user settings for Stealthy
+import { BaseDataObj } from './baseDataObj'
 
 class SettingsDataObj extends BaseDataObj {
   constructor() {
@@ -10,27 +11,16 @@ class SettingsDataObj extends BaseDataObj {
       analytics: true,
       discovery: true,
       heartbeat: false,
-      webrtc: false,
-      twitterShare: false
+      webrtc: false
     }
   }
 
-  initFromStringifiedObj(theStringifiedObj) {
-    let obj = undefined
-    try {
-      obj = JSON.parse(theStringifiedObj)
-    } catch (error) {
-      // Suppress and go to default values
-      console.log(`ERROR(SettingsDataObj::initFromStringifiedData) - Suppressed.\n${error}`)
-      return
-    }
-
-    if (obj.hasOwnProperty('data') &&
-        obj.hasOwnProperty('version') &&
-        obj.hasOwnProperty('modified')) {
-      super._initFromObj(obj)
+  initFromObj(theObj) {
+    if (theObj.hasOwnProperty('data') &&
+        theObj.hasOwnProperty('time')) {
+      super._initFromObj(theObj)
     } else {
-      this._initFromOriginalDataFormat(obj)
+      this._initFromOriginalDataFormat(theObj)
     }
   }
 
@@ -38,8 +28,8 @@ class SettingsDataObj extends BaseDataObj {
     super.setData(theData)
   }
 
-  getTwitterShare() {
-    return this.data.twitterShare
+  synchronize(anObjectToSynchronize) {
+    // TODO: ...
   }
 
   getAnalytics() {
@@ -54,18 +44,20 @@ class SettingsDataObj extends BaseDataObj {
     return this.data.discovery
   }
 
-  toggleTwitterShare() {
-
-  }
-
   toggleAnalytics() {
-
+    super.setTimeModified()
+    this.data.analytics = !this.data.analytics
   }
 
   toggleNotifications() {
-
+    super.setTimeModified()
+    this.data.notifications = !this.data.notifications
   }
 
+  toggleDiscovery() {
+    super.setTimeModified()
+    this.data.discovery = !this.data.discovery
+  }
 }
 
 module.exports = { SettingsDataObj }

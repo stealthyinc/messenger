@@ -33,12 +33,17 @@ class BaseDataObj {
 
     this.data = undefined
 
-    this.version = undefined
-    this.modified = undefined
+    this.time = {
+      saved: undefined,
+      modified: undefined
+    }
+  }
 
-    // Possible future vars:
-    this.origin = undefined
-    this.merged = undefined
+  _initFromObj(theObj) {
+    if (theObj) {
+      this.data = theObj.data
+      this.time = theObj.time
+    }
   }
 
   setData(theData) {
@@ -46,31 +51,33 @@ class BaseDataObj {
   }
 
   getData() {
-    return this.data
+    return (this.hasOwnProperty('data')) ? this.data : undefined
   }
 
-  setVersion(aUTC = undefined) {
-    this.version = (aUTC) ? aUTC : Date.now()
+  setTimeSaved(aUTC=undefined) {
+    this.time.saved = (aUTC) ? aUTC : Date.now()
+    this.time.modified = undefined
   }
 
-  getVersion() {
-    return this.version
+  getTimeSaved() {
+    return (this.time.hasOwnProperty('saved')) ? this.time.saved : undefined
   }
 
-  isNewerVersion(aBaseDataObj) {
-    return (aBaseDataObj.getVersion() > this.version)
+  isNewerInitialData(aBaseDataObj) {
+    return (aBaseDataObj.getTimeSaved() > this.getTimeSaved())
   }
 
-  setModified(aModifiedFlag = undefined) {
-    if (aModifiedFlag !== undefined) {
-      this.modified = aModifiedFlag
-    } else {
-      this.modified = true
-    }
-
+  setTimeModified(aUTC=undefined) {
+    this.time.modified = (aUTC) ? aUTC : Date.now()
   }
+
+  getTimeModified() {
+    return (this.time.hasOwnProperty('modified')) ? this.time.modified : undefined
+  }
+
   isModified() {
-    return this.modified
+    return (this.time.hasOwnProperty('modified') &&
+            (this.time.modified === undefined))
   }
 }
 

@@ -59,7 +59,7 @@ class ConversationScreen extends React.Component {
   componentWillReceiveProps (nextProps) {
     const { contactMgr, engineInit, navigation } = nextProps
     if (engineInit && contactMgr && contactMgr.getContactIds) {
-      const listViewData = contactMgr.getAllContacts()
+      const listViewData = contactMgr.getContacts()
       this.setState({listViewData})
     }
     const { params } = navigation.state
