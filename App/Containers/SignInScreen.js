@@ -67,7 +67,7 @@ class SignInScreen extends React.Component {
       )
     }
     const CustomComponent = ({ copilot }) => (
-      <View {...copilot} style={styles.title}>
+      <View {...copilot}>
         <Button
           onPress={this._signInAsync}
           title='Sign In/Up'
@@ -100,7 +100,7 @@ class SignInScreen extends React.Component {
                        style={{justifyContent: 'flex-start'}}>
             <WalkthroughableText style={styles.title}>
               <Icon
-                size={40} 
+                size={40}
                 name='twitter'
                 color='#38A1F3'
                 onPress={() => Linking.openURL('https://twitter.com/stealthyim').catch(err => console.error('An error occurred', err))}
@@ -115,7 +115,7 @@ class SignInScreen extends React.Component {
                        style={{justifyContent: 'flex-start'}}>
             <WalkthroughableText style={styles.title}>
               <Icon
-                size={40} 
+                size={40}
                 name='product-hunt'
                 color='#da552f'
                 onPress={() => Linking.openURL('https://www.producthunt.com/posts/stealthy-im').catch(err => console.error('An error occurred', err))}
@@ -130,7 +130,7 @@ class SignInScreen extends React.Component {
                        style={{justifyContent: 'flex-end'}}>
             <WalkthroughableText style={styles.title}>
               <Icon
-                size={40} 
+                size={40}
                 name='medium'
                 color='#00ab6c'
                 onPress={() => Linking.openURL('https://medium.com/@stealthyim').catch(err => console.error('An error occurred', err))}
@@ -145,7 +145,7 @@ class SignInScreen extends React.Component {
                        style={{justifyContent: 'flex-end'}}>
             <WalkthroughableText style={styles.title}>
               <Icon
-                size={40} 
+                size={40}
                 name='youtube-play'
                 color='#ED3833'
                 onPress={() => Linking.openURL('https://www.youtube.com/watch?v=4rLdMIrVBrw').catch(err => console.error('An error occurred', err))}
@@ -168,7 +168,7 @@ class SignInScreen extends React.Component {
               source={chatIcon}
               style={{width: 50, height: 50}}
             />
-            <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15 }}>Hi Stealthy 👋</Text>
+            <Text style={{ fontWeight: 'bold', fontSize: 36, marginLeft: 15 }}>Hi Stealthy! 👋</Text>
           </View>
 
           <View style={{flex: 0.15}} />

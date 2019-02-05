@@ -28,7 +28,7 @@ class UpdateScreen extends Component {
         show={true}
         showProgress={false}
         title='App Update Required'
-        message='Please update your app to fix a Blockstack security issue'
+        message='Please update your app to ensure you have the latest release'
         closeOnTouchOutside={false}
         closeOnHardwareBackPress={false}
         showCancelButton

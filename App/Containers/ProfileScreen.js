@@ -16,7 +16,7 @@ const utils = require('./../Engine/misc/utils.js')
 const WalkthroughableText = walkthroughable(AText);
 
 const CustomIcon = ({ copilot, disabled, name, flag, onPress }) => (
-  <View {...copilot} style={styles.title}>
+  <View {...copilot}>
     <Icon
       reverse
       disabled={disabled}
@@ -153,7 +153,7 @@ class ProfileScreen extends React.Component {
       )
     }
     const CustomButton = ({ copilot }) => (
-      <View {...copilot} style={styles.title}>
+      <View {...copilot}>
         <Button
           onPress={this.showActionSheet}
           icon={{name: 'share', color: 'white'}}
@@ -166,6 +166,7 @@ class ProfileScreen extends React.Component {
     if (username.length > 24) {
       username = username.substring(0, 21) + '...'
     }
+    const myAppVersion = (this.props.appVersion) ? 'v' + this.props.appVersion : null
     return (
       <View style={styles.container}>
         <View style={{flex: 1,
@@ -186,12 +187,17 @@ class ProfileScreen extends React.Component {
             <Text h4 style={{fontStyle: 'italic'}}>{fullName}</Text>
           </View>
 
-          <View style={{flex: 0.25}} />
+          <View style={{flex: 0.2}} />
+
           <View style={{alignItems: 'center'}}>
             <CopilotStep text="Share your Blockstack ID with your friends" order={3} name="share">
               <CustomButton />
             </CopilotStep>
+          </View>
 
+          <View style={{flex: 0.05}} />
+
+          <View style={{alignItems: 'center'}}>
             <View style={{width: buttonRowWidth,
                           flexDirection: 'row',
                           justifyContent: 'space-around',
@@ -201,7 +207,7 @@ class ProfileScreen extends React.Component {
                           borderColor: borderAccentColor}}>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <CopilotStep text="Click here to show your QR code" order={4} name="qrcode">
-                  <CustomIcon 
+                  <CustomIcon
                     name='qrcode'
                     disabled={!base64}
                     flag={showQR}
@@ -218,7 +224,7 @@ class ProfileScreen extends React.Component {
               </View>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <CopilotStep text="Click here to toggle contact discovery" order={5} name="discover">
-                  <CustomIcon 
+                  <CustomIcon
                     name='connectdevelop'
                     disabled={false}
                     flag={discovery}
@@ -235,7 +241,7 @@ class ProfileScreen extends React.Component {
               </View>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <CopilotStep text="Click here to toggle notifications" order={6} name="notification">
-                  <CustomIcon 
+                  <CustomIcon
                     name='bell'
                     disabled={false}
                     flag={notifications}
@@ -252,7 +258,7 @@ class ProfileScreen extends React.Component {
               </View>
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <CopilotStep text="Click here to toggle analytics" order={7} name="analytics">
-                  <CustomIcon 
+                  <CustomIcon
                     name='pie-chart'
                     disabled={false}
                     flag={analytics}
@@ -271,11 +277,11 @@ class ProfileScreen extends React.Component {
           </View>
 
           <View style={{flex: 0.15}} />
-          
+
           <View style={{alignItems: 'flex-end', justifyContent: 'flex-end', alignSelf: 'stretch', marginRight: 20}}>
             <CopilotStep text="The version of Stealthy running" order={8} name="appVersion">
               <WalkthroughableText style={styles.title}>
-                <Text h5 style={{color: borderAccentColor, fontStyle: 'italic', fontWeight: 'bold', textAlign: 'right'}}>v{this.props.appVersion}</Text>
+                <Text h5 style={{color: borderAccentColor, fontStyle: 'italic', fontWeight: 'bold', textAlign: 'right'}}>{myAppVersion}</Text>
               </WalkthroughableText>
             </CopilotStep>
           </View>

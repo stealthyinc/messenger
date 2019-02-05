@@ -18,18 +18,18 @@ module.exports.isChannelOrAma = function (protocolStr) {
          module.exports.isAma(protocolStr)
 }
 
-// module.exports.fmtErrorStr = function (anErrDescription,
-//                            aMethodName = undefined,
-//                            aCaughtErrDescription = undefined) {
-//   let description = (anErrDescription) || ''
-//   let method = (aMethodName) ? `(${aMethodName})` : ''
-//   let caughtDescription = (aCaughtErrDescription) || ''
+module.exports.fmtErrorStr = function (anErrDescription,
+                           aMethodName = undefined,
+                           aCaughtErrDescription = undefined) {
+  let description = (anErrDescription) || ''
+  let method = (aMethodName) ? `(${aMethodName})` : ''
+  let caughtDescription = (aCaughtErrDescription) || ''
 
-//   let errorString = `ERROR${method}: ${description}\n`
-//   if (caughtDescription) {
-//     errorString += caughtDescription
-//   }
-// }
+  let errorString = `ERROR${method}: ${description}\n`
+  if (caughtDescription) {
+    errorString += caughtDescription
+  }
+}
 
 // Determines if a js object is empty.
 //

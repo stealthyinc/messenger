@@ -409,7 +409,7 @@ class ChatScreen extends Component {
           <Text style={{marginTop: 30, marginBottom: 20, marginRight: 5, marginLeft: 5, fontSize: 16}}>Invite {id} to securely chat with you!</Text>
           <View style={{flexDirection: 'row', margin: 5}}>
             <Button
-              backgroundColor={'#34bbed'}
+              buttonStyle={{backgroundColor: '#34bbed'}}
               onPress={() => {
                 console.log('refresh')
                 this.props.updateContactPubKey(id)
@@ -417,15 +417,18 @@ class ChatScreen extends Component {
               icon={{name: 'refresh', color: 'white'}}
               title='Refresh'
               raised
+              style={{marginRight: 5}}
             />
             <Button
-              backgroundColor={'#34bbed'}
+              buttonStyle={{backgroundColor: '#34bbed'}}
               onPress={() => Communications.text('')}
               icon={{name: 'chat', color: 'white'}}
               title='Text'
+              raised
+              style={{marginRight: 5}}
             />
             <Button
-              backgroundColor={'#34bbed'}
+              buttonStyle={{backgroundColor: '#34bbed'}}
               onPress={() => Communications.email([''], null, null, 'Add me on Stealthy IM', '')}
               icon={{name: 'email', color: 'white'}}
               title='Email'
@@ -463,7 +466,6 @@ class ChatScreen extends Component {
               { type: 'url', style: linkStyle, onPress: this.onPressUrl }
             ]}
             onInputTextChanged={text => this.setCustomText(text)}
-            textInputAutoFocus={true}
           />
         </View>
       )

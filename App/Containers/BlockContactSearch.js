@@ -192,17 +192,19 @@ class BlockContactSearch extends Component {
             <Text>No Profiles Found: Invite via Text/Email</Text>
             <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 20}}>
               <Button
-                backgroundColor={'#34bbed'}
+                buttonStyle={{backgroundColor: '#34bbed'}}
                 onPress={() => Communications.email([''], null, null, 'Add me on Stealthy IM', '')}
                 icon={{name: 'email', color: 'white'}}
                 title='Email'
                 raised
+                style={{marginRight: 10}}
               />
               <Button
-                backgroundColor={'#34bbed'}
+                buttonStyle={{backgroundColor: '#34bbed'}}
                 onPress={() => Communications.text('')}
                 icon={{name: 'chat', color: 'white'}}
                 title='Message'
+                raised
               />
             </View>
           </Body>

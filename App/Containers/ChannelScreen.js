@@ -471,6 +471,7 @@ class ChannelScreen extends Component {
   onLongPress = (context, currentMessage) => {
     const options = [
       'Reply To',
+      'Quote Text',
       'Direct Message',
       'Copy Text',
       'Cancel',
@@ -484,7 +485,13 @@ class ChannelScreen extends Component {
         let index = userId.indexOf(".")
         let id = runes.substr(userId, 0, index)
         if (buttonIndex === 0) {
+          this.setState({inputText: `@${id} `})
+          this._giftedChat.textInput.focus()
           this.setState({replyTo: userId, replyMsg: currentMessage.text})
+        }
+        else if (buttonIndex === 1) {
+          this.setState({inputText: `@${id} "${currentMessage.text}" `})
+          this._giftedChat.textInput.focus()
         }
         else if (buttonIndex === 1) {
           this.contactAddLogic(userId)
@@ -582,6 +589,7 @@ class ChannelScreen extends Component {
           onPress={(index) => this.handleUserActionSheet(index)}
         />
         <GiftedChat
+          ref={(ref) => this._giftedChat = ref}
           messages={this.state.messages}
           onSend={this.onSend}
           loadEarlier={this.state.loadEarlier}
@@ -608,7 +616,6 @@ class ChannelScreen extends Component {
           textInputProps={{editable: (!disableAmaFeatures)}}
           onLongPress={this.onLongPress}
           renderChatFooter={this.renderChatFooter}
-          textInputAutoFocus={true}
         />
       </View>
     )

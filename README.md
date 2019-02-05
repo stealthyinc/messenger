@@ -34,6 +34,11 @@ Android Download: https://play.google.com/store/apps/details?id=com.stealthy
     * Run Genymotion
     * run `react-native run-android`
 
+## How to Install Release (Android Only) App
+
+1. connect Android phone via USB
+2. cd to the release directory of repo: `cd release`
+3. use adb to install app: `adb install V1_9.apk`
 
 ## Common Build Error Solutions
 
