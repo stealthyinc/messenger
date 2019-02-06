@@ -30,7 +30,6 @@ class ReduxNavigation extends React.Component {
       visible: false
     }
     this.publicKey = undefined
-    this.ref = undefined
     this.shutDownSignOut = false
     //
     // IMPORTANT: we disallow timeout below b/c it results in interuption of
@@ -188,69 +187,31 @@ class ReduxNavigation extends React.Component {
   }
 
   _authWork = async (userData) => {
-    // This variable controls whether or not you are presented with a page
-    // if another session ID is in the database. If you are developing and
-    // constantly killing and restarting the App, it makes sense to set the
-    // logic below so that this is true. For production, it should be false.
-    //
-    // When you change code pertaining to the session listener, you should
-    // set this var to false and test by changing the session id in the database.
-    //
-    // const SKIP_SESSION_BLOCK_PAGE_FOR_DEV = (process.env.NODE_ENV !== 'production')
-    // pbj disabling this due to app background crashing
     this.spinnerTimeoutAllowed = false    // Never stop the spinner on login
     this.toastTimeoutAllowed = false
-    const SKIP_SESSION_BLOCK_PAGE_FOR_DEV = true
-
     this.shutDownSignOut = false
     this.publicKey = userData['appPublicKey']
-    this.props.dispatch(EngineActions.setPublicKey(this.publicKey))
-    const ref = firebaseInstance.getFirebaseRef(common.getDbSessionPath(this.publicKey))
+    const sessionId = common.getSessionId()
 
-    console.log(`INFO(ReduxNavigation::_authWork): reading session.`)
-    return ref.once('value')
-    .then(snapshot => {
-      console.log(`INFO(ReduxNavigation::_authWork): AFTER reading session.`)
-      if (!snapshot.exists() || snapshot.val() === 'none') {
-        // signin screen
-        ref.set(common.getSessionId())
-        this._setupVars(userData, common.getSessionId())
-        this.___installSessionLossListener()
-        this._tokenRefresh(this.publicKey)
-      } else if (snapshot.exists() && (snapshot.val() === common.getSessionId())) {
-        // authloading screen
-        this._setupVars(userData, common.getSessionId())
-        this.___installSessionLossListener()
-        this._tokenRefresh(this.publicKey)
-      } else {
-        if (SKIP_SESSION_BLOCK_PAGE_FOR_DEV) {
-          ref.set(common.getSessionId())
-          this._setupVars(userData, common.getSessionId())
-          this.___installSessionLossListener()
-          this._tokenRefresh(this.publicKey)
-        } else {
-          this.props.dispatch(EngineActions.setSession(snapshot.val()))
-          this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'Block' })
-        }
-      }
-    })
-    .catch(error => {
-      console.log(`ERROR(ReduxNavigation::_authWork): ${error}`)
-    })
-  }
-  _setupVars = async (userData, session) => {
-    this.props.dispatch(EngineActions.setSession(session))
+    this.props.dispatch(EngineActions.setPublicKey(this.publicKey))
+    this.props.dispatch(EngineActions.setSession(sessionId))
     this.props.dispatch(EngineActions.setUserData(userData))
-    const userProfile = JSON.parse(await AsyncStorage.getItem('userProfile'))
-    if (userProfile) {
-      this.props.dispatch(EngineActions.setUserProfile(userProfile))
+
+    try {
+      const userProfile = JSON.parse(await AsyncStorage.getItem('userProfile'))
+      if (userProfile) {
+        this.props.dispatch(EngineActions.setUserProfile(userProfile))
+      }
+    } catch (error) {
+      // suppress
     }
-    // const token = await AsyncStorage.getItem('token')
-    // console.log("firebase token readback", token)
+
     this.props.dispatch(EngineActions.setToken(this.token))
     this.props.dispatch({ type: 'Navigation/NAVIGATE', routeName: 'App' })
     this.spinnerTimeoutAllowed = true    // The spinner can timout after login complete
     this.toastTimeoutAllowed = true
+
+    this._tokenRefresh(this.publicKey)
   }
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -274,10 +235,6 @@ class ReduxNavigation extends React.Component {
     this.spinnerTimeoutAllowed = false    // Never stop the spinner on logouts
     this.toastTimeoutAllowed = false
     const method = 'ReduxNavigation::___startLogOutSequence'
-    if (this.ref) {
-      this.ref.off()
-      this.ref = undefined
-    }
     this.props.dispatch(EngineActions.initShutdown())
 
     // Give Android more time (we've disabled the emit event for android in the
@@ -306,18 +263,21 @@ class ReduxNavigation extends React.Component {
       this.shutDownSignOut = true
 
       if (this.publicKey) {
-        firebaseInstance.setFirebaseData(common.getDbSessionPath(this.publicKey), common.NO_SESSION)
         this.props.dispatch(EngineActions.clearUserData(this.publicKey))
       }
 
-      // unsubscribe from all channels
-      for (let ch in this.props.channels) {
-        const {id} = this.props.channels[ch]
-        const theNextActiveContact = this.props.contactMgr.getContact(id)
-        this.props.dispatch(EngineActions.handleContactMute(theNextActiveContact))
+      // PBJ was wiping all of AsyncStorage and then re-writing the token:
+      // await AsyncStorage.clear()
+      // Instead we'll just wipe out things he wrote and keep the stuff we're
+      // now persisting:
+      for (const itemKey of ['token', 'userProfile', 'userData', 'channels', 'appVersion', 'reducerVersion']) {
+        try {
+          await AsyncStorage.removeItem(itemKey)
+          console.log(`INFO(ReduxNavigation::___finishLogOutSequence): removed ${itemKey} from AsyncStorage.`)
+        } catch (error) {
+          // Suppress
+        }
       }
-
-      await AsyncStorage.clear()
       const { token } = this.props
       AsyncStorage.setItem('token', token)
 
@@ -336,19 +296,6 @@ class ReduxNavigation extends React.Component {
     }
   }
 
-  ___installSessionLossListener = () => {
-    if (this.publicKey && !this.ref) {
-      const sessionPath = common.getDbSessionPath(this.publicKey)
-      this.ref = firebaseInstance.getFirebaseRef(sessionPath)
-
-      this.ref.on('value', (childSnapshot) => {
-        const session = childSnapshot.val()
-        if (session !== common.getSessionId()) {
-          this.___startLogOutSequence()
-        }
-      })
-    }
-  }
 
 /// /////////////////////////////////////////////////////////////////////////////
 //  End #FearThis

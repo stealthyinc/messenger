@@ -32,12 +32,9 @@ class LocalIO extends BaseIO {
     try {
       const keyPath = LocalIO.getKeyPath(localUser, fileName)
       await AsyncStorage.setItem(keyPath, data)
-      console.log('DEBUG - writeLocalFile')
     } catch (error) {
       // TODO:
-      console.log(`CATCH - writeLocalFile: ${error}`)
     } finally {
-      console.log('FINALLY - writeLocalFile')
     }
   }
 
@@ -45,13 +42,11 @@ class LocalIO extends BaseIO {
     let data = undefined
     try {
       const keyPath = LocalIO.getKeyPath(localUser, fileName)
+      // Returns 'null' on iOS (possibly Android too) if no file.
       data = await AsyncStorage.getItem(keyPath)
-      console.log('DEBUG - readLocalFile')
     } catch (error) {
       // TODO:
-      console.log(`CATCH - readLocalFile: ${error}`)
     } finally {
-      console.log('FINALLY - readLocalFile')
       return data
     }
   }

@@ -26,11 +26,14 @@ class SettingsDataObj extends BaseDataObj {
 
   _initFromOriginalDataFormat(theData) {
     super.setData(theData)
+    // Indicate the data is modified and must be saved to GAIA / cloud
+    // storage.
+    super.setTimeModified()
   }
 
-  synchronize(anObjectToSynchronize) {
-    // TODO: ...
-  }
+  // synchronize(anObjectToSynchronize) {
+  //   // TODO: ...
+  // }
 
   getAnalytics() {
     return this.data.analytics

@@ -29,6 +29,8 @@ module.exports.fmtErrorStr = function (anErrDescription,
   if (caughtDescription) {
     errorString += caughtDescription
   }
+
+  return errorString
 }
 
 // Determines if a js object is empty.

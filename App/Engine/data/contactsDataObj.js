@@ -20,6 +20,7 @@ class ContactsDataObj extends BaseDataObj {
 
   _initFromOriginalObjFormat(theObj) {
     super.setData(theObj)
+    super.setTimeModified()
   }
 
   synchronize(anObjectToSynchronize) {

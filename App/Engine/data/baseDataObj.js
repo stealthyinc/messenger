@@ -26,15 +26,16 @@ class BaseDataObj {
       throw new TypeError('Abstract class "BaseDataObj" cannot be instantiated directly.')
     }
 
-    if (this.synchronize === undefined) {
-      throw new TypeError('Classes extending the BaseIO abstract class must implement: ' +
-                          'synchronize(anObjectToSynchronize)')
-    }
+    // if (this.synchronize === undefined) {
+    //   throw new TypeError('Classes extending the BaseIO abstract class must implement: ' +
+    //                       'synchronize(anObjectToSynchronize)')
+    // }
 
     this.data = undefined
 
     this.time = {
-      saved: undefined,
+      cloudSaved: undefined,
+      localSaved: undefined,
       modified: undefined
     }
   }
@@ -54,17 +55,29 @@ class BaseDataObj {
     return (this.hasOwnProperty('data')) ? this.data : undefined
   }
 
-  setTimeSaved(aUTC=undefined) {
-    this.time.saved = (aUTC) ? aUTC : Date.now()
+  setTimeBothSaved(aUTC=undefined) {
+    const timeSaved = (aUTC) ? aUTC : Date.now()
+    this.time.cloudSaved = timeSaved
+    this.time.localSaved = timeSaved
     this.time.modified = undefined
   }
 
-  getTimeSaved() {
-    return (this.time.hasOwnProperty('saved')) ? this.time.saved : undefined
+  setTimeCloudSaved(aUTC=undefined) {
+    this.time.cloudSaved = (aUTC) ? aUTC : Date.now()
+    this.time.modified = undefined
   }
 
-  isNewerInitialData(aBaseDataObj) {
-    return (aBaseDataObj.getTimeSaved() > this.getTimeSaved())
+  getTimeCloudSaved() {
+    return (this.time.hasOwnProperty('cloudSaved')) ? this.time.cloudSaved : undefined
+  }
+
+  setTimeLocalSaved(aUTC=undefined) {
+    this.time.localSaved = (aUTC) ? aUTC : Date.now()
+    this.time.modified = undefined
+  }
+
+  getTimeLocalSaved(aUTC=undefined) {
+    return (this.time.hasOwnProperty('localSaved')) ? this.time.localSaved : undefined
   }
 
   setTimeModified(aUTC=undefined) {
