@@ -1,15 +1,18 @@
 import React from 'react'
 import {
   AsyncStorage,
+  Image,
   NativeModules,
   StatusBar,
   StyleSheet,
+  Text,
   View
 } from 'react-native'
 import { connect } from 'react-redux'
 import EngineActions, { EngineSelectors } from '../Redux/EngineRedux'
 import Config from 'react-native-config'
 import { getAppstoreAppVersion } from "react-native-appstore-version-checker";
+import chatIcon from '../Images/blue128.png'
 
 const utils = require('./../Engine/misc/utils.js')
 
@@ -17,6 +20,7 @@ class AuthLoadingScreen extends React.Component {
   constructor (props) {
     super(props)
     this.checkAppVersion()
+    this.props.setSpinnerData(true, '')
   }
   checkAppVersion = async () => {
     let appName = ''
@@ -113,6 +117,9 @@ class AuthLoadingScreen extends React.Component {
     return (
       <View style={styles.container}>
         <StatusBar barStyle='default' />
+        <Image
+          source={chatIcon}
+        />
       </View>
     )
   }

@@ -81,7 +81,7 @@ class BlockContactSearch extends Component {
       this.protocol = (theNextActiveContact)
         ? utils.isChannelOrAma(theNextActiveContact.protocol) : false
       if (theNextActiveContact) {
-        if (this.protocol) { this.props.navigation.navigate('ChannelRoom') } else { this.props.navigation.navigate('ChatRoom') }
+        if (this.protocol) { this.props.navigation.goBack() } else { this.props.navigation.navigate('ChatRoom') }
       } else {
         this.props.navigation.goBack()
       }
