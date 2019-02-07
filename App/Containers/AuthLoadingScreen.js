@@ -102,9 +102,11 @@ class AuthLoadingScreen extends React.Component {
     if (channels) { this.props.setChannelsData(channels) }
 
     if (!userData) {
+      this.props.setSpinnerData(false, '')
       this.props.navigation.navigate('Auth')
     } 
     else if (parseFloat(appVersion) < parseFloat(onlineAppVersion)) {
+      this.props.setSpinnerData(false, '')
       this.props.navigation.navigate('Update')
     }
     else {
