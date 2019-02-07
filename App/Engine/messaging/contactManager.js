@@ -1,11 +1,8 @@
 const utils = require('./../misc/utils.js')
 const constants = require('./../misc/constants.js')
-const statusIndicators = constants.statusIndicators
 const runes = require('runes')
 const RNFetchBlob = require('rn-fetch-blob').default
 const SUMMARY_LEN = 27
-const LEAN_PLUGIN = false
-// import defaultProfile from '../Images/defaultProfile.png'
 
 // The format of the elements in contactArr (TODO: a class or something appropriate)
 // {
@@ -33,34 +30,51 @@ class ContactManager {
   constructor (forceActiveContact = true) {
     this.contactArr = []
     this.activeContact = undefined
-    this.pluginMode = false
-    this.dropDownContacts = []
     this.forceActiveContact = forceActiveContact
+
+    // UTC times to track when the contact array was captured for saving and
+    // when it was last modified.  If dataModified > dataSaved then we need to
+    // perform a save operation.
+    this.contactArrSavedUTC = undefined
+    this.contactArrModifiedUTC = undefined
+  }
+
+  setContactArrSaved() {
+    this.contactArrSavedUTC = Date.now()
+  }
+
+  getContactArrSaved() {
+    return this.contactArrSavedUTC
+  }
+
+  setContactArrModified() {
+    this.contactArrModifiedUTC = Date.now()
+  }
+
+  getContactArrModified() {
+    return this.contactArrModifiedUTC
+  }
+
+  isContactArrModified() {
+    if ((this.contactArrSavedUTC === undefined) ||
+        (this.contactArrModifiedUTC === undefined)) {
+      return false
+    }
+
+    return this.contactArrModifiedUTC > this.contactArrSavedUTC
   }
 
   clone = (aContactManager) => {
     if (aContactManager) {
-      const contactArr = aContactManager.getAllContacts()
+      const contactArr = aContactManager.getContacts()
       const activeContact = aContactManager.getActiveContact()
 
-      this.pluginMode = aContactManager.isPlugin()
       this.forceActiveContact = aContactManager.forceActiveContact
 
       this.initFromArray(contactArr, activeContact)
-    }
-  }
 
-  // Initialize from an array stored in the cloud (usually the first load of
-  // contacts). This clears some data before proceeding to Initialize the object.
-  initFromStoredArray = (aContactArr) => {
-    if (aContactArr && (aContactArr.length > 0)) {
-      for (const contact of aContactArr) {
-        // Don't clear unread--it's confusing users into thinking they haven't lost info.
-        // contact.unread = 0;
-        contact.time = ''
-        contact.timeMs = ''
-      }
-      this.initFromArray(aContactArr)
+      this.contactArrSavedUTC = aContactManager.getContactArrSaved()
+      this.contactArrModifiedUTC = aContactManager.getContactArrModified()
     }
   }
 
@@ -70,9 +84,6 @@ class ContactManager {
       // contacts.
       const tempContactArr = utils.deepCopyObj(aContactArr)
       for (const aContact of tempContactArr) {
-        if (aContact.timeMs === undefined) {
-          aContact.timeMs = ''
-        }
         if (ContactManager._getContactForId(aContact.id, this.contactArr)) {
           // TODO: throw / warn if duplicate detected.
           continue
@@ -83,7 +94,7 @@ class ContactManager {
       if (activeContact) {
         // Find the cloned active contact object and assign it.
         for (const contact of this.contactArr) {
-          if (contact.id === activeContact.id) {
+          if (contact.id == activeContact.id) {
             this.activeContact = contact
             break
           }
@@ -91,107 +102,27 @@ class ContactManager {
       } else if (this.forceActiveContact) {
         this.activeContact = this.contactArr[0]
       }
-      this.dropDownContacts = this.initContactDetailsForDropDown()
+
+      this.setContactArrSaved()
+      this.contactArrModifiedUTC = undefined
     }
   }
 
-  initContactDetailsForDropDown = () => {
-    const myContactArr = this.getAllContacts()
-    const activeContact = this.getActiveContact()
-    let contacts = []
-    let key = 0
-    for (const contact of myContactArr) {
-      let name = contact.id
-      if (contact.title) {
-        const idx = contact.title.indexOf(' ')
-        name = (idx > -1)
-          ? contact.title.substr(0, idx) : contact.title
-      }
-      const text = name
-      const value = contact.id
-      const image = {
-        avatar: true,
-        src: contact.image
-      }
-      if (activeContact && activeContact.id === contact.id) {
-        contacts.unshift({key, text, value, image, contact, name})
-      } else {
-        contacts.push({key, text, value, image, contact, name})
-      }
-      key += 1
-    }
-    return contacts
-  }
-//
-//
-// ContactMgr configuration operations:
-// //////////////////////////////////////////////////////////////////////////////
-//
-  isPlugin = () => {
-    return this.pluginMode
-  }
-
-  setPlugInMode = (aUserId) => {
-    const plugInContact = this.getContact(aUserId)
-    if (plugInContact) {
-      this.pluginMode = true
-      this.activeContact = plugInContact
-      return
-    }
-
-    throw `ERROR: user ID undefined in contact manager plug in mode.`
-  }
 //
 //
 // All contact operations:
 // //////////////////////////////////////////////////////////////////////////////
 //
-  setAllContactsStatus = (aStatus = statusIndicators.offline) => {
-    for (const contact of this.contactArr) {
-      contact.status = aStatus
-    }
-  }
-
   getContacts = () => {
-    if (this.pluginMode && LEAN_PLUGIN) {
-      return (this.activeContact) ? [this.activeContact] : []
-    }
-
     return this.contactArr
-  }
-
-  getAllContacts = () => {
-    return this.contactArr
-  }
-
-  setContacts = (aContactArr) => {
-    this.contactArr = (aContactArr) || []
   }
 
   getContactIds = () => {
-    if (this.pluginMode && LEAN_PLUGIN) {
-      return (this.activeContact) ? [this.activeContact.id] : []
-    }
-
     const userIds = []
     for (const contact of this.contactArr) {
       userIds.push(contact.id)
     }
     return userIds
-  }
-
-  getAllContactIds = () => {
-    const userIds = []
-    for (const contact of this.contactArr) {
-      userIds.push(contact.id)
-    }
-    return userIds
-  }
-
-  getDropDownContacts = () => {
-    // This probably needs an update method (i.e. if a contact is added through
-    // discovery after dropDownContacts is initialized).
-    return this.dropDownContacts
   }
 
   // aPKMask is the last 4 hex digits of a contact's PK
@@ -278,7 +209,6 @@ class ContactManager {
 
     // Defaults:
     newContact.summary = ''
-    newContact.time = ''
     newContact.unread = 0
     newContact.base64 = ''
     if (newContact.image) {
@@ -307,12 +237,11 @@ class ContactManager {
       }
 
       this.contactArr.splice(0, 0, aContact)
+      this.setContactArrModified()
 
       if (makeActiveContact) {
         this.activeContact = aContact
       }
-
-      this.dropDownContacts = this.initContactDetailsForDropDown()
     }
   }
 
@@ -354,6 +283,7 @@ class ContactManager {
           }
 
           this.contactArr = newContactArr
+          this.setContactArrModified()
         }
       }
     }
@@ -380,20 +310,6 @@ class ContactManager {
     return ''
   }
 
-  getTimeMs = (aContactId) => {
-    if (aContactId) {
-      const contact =
-        ContactManager._getContactForId(aContactId, this.contactArr)
-
-      if (contact &&
-          contact.hasOwnProperty('timeMs')) {
-        return contact.timeMs
-      }
-    }
-
-    return undefined
-  }
-
   getProtocol = (aContactId) => {
     if (aContactId) {
       const contact =
@@ -412,10 +328,6 @@ class ContactManager {
     this._setterWithChecks(aContactId, 'publicKey', aPublicKey)
   }
 
-  setStatus = (aContactId, aStatus) => {
-    this._setterWithChecks(aContactId, 'status', aStatus)
-  }
-
   setSummary = (aContactId, aSummaryStr) => {
     // TODO: Introduce code to see if this is a channel before producing the
     //       truncated summary string from the id removal regex
@@ -423,18 +335,6 @@ class ContactManager {
     const summaryStr = ContactManager._getTruncatedMessage(noIdSummaryStr)
 
     this._setterWithChecks(aContactId, 'summary', summaryStr)
-  }
-
-  setTime = (aContactId, aTimeStr) => {
-    this._setterWithChecks(aContactId, 'time', aTimeStr)
-  }
-
-  setTimeMs = (aContactId, theTimeSinceOnlineMs) => {
-    if (theTimeSinceOnlineMs) {
-      this._setterWithChecks(aContactId, 'timeMs', theTimeSinceOnlineMs)
-    } else {
-      this._setterWithChecks(aContactId, 'timeMs', '')
-    }
   }
 
   setProtocol = (aContactId, aProtocol) => {
@@ -506,6 +406,7 @@ class ContactManager {
       if ((index !== undefined) || (index !== 0)) {
         const contactToMoveToTop = this.contactArr.splice(index, 1)
         this.contactArr.splice(0, 0, contactToMoveToTop[0])
+        this.setContactArrModified()
       }
     }
   }
@@ -515,6 +416,14 @@ class ContactManager {
       const contact = this.getContact(aContactId)
 
       if (contact) {
+
+        // Don't mark modified if this value is already set (saves are costly)
+        if (aPropName !== 'summary' ||
+            !contact.hasOwnProperty(aPropName) ||
+            contact[aPropName] !== aValue) {
+          this.setContactArrModified()
+        }
+
         contact[aPropName] = aValue
       }
     }
@@ -527,30 +436,6 @@ class ContactManager {
       }
     }
     return undefined
-  }
-
-  static getContactTimeStr (aTimeInMs) {
-    if (aTimeInMs && aTimeInMs === '') {
-      return '...'
-    }
-    if (aTimeInMs && (aTimeInMs > 0)) {
-      const timeInSeconds = Math.floor(aTimeInMs / 1000)
-      const timeInMinutes = Math.floor(timeInSeconds / 60)
-      const timeInHours = Math.floor(timeInMinutes / 60)
-      const timeInDays = Math.floor(timeInHours / 24)
-      if ((timeInDays > 0) && (timeInDays < 7)) {
-        return `present ${timeInDays} day(s) ago.`
-      } else if ((timeInDays > 7)) {
-        return 'present a week or more ago.'
-      } else if (timeInHours > 0) {
-        return `present ${timeInHours} hour(s) ago.`
-      } else if (timeInMinutes > 1) {
-        return `present ${timeInMinutes} minute(s) ago.`
-      }
-      return 'available.'
-    }
-
-    return '...'
   }
 
   static _getTruncatedMessage (aMessageStr) {
@@ -590,10 +475,7 @@ class ContactManager {
           id: theirUserId,
           image: imageURL,
           publicKey: theirPublicKey,
-          status: statusIndicators.offline,
           summary: '',
-          time: '',
-          timeMs: '',
           title,
           unread: 0
         }
@@ -601,6 +483,33 @@ class ContactManager {
     }
 
     return contact
+  }
+
+  // Iterate over a contact array and make sure it's values are reasonable and
+  // correct for contacts (otherwise, bugs like the channel with missing
+  // profile add that affected Raji can occur.) Omit unreasonable values.
+  //
+  static sanitizeContactArr(aContactArr) {
+    try {
+      const badElements = []
+      for (let index = 0, length=aContactArr.length; index < length; index++) {
+        const contact = aContactArr[index]
+        if (contact &&
+            contact.hasOwnProperty('title') &&
+            contact.hasOwnProperty('description') &&
+            contact.hasOwnProperty('id')) {
+          continue
+        }
+
+        badElements.unshift(index)
+      }
+
+      for (const badIndex of badElements) {
+        aContactArr.splice(badIndex, 1)
+      }
+    } catch (error) {
+      // Suppress
+    }
   }
 }
 

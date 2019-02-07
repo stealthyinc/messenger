@@ -63,7 +63,7 @@ class BlockContactSearch extends Component {
     }
     this.search = undefined
     this.numContacts = (props.contactMgr)
-      ? (props.contactMgr.getAllContacts().length) : 0
+      ? (props.contactMgr.getContacts().length) : 0
   }
   componentWillMount () {
     this.props.navigation.setParams({ navigation: this.props.navigation })
@@ -74,14 +74,14 @@ class BlockContactSearch extends Component {
   }
   componentWillReceiveProps (nextProps) {
     const { contactMgr } = nextProps
-    if (contactMgr && contactMgr.getAllContacts().length > this.numContacts) {
-      this.numContacts = contactMgr.getAllContacts().length
+    if (contactMgr && contactMgr.getContacts().length > this.numContacts) {
+      this.numContacts = contactMgr.getContacts().length
       this.props.navigation.goBack()
       const theNextActiveContact = contactMgr.getActiveContact()
       this.protocol = (theNextActiveContact)
         ? utils.isChannelOrAma(theNextActiveContact.protocol) : false
       if (theNextActiveContact) {
-        if (this.protocol) { this.props.navigation.navigate('ChannelRoom') } else { this.props.navigation.navigate('ChatRoom') }
+        if (this.protocol) { this.props.navigation.goBack() } else { this.props.navigation.navigate('ChatRoom') }
       } else {
         this.props.navigation.goBack()
       }

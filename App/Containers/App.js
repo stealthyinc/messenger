@@ -7,6 +7,7 @@ import createStore from '../Redux'
 import { AppState, PushNotificationIOS, Platform, Linking } from 'react-native'
 import LinkRoutes from './LinkRoutes'
 import EngineActions from '../Redux/EngineRedux'
+import chatIcon from '../Images/blue128.png'
 
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 

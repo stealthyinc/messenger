@@ -26,19 +26,25 @@ class BaseDataObj {
       throw new TypeError('Abstract class "BaseDataObj" cannot be instantiated directly.')
     }
 
-    if (this.synchronize === undefined) {
-      throw new TypeError('Classes extending the BaseIO abstract class must implement: ' +
-                          'synchronize(anObjectToSynchronize)')
-    }
+    // if (this.synchronize === undefined) {
+    //   throw new TypeError('Classes extending the BaseIO abstract class must implement: ' +
+    //                       'synchronize(anObjectToSynchronize)')
+    // }
 
     this.data = undefined
 
-    this.version = undefined
-    this.modified = undefined
+    this.time = {
+      cloudSaved: undefined,
+      localSaved: undefined,
+      modified: undefined
+    }
+  }
 
-    // Possible future vars:
-    this.origin = undefined
-    this.merged = undefined
+  _initFromObj(theObj) {
+    if (theObj) {
+      this.data = theObj.data
+      this.time = theObj.time
+    }
   }
 
   setData(theData) {
@@ -46,31 +52,45 @@ class BaseDataObj {
   }
 
   getData() {
-    return this.data
+    return (this.hasOwnProperty('data')) ? this.data : undefined
   }
 
-  setVersion(aUTC = undefined) {
-    this.version = (aUTC) ? aUTC : Date.now()
+  setTimeBothSaved(aUTC=undefined) {
+    const timeSaved = (aUTC) ? aUTC : Date.now()
+    this.time.cloudSaved = timeSaved
+    this.time.localSaved = timeSaved
+    this.time.modified = undefined
   }
 
-  getVersion() {
-    return this.version
+  setTimeCloudSaved(aUTC=undefined) {
+    this.time.cloudSaved = (aUTC) ? aUTC : Date.now()
+    this.time.modified = undefined
   }
 
-  isNewerVersion(aBaseDataObj) {
-    return (aBaseDataObj.getVersion() > this.version)
+  getTimeCloudSaved() {
+    return (this.time.hasOwnProperty('cloudSaved')) ? this.time.cloudSaved : undefined
   }
 
-  setModified(aModifiedFlag = undefined) {
-    if (aModifiedFlag !== undefined) {
-      this.modified = aModifiedFlag
-    } else {
-      this.modified = true
-    }
-
+  setTimeLocalSaved(aUTC=undefined) {
+    this.time.localSaved = (aUTC) ? aUTC : Date.now()
+    this.time.modified = undefined
   }
+
+  getTimeLocalSaved(aUTC=undefined) {
+    return (this.time.hasOwnProperty('localSaved')) ? this.time.localSaved : undefined
+  }
+
+  setTimeModified(aUTC=undefined) {
+    this.time.modified = (aUTC) ? aUTC : Date.now()
+  }
+
+  getTimeModified() {
+    return (this.time.hasOwnProperty('modified')) ? this.time.modified : undefined
+  }
+
   isModified() {
-    return this.modified
+    return (this.time.hasOwnProperty('modified') &&
+            (this.time.modified === undefined))
   }
 }
 

@@ -52,7 +52,7 @@ class DiscoverScreen extends Component {
       channelId: ''
     }
     this.numContacts = (props.contactMgr)
-      ? (props.contactMgr.getAllContacts().length) : 0
+      ? (props.contactMgr.getContacts().length) : 0
   }
   // componentWillMount() {
   //   this.props.navigation.setParams({ navigation: this.props.navigation });
@@ -66,7 +66,7 @@ class DiscoverScreen extends Component {
     // AC: Begin debug output
     console.log(`INFO(${method}): channelClicked=${channelClicked}, contactAdded=${contactAdded}`)
     if (contactMgr) {
-      console.log(`INFO(${method}): contactMgr length=${contactMgr.getAllContacts().length}`)
+      console.log(`INFO(${method}): contactMgr length=${contactMgr.getContacts().length}`)
       for (const contactId of contactMgr.getContactIds()) {
         console.log(`INFO(${method}):   ${contactId}`)
       }
@@ -79,7 +79,7 @@ class DiscoverScreen extends Component {
       console.log(`INFO(${method}): in code to stop spinner ...`)
       // AC: End debug output
 
-      this.numContacts = contactMgr.getAllContacts().length
+      this.numContacts = contactMgr.getContacts().length
       this.setState({channelClicked: false, channelId: ''})
       // this.props.navigation.navigate('ChatRoom')
       // const params = {id: channelId}

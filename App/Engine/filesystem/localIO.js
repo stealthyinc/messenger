@@ -28,21 +28,21 @@ class LocalIO extends BaseIO {
     super()
   }
 
-  async writeLocalFile(localUser, filename, data) {
+  async writeLocalFile(localUser, fileName, data) {
     try {
-      const keyPath = this.getKeyPath(localUser, fileName)
+      const keyPath = LocalIO.getKeyPath(localUser, fileName)
       await AsyncStorage.setItem(keyPath, data)
     } catch (error) {
       // TODO:
     } finally {
-
     }
   }
 
-  async readLocalFile(localUser, filename) {
+  async readLocalFile(localUser, fileName) {
     let data = undefined
     try {
-      const keyPath = this.getKeyPath(localUser, fileName)
+      const keyPath = LocalIO.getKeyPath(localUser, fileName)
+      // Returns 'null' on iOS (possibly Android too) if no file.
       data = await AsyncStorage.getItem(keyPath)
     } catch (error) {
       // TODO:
@@ -51,9 +51,9 @@ class LocalIO extends BaseIO {
     }
   }
 
-  async deleteLocalFile(localUser, filename) {
+  async deleteLocalFile(localUser, fileName) {
     try {
-      const keyPath = this.getKeyPath(localUser, fileName)
+      const keyPath = LocalIO.getKeyPath(localUser, fileName)
       await AsyncStorage.removeItem(keyPath)
     } catch (error) {
       // TODO:
@@ -62,7 +62,7 @@ class LocalIO extends BaseIO {
     }
   }
 
-  readRemoteFile() {
+  readRemoteFile(username, filename) {
     // NO-OP (Unsupported - implies reading from a different device than the
     //        one we are operating on.)
   }

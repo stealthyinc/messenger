@@ -227,6 +227,7 @@ class SignInScreen extends React.Component {
               userData['appPublicKey'] = publicKey
               AsyncStorage.setItem('userData', JSON.stringify(userData))
               this.props.screenProps.authWork(userData)
+              this.props.setAppVersion(VersionNumber.appVersion)
               AsyncStorage.setItem('appVersion', JSON.stringify(VersionNumber.appVersion))
             }
           })
@@ -294,6 +295,7 @@ class SignInScreen extends React.Component {
       } else {
         AsyncStorage.setItem('userData', JSON.stringify(userData))
         this.props.screenProps.authWork(userData)
+        this.props.setAppVersion(VersionNumber.appVersion)
         AsyncStorage.setItem('appVersion', JSON.stringify(VersionNumber.appVersion))
       }
       this.props.setSignInPending(false)
@@ -339,6 +341,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     setSignInPending: (flag) => dispatch(EngineActions.setSignInPending(flag)),
     setChannelsData: (channels) => dispatch(EngineActions.setChannelsData(channels)),
+    setAppVersion: (appVersion) => dispatch(EngineActions.setAppVersion(appVersion)),
     setSpinnerData: (flag, message) => dispatch(EngineActions.setSpinnerData(flag, message))
     // setEngineFault: (flag) => dispatch(EngineActions.setEngineFault(flag)),
   }
