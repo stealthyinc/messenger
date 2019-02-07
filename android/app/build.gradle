@@ -117,8 +117,8 @@ android {
         applicationId "com.stealthy"
         minSdkVersion 23
         targetSdkVersion 27
-        versionCode 40
-        versionName "2.0"
+        versionCode 41
+        versionName "2.1"
         multiDexEnabled true
         ndk {
             abiFilters "armeabi-v7a", "x86"
