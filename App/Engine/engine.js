@@ -730,6 +730,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   handleShutDownRequest = async () => {
     const method = 'engine::handleShutDownRequest'
     console.log(`INFO(${method}): called.`)
+    const shutDownTimer = new Timer('handleShutDownRequest called')
 
     // Clear the mobileGaiaTest flag on start tests to ensure we test for bad
     // / cross GAIA log in.
@@ -740,6 +741,7 @@ export class MessagingEngine extends EventEmitterAdapter {
       // suppress & do nothing
       console.log(`S-ERROR(${method}): unable to clear mobileGaiaTest flag in local file startTests.txt.`)
     });
+    shutDownTimer.logEvent('   initiated async device write of startTests.json')
 
     if (this.offlineMsgSvc) {
       try {
@@ -750,6 +752,7 @@ export class MessagingEngine extends EventEmitterAdapter {
         // do nothing, just don't prevent the code below from happening
       }
     }
+    shutDownTimer.logEvent('   removed offlineMsgSvc listeners.')
 
     if (this.discovery) {
       try {
@@ -760,6 +763,7 @@ export class MessagingEngine extends EventEmitterAdapter {
         // do nothing, just don't prevent the code below from happening
       }
     }
+    shutDownTimer.logEvent('   removed discovery listeners.')
 
     console.log(`INFO(${method}): removed event listeners.`)
 
@@ -775,6 +779,7 @@ export class MessagingEngine extends EventEmitterAdapter {
         // do nothing, just don't prevent the code below from happening
       }
     }
+    shutDownTimer.logEvent('   stopped offlineMsgSvc service.')
 
     console.log(`INFO(${method}): stopped offline msg send/receive service.`)
 
@@ -791,6 +796,7 @@ export class MessagingEngine extends EventEmitterAdapter {
         }
       }
     }
+    shutDownTimer.logEvent('   initiated async notification unsubscribe for channels.')
 
     try {
       await this.offlineMsgSvc.sendMessagesToStorage()
@@ -798,13 +804,18 @@ export class MessagingEngine extends EventEmitterAdapter {
     } catch (error) {
       console.log(`ERROR(${method}): writing offline messages.`)
     }
+    shutDownTimer.logEvent('   wrote offline messages to GAIA storage.')
 
     try {
+      // Writing contacts can be a very expensive operation on Android low performance
+      // devices. Before we do a write, we quickly check whether or not it is necessary.
+      //
       await this._writeContactList()
       console.log(`INFO(${method}): wrote contacts.`)
     } catch (error) {
       console.log(`ERROR(${method}): writing contacts.`)
     }
+    shutDownTimer.logEvent('   wrote contact list to GAIA storage.')
 
     try {
       await this._writeConversations()
@@ -812,23 +823,21 @@ export class MessagingEngine extends EventEmitterAdapter {
     } catch (error) {
       console.log(`ERROR(${method}): writing conversations.`)
     }
+    shutDownTimer.logEvent('   wrote conversation bundles to GAIA storage.')
 
-    try {
-      // this.logger(`INFO:(${method}): waiting on gaia related promises.`)
-      // await Promise.all(promises)
-      this.logger(`INFO:(${method}): engine shutdown successful.`)
-    } catch (error) {
-      console.log(`ERROR(${method}): ${error}`)
-    } finally {
-      this.offlineMsgSvc = undefined
 
-      // Don't issue this in Android (if we timed out on the UI, this gets
-      // cached and causes an immediate sign out on the next sign in, resulting
-      // in a crash)
-      if (!utils.isAndroid()) {
-        this.emit('me-shutdown-complete', true)
-      }
-    }
+    this.logger(`INFO:(${method}): engine shutdown successful.`)
+    this.offlineMsgSvc = undefined
+
+    shutDownTimer.logEvent('   engine shutdown complete - issuing event.')
+    console.log(shutDownTimer.getEvents())
+
+    // Don't issue this in Android (if we timed out on the UI, this gets
+    // cached and causes an immediate sign out on the next sign in, resulting
+    // in a crash)
+    // if (!utils.isAndroid()) {
+      this.emit('me-shutdown-complete', true)
+    // }
 
     // This code has to be last or at least after we emit 'me-shutdown-complete'.
     try {
@@ -1685,16 +1694,22 @@ export class MessagingEngine extends EventEmitterAdapter {
     const method = 'MessagingEngine::_writeContactList'
     console.log(`INFO(${method}): called!`)
 
-    try {
-      const contactArr = this.contactMgr.getContacts()
-      this.contacts.setContactArr(contactArr)
-      this.contacts.setTimeBothSaved()
-      const encContactsData = await this.safeEncryptObj(this.contacts, ENCRYPT_CONTACTS)
-      await this.deviceIO.writeLocalFile(this.userId, 'contacts.json', encContactsData)
-      await this.io.robustLocalWrite(this.userId, 'contacts.json', encContactsData)
-    } catch (error) {
-      const errStr = utils.fmtErrorStr('failed to write contacts.json', method, error)
-      console.log(errStr)
+    if (this.contactMgr.isContactArrModified()) {
+      console.log(`INFO(${method}:   contactArr modified. Saving (saved=${this.contactMgr.getContactArrSaved()}, modified=${this.contactMgr.getContactArrModified()}))`)
+      try {
+        const contactArr = this.contactMgr.getContacts()
+        this.contacts.setContactArr(contactArr)
+        this.contacts.setTimeBothSaved()
+        const encContactsData = await this.safeEncryptObj(this.contacts, ENCRYPT_CONTACTS)
+        await this.deviceIO.writeLocalFile(this.userId, 'contacts.json', encContactsData)
+        this.contactMgr.setContactArrSaved()
+        await this.io.robustLocalWrite(this.userId, 'contacts.json', encContactsData)
+      } catch (error) {
+        const errStr = utils.fmtErrorStr('failed to write contacts.json', method, error)
+        console.log(errStr)
+      }
+    } else {
+          console.log(`INFO(${method}:   contactArr not modified. Skipping write (saved=${this.contactMgr.getContactArrSaved()}, modified=${this.contactMgr.getContactArrModified()}))`)
     }
   }
 

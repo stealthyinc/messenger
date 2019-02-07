@@ -31,6 +31,37 @@ class ContactManager {
     this.contactArr = []
     this.activeContact = undefined
     this.forceActiveContact = forceActiveContact
+
+    // UTC times to track when the contact array was captured for saving and
+    // when it was last modified.  If dataModified > dataSaved then we need to
+    // perform a save operation.
+    this.contactArrSavedUTC = undefined
+    this.contactArrModifiedUTC = undefined
+  }
+
+  setContactArrSaved() {
+    this.contactArrSavedUTC = Date.now()
+  }
+
+  getContactArrSaved() {
+    return this.contactArrSavedUTC
+  }
+
+  setContactArrModified() {
+    this.contactArrModifiedUTC = Date.now()
+  }
+
+  getContactArrModified() {
+    return this.contactArrModifiedUTC
+  }
+
+  isContactArrModified() {
+    if ((this.contactArrSavedUTC === undefined) ||
+        (this.contactArrModifiedUTC === undefined)) {
+      return false
+    }
+
+    return this.contactArrModifiedUTC > this.contactArrSavedUTC
   }
 
   clone = (aContactManager) => {
@@ -41,6 +72,9 @@ class ContactManager {
       this.forceActiveContact = aContactManager.forceActiveContact
 
       this.initFromArray(contactArr, activeContact)
+
+      this.contactArrSavedUTC = aContactManager.getContactArrSaved()
+      this.contactArrModifiedUTC = aContactManager.getContactArrModified()
     }
   }
 
@@ -68,6 +102,9 @@ class ContactManager {
       } else if (this.forceActiveContact) {
         this.activeContact = this.contactArr[0]
       }
+
+      this.setContactArrSaved()
+      this.contactArrModifiedUTC = undefined
     }
   }
 
@@ -78,10 +115,6 @@ class ContactManager {
 //
   getContacts = () => {
     return this.contactArr
-  }
-
-  setContacts = (aContactArr) => {
-    this.contactArr = (aContactArr) || []
   }
 
   getContactIds = () => {
@@ -204,6 +237,7 @@ class ContactManager {
       }
 
       this.contactArr.splice(0, 0, aContact)
+      this.setContactArrModified()
 
       if (makeActiveContact) {
         this.activeContact = aContact
@@ -249,6 +283,7 @@ class ContactManager {
           }
 
           this.contactArr = newContactArr
+          this.setContactArrModified()
         }
       }
     }
@@ -371,6 +406,7 @@ class ContactManager {
       if ((index !== undefined) || (index !== 0)) {
         const contactToMoveToTop = this.contactArr.splice(index, 1)
         this.contactArr.splice(0, 0, contactToMoveToTop[0])
+        this.setContactArrModified()
       }
     }
   }
@@ -380,6 +416,14 @@ class ContactManager {
       const contact = this.getContact(aContactId)
 
       if (contact) {
+
+        // Don't mark modified if this value is already set (saves are costly)
+        if (aPropName !== 'summary' ||
+            !contact.hasOwnProperty(aPropName) ||
+            contact[aPropName] !== aValue) {
+          this.setContactArrModified()
+        }
+
         contact[aPropName] = aValue
       }
     }

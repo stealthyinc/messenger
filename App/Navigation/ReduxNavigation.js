@@ -18,7 +18,8 @@ const common = require('./../common.js')
 const utils = require('./../Engine/misc/utils.js')
 const { firebaseInstance } = require('../Engine/firebaseWrapper.js')
 
-const SPINNER_TIMEOUT_S = 5        // seconds
+// Slower for Android b/c it takes longer to do things like decryption etc.
+const SPINNER_TIMEOUT_S = (utils.is_iOS) ? 5 : 10        // seconds
 const TOAST_TIMEOUT = 2500    // milliseconds
 
 class ReduxNavigation extends React.Component {
