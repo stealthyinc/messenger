@@ -187,15 +187,13 @@ class ChannelScreen extends Component {
   }
   parseJargon = (message) => {
     const { body, time, contentType } = message
-    let url, gimage, text, replyMsg, replyTo
+    let url, gimage, text
     if (contentType === 'TEXT') {
       text = body
       url = ''
       gimage = ''
     } else if (contentType === 'TEXT_JSON') {
       text = body.text
-      replyMsg = body.replyMsg
-      replyTo = body.replyTo
       //
       // Handle AMA message objects
       if (body.type === 'public ama 1.0') {
@@ -212,7 +210,7 @@ class ChannelScreen extends Component {
       url = body.url
       gimage = body.image
     }
-    return { url, gimage, text, time, replyMsg, replyTo }
+    return { url, gimage, text, time }
   }
   setupMessages = (inputMessages) => {
     let messages = []
@@ -221,7 +219,7 @@ class ChannelScreen extends Component {
       let { author, image, state } = message
       const sent = (state === MESSAGE_STATE.SENT_OFFLINE || state === MESSAGE_STATE.SENT_REALTIME || state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
       const received = (state === MESSAGE_STATE.SEEN || state === MESSAGE_STATE.RECEIVED)
-      let { url, gimage, text, time, replyMsg, replyTo } = this.parseJargon(message)
+      let { url, gimage, text, time } = this.parseJargon(message)
       if (author === id) {
         if (this.protocol) {
           const newText = text
@@ -237,8 +235,6 @@ class ChannelScreen extends Component {
           _id: Math.round(Math.random() * 1000000),
           text,
           url,
-          replyMsg,
-          replyTo,
           image: gimage,
           createdAt: time,
           sent: sent,
@@ -254,8 +250,6 @@ class ChannelScreen extends Component {
           _id: Math.round(Math.random() * 1000000),
           text,
           url,
-          replyMsg,
-          replyTo,
           image: gimage,
           createdAt: time,
           sent: sent,
@@ -291,13 +285,8 @@ class ChannelScreen extends Component {
   }
   onSend = (messages = [], json) => {
     const {text, image, url} = messages[0]
-    const {replyTo, replyMsg} = this.state
-    if (replyMsg && replyTo) {
-      messages[0].replyMsg = replyMsg
-      messages[0].replyTo = replyTo
-    }
 
-    if (image && url || replyMsg) {
+    if (image && url) {
       this.props.handleOutgoingMessage(undefined, messages[0])
     } else if (text) {
       this.props.handleOutgoingMessage(text, undefined)
@@ -317,7 +306,7 @@ class ChannelScreen extends Component {
     let updatedMessages = []
     if (this.protocol) {
       for (let message of newMessages) {
-        let {text, user, createdAt, _id, replyTo, replyMsg} = message
+        let {text, user, createdAt, _id} = message
         const index = text.indexOf(' says: ')
         let newId = ''
         let newText = text
@@ -331,8 +320,6 @@ class ChannelScreen extends Component {
         let crap = {
           user,
           text: newText,
-          replyMsg,
-          replyMsg,
           createdAt,
           _id
         }
