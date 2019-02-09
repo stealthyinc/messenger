@@ -10,8 +10,7 @@ const { Types, Creators } = createActions({
   setDappUrl: ['dappUrl'],
   setDappData: ['dapp', 'data'],
   setDappError: ['dappError'],
-  setDappMessage: ['dappMessage'],
-  refreshIntegrationData: ['']
+  setDappMessage: ['dappMessage']
 })
 
 export const DappTypes = Types

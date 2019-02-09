@@ -13,7 +13,6 @@ const platform = require('platform')
 // const firebaseInstance = require('firebase')
 // const { EventEmitterAdapter } = require('./platform/react/eventEmitterAdapter.js')
 // const Anonalytics = require('./platform/no-op/Analytics.js')
-// const { Graphite, StealthyIndexReader } = require('./platform/no-op/Integrations.js')
 //
 // Web/React Client (TODO: one day.)
 // ...
@@ -23,8 +22,6 @@ const platform = require('platform')
 const { firebaseInstance } = require('./firebaseWrapper.js')
 const { EventEmitterAdapter } = require('./platform/reactNative/eventEmitterAdapter.js')
 const { Anonalytics } = require('../Analytics.js')
-const { Graphite } = require('./integrations/graphite.js')
-const { StealthyIndexReader } = require('./integrations/stealthyIndexReader.js')
 //
 // Common:
 //
@@ -111,8 +108,6 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     this.deviceIO = undefined
 
-    this.indexIntegrations = {}
-
     // Simple dictionary of amaId to array of voted question Ids.
     // e.g. for ama 001, an upvote of question 123 would look like:
     //   {
@@ -188,62 +183,6 @@ export class MessagingEngine extends EventEmitterAdapter {
       console.log(`ERROR(MessagingEngine::writeAmaData): failed to write or encrypt amaData.\n${error}`)
     }
   }
-  //
-  // API Integration Interface
-  // ////////////////////////////////////////////////////////////////////////////
-  // ////////////////////////////////////////////////////////////////////////////
-  // Events to listen for:
-  //    me-integration-data <appName> <error> <indexData>
-
-  // Returns the current integration data for specified appName and issues an
-  // me-integration-data event.
-  getIntegrationData (appName = 'Graphite') {
-    // const method = 'engine.js::getIntegrationData'
-    // let error = undefined
-    // let indexData = undefined
-    //
-    // if (!appName) {
-    //   error = `ERROR(${method}): appName is not defined.`
-    // } else if (!this.indexIntegrations ||
-    //            !this.indexIntegrations.hasOwnProperty(appName)) {
-    //   error = `ERROR(${method}): no integration for ${appName} available.`
-    // }
-    //
-    // if (!error) {
-    //   indexData = {}
-    //   indexData[appName] = this.indexIntegrations[appName].getIndexData()
-    // }
-    //
-    // this.emit('me-integration-data', appName, error, indexData)
-  }
-
-  // Updates integration data for specified appName and issues an me-integration-data
-  // event on completion.
-  async refreshIntegrationData (appName = 'Graphite') {
-    const method = 'engine.js::refreshIntegrationData'
-    let error
-    let indexData
-
-    if (!appName) {
-      error = `ERROR(${method}): appName is not defined.`
-    } else if (!this.indexIntegrations ||
-               !this.indexIntegrations.hasOwnProperty(appName)) {
-      error = `ERROR(${method}): no integration for ${appName} available.`
-    }
-
-    if (!error) {
-      const integration = this.indexIntegrations[appName]
-      try {
-        const result = await integration.readIndexData()
-        indexData = {}
-        indexData[appName] = result
-      } catch (integrationError) {
-        error = integrationError
-      }
-    }
-
-    this.emit('me-integration-data', appName, error, indexData)
-  }
 
   //
   //  React Component Callbacks
@@ -279,13 +218,20 @@ export class MessagingEngine extends EventEmitterAdapter {
     const method = 'MessagingEngine::_configureIO'
 
     this.myTimer.logEvent('Enter _configureIO')
-    this.io = (ENABLE_GAIA)
-      ? new GaiaIO(this.logger, LOG_GAIAIO)
-      : new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO)
+    this.deviceIO = new LocalIO()
+
+    this.io = undefined
+    if (ENABLE_GAIA) {
+      this.io = new GaiaIO(
+        this.logger, this.userId, this.publicKey, this.deviceIO, LOG_GAIAIO)
+        
+      await this.io.init(this.privateKey)
+    } else {
+      this.io = new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO)
+    }
+
     this.idxIo = new IndexedIO(this.logger, this.io, this.userId,
                                this.privateKey, this.publicKey, ENCRYPT_INDEXED_IO)
-
-    this.deviceIO = new LocalIO()
   }
 
   async _startupWork() {
@@ -708,18 +654,6 @@ export class MessagingEngine extends EventEmitterAdapter {
       // TODO: local store AMA data too (not just in GAIA)
       this.readAmaData()
     }
-
-    // Integrations load on start in the background. Might need to queue these and
-    // add a busy/working block to prevent multiple read requests:
-    // const graphiteIntegration = new Graphite(this.io, this.userId, this.privateKey)
-    // this.indexIntegrations['Graphite'] = graphiteIntegration
-    // //
-    // const travelStackIntegration = new StealthyIndexReader(
-    //   this.userId, this.privateKey, this.io, 'https://app.travelstack.club')
-    // this.indexIntegrations['Travelstack'] = travelStackIntegration
-
-    // this.refreshIntegrationData('Graphite')
-    // this.refreshIntegrationData('Travelstack')
   }
 
   //

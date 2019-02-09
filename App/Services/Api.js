@@ -147,7 +147,7 @@ const create = (baseURL = 'https://core.blockstack.org') => {
     try {
       profileData = await getProfileFromNameSearch(aUserName, anAppUrl)
       const appUrl = profileData.apps[anAppUrl]
-      console.log(`DEBUG(api.js::getUserGaiaNS): gaia app bucket = ${appUrl}`)
+      console.log(`DEBUG(${methodName}): gaia app bucket = ${appUrl}`)
       return appUrl
     } catch (err) {
       throw `ERROR(${methodName}): failed to get profile data from name search.\n${err}`
@@ -264,23 +264,17 @@ const Gaia = (gaiaHubUrl = 'https://gaia.blockstack.org') => {
     timeout: 10000
   })
 
-  // TODO: exponential back off on retry
+
+  // Don't do exponential back-off here as that is done at a higher level of the
+  // API abstraction.
   const getFileMultiPlayer = async (aUrlPath) => {
     const cleanUrlPath = aUrlPath.replace(`${gaiaHubUrl}/`, '')
 
     let result
     try {
       result = await api.get(cleanUrlPath)
-    } catch (err1) {
-      try {
-        result = await api.get(cleanUrlPath)
-      } catch (err2) {
-        try {
-          result = await api.get(cleanUrlPath)
-        } catch (err3) {
-          throw `ERROR(Api::gaiaMultiPlayerGetFile::getFileFromUrlPath): get failed from ${gaiaHubUrl}/${aUrlPath}`
-        }
-      }
+    } catch (error) {
+      throw `ERROR(Api::gaiaMultiPlayerGetFile::getFileFromUrlPath): get failed from ${gaiaHubUrl}/${aUrlPath}`
     }
 
     return (result && result.hasOwnProperty('data')) ? result.data : undefined

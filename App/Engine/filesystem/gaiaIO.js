@@ -2,7 +2,11 @@ import { NativeModules } from 'react-native'
 import API from './../../Services/Api'
 import Config from 'react-native-config'
 const BaseIO = require('./baseIO.js')
+
 const utils = require('./../misc//utils.js')
+import { HubCacheDataObj } from './../data/hubCacheDataObj'
+
+import MeasureIOFrequency from './../measure/measureIOFrequency'
 
 // TODO: this code needs a serious cleanup. Issues include:
 //       - inconsistent / improper error handling between sequential and async calls
@@ -19,131 +23,33 @@ const api = API.create()
 const gaia = API.Gaia()
 
 const NAME_ENDPOINT = 'https://core.blockstack.org/v1/names'
-// const ENABLE_IOS_LOOKUP_WORKAROUND = true
 
-class IOMeasurement {
-  constructor() {
-    this.instanceNum = Date.now()
-    this.writes = {}
-    this.reads = {}
-    this.deletes = {}
-
-    this.minuteIndex = 0
-    this.writesPerMinute = []
-    this.readsPerMinute = []
-    this.deletesPerMinute = []
-
-    this._minuteTimer()
-    this._reportTimer()
-  }
-
-  recordWrite(userName, filePath) {
-    const path = `${userName}/${filePath}`
-    if (!this.writes.hasOwnProperty(path)) {
-      this.writes[path] = []
-    }
-    this.writes[path].push(Date.now())
-    if (this.writesPerMinute.length === this.minuteIndex) {
-      this.writesPerMinute.push(0)
-    }
-    this.writesPerMinute[this.minuteIndex]++
-  }
-
-  recordRead(userName, filePath) {
-    const path = `${userName}/${filePath}`
-    if (!this.reads.hasOwnProperty(path)) {
-      this.reads[path] = []
-    }
-    this.reads[path].push(Date.now())
-    if (this.readsPerMinute.length === this.minuteIndex) {
-      this.readsPerMinute.push(0)
-    }
-    this.readsPerMinute[this.minuteIndex]++
-  }
-
-  recordDelete(userName, filePath) {
-    const path = `${userName}/${filePath}`
-    if (!this.deletes.hasOwnProperty(path)) {
-      this.deletes[path] = []
-    }
-    this.deletes[path].push(Date.now())
-    if (this.deletesPerMinute.length === this.minuteIndex) {
-      this.deletesPerMinute.push(0)
-    }
-    this.deletesPerMinute[this.minuteIndex]++
-  }
-
-  async _minuteTimer() {
-    const oneMinuteMs = 1 * 60 * 1000
-
-    while (true) {
-      await utils.resolveAfterMilliseconds(oneMinuteMs)
-      this.minuteIndex++
-    }
-  }
-
-  async _reportTimer() {
-    const fiveMinutesMs = 5 * 60 * 1000
-
-    while (true) {
-      await utils.resolveAfterMilliseconds(fiveMinutesMs)
-
-      // From:
-      // https://stackoverflow.com/questions/1230233/how-to-find-the-sum-of-an-array-of-numbers
-      const avgWritesPerMin =  this.writesPerMinute.reduce((a,b) => a+b, 0) / (this.minuteIndex + 1)
-      const avgReadsPerMin =  this.readsPerMinute.reduce((a,b) => a+b, 0) / (this.minuteIndex + 1)
-      const avgDeletesPerMin =  this.deletesPerMinute.reduce((a,b) => a+b, 0) / (this.minuteIndex + 1)
-
-      console.log(`IOMeasurement Report (Instance = ${this.instanceNum})`)
-      console.log('---------------------------------------------------------------------------------')
-      console.log(`   Avg. writes / min. = ${avgWritesPerMin}`)
-      console.log(`   Avg. reads / min. = ${avgReadsPerMin}`)
-      console.log(`   Avg. deletes / min. = ${avgDeletesPerMin}`)
-      console.log('')
-      console.log('   Most. frequent write paths:')
-      console.log('----------------------------------------')
-      this._printFormattedPathList(this.writes)
-      console.log('')
-      console.log('   Most. frequent read paths:')
-      console.log('----------------------------------------')
-      this._printFormattedPathList(this.reads)
-      console.log('')
-      console.log('   Most. frequent delete paths:')
-      console.log('----------------------------------------')
-      this._printFormattedPathList(this.deletes)
-      console.log('')
-      console.log('')
-    }
-  }
-
-  _getPathsInDescendingFrequency(aPathOccurenceDict) {
-    let pathArr = []
-    for (const path in aPathOccurenceDict) {
-      const pathLen = aPathOccurenceDict[path].length
-      pathArr.push({pathLen, path})
-    }
-
-    return pathArr.sort(function (eleA, eleB) {
-      return eleB.pathLen - eleA.pathLen
-    })
-  }
-
-  _printFormattedPathList(aPathOccurenceDict) {
-    const sortedPathAndOccurences =
-      this._getPathsInDescendingFrequency(aPathOccurenceDict)
-
-    for (const ele of sortedPathAndOccurences) {
-      console.log(`   ${ele.path} (${ele.pathLen})`)
-    }
-  }
-}
 
 module.exports = class GaiaIO extends BaseIO {
   constructor (logger,
-              logOutput = false) {
+               aLocalUserId,
+               aPublicKey,
+               deviceIO = undefined,
+               logOutput = false) {
     super()
 
     utils.throwIfUndef('logger', logger)
+
+    // Shoe-horned in here to support cache write for gaia lookups.
+    // At this point, really need to consider a re-write of the IO layers to
+    // change the API and support intrinsic knowledge of local user and local
+    // user's keys (i.e. put the encryption into the IO instead of separating.)
+    //
+    // Alternately, we could factor this out and bind the ecnryption / user ID
+    // to the deviceIO class or just explicitly call everything within an event
+    // handler in the engine.
+    this.userId = aLocalUserId
+    this.publicKey = aPublicKey
+
+    // Local device IO is used to store caches for improvements in speed on
+    // loading of files etc. (i.e. prevent constantly hitting gaia lookup end
+    // point for names we already have).
+    this.deviceIO = deviceIO
 
     this.logger = logger
     this.logOutput = logOutput
@@ -158,12 +64,36 @@ module.exports = class GaiaIO extends BaseIO {
     //    },
     //    ...
     //  }
-    this.hubCache = {}
+    this.hubCache = new HubCacheDataObj()
 
     // Measure usage of this class for optimization purposes:
     //
-    // this.ioMeasure = new IOMeasurement()
+    // this.ioMeasure = new MeasureIOFrequency()
     this.ioMeasure = undefined
+  }
+
+  // PrivateKey is used to decrypt the hub cache stored on the device. It's
+  // encrypted b/c it could reveal contacts (future meta-data security).
+  //
+  async init(aPrivateKey) {
+    const method = 'GaiaIO::init'
+
+    if (this.deviceIO && aPrivateKey) {
+      // Load the hub cache from local storage
+      try {
+        const cacheDataEnc =
+          await this.deviceIO.readLocalFile(this.userId, 'gaiaHubCache.json')
+
+        if (cacheDataEnc) {
+          const cacheDataObj =
+            await this.utils.decryptObj(aPrivateKey, cacheDataEnc, true)
+
+          this.hubCache.initFromObj(cacheDataObj)
+        }
+      } catch (error) {
+        console.log(`S-ERROR(${method}): failed to initialize GAIA hub cache.\n${error}`)
+      }
+    }
   }
 
   log (...args) {
@@ -172,33 +102,6 @@ module.exports = class GaiaIO extends BaseIO {
     }
   }
 
-  clearHubCache () {
-    this.hubCache = {}
-  }
-
-  setHubCacheEntry (aUserName, anAppUrl, hubUrl) {
-    if (!this.hubCache.hasOwnProperty(aUserName)) {
-      this.hubCache[aUserName] = {}
-    }
-    this.hubCache[aUserName][anAppUrl] = hubUrl
-  }
-
-  getHubCacheEntry (aUserName, anAppUrl) {
-    if (this.hubCache.hasOwnProperty(aUserName)) {
-      const userHubCache = this.hubCache[aUserName]
-      if (userHubCache && userHubCache.hasOwnProperty(anAppUrl)) {
-        return userHubCache[anAppUrl]
-      }
-    }
-    return undefined
-  }
-
-  hasHubCacheEntry (aUserName, anAppUrl) {
-    if (this.getHubCacheEntry(aUserName, anAppUrl)) {
-      return true
-    }
-    return false
-  }
 
   // Public:
   //
@@ -371,19 +274,37 @@ module.exports = class GaiaIO extends BaseIO {
     })
   }
 
+  async _saveGaiaHubCache() {
+    const method = 'GaiaIO::_saveGaiaHubCache'
+
+    // Save cached gaia lookups (this is not critical data
+    // so don't use the slow safe encrypt method)
+    try {
+      this.hubCache.setTimeBothSaved()
+      const encHubCacheObj =
+        await utils.encryptObj(this.publicKey, this.hubCache, true)
+      await this.deviceIO.writeLocalFile(
+        this.userId, 'gaiaHubCache.json', encHubCacheObj)
+      console.log(`INFO(${method}): stored updated GAIA hub cache.`)
+    } catch (error) {
+      console.log(`S-ERROR(${method}): unable to store updated GAIA hub cache.\n${error}`)
+    }
+  }
+
   getGaiaHubUrl (aUserName, anAppUrl = 'https://www.stealthy.im', useCache = true) {
     return new Promise((resolve, reject) => {
       if (!aUserName) {
         reject('aUserName is not defined')
-      } else if (useCache && this.hasHubCacheEntry(aUserName, anAppUrl)) {
-        resolve(this.getHubCacheEntry(aUserName, anAppUrl))
+      } else if (useCache && this.hubCache.hasHubCacheEntry(aUserName, anAppUrl)) {
+        resolve(this.hubCache.getHubCacheEntry(aUserName, anAppUrl))
       } else {
         api.getUserGaiaNS(aUserName, anAppUrl)
         .then((gaiaHubUrl) => {
           if (!gaiaHubUrl) {
             reject(`ERROR(gaiaIO.js::getGaiaHubUrl): unable to find gaia hub for user:${aUserName}, app:${anAppUrl}`)
           } else {
-            this.setHubCacheEntry(aUserName, anAppUrl, gaiaHubUrl)
+            this.hubCache.setHubCacheEntry(aUserName, anAppUrl, gaiaHubUrl)
+            this._saveGaiaHubCache()
             resolve(gaiaHubUrl)
           }
         })
@@ -520,42 +441,5 @@ module.exports = class GaiaIO extends BaseIO {
 
     this.log(`Deleting ${filePath}`)
     return this._write('', filePath, {})
-  }
-
-  readPartnerAppFile (aUserName, aFilePath, anAppUrl) {
-    const method = 'gaiaIO.js::readPartnerAppFile'
-    console.log(`DEBUG(${method}): Reading ${aFilePath} from ${aUserName}'s ${anAppUrl} GAIA.`)
-
-    if (!aUserName || !aFilePath || !anAppUrl) {
-      throw `ERROR(${method}): aFileName or aHubUrl not specified.`
-    }
-
-    if (!utils.is_iOS()) {
-      throw `ERROR(${method}): Non-iOS deployments not yet supported.`
-    }
-
-    return new Promise((resolve, reject) => {
-      this.getGaiaHubUrl(aUserName, anAppUrl)
-      .then((gaiaHubUrl) => {
-        if (gaiaHubUrl) {
-          getRawFile(aFilePath, gaiaHubUrl, (error, content) => {
-            if (!error) {
-              if (!content || content.includes('<Error><Code>BlobNotFound')) {
-                resolve(undefined)
-              } else {
-                resolve(content)
-              }
-            } else {
-              reject(error)
-            }
-          })
-        } else {
-          reject('Unable to get gaia hub path.')
-        }
-      })
-      .catch((error) => {
-        reject(error)
-      })
-    })
   }
 }
