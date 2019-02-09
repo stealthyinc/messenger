@@ -177,28 +177,6 @@ function * watchShutDownChannel () {
   }
 }
 
-function * watchIntegrationDataChannel () {
-  const channel = eventChannel(emitter => {
-    EngineInstance.on('me-integration-data', (appName, error, indexData) => {
-      const result = {
-        appName,
-        error,
-        indexData
-      }
-      emitter(result)
-    })
-    return () => {
-      console.log(`Messaging Engine Integration`)
-    }
-  })
-  while (true) {
-    const { appName, error, indexData } = yield take(channel)
-    yield put(DappActions.setDapp(appName))
-    yield put(DappActions.setDappData(appName, indexData))
-    yield put(DappActions.setDappError({dappError: error}))
-  }
-}
-
 function * handleContactMute (action) {
   const { contact } = action
   EngineInstance.handleContactMute(contact)
@@ -298,10 +276,6 @@ function * notificationTasks (action) {
   EngineInstance.handleMobileNotifications(senderInfo)
 }
 
-function * getIntegrationData () {
-  EngineInstance.getIntegrationData()
-}
-
 function * checkToken () {
   if (process.env.NODE_ENV === 'production' || OVERRIDE_NOTIFICATIONS) {
     const bearerToken = yield select(EngineSelectors.getBearerToken)
@@ -332,8 +306,6 @@ export function * startEngine (action) {
   yield fork(watchContactAddedChannel)
   yield fork(watchUserSettingsChannel)
   yield fork(watchShutDownChannel)
-  yield fork(watchIntegrationDataChannel)
-  yield takeLatest(DappTypes.REFRESH_INTEGRATION_DATA, getIntegrationData)
   yield takeLatest(EngineTypes.INIT_SHUTDOWN, handleShutDownRequest)
   yield takeLatest(EngineTypes.HANDLE_CONTACT_UNMUTE, handleContactUnmute)
   yield takeLatest(EngineTypes.HANDLE_CONTACT_MUTE, handleContactMute)
@@ -386,6 +358,5 @@ export default function * engineSagas (api) {
   yield takeLatest([EngineTypes.FORE_GROUND, EngineTypes.SEND_NOTIFICATION], checkToken)
   yield takeLatest([EngineTypes.SET_USER_DATA, EngineTypes.RESTART_ENGINE], startEngine)
   yield takeLatest(EngineTypes.SET_USER_DATA, getUserProfile, api)
-  yield takeLatest(EngineTypes.SET_USER_DATA, getIntegrationData)
   yield takeEvery(EngineTypes.SET_ACTIVE_CONTACT, getActiveUserProfile, api)
 }

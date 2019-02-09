@@ -28,7 +28,7 @@ class DappData extends Component {
     }
   }
   componentWillMount () {
-    this.props.navigation.setParams({ navigation: this.props.navigation, refresh: this.props.refreshIntegrationData })
+    this.props.navigation.setParams({ navigation: this.props.navigation })
   }
   sendDappUrlMessage = (dappUrl, dappMessage) => {
     if (dappUrl) {
@@ -283,8 +283,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     setDappUrl: (dappUrl) => dispatch(DappActions.setDappUrl(dappUrl)),
-    setDappMessage: (dappMessage) => dispatch(DappActions.setDappMessage(dappMessage)),
-    refreshIntegrationData: () => dispatch(DappActions.refreshIntegrationData())
+    setDappMessage: (dappMessage) => dispatch(DappActions.setDappMessage(dappMessage))
   }
 }
 

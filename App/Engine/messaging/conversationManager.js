@@ -154,6 +154,8 @@ class ConversationManager {
   // Always resolve to a usable bundle, even if we can't read the actual bundle:
   //   - temp tradeoff, usability for data loss
   async _loadContactBundle (aContactId) {
+    const method = 'ConversationManager::_loadContactBundle'
+
     const isFirebase = this.idxIoInst.isFirebase()
     const extension = isFirebase ? '_b' : '.b'
     const indexFilePath = `${aContactId}/conversations/bundles`
@@ -167,6 +169,7 @@ class ConversationManager {
         // Read has failed.
         // Assumption: fail will error out. Let's add them as if they're a new
         //             contact.
+        console.log(`WARNING(${method}): indexData null or undefined. Assuming no bundle file written for ${aContactId}.`)
         return this.addConversation(aContactId)
       }
 
@@ -206,8 +209,10 @@ class ConversationManager {
       }
       // Assumption: user never had bundle file written. Add them as a
       //             new contact.
+      console.log(`WARNING(${method}): No indexData.active. Assuming no bundle file written for ${aContactId}.`)
       return this.addConversation(aContactId)
     } catch (error) {
+      console.log(`WARNING(${method}): assuming no bundle file written for ${aContactId}. Threw:\n${error}`)
       return this.addConversation(aContactId)
     }
   }
@@ -257,14 +262,16 @@ class ConversationManager {
       for (const bundle of bundles) {
         if (bundle.isModified()) {
           const bundleFilePath = `${bundlePath}/${bundle.bundleFile}`
-
+          bundle.setModified(false)
           const wrPromise = new Promise((resolve, reject) => {
             this.idxIoInst.writeLocalFile(bundleFilePath, bundle)
             .then(() => {
-              bundle.setModified(false)
               resolve()
             })
             .catch((err) => {
+              // Write failed. Keep status of the bundle as modified to cause
+              // another write
+              bundle.setModified(true)
               reject(err)
             })
           })
