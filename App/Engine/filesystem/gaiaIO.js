@@ -86,7 +86,7 @@ module.exports = class GaiaIO extends BaseIO {
 
         if (cacheDataEnc) {
           const cacheDataObj =
-            await this.utils.decryptObj(aPrivateKey, cacheDataEnc, true)
+            await utils.decryptObj(aPrivateKey, cacheDataEnc, true)
 
           this.hubCache.initFromObj(cacheDataObj)
         }

@@ -224,7 +224,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     if (ENABLE_GAIA) {
       this.io = new GaiaIO(
         this.logger, this.userId, this.publicKey, this.deviceIO, LOG_GAIAIO)
-        
+
       await this.io.init(this.privateKey)
     } else {
       this.io = new FirebaseIO(this.logger, STEALTHY_PAGE, LOG_GAIAIO)
@@ -528,7 +528,20 @@ export class MessagingEngine extends EventEmitterAdapter {
           }
         }
 
+        // Indexing / design workaround for efficiency:
+        //   - When restoring from bundles, we look for the last channel message
+        //     and examine it's address. We set this as the last address. We need
+        //     to increment by 1 to prevent inadvertent reads of messages that
+        //     we already have.  EXCEPT for message zero when messages.length is
+        //     zero--in that case we need to still fetch the first message.
+        if ((messages.length === 0) && ChannelServicesV2.isFirstMsgAddress(msgAddress)) {
+          // Don't increment
+        } else {
+          // Increment
+          ChannelServicesV2.incrementMsgAddress(msgAddress)
+        }
         channelAddresses[contactId] = msgAddress
+
         if (this.contactMgr.isNotifications(contactId)) {
           firebaseInstance.subscribeToTopic(contactId)
         }
@@ -813,17 +826,20 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     // TODO: - should the service only start on background update and stop when background update done?
     //       - can the service fail if shut down inappropriately (i.e. while waiting on request)?
-    if (this && this.offlineMsgSvc && !this.offlineMsgSvc.isReceiving()) {
-      this.offlineMsgSvc.pauseRecvService()
+    if (this && this.offlineMsgSvc) {
 
-      this.offlineMsgSvc.receiveMessages()
-      .then(() => {
-        this.offlineMsgSvc.resumeRecvService()
-      })
-      .catch((err) => {
-        console.log(`ERROR:(engine.js::handleMobileBackgroundUpdate): ${err}`)
-        this.offlineMsgSvc.resumeRecvService()
-      })
+      if (!this.offlineMsgSvc.isReceiving()) {
+        this.offlineMsgSvc.pauseRecvService()
+
+        this.offlineMsgSvc.receiveMessages()
+        .then(() => {
+          this.offlineMsgSvc.resumeRecvService()
+        })
+        .catch((err) => {
+          console.log(`ERROR:(engine.js::handleMobileBackgroundUpdate): ${err}`)
+          this.offlineMsgSvc.resumeRecvService()
+        })
+      }
     } else {
       console.log(`ERROR:(engine.js::handleMobileBackgroundUpdate): unable to call this.offlineMsgSvc.isReceiving()`)
     }

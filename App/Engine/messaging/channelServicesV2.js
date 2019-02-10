@@ -233,6 +233,31 @@ class ChannelServicesV2 {
     return undefined
   }
 
+  // Returns undefined if invalid addresses passed in.
+  static msgAddressLessThan(msgAddress1, msgAddress2) {
+    // TODO: make this less crappy. In a hurry. Needs things like parseInt and
+    //       refactoring.
+    try {
+      if (msgAddress1.outerFolderNumber < msgAddress2.outerFolderNumber) {
+        return true
+      } else if (msgAddress1.outerFolderNumber > msgAddress2.outerFolderNumber) {
+        return false
+      } else {  // equal outerFolderNumbers
+        if (msgAddress1.innerFolderNumber < msgAddress2.innerFolderNumber) {
+          return true
+        } else if (msgAddress1.innerFolderNumber > msgAddress2.innerFolderNumber) {
+          return false
+        } else {  // equal innerFolderNumbers
+          return (msgAddress1.fileNumber < msgAddress2.fileNumber)
+        }
+      }
+    } catch (error) {
+      // Suppress
+    }
+
+    return undefined
+  }
+
   static msgAddressEqual (msgAddress1, msgAddress2) {
     if (msgAddress1 && msgAddress2) {
       try {

@@ -179,6 +179,15 @@ class OfflineMessagingServices extends EventEmitterAdapter {
   }
 
   setChannelAddresses (theChannelAddresses) {
+    const method = 'OfflineMessagingServices::setChannelAddresses'
+
+    console.log(`INFO(${method}):`)
+    for (const chId in theChannelAddresses) {
+      const msgFilePath = ChannelServicesV2.getMsgFilePath(theChannelAddresses[chId])
+      console.log(`    ${chId}: ${msgFilePath}`)
+    }
+    console.log('')
+
     this.channelAddresses = theChannelAddresses
   }
 
@@ -447,10 +456,18 @@ class OfflineMessagingServices extends EventEmitterAdapter {
             continue
           }
 
-          // TODO: optimize so we're not creating this every time. First get it working
-          //       though
+          // Sub-optimal situation / design resulting from TC rush:
+          //   -  this.channelAddresses[<someId] represents the last message we
+          //      stored from the channel we're polling, but incremented by 1 to
+          //      work with this code and prevent getting messages we already have.
+          //   -  remoteStatusData represents the last message indicated in the
+          //      channel we're polling's status.json
+          //
           const channelMgr = new ChannelServicesV2()
           channelMgr.setLastMsgAddress(remoteStatusData)
+          //
+          // WARNING WARNING WARNING: the call to getMsgFilePaths increments the
+          // value in this.channelAddresses if there are more messages.
           const messageFilePaths = channelMgr.getMsgFilePaths(this.channelAddresses[contactId])
 
           // TODO: Yuck! Fix this to be more sensible and less dangerous--out of time
@@ -467,7 +484,7 @@ class OfflineMessagingServices extends EventEmitterAdapter {
           }
 
           for (const messageFilePath of messageFilePaths) {
-            console.log(`messageFilePath: ${messageFilePath}`)
+            console.log(`messageFilePath(${contactId}): ${messageFilePath}`)
             chatMessagesReadPromises.push(
               new Promise((resolve, reject) => {
                 this.ioInst.robustRemoteRead(contactId, messageFilePath)
