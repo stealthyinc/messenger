@@ -408,10 +408,14 @@ class OfflineMessagingServices extends EventEmitterAdapter {
   }
 
   async receiveMessages (contacts) {
+    const method = 'OfflineMessagingServices::receiveMessages'
+    console.log(`INFO(${method}): called!`)
+
     // Problems in this loop must be suppressed for continuity of operation
     try {
       // Only one instance of this loop can be running at any time
       if (this.receiving) {
+        console.log(`INFO(${method}): already receiving messages. Exiting call.`)
         return
       }
       this.receiving = true
@@ -430,6 +434,8 @@ class OfflineMessagingServices extends EventEmitterAdapter {
 
       const isFirebase = this.idxIoInst.isFirebase()
       const chatMessagesReadPromises = []
+
+      console.log(`INFO(${method}): checking for messages from ${this.contactReceiveQueue.length} contacts.`)
 
       while (this.contactReceiveQueue.length > 0) {
         const contact = this.contactReceiveQueue.shift()
@@ -544,6 +550,10 @@ class OfflineMessagingServices extends EventEmitterAdapter {
 
       return Promise.all(chatMessagesReadPromises)
       .then((chatMessageObjs) => {
+        // TODO: protocol extenion to handle failed reads (today, they just
+        //       get lost for channels).
+        //       - probably should stop at first undefined for channel and re-
+        //         fetch undefined and remaining messages.
         let count = 0
         for (const chatMsg of chatMessageObjs) {
           // Check if chatMsg is defined too (failed reads make it undefined)

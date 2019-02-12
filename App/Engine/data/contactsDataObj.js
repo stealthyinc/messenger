@@ -33,6 +33,7 @@ class ContactsDataObj extends BaseDataObj {
 
   setContactArr(aContactArr) {
     this.data = aContactArr
+    super.setTimeModified()
   }
 }
 

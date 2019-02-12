@@ -108,6 +108,8 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     this.deviceIO = undefined
 
+    this.writeContactListRequests = 0
+
     // Simple dictionary of amaId to array of voted question Ids.
     // e.g. for ama 001, an upvote of question 123 would look like:
     //   {
@@ -1640,26 +1642,70 @@ export class MessagingEngine extends EventEmitterAdapter {
   // ////////////////////////////////////////////////////////////////////////////
   // ////////////////////////////////////////////////////////////////////////////
   //
+
+  // Receives requests to write the contact list. Waits until an existing write
+  // has completed, then checks to see if a write is needed and proceeds to
+  // write the contact list. (Prevents multiple duplicate calls from needlessly
+  // writing--i.e. if writing takes longer than requests to write are coming in,
+  // bundle them into fewer writes).
   async _writeContactList () {
     const method = 'MessagingEngine::_writeContactList'
     console.log(`INFO(${method}): called!`)
 
+    if (this.writeContactListRequests !== 0) {
+      // We're already saving the contact list so increment the request count
+      // and exit.
+      this.writeContactListRequests++
+      console.log(`INFO(${method}): Already encrypting/writing contact list. Incremented outstanding requests to: ${this.writeContactListRequests}.`)
+      return
+    }
+
+    // Increment request count to get the loop operating:
+    this.writeContactListRequests = 1
+
+    while (this.writeContactListRequests !== 0) {
+      try {
+        await this.___safeEncAndWriteContactList()
+      } catch (error) {
+        console.log(`S-ERROR(${method}): problem encrypting and writing contact list.\n${error}`)
+      } finally {
+        // Remove all requests except 1 if there are mulitple outstanding. If there
+        // was only 1 request remaining, zero the count.
+        this.writeContactListRequests = (this.writeContactListRequests > 1) ? 1 : 0
+        console.log(`INFO(${method}): ${this.writeContactListRequests} requests outstanding after successful write.`)
+      }
+    }
+
+  }
+
+  async ___safeEncAndWriteContactList() {
+    const method = 'MessagingEngine::___safeEncAndWriteContactList'
+    console.log(`INFO(${method}): called!`)
+
     if (this.contactMgr.isContactArrModified()) {
       console.log(`INFO(${method}:   contactArr modified. Saving (saved=${this.contactMgr.getContactArrSaved()}, modified=${this.contactMgr.getContactArrModified()}))`)
+
+      let tempContactsTimeObj = this.contacts.getTimeObj()
+      let tempContactMgrTimeSaved = this.contactMgr.getContactArrSaved()
       try {
         const contactArr = this.contactMgr.getContacts()
         this.contacts.setContactArr(contactArr)
         this.contacts.setTimeBothSaved()
+        this.contactMgr.setContactArrSaved()
+
         const encContactsData = await this.safeEncryptObj(this.contacts, ENCRYPT_CONTACTS)
         await this.deviceIO.writeLocalFile(this.userId, 'contacts.json', encContactsData)
-        this.contactMgr.setContactArrSaved()
         await this.io.robustLocalWrite(this.userId, 'contacts.json', encContactsData)
       } catch (error) {
         const errStr = utils.fmtErrorStr('failed to write contacts.json', method, error)
         console.log(errStr)
+
+        // Restore the time saved if we fail to save the contact list this time
+        this.contactMgr.setContactArrSaved(tempContactMgrTimeSaved)
+        this.contacts.restoreTimeObj(tempContactsTimeObj)
       }
     } else {
-          console.log(`INFO(${method}:   contactArr not modified. Skipping write (saved=${this.contactMgr.getContactArrSaved()}, modified=${this.contactMgr.getContactArrModified()}))`)
+      console.log(`INFO(${method}:   contactArr not modified. Skipping write (saved=${this.contactMgr.getContactArrSaved()}, modified=${this.contactMgr.getContactArrModified()}))`)
     }
   }
 
@@ -1694,6 +1740,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     const method = 'engine::writeSettings'
 
     if (this.settings) {
+      let tempSettingsTimeObj = this.settings.getTimeObj()
       try {
         this.settings.setTimeBothSaved()
         const encSettingsStrObj = await this.safeEncryptObj(this.settings, ENCRYPT_SETTINGS)
@@ -1702,6 +1749,9 @@ export class MessagingEngine extends EventEmitterAdapter {
       } catch (error) {
         const errMsg = `ERROR(${method})-suppressed: failed to write settings.\n${error}`
         console.log(errMsg)
+
+        // Restore the time saved if we fail to save settings this time:
+        this.settings.restoreTimeObj(tempSettingsTimeObj)
       }
     }
   }

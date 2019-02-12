@@ -113,7 +113,8 @@ class ChannelServicesV2 {
         const numMsgs = ChannelServicesV2.getNumberOfMessages(this.lastMsgAddress)
         if (numMsgs > firstFetchLimit) {
           msgFilePaths.push(ChannelServicesV2.getMsgFilePath(aMsgAddress))
-          pathCount++
+          // 20 paths + first one
+          // pathCount++
 
           // Now increment to the last message minus the first fetch limit
           let startMsgNum = numMsgs - firstFetchLimit
@@ -135,7 +136,7 @@ class ChannelServicesV2 {
       // Note msgAddressLessThan returns undefined if objects are problematic (which
       // resolves to falsy and prevents our loop from running)
 
-      while ((pathCount < maxPaths) &&
+      while ((pathCount <= maxPaths) &&
              ChannelServicesV2.msgAddressLessThanOrEqual(aMsgAddress, this.lastMsgAddress)) {
         msgFilePaths.push(ChannelServicesV2.getMsgFilePath(aMsgAddress))
         pathCount++

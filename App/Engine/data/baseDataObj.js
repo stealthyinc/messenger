@@ -55,6 +55,21 @@ class BaseDataObj {
     return (this.hasOwnProperty('data')) ? this.data : undefined
   }
 
+  getTimeObj() {
+    return this.time
+  }
+
+  // Restores the cloud / local saved times without overwriting the exisitng
+  // modified time value
+  restoreTimeObj(aTimeObj) {
+    if (aTimeObj &&
+        aTimeObj.hasOwnProperty('cloudSaved') &&
+        aTimeObj.hasOwnProperty('localSaved')) {
+      this.time.cloudSaved = aTimeObj.cloudSaved
+      this.time.localSaved = aTimeObj.localSaved
+    }
+  }
+
   setTimeBothSaved(aUTC=undefined) {
     const timeSaved = (aUTC) ? aUTC : Date.now()
     this.time.cloudSaved = timeSaved

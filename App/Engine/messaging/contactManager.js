@@ -39,8 +39,8 @@ class ContactManager {
     this.contactArrModifiedUTC = undefined
   }
 
-  setContactArrSaved() {
-    this.contactArrSavedUTC = Date.now()
+  setContactArrSaved(aTimeSavedMsUTC = Date.now()) {
+    this.contactArrSavedUTC = aTimeSavedMsUTC
   }
 
   getContactArrSaved() {
