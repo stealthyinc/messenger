@@ -216,8 +216,10 @@ module.exports.decrypt = async function (aKey, theCipherObject) {
     // which fails because Java is not expecting that. Fix it here with a simple
     // string replace (but scope it only to \" to prevent destroying intentional
     // backslashes):
-    const recoveredWorkaround = recovered.replace(/\\"/g, '"')
-    return recoveredWorkaround
+    // const recoveredWorkaround = recovered.replace(/\\"/g, '"')
+    // return recoveredWorkaround
+    console.log(recovered)
+    return recovered
   } else {
     return jsDecryptECIES(aKey, theCipherObject)
   }

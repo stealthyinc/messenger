@@ -168,10 +168,6 @@ class IndexedIO {
     for (const activeFileName in indexData.active) {
       logger(`    ${activeFileName}: ${indexData.active[activeFileName].time}`)
     }
-    logger('  deleted:')
-    for (const delFileName in indexData.deleted) {
-      logger(`    ${delFileName}: ${indexData.deleted[delFileName].time}`)
-    }
     logger('')
   }
 
@@ -191,7 +187,7 @@ class IndexedIO {
   //
   // TODO: this is now very similar to seqWriteLocalFile, consider merging them
   //       with a param to control delay.
-  async writeLocalFile (filePath, data, someonesPubKey = undefined) {
+  async writeLocalFile(filePath, data, someonesPubKey = undefined) {
     const method = 'IndexedIO::writeLocalFile'
     IndexedIO._checkFilePath(filePath)
 
@@ -207,9 +203,6 @@ class IndexedIO {
     }
 
     const sanoIndexData = IndexedIO._sanitizeIndexData(indexData)
-    if (fileName in sanoIndexData.deleted) {
-      delete sanoIndexData.deleted[fileName]
-    }
     sanoIndexData.active[fileName] = { time }
 
     const encKey = (someonesPubKey) || this.publicKey
@@ -348,9 +341,6 @@ class IndexedIO {
     this.logger(`DEBUG(${method}): reading local index - ${path} complete.`)
 
     const sanoIndexData = IndexedIO._sanitizeIndexData(indexData)
-    if (fileName in sanoIndexData.deleted) {
-      delete sanoIndexData.deleted[fileName]
-    }
     sanoIndexData.active[fileName] = { time }
 
     this.logger(`DEBUG(${method}): writing local index - ${path}`)
@@ -409,7 +399,6 @@ class IndexedIO {
     const sanoIndexData = IndexedIO._sanitizeIndexData(indexData)
     for (const fileName in sanoIndexData.active) {
       delete sanoIndexData.active[fileName]
-      sanoIndexData.deleted[fileName] = { time }
       const filePath = `${dirPath}/${fileName}`
       deleteFilePromises.push(this.ioInst.deleteLocalFile(this.userId, filePath))
     }
@@ -449,7 +438,6 @@ class IndexedIO {
     for (const fileName in sanoIndexData.active) {
       if (fileList.includes(fileName)) {
         delete sanoIndexData.active[fileName]
-        sanoIndexData.deleted[fileName] = { time }
         const filePath = `${dirPath}/${fileName}`
         deleteFilePromises.push(this.ioInst.deleteLocalFile(this.userId, filePath))
       }
@@ -491,7 +479,6 @@ class IndexedIO {
     if (fileName in sanoIndexData.active) {
       delete sanoIndexData.active[fileName]
     }
-    sanoIndexData.deleted[fileName] = { time }
 
     try {
       await this.writeLocalIndex(path, sanoIndexData, someonesPubKey)
@@ -636,8 +623,8 @@ class IndexedIO {
     if ((theIndexData === undefined) || (theIndexData === null)) {
       theIndexData = {}
     }
-    if ((theIndexData.deleted === undefined) || (theIndexData.deleted === null)) {
-      theIndexData.deleted = {}
+    if (theIndexData.hasOwnProperty('deleted')) {
+      delete theIndexData.deleted
     }
     if ((theIndexData.active === undefined) || (theIndexData.active === null)) {
       theIndexData.active = {}

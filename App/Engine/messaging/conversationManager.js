@@ -63,6 +63,15 @@ class Bundle {
   }
 
   inflate (someBundleData) {
+    const method = 'Bundle::inflate'
+    if (!someBundleData ||
+        !someBundleData.hasOwnProperty('userId') ||
+        !someBundleData.hasOwnProperty('bundleId') ||
+        !someBundleData.hasOwnProperty('bundleFile') ||
+        !someBundleData.hasOwnProperty('messages')) {
+      throw(`ERROR(${method}): someBundleData is missing expected properties.`)
+    }
+
     this.userId = someBundleData.userId
     this.bundleId = someBundleData.bundleId
     this.bundleFile = someBundleData.bundleFile
@@ -147,35 +156,39 @@ class ConversationManager {
     this.idxIoInst = anIdxIoInst
   }
 
-  // TODO: this is ugly AF competition code.
-  //       - change to use a better mechanism than indexed IO
-  //       - retry read mechanism
+  // Returns a promise that resolves to the following object:
+  //   {
+  //     userId: <a user id>,
+  //     bundleObj: <a bundle object or undefined>
+  //     error: <an error message or undefined>
+  //   }
+  // The promise should never reject. Be sure to check the resolved object to
+  // see if the bundleObj is undefined and if there is a valid error message.
   //
-  // Always resolve to a usable bundle, even if we can't read the actual bundle:
-  //   - temp tradeoff, usability for data loss
-  async _loadContactBundle (aContactId) {
-    const method = 'ConversationManager::_loadContactBundle'
+  _getContactBundle(aContactId) {
+    const method = 'ConversationManager::_getContactBundle'
+
+    const obj = {
+      userId: aContactId,
+      bundleObj: undefined,
+      error: undefined
+    }
 
     const isFirebase = this.idxIoInst.isFirebase()
     const extension = isFirebase ? '_b' : '.b'
     const indexFilePath = `${aContactId}/conversations/bundles`
 
-    try {
-      // TODO: more robust index data read (multi-attempt)
-      const indexData = await this.idxIoInst.readLocalIndex(indexFilePath)
+    return new Promise((resolve, reject) => {
+      this.idxIoInst.readLocalIndex(indexFilePath)
+      .then((indexData) => {
+        // Check for valid indexData:
+        if (!indexData || !indexData.active) {
+          obj.error = `WARNING(${method}): indexData or indexData.active undefined for ${aContactId}.`
+          resolve(obj)
+          return
+        }
 
-      if ((indexData === null) || (indexData === undefined)) {
-        // Two scenarios--contact existed but we've migrated to this data structure.
-        // Read has failed.
-        // Assumption: fail will error out. Let's add them as if they're a new
-        //             contact.
-        console.log(`WARNING(${method}): indexData null or undefined. Assuming no bundle file written for ${aContactId}.`)
-        return this.addConversation(aContactId)
-      }
-
-      // Examine the index for active files.
-      // See if any are bundles.
-      if (indexData.active) {
+        // Examine the index for active files that are bundles:
         const fileNames = Object.keys(indexData.active)
         const bundleFiles = []
         for (const fileName of fileNames) {
@@ -184,110 +197,166 @@ class ConversationManager {
           }
         }
         if (bundleFiles.length <= 0) {
-            // Assumption: user never had bundle file written. Add them as a
-            //             new contact.
-          return this.addConversation(aContactId)
+          obj.error = `WARNING(${method}): No bundle files found in indexData.active for ${aContactId}.`
+          resolve(obj)
+          return
         }
-            // sort them to get the newest one:
+
+        // sort the bundle files to get the newest one:
         if (isFirebase) {
           bundleFiles.sort(Bundle.compareBundleFilesFB)
         } else {
           bundleFiles.sort(Bundle.compareBundleFiles)
         }
-
         const lastFile = bundleFiles[bundleFiles.length - 1]
         const bundleFilePath = `${indexFilePath}/${lastFile}`
 
-        const bundleData = await this.idxIoInst.readLocalFile(bundleFilePath)
-        if (!(aContactId in this.conversations)) {
-          this.conversations[aContactId] = []
-        }
-
-        const bundle = new Bundle(aContactId, -1)
-        bundle.inflate(bundleData)
-        return bundle
-      }
-      // Assumption: user never had bundle file written. Add them as a
-      //             new contact.
-      console.log(`WARNING(${method}): No indexData.active. Assuming no bundle file written for ${aContactId}.`)
-      return this.addConversation(aContactId)
-    } catch (error) {
-      console.log(`WARNING(${method}): assuming no bundle file written for ${aContactId}. Threw:\n${error}`)
-      return this.addConversation(aContactId)
-    }
+        return this.idxIoInst.readLocalFile(bundleFilePath)
+        .then((bundleData) => {
+          const bundle = new Bundle(aContactId, -1)
+          try {
+            bundle.inflate(bundleData)
+            obj.bundleObj = bundle
+          } catch (error) {
+            obj.error = error
+          }
+          resolve(obj)
+          return
+        })
+        .catch((error) => {
+          obj.error = error
+          // Intentionally resolving, not rejecting.
+          resolve(obj)
+          return
+        })
+      })
+      .catch((error) => {
+        obj.error = error
+        // Intentionally resolving, not rejecting.
+        resolve(obj)
+        return
+      })
+    })
   }
 
-  // TODO: -refactor.
-  //       -Use Promises.all() in return.
-  //       -Share path generation.
-  //       -Add bundle specifier (right now we load the last one).
-  loadContactBundles (contactIdArr) {
+  async loadContactBundles (contactIdArr) {
+    const method = 'ConversationManager::loadContactBundles'
     if (!contactIdArr) {
-      throw ('ERROR(ConversationManager::loadContactBundles): contactIdArr undefined.')
+      throw (`ERROR(${method}): contactIdArr undefined.`)
     }
 
     const promises = []
     for (const contactId of contactIdArr) {
-      promises.push(this._loadContactBundle(contactId))
+      // _getContactBundle should always resolve and never reject, but to ensure
+      // we don't fail early in fetching a contact bundle in the promise.all, we
+      // add the catch below.
+      //
+      // TODO: - Consider spacing these requests out at 4 / second to prevent
+      //       overloading GAIA for folks with a lot of bundles.
+      //       - Consider lazy loading instead.
+      //       - Consider local storage, then gating GAIA requests.
+      //
+      const promise =
+        this._getContactBundle(contactId)
+        .catch((error) => {
+          console.log(`S-ERROR(${method}): Problem getting contact bundle.\n${error}`)
+        })
+
+      promises.push(promise)
     }
 
     const isFirebase = this.idxIoInst.isFirebase()
-    return Promise.all(promises)
-    .then((bundles) => {
-      for (const bundle of bundles) {
-        if (!bundle) {
-          console.log('WARNING(ConversationManager::loadContactBundles): bundle undefined.')
-          continue
+    const bundleWrapperObjs = await Promise.all(promises)
+    // If in the unlikely event that a bundleWrapperObj is undefined, indicate
+    // that we need to post-process the bundles to create empty ones for some
+    // contacts.
+    let bundleWrapperFail = false
+
+    for (const bundleWrapperObj of bundleWrapperObjs) {
+      if (!bundleWrapperObj) {
+        console.log(`S-ERROR(${method}): bundle wrapper undefined.`)
+        bundleWrapperFail = true
+        continue
+      }
+
+      if (!bundleWrapperObj.hasOwnProperty('bundleObj') || !bundleWrapperObj.bundleObj) {
+        const errMsg = `S-ERROR(${method}): bundle object undefined.`
+        if ((bundleWrapperObj.hasOwnProperty('error') && bundleWrapperObj.error)) {
+          errMsg += `\n${bundleWrapperObj.error}`
+        }
+        console.log(errMsg)
+        bundleWrapperFail = true
+        continue
+      }
+
+      try {
+        const contactId = bundleWrapperObj.userId
+        if (!contactId) {
+          throw `ERROR(${method}): contactId is undefined.`
         }
 
-        const contactId = bundle.userId
-        this.conversations[contactId].push(bundle)
-        // Inefficient--move to place where all bundles pushed in
+        if (!(contactId in this.conversations)) {
+          this.conversations[contactId] = []
+        }
+        this.conversations[contactId].push(bundleWrapperObj.bundleObj)
+
         if (isFirebase) {
           this.conversations[contactId].sort(Bundle.compareBundlesFB)
         } else {
           this.conversations[contactId].sort(Bundle.compareBundles)
         }
+      } catch (error) {
+        console.log(`S-ERROR(${method}): error processing bundle wrapper.\n${error}`)
+        bundleWrapperFail = true
+        continue
       }
-    })
+    }
+
+    if (bundleWrapperFail) {
+      for (const contactId of contactIdArr) {
+        if (!(contactId in this.conversations)) {
+          console.log(`WARNING(${method}): creating new conversation bundle for ${contactId}`)
+          this.createConversation(contactId)
+        }
+      }
+    }
   }
 
-  storeContactBundles () {
-    const promises = []
+  // TODO:
+  //   - safe encryption
+  //   - device IO local write
+  //   - make this a one time operation like storing contact manager and
+  //     have it run until no fail or 3 attempts
+  async storeContactBundles () {
+    const method = `ConversationManager::storeContactBundles`
 
+    const promises = []
     for (const contactId in this.conversations) {
       const bundlePath = `${contactId}/conversations/bundles`
 
       const bundles = this.conversations[contactId]
       for (const bundle of bundles) {
-        if (bundle.isModified()) {
-          const bundleFilePath = `${bundlePath}/${bundle.bundleFile}`
-          bundle.setModified(false)
-          const wrPromise = new Promise((resolve, reject) => {
-            this.idxIoInst.writeLocalFile(bundleFilePath, bundle)
-            .then(() => {
-              resolve()
-            })
-            .catch((err) => {
-              // Write failed. Keep status of the bundle as modified to cause
-              // another write
-              bundle.setModified(true)
-              reject(err)
-            })
+        if (!bundle.isModified()) {
+          continue
+        }
+
+        const bundleFilePath = `${bundlePath}/${bundle.bundleFile}`
+        bundle.setModified(false)
+        const wrPromise =
+          this.idxIoInst.writeLocalFile(bundleFilePath, bundle)
+          .catch((error) => {
+            console.log(`S-ERROR(${method}): Error writing contact bundle ${bundleFilePath}.\n${error}.`)
+            // Write failed. Keep status of the bundle as modified to cause
+            // another write. Do not reject so that await doesn't end early
+            // on the promise all below.
+            bundle.setModified(true)
           })
 
-          promises.push(wrPromise)
-        }
+        promises.push(wrPromise)
       }
     }
 
-    return Promise.all(promises)
-    .then(() => {
-
-    })
-    .catch((err) => {
-      throw `ERROR(conversationManager::storeContactBundles): ${err}`
-    })
+    const promiseResults = await Promise.all(promises)
   }
 
   hasMessage (aChatMessage) {
@@ -423,13 +492,12 @@ class ConversationManager {
 
   addConversation (aUserId) {
     if (aUserId in this.conversations) {
-      throw 'ERROR(ConversationManager::addConversation): unexpected error adding conversation.'
+      throw 'ERROR(ConversationManager::addConversation): a conversation already exists for user ${aUserId}.'
     }
 
     this.conversations[aUserId] = []
     const bundle = new Bundle(aUserId, Bundle.getNextBundleId())
     bundle.setModified()
-    // this.conversations[aUserId].push(bundle);
     return bundle
   }
 
