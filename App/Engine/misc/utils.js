@@ -218,7 +218,6 @@ module.exports.decrypt = async function (aKey, theCipherObject) {
     // backslashes):
     // const recoveredWorkaround = recovered.replace(/\\"/g, '"')
     // return recoveredWorkaround
-    console.log(recovered)
     return recovered
   } else {
     return jsDecryptECIES(aKey, theCipherObject)

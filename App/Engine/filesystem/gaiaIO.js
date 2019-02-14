@@ -366,7 +366,8 @@ module.exports = class GaiaIO extends BaseIO {
           const urlPath = `${gaiaHubPath}${filePath}`
           gaia.getFileMultiPlayer(urlPath)
           .then((data) => {
-            if (!data || data.includes('<Error><Code>BlobNotFound')) {
+            if (data === null || data === undefined ||
+                (!utils.isEmptyObj(data) && data.includes('<Error><Code>BlobNotFound'))) {
               resolve(undefined)
             } else {
               resolve(data)

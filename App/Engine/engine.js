@@ -6,6 +6,8 @@ import {AsyncStorage} from 'react-native'
 
 const platform = require('platform')
 
+const RNFetchBlob = require('rn-fetch-blob').default
+
 // Platform dependent (commented out parts are for other platforms)
 // -----------------------------------------------------------------------------
 // Web/React Server:
@@ -47,9 +49,21 @@ const { Timer } = require('./misc/timer.js')
 
 import { SettingsDataObj } from './data/settingsDataObj'
 import { ContactsDataObj } from './data/contactsDataObj'
+import { ContactsImgDataObj } from './data/contactsImgDataObj'
 
 const common = require('./../common.js')
 const api = API.create()
+
+// Filename constants:
+const CONTACTS_FILE = 'contacts.json'
+const CONTACTS_IMGS_FILE = 'contactsImgs.json'
+const SETTINGS_FILE = 'settings.json'
+const AMA_DATA_FILE = 'ama-data.json'
+const AMA_OWNER_FILE = 'owner.json'
+const AMA_DELEGATES_FILE = 'delegates.json'
+const STARTUP_TESTS_FILE = 'startTests.json'
+const PROTOCOL_FILE = 'info.json'
+const PUB_KEY_FILE = 'pk.txt'
 
 // TODO: figure out how to only include/build this for development
 const ENABLE_MEASUREMENTS = false
@@ -93,6 +107,15 @@ export class MessagingEngine extends EventEmitterAdapter {
     this.startTests = {}
     this.settings = new SettingsDataObj()
     this.contacts = new ContactsDataObj()
+
+    // We were storing base64 images in the contacts array and it was leading to
+    // big files that slowed GAIA reads/writes as well as really long encryption
+    // decryption times. This dictionary is used to store those images and also
+    // persist them to GAIA / local storage, but in fewer situations than would
+    // occur with the regular contacts list which tracks order, last message,
+    // and number of unread messages among other things:
+    this.loadedContactImages = false
+    this.contactsImgs = new ContactsImgDataObj()
 
     this.contactMgr = undefined
 
@@ -150,6 +173,12 @@ export class MessagingEngine extends EventEmitterAdapter {
     const contactMgr = new ContactManager(forceActiveContact)
     contactMgr.clone(this.contactMgr)
 
+    // Merge the pointers to the contact images to the cloned contact manager so
+    // they can be displayed in the UI.
+    for (const contact of contactMgr.getContacts()) {
+      contactMgr.setProfileImage(contact,
+                                 this.contactsImgs.getContactImg(contact.id))
+    }
     this.emit('me-update-contactmgr', contactMgr)
   }
 
@@ -164,7 +193,7 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   async readAmaData () {
     try {
-      const encAmaData = await this.io.robustLocalRead(this.userId, 'ama-data.json')
+      const encAmaData = await this.io.robustLocalRead(this.userId, AMA_DATA_FILE)
       if (encAmaData) {
         const amaData = await utils.decryptObj(this.privateKey, encAmaData, true)
         if (amaData) {
@@ -173,14 +202,14 @@ export class MessagingEngine extends EventEmitterAdapter {
         }
       }
     } catch (error) {
-      console.log(`ERROR(MessagingEngine::readAmaData): failed to read or decrypt ama-data.json.\n${error}`)
+      console.log(`ERROR(MessagingEngine::readAmaData): failed to read or decrypt ${AMA_DATA_FILE}.\n${error}`)
     }
   }
 
   async writeAmaData () {
     try {
       const encAmaData = await utils.encryptObj(this.publicKey, this.amaData, true)
-      await this.io.robustLocalWrite(this.userId, 'ama-data.json', encAmaData)
+      await this.io.robustLocalWrite(this.userId, AMA_DATA_FILE, encAmaData)
     } catch (error) {
       console.log(`ERROR(MessagingEngine::writeAmaData): failed to write or encrypt amaData.\n${error}`)
     }
@@ -238,12 +267,12 @@ export class MessagingEngine extends EventEmitterAdapter {
 
   async _startupWork() {
     try {
-      const strStartTests = await this.deviceIO.readLocalFile(this.userId, 'startTests.json')
+      const strStartTests = await this.deviceIO.readLocalFile(this.userId, STARTUP_TESTS_FILE)
       if (strStartTests) {
         this.startTests = JSON.parse(strStartTests)
       }
     } catch (error) {
-      console.log(`INFO(${method}): unable to read local file startTests.json.`)
+      console.log(`INFO(${method}): unable to read local file ${STARTUP_TESTS_FILE}.`)
     }
 
     this.myTimer.logEvent('Starting mobileGaiaTest')
@@ -256,20 +285,20 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.myTimer.logEvent('Completed mobileGaiaTest')
     }
 
-    this.myTimer.logEvent('Starting write of pk.txt')
+    this.myTimer.logEvent(`Starting write of ${PUB_KEY_FILE}`)
     if (this.startTests.hasOwnProperty('wrotePkTxt') &&
         this.startTests.wrotePkTxt) {
-      this.myTimer.logEvent('Skipping write of pk.txt')
+      this.myTimer.logEvent(`Skipping write of ${PUB_KEY_FILE}`)
     } else {
-      await this.io.robustLocalWrite(this.userId, 'pk.txt', this.publicKey)
+      await this.io.robustLocalWrite(this.userId, PUB_KEY_FILE, this.publicKey)
       this.startTests.wrotePkTxt = true
-      this.myTimer.logEvent('After writing pk.txt')
+      this.myTimer.logEvent(`After writing ${PUB_KEY_FILE}`)
     }
 
     this.deviceIO.writeLocalFile(
-      this.userId, 'startTests.json', JSON.stringify(this.startTests))
+      this.userId, STARTUP_TESTS_FILE, JSON.stringify(this.startTests))
     .catch((error) => {
-      console.log(`INFO(${method}): unable to write local file startTests.json to device.\n${error}`)
+      console.log(`INFO(${method}): unable to write local file ${STARTUP_TESTS_FILE} to device.\n${error}`)
     });
   }
 
@@ -319,15 +348,15 @@ export class MessagingEngine extends EventEmitterAdapter {
     const method = 'engine.js::_fetchUserSettings'
     this.myTimer.logEvent('_fetchUserSettings    (Entered)')
 
-    this.myTimer.logEvent('_fetchUserSettings    (Starting read of settings.json)')
+    this.myTimer.logEvent(`_fetchUserSettings    (Starting read of ${SETTINGS_FILE})`)
     let encSettingsData = undefined
     try {
 
-      encSettingsData = await this.deviceIO.readLocalFile(this.userId, 'settings.json')
-      this.myTimer.logEvent('_fetchUserSettings    (Read settings.json from device)')
+      encSettingsData = await this.deviceIO.readLocalFile(this.userId, SETTINGS_FILE)
+      this.myTimer.logEvent(`_fetchUserSettings    (Read ${SETTINGS_FILE} from device)`)
       if (!encSettingsData) {
-        encSettingsData = await this.io.robustLocalRead(this.userId, 'settings.json')
-        this.myTimer.logEvent('_fetchUserSettings    (Read settings.json from GAIA)')
+        encSettingsData = await this.io.robustLocalRead(this.userId, SETTINGS_FILE)
+        this.myTimer.logEvent(`_fetchUserSettings    (Read ${SETTINGS_FILE} from GAIA)`)
       }
       // readLocalFile returns undefined on BlobNotFound, so set new user:
       this.newUser = (encSettingsData) ? false : true
@@ -341,7 +370,7 @@ export class MessagingEngine extends EventEmitterAdapter {
           this.privateKey, encSettingsData, ENCRYPT_SETTINGS)
 
         this.settings.initFromObj(settingsData)
-        this.myTimer.logEvent('_fetchUserSettings    (After decrypting settings.json)')
+        this.myTimer.logEvent(`_fetchUserSettings    (After decrypting ${SETTINGS_FILE})`)
       } catch (err) {
         // Problem if here is likely that another account wrote to the current
         // account's gaia with it's own encryption, resulting in a mac mismatch:
@@ -373,13 +402,13 @@ export class MessagingEngine extends EventEmitterAdapter {
 
     let encContactsData = undefined
     try {
-      this.myTimer.logEvent('_fetchUserContacts    (Starting read of contacts.json)')
-      encContactsData = await this.deviceIO.readLocalFile(this.userId, 'contacts.json')
-      this.myTimer.logEvent('_fetchUserContacts    (Read contacts.json from device)')
+      this.myTimer.logEvent(`_fetchUserContacts    (Starting read of ${CONTACTS_FILE})`)
+      encContactsData = await this.deviceIO.readLocalFile(this.userId, CONTACTS_FILE)
+      this.myTimer.logEvent(`_fetchUserContacts    (Read ${CONTACTS_FILE} from device)`)
       if (!encContactsData) {
         const maxAttempts = 5
-        encContactsData = await this.io.robustLocalRead(this.userId, 'contacts.json', maxAttempts)
-        this.myTimer.logEvent('_fetchUserContacts    (Read contacts.json from GAIA.')
+        encContactsData = await this.io.robustLocalRead(this.userId, CONTACTS_FILE, maxAttempts)
+        this.myTimer.logEvent(`_fetchUserContacts    (Read ${CONTACTS_FILE} from GAIA.`)
       }
     } catch (error) {
       // TODO:
@@ -396,7 +425,7 @@ export class MessagingEngine extends EventEmitterAdapter {
         const contactsData =
           await utils.decryptObj(this.privateKey, encContactsData, ENCRYPT_CONTACTS)
         this.contacts.initFromObj(contactsData)
-        this.myTimer.logEvent('_fetchUserContacts    (After decrypting contacts.json data)')
+        this.myTimer.logEvent(`_fetchUserContacts    (After decrypting ${CONTACTS_FILE} data)`)
       } catch (error) {
         // TODO:
         //   - see above about safe encryption and n-mod redudancy
@@ -650,6 +679,14 @@ export class MessagingEngine extends EventEmitterAdapter {
     } catch (error) {
       console.log(`WARNING(${method}): Failed to write settings.\n${error}`)
     }
+
+    try {
+      // This method must be followed with a call to write the contact list!
+      await this._loadContactImages()
+    } catch (error) {
+      console.log(`WARNING(${method}): Failed to load contact images.\n${error}`)
+    }
+
     //
     // Similar situation for Contacts.json (4 possibilities mentioned above)
     try {
@@ -671,6 +708,65 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
   }
 
+  async _loadContactImages() {
+    // Migrate the legacy contacts system to store contact images separately
+    // from the other contacts data to reduce the load of encrypting and storing
+    // changes in contact order, summaries, and unread.
+    //
+    // 1. Read the contact images.
+    //
+    let encContactsImgData = undefined
+    try {
+      encContactsImgData =
+        await this.deviceIO.readLocalFile(this.userId, CONTACTS_IMGS_FILE)
+      if (!encContactsImgData) {
+        encContactsImgData =
+          await this.io.robustLocalRead(this.userId, CONTACTS_IMGS_FILE)
+      }
+    } catch (error) {
+      console.log(`WARNING(${method}): unable to read ${CONTACTS_IMGS_FILE}`)
+    }
+    //
+    let contactsImgData = undefined
+    if (encContactsImgData) {
+      try {
+        contactsImgData = await utils.decryptObj(this.privateKey, encContactsImgData, true)
+      } catch (error) {
+        console.log(`S-ERROR(${method}): unable to decrypt ${CONTACTS_IMGS_FILE}`)
+      }
+    }
+    //
+    if (contactsImgData) {
+      // 2. If they exist then:
+      //      - initialize the ContactsImgDataObj with them.
+      //      - update contacts in the UI so that images appear.
+      this.contactsImgs.initFromObj(contactsImgData)
+    } else {
+      // 3. If they do not exist then:
+      //      - populate the ContactsImgDataObj and save it.
+      //      - remove images from the existing contact manager and
+      //        contact array and save it.
+      //      - update contacts in the UI so that images appear.
+      //
+      let modifiedContactArr = false
+      const contactArr = this.contactMgr.getContacts()
+      for (const contact of contactArr) {
+        this.contactsImgs.setContactImg(contact)
+        if (contact.hasOwnProperty('base64')) {
+          delete contact.base64
+          this.contactMgr.setContactArrModified('MessagingEngine::_backgroundInitTasks')
+        }
+      }
+
+      // this.loadedContactImages = true
+      // this._writeContactList()
+      // this.updateContactMgr()
+    }
+
+    this.updateContactMgr()
+    this.loadedContactImages = true
+  }
+
   //
   //  Generic
   // ////////////////////////////////////////////////////////////////////////////
@@ -685,12 +781,12 @@ export class MessagingEngine extends EventEmitterAdapter {
     // / cross GAIA log in.
     this.startTests.mobileGaiaTest = false
     this.deviceIO.writeLocalFile(
-      this.userId, 'startTests.json', JSON.stringify(this.startTests))
+      this.userId, STARTUP_TESTS_FILE, JSON.stringify(this.startTests))
     .catch((error) => {
       // suppress & do nothing
       console.log(`S-ERROR(${method}): unable to clear mobileGaiaTest flag in local file startTests.txt.`)
     });
-    shutDownTimer.logEvent('   initiated async device write of startTests.json')
+    shutDownTimer.logEvent(`   initiated async device write of ${STARTUP_TESTS_FILE}`)
 
     if (this.offlineMsgSvc) {
       try {
@@ -993,7 +1089,7 @@ export class MessagingEngine extends EventEmitterAdapter {
         let delegate = false
 
         try {
-          const ownerDataStr = await this.io.robustRemoteRead(contact.id, 'owner.json')
+          const ownerDataStr = await this.io.robustRemoteRead(contact.id, AMA_OWNER_FILE)
           if (ownerDataStr) {
             const ownerData = JSON.parse(ownerDataStr)
             const ownerIdEnc = ownerData.for_owner
@@ -1009,7 +1105,7 @@ export class MessagingEngine extends EventEmitterAdapter {
         if (!owner) {
           let delegateDataArr = []
           try {
-            const delegateDataStr = await this.io.robustRemoteRead(contact.id, 'delegates.json')
+            const delegateDataStr = await this.io.robustRemoteRead(contact.id, AMA_DELEGATES_FILE)
             delegateDataArr = JSON.parse(delegateDataStr)
           } catch (error) {
             console.log(`WARNING(${method}): failed to read channel delegate information.\n${error}`)
@@ -1043,7 +1139,31 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
     this.logger(`DEBUG(${method}): adding new contact ${contact.id} to contact manager ...`)
-    await this.contactMgr.addNewContact(contact, contact.id, publicKey, makeActiveContact)
+    this.contactMgr.addNewContact(contact, contact.id, publicKey, makeActiveContact)
+    //
+    // Grab the image for the new contact and put that into our contactImgs data structure:
+    //
+    if (contact.hasOwnProperty('image')) {
+      const tempContact = {
+        id: contact.id,
+        image: contact.image,
+        base64: ""
+      }
+
+      try {
+        const headers = {}
+        const res = await RNFetchBlob.fetch('GET', tempContact.image, headers)
+        if (res && res.info() && (res.info().status === 200)) {
+          tempContact.base64 = 'data:image/png;base64,' + res.base64()
+        }
+        this.contactsImgs.setContactImg(tempContact)
+      } catch (error) {
+        /* suppress */
+      }
+    }
+
+
+
     // We do the next part here to minimize the reading delay on protocol so that
     // when the contact is added and inserted into the offline messaging service, the
     // protocol and administrability are known and set.
@@ -1169,6 +1289,7 @@ export class MessagingEngine extends EventEmitterAdapter {
     }
 
     this.contactMgr.deleteContact(contact)
+    this.contactsImgs.removeContactImg(contact.id)
 
     this._writeContactList()
 
@@ -1430,6 +1551,9 @@ export class MessagingEngine extends EventEmitterAdapter {
 
       this.dispatchMessageReceipts(receipts)
     }
+
+    const numReceipts = Object.keys(receipts)
+    return numReceipts.length
   }
 
   dispatchMessageReceipts (theReceipts) {
@@ -1598,9 +1722,12 @@ export class MessagingEngine extends EventEmitterAdapter {
   }
 
   handleContactClick = (contact) => {
+    const handleCCTimer = new Timer('handleContactClick called')
     if (!contact && !this.forceActiveContact) {
       this.contactMgr.setActiveContact(undefined)
       this.updateContactMgr()
+      handleCCTimer.logEvent('    after updateContactMgr for no contact and no forceActiveContact.')
+      console.log(handleCCTimer.getEvents())
       return
     }
 
@@ -1620,14 +1747,21 @@ export class MessagingEngine extends EventEmitterAdapter {
       this.contactMgr.setActiveContact(contact)
       // ACTODO: this method makes shit break...............
       this.contactMgr.clearUnread(selectedUserId)
+      handleCCTimer.logEvent('    after setActiveContact and clearUnread.')
 
       const seenMessages = this.markReceivedMessagesSeen(selectedUserId)
-      this.sendMessageReceipts(seenMessages)
+      const numReceipts = this.sendMessageReceipts(seenMessages)
+      handleCCTimer.logEvent(`    async sendMessageReceipts dispatched ${numReceipts} receipts`)
 
       this.updateContactMgr()
+      handleCCTimer.logEvent(`    after updateContactMgr`)
+
       this.updateMessages(selectedUserId)
+      handleCCTimer.logEvent(`    after updateMessages`)
     }
     // this.closeContactSearch();
+
+    console.log(handleCCTimer.getEvents())
   }
 
   _sendOutgoingMessageOffline (aChatMsg) {
@@ -1666,8 +1800,11 @@ export class MessagingEngine extends EventEmitterAdapter {
     while (this.writeContactListRequests !== 0) {
       try {
         await this.___safeEncAndWriteContactList()
+        if (this.loadedContactImages) {
+          await this.___safeEncAndWriteContactsImgs()
+        }
       } catch (error) {
-        console.log(`S-ERROR(${method}): problem encrypting and writing contact list.\n${error}`)
+        console.log(`S-ERROR(${method}): problem encrypting and writing contact list or contact images.\n${error}`)
       } finally {
         // Remove all requests except 1 if there are mulitple outstanding. If there
         // was only 1 request remaining, zero the count.
@@ -1694,10 +1831,12 @@ export class MessagingEngine extends EventEmitterAdapter {
         this.contactMgr.setContactArrSaved()
 
         const encContactsData = await this.safeEncryptObj(this.contacts, ENCRYPT_CONTACTS)
-        await this.deviceIO.writeLocalFile(this.userId, 'contacts.json', encContactsData)
-        await this.io.robustLocalWrite(this.userId, 'contacts.json', encContactsData)
+        // TODO: these next two need to go in a promise.all block and also catch to ensure first fail doesn't happen
+        //       same with other occurences of this pattern throughout
+        await this.deviceIO.writeLocalFile(this.userId, CONTACTS_FILE, encContactsData)
+        await this.io.robustLocalWrite(this.userId, CONTACTS_FILE, encContactsData)
       } catch (error) {
-        const errStr = utils.fmtErrorStr('failed to write contacts.json', method, error)
+        const errStr = utils.fmtErrorStr(`failed to write ${CONTACTS_FILE}`, method, error)
         console.log(errStr)
 
         // Restore the time saved if we fail to save the contact list this time
@@ -1706,6 +1845,32 @@ export class MessagingEngine extends EventEmitterAdapter {
       }
     } else {
       console.log(`INFO(${method}:   contactArr not modified. Skipping write (saved=${this.contactMgr.getContactArrSaved()}, modified=${this.contactMgr.getContactArrModified()}))`)
+    }
+  }
+
+  async ___safeEncAndWriteContactsImgs() {
+    const method = 'MessagingEngine::___safeEncAndWriteContactsImgs'
+    console.log(`INFO(${method}): called!`)
+
+    if (this.contactsImgs.isModified()) {
+      console.log(`INFO(${method}):   contactImgs modified. Saving.`)
+
+      let tempContactsImgsTimeObj = this.contactsImgs.getTimeObj()
+      try {
+        this.contactsImgs.setTimeBothSaved()
+
+        const encContactsImgsData = await this.safeEncryptObj(this.contactsImgs, true)
+        await this.deviceIO.writeLocalFile(this.userId, CONTACTS_IMGS_FILE, encContactsImgsData)
+        await this.io.robustLocalWrite(this.userId, CONTACTS_IMGS_FILE, encContactsImgsData)
+      } catch (error) {
+        const errStr = utils.fmtErrorStr(`failed to write ${CONTACTS_IMGS_FILE}`, method, error)
+        console.log(errStr)
+
+        // Restore the time saved if we fail to save the contact list this time
+        this.contactsImgs.restoreTimeObj(tempContactsImgsTimeObj)
+      }
+    } else {
+      console.log(`INFO(${method}:   contactImgs not modified. Skipping write.`)
     }
   }
 
@@ -1744,8 +1909,8 @@ export class MessagingEngine extends EventEmitterAdapter {
       try {
         this.settings.setTimeBothSaved()
         const encSettingsStrObj = await this.safeEncryptObj(this.settings, ENCRYPT_SETTINGS)
-        await this.deviceIO.writeLocalFile(this.userId, 'settings.json', encSettingsStrObj)
-        await this.io.robustLocalWrite(this.userId, 'settings.json', encSettingsStrObj)
+        await this.deviceIO.writeLocalFile(this.userId, SETTINGS_FILE, encSettingsStrObj)
+        await this.io.robustLocalWrite(this.userId, SETTINGS_FILE, encSettingsStrObj)
       } catch (error) {
         const errMsg = `ERROR(${method})-suppressed: failed to write settings.\n${error}`
         console.log(errMsg)
@@ -1801,7 +1966,7 @@ export class MessagingEngine extends EventEmitterAdapter {
   }
 
   async _fetchPublicKey (aUserId) {
-    return this.io.robustRemoteRead(aUserId, 'pk.txt')
+    return this.io.robustRemoteRead(aUserId, PUB_KEY_FILE)
   }
 
   getAnonalytics () {
@@ -1817,25 +1982,25 @@ export class MessagingEngine extends EventEmitterAdapter {
     const maxAttempts = 5
     let stringifiedInfo
     try {
-      console.log(`INFO(${method}): reading info.json.`)
-      stringifiedInfo = await this.io.robustRemoteRead(aUserId, 'info.json', maxAttempts)
+      console.log(`INFO(${method}): reading ${PROTOCOL_FILE}.`)
+      stringifiedInfo = await this.io.robustRemoteRead(aUserId, PROTOCOL_FILE, maxAttempts)
     } catch (error) {
       // Supress: assume user is regular user, return undefined
-      console.log(`ERROR(${method}): failed reading info.json for ${aUserId}.\n  ${error}`)
+      console.log(`ERROR(${method}): failed reading ${PROTOCOL_FILE} for ${aUserId}.\n  ${error}`)
       return undefined
     }
 
     if (stringifiedInfo) {
       try {
-        console.log(`INFO(${method}): processing data from info.json.\n  ${stringifiedInfo}\n`)
+        console.log(`INFO(${method}): processing data from ${PROTOCOL_FILE}.\n  ${stringifiedInfo}\n`)
         const info = JSON.parse(stringifiedInfo)
         return `${info.protocol} ${info.version.major}.${info.version.minor}`
       } catch (error) {
         // Supress: assume user is regular user, return undefined
-        console.log(`ERROR(${method}): failed processing data from info.json.\n  ${error}`)
+        console.log(`ERROR(${method}): failed processing data from ${PROTOCOL_FILE}.\n  ${error}`)
       }
     } else {
-      console.log(`INFO(${method}): no data in info.json or info.json doesn't exist.`)
+      console.log(`INFO(${method}): no data or ${PROTOCOL_FILE} doesn't exist.`)
     }
 
     return undefined

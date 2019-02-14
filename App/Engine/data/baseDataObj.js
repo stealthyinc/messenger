@@ -105,7 +105,7 @@ class BaseDataObj {
 
   isModified() {
     return (this.time.hasOwnProperty('modified') &&
-            (this.time.modified === undefined))
+            (this.time.modified !== undefined))
   }
 }
 

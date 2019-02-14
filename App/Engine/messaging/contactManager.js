@@ -1,7 +1,6 @@
 const utils = require('./../misc/utils.js')
 const constants = require('./../misc/constants.js')
 const runes = require('runes')
-const RNFetchBlob = require('rn-fetch-blob').default
 const SUMMARY_LEN = 27
 
 // The format of the elements in contactArr (TODO: a class or something appropriate)
@@ -37,6 +36,8 @@ class ContactManager {
     // perform a save operation.
     this.contactArrSavedUTC = undefined
     this.contactArrModifiedUTC = undefined
+
+    this.instanceId = Date.now()
   }
 
   setContactArrSaved(aTimeSavedMsUTC = Date.now()) {
@@ -47,7 +48,8 @@ class ContactManager {
     return this.contactArrSavedUTC
   }
 
-  setContactArrModified() {
+  setContactArrModified(context='') {
+    console.log(`INFO(ContactManager::setContactArrModified): ${context}, instanceId=${this.instanceId}`)
     this.contactArrModifiedUTC = Date.now()
   }
 
@@ -202,7 +204,12 @@ class ContactManager {
     return true
   }
 
-  addNewContact = async (aContact, id, publicKey, makeActiveContact = true) => {
+  addNewContact = (aContact, id, publicKey, makeActiveContact = true) => {
+      // Check to see if we already have this contact, if so, exit.
+    if (!aContact || this.getContact(aContact.id)) {
+      return
+    }
+
     const newContact = utils.deepCopyObj(aContact)
     newContact.id = id
     newContact.publicKey = publicKey
@@ -210,19 +217,29 @@ class ContactManager {
     // Defaults:
     newContact.summary = ''
     newContact.unread = 0
-    newContact.base64 = ''
-    if (newContact.image) {
-      try {
-        const headers = {}
-        const res = await RNFetchBlob.fetch('GET', newContact.image, headers)
-        if (res && res.info() && (res.info().status === 200)) {
-          newContact.base64 = 'data:image/png;base64,' + res.base64()
-        } else {  // handle other status codes
-          newContact.base64 = defaultImage
-        }
-      } catch (error) {
-       /* suppress */
-      }
+
+    // Make sure the new contact passes the sanitize method in this class.
+    //  - an .id.blockstack account created from within stealthy will arrive
+    //    with properties title, description, and image undefined (vs. the
+    //    zombie account added to Raji which had none of those properties).
+    //  - TODO: schema with proper checks for data structures
+    //
+    if (!newContact.hasOwnProperty('title') ||
+        newContact.title === undefined) {
+      newContact.title = ''
+    }
+    if (!newContact.hasOwnProperty('description') ||
+        newContact.description === undefined) {
+      newContact.description = ''
+    }
+
+    // Remove base64 and image (they are stored in the contactImgs structure)
+    //
+    if (newContact.hasOwnProperty('base64')) {
+      delete newContact.base64
+    }
+    if (newContact.hasOwnProperty('image')) {
+      delete newContact.image
     }
 
     this.addContact(newContact, makeActiveContact)
@@ -230,14 +247,13 @@ class ContactManager {
 
   addContact = (aContact, makeActiveContact = true) => {
     if (aContact) {
-      // Check to see if we already have this contact, if so, issue an info message.
+      // Check to see if we already have this contact, if so, exit.
       if (this.getContact(aContact.id)) {
-        // TODO: info message.
         return
       }
 
       this.contactArr.splice(0, 0, aContact)
-      this.setContactArrModified()
+      this.setContactArrModified('addContact')
 
       if (makeActiveContact) {
         this.activeContact = aContact
@@ -283,7 +299,7 @@ class ContactManager {
           }
 
           this.contactArr = newContactArr
-          this.setContactArrModified()
+          this.setContactArrModified('deleteContact')
         }
       }
     }
@@ -325,7 +341,7 @@ class ContactManager {
   }
 
   setPublicKey = (aContactId, aPublicKey) => {
-    this._setterWithChecks(aContactId, 'publicKey', aPublicKey)
+    this._setterWithChecksId(aContactId, 'publicKey', aPublicKey)
   }
 
   setSummary = (aContactId, aSummaryStr) => {
@@ -334,19 +350,19 @@ class ContactManager {
     const noIdSummaryStr = aSummaryStr.replace(/^.* says: /, '')
     const summaryStr = ContactManager._getTruncatedMessage(noIdSummaryStr)
 
-    this._setterWithChecks(aContactId, 'summary', summaryStr)
+    this._setterWithChecksId(aContactId, 'summary', summaryStr)
   }
 
   setProtocol = (aContactId, aProtocol) => {
     const protocol = (aProtocol) || ''
-    this._setterWithChecks(aContactId, 'protocol', protocol)
+    this._setterWithChecksId(aContactId, 'protocol', protocol)
   }
 
   // Set's whether or not we can administrate this channel. Largely used to
   // control the UI a user sees. Does not give over-riding privilege to a user (
   // that is controlled on the channel/ama server).
   setAdministrable = (aContactId, administrable) => {
-    this._setterWithChecks(aContactId, 'administrable', administrable)
+    this._setterWithChecksId(aContactId, 'administrable', administrable)
   }
 
   // Only applicable to channels. Stores whether or not we've muted notifications
@@ -355,7 +371,7 @@ class ContactManager {
   setNotifications = (aContactId, enable=true) => {
     const protocol = this.getProtocol(aContactId)
     if (utils.isChannelOrAma(protocol)) {
-      this._setterWithChecks(aContactId, 'notifications', enable)
+      this._setterWithChecksId(aContactId, 'notifications', enable)
     }
   }
 
@@ -370,16 +386,17 @@ class ContactManager {
         } else {
           contact.unread = 1
         }
+        this.setContactArrModified('incrementUnread')
       }
     }
   }
 
   setUnread = (aContactId, anUnreadCount) => {
-    this._setterWithChecks(aContactId, 'unread', anUnreadCount)
+    this._setterWithChecksId(aContactId, 'unread', anUnreadCount)
   }
 
   clearUnread = (aContactId) => {
-    this._setterWithChecks(aContactId, 'unread', 0)
+    this._setterWithChecksId(aContactId, 'unread', 0)
   }
 
   getAllUnread = () => {
@@ -394,6 +411,15 @@ class ContactManager {
     return unreadCount
   }
 
+  // Sets the image data for the contact to point to the image data in aPtrToImageBase64
+  // and wipes out property ('image') which would cause
+  setProfileImage = (aContact, aPtrToImageBase64) => {
+    this._setterWithChecks(aContact, 'base64', aPtrToImageBase64)
+    if (aContact.hasOwnProperty('image')) {
+      delete aContact.image
+    }
+  }
+
   moveContactToTop = (aContactId) => {
     if (aContactId) {
       let index
@@ -406,26 +432,28 @@ class ContactManager {
       if ((index !== undefined) || (index !== 0)) {
         const contactToMoveToTop = this.contactArr.splice(index, 1)
         this.contactArr.splice(0, 0, contactToMoveToTop[0])
-        this.setContactArrModified()
+        this.setContactArrModified('moveContactToTop')
       }
     }
   }
 
-  _setterWithChecks = (aContactId, aPropName, aValue) => {
+  _setterWithChecksId = (aContactId, aPropName, aValue) => {
     if (aContactId && aPropName) {
       const contact = this.getContact(aContactId)
+      this._setterWithChecks(contact, aPropName, aValue)
+    }
+  }
 
-      if (contact) {
-
-        // Don't mark modified if this value is already set (saves are costly)
-        if (aPropName !== 'summary' ||
-            !contact.hasOwnProperty(aPropName) ||
-            contact[aPropName] !== aValue) {
-          this.setContactArrModified()
-        }
-
-        contact[aPropName] = aValue
+  _setterWithChecks = (aContact, aPropName, aValue) => {
+    if (aContact && aPropName) {
+      // Don't mark modified if this value is already set (saves are costly)
+      if (aPropName !== 'summary' &&
+          (!aContact.hasOwnProperty(aPropName) ||
+          aContact[aPropName] !== aValue)) {
+        this.setContactArrModified(`_setterWithChecks[${aPropName}]`)
       }
+
+      aContact[aPropName] = aValue
     }
   }
 
