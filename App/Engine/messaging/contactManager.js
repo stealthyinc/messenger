@@ -58,9 +58,12 @@ class ContactManager {
   }
 
   isContactArrModified() {
-    if ((this.contactArrSavedUTC === undefined) ||
+    if ((this.contactArrSavedUTC === undefined) &&
         (this.contactArrModifiedUTC === undefined)) {
       return false
+    } else if ((this.contactArrSavedUTC === undefined) &&
+               (this.contactArrModifiedUTC)) {
+      return true             
     }
 
     return this.contactArrModifiedUTC > this.contactArrSavedUTC
