@@ -157,7 +157,7 @@ class ProfileScreen extends React.Component {
         <Button
           onPress={this.showActionSheet}
           icon={{name: 'share', color: 'white'}}
-          buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, marginBottom: 15, width: 150, height: 50, backgroundColor: '#34bbed'}}
+          buttonStyle={{borderRadius: 5, marginLeft: 0, marginRight: 0, width: 150, height: 50, backgroundColor: '#34bbed'}}
           titleStyle={{ fontSize: 18, fontWeight: '900', color: 'white' }}
           title='Share ID'
         />
@@ -173,7 +173,7 @@ class ProfileScreen extends React.Component {
                       width: '100%',
                       alignItems: 'center'}}>
 
-          <View style={{flex: 0.5}} />
+          <View style={{flex: 0.45}} />
 
           <View style={{alignItems: 'center'}}>
             <CopilotStep text="This is your profile picture or QRCode" order={1} name="profilePicture">
@@ -195,7 +195,7 @@ class ProfileScreen extends React.Component {
             </CopilotStep>
           </View>
 
-          <View style={{flex: 0.05}} />
+          <View style={{flex: 0.1}} />
 
           <View style={{alignItems: 'center'}}>
             <View style={{width: buttonRowWidth,
